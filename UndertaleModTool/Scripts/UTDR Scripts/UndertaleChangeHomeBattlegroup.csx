@@ -28,7 +28,10 @@ if (code == null)
 
 GlobalDecompileContext globalDecompileContext = new(Data);
 Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = new Underanalyzer.Decompiler.DecompileSettings();
-UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
+{
+    MainThreadAction = MainThreadAction
+};
 
 string preValue = GetPreviousValue();
 if (!ScriptQuestion("Change the battlegroup in \"gml_Object_obj_mainchara_KeyPress_36\" (when you press \"HOME\" in debug mode)?" + ((preValue == "None") ? "" : "\n\nThe current battlegroup value is: " + preValue)))

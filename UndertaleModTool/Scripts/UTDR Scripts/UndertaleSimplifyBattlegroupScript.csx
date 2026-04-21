@@ -13,7 +13,8 @@ else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter
 
 UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
 {
-    ThrowOnNoOpFindReplace = true
+    ThrowOnNoOpFindReplace = true,
+    MainThreadAction = MainThreadAction
 };
 importGroup.QueueFindReplace("gml_Script_scr_battlegroup", "global.monstertype[0] = 47", "");
 importGroup.QueueFindReplace("gml_Script_scr_battlegroup", "global.monstertype[1] = 0", "");

@@ -38,6 +38,8 @@ namespace UndertaleModTests
 
         public bool IsAppClosed => throw new NotImplementedException();
 
+        public Action<Action> MainThreadAction => static (f) => f();
+
         public void ChangeSelection(object newSelection)
         {
         }

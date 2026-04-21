@@ -53,6 +53,11 @@ public sealed class CodeImportGroup
     public bool ThrowOnNoOpFindReplace { get; set; } = false;
 
     /// <summary>
+    /// This action will be called when main-thread operations should occur, and can be changed.
+    /// </summary>
+    public Action<Action> MainThreadAction { get; set; } = static (f) => f();
+
+    /// <summary>
     /// Compile group being used by this context, if not null.
     /// </summary>
     internal CompileGroup CompileGroup { get; private set; } = null;
@@ -94,7 +99,8 @@ public sealed class CodeImportGroup
     /// <param name="code">Code entry to link.</param>
     /// <param name="type">Main event type to link to.</param>
     /// <param name="subtype">Event subtype to link to.</param>
-    public static void LinkEvent(UndertaleGameObject obj, UndertaleCode code, EventType type, uint subtype)
+    /// <param name="mainThreadAction">Action to call when creating new data, which may require being changed on the main thread.</param>
+    public static void LinkEvent(UndertaleGameObject obj, UndertaleCode code, EventType type, uint subtype, Action<Action> mainThreadAction)
     {
         UndertalePointerList<UndertaleGameObject.Event> eventList = obj.Events[(int)type];
         bool foundExisting = false;
@@ -118,11 +124,11 @@ public sealed class CodeImportGroup
             if (@event.Actions is [])
             {
                 // Event already exists, but with no actions... create a new one.
-                @event.Actions.Add(new()
+                mainThreadAction(() => @event.Actions.Add(new()
                 {
                     ActionName = code.Name,
                     CodeId = code
-                });
+                }));
                 foundExisting = true;
                 break;
             }
@@ -137,13 +143,61 @@ public sealed class CodeImportGroup
             {
                 EventSubtype = subtype
             };
-            newEvent.Actions.Add(new()
+            mainThreadAction(() =>
             {
-                ActionName = code.Name,
-                CodeId = code
+                newEvent.Actions.Add(new()
+                {
+                    ActionName = code.Name,
+                    CodeId = code
+                });
+                eventList.Add(newEvent);
             });
-            eventList.Add(newEvent);
         }
+    }
+
+    // Separators used for event name parsing.
+    private const string EventScriptPrefix = "gml_Script_";
+    private const string EventGlobalScriptPrefix = "gml_GlobalScript_";
+    private const string EventObjectPrefix = "gml_Object_";
+    private const string EventCollisionSeparator = "_Collision_";
+
+    /// <summary>
+    /// Attempts to parse the collision event subtype for the given code entry name.
+    /// </summary>
+    /// <returns>True if succeeded, false otherwise.</returns>
+    private bool TryParseCollisionEvent(string codeEntryName, int collisionSeparatorIndex, out ReadOnlySpan<char> objectName, out uint subtype)
+    {
+        objectName = default;
+        subtype = 0;
+
+        // Only supports parsing in 2.3+, where objects are easily distinguished.
+        if (!Data.IsVersionAtLeast(2, 3))
+        {
+            return false;
+        }
+
+        // Make sure only one separator exists.
+        if (codeEntryName.IndexOf(EventCollisionSeparator, collisionSeparatorIndex + EventCollisionSeparator.Length - 1, StringComparison.Ordinal) >= 0)
+        {
+            return false;
+        }
+
+        // Figure out object names, and make sure the one on the right-hand side already exists.
+        objectName = codeEntryName.AsSpan(new Range(EventObjectPrefix.Length, collisionSeparatorIndex));
+        if (objectName.Length <= 0)
+        {
+            return false;
+        }
+        ReadOnlySpan<char> otherObjectName = codeEntryName.AsSpan(collisionSeparatorIndex + EventCollisionSeparator.Length);
+        int otherObjectIndex = Data.GameObjects.IndexOfName(otherObjectName);
+        if (otherObjectIndex < 0)
+        {
+            return false;
+        }
+
+        // Parsed successfully - use object index as the event subtype.
+        subtype = (uint)otherObjectIndex;
+        return true;
     }
 
     /// <summary>
@@ -172,28 +226,28 @@ public sealed class CodeImportGroup
         }
 
         // Also create assets based on code entry name
-        const string scriptPrefix = "gml_Script_";
-        const string globalScriptPrefix = "gml_GlobalScript_";
-        const string objectPrefix = "gml_Object_";
-        if (codeEntryName.StartsWith(scriptPrefix, StringComparison.Ordinal))
+        if (codeEntryName.StartsWith(EventScriptPrefix, StringComparison.Ordinal))
         {
-            ReadOnlySpan<char> scriptName = codeEntryName.AsSpan(scriptPrefix.Length);
-            if (Data.Scripts.ByName(scriptName) is not UndertaleScript existingScript)
+            MainThreadAction(() =>
             {
-                // Create script, as one doesn't already exist
-                Data.Scripts.Add(new()
+                ReadOnlySpan<char> scriptName = codeEntryName.AsSpan(EventScriptPrefix.Length);
+                if (Data.Scripts.ByName(scriptName) is not UndertaleScript existingScript)
                 {
-                    Name = Data.Strings.MakeString(scriptName.ToString()),
-                    Code = newEntry
-                });
-            }
-            else
-            {
-                // Attach to existing script asset (in case of corruption)
-                existingScript.Code = newEntry;
-            }
+                    // Create script, as one doesn't already exist
+                    Data.Scripts.Add(new()
+                    {
+                        Name = Data.Strings.MakeString(scriptName.ToString()),
+                        Code = newEntry
+                    });
+                }
+                else
+                {
+                    // Attach to existing script asset (in case of corruption)
+                    existingScript.Code = newEntry;
+                }
+            });
         }
-        else if (codeEntryName.StartsWith(globalScriptPrefix, StringComparison.Ordinal))
+        else if (codeEntryName.StartsWith(EventGlobalScriptPrefix, StringComparison.Ordinal))
         {
             // Scan to see if there's a global init script with a matching (and presumably, invalid) code reference
             UndertaleGlobalInit existingGlobalInit = null;
@@ -208,9 +262,12 @@ public sealed class CodeImportGroup
             if (existingGlobalInit is null)
             {
                 // Create global init entry, if one doesn't already exist
-                Data.GlobalInitScripts.Add(new()
+                MainThreadAction(() =>
                 {
-                    Code = newEntry
+                    Data.GlobalInitScripts.Add(new()
+                    {
+                        Code = newEntry
+                    });
                 });
             }
             else
@@ -219,18 +276,49 @@ public sealed class CodeImportGroup
                 existingGlobalInit.Code = newEntry;
             }
         }
-        else if (codeEntryName.StartsWith(objectPrefix, StringComparison.Ordinal))
+        else if (codeEntryName.StartsWith(EventObjectPrefix, StringComparison.Ordinal))
         {
-            // Parse object event. First, find positions of last two underscores in name.
+            // Parse object event.
+            // First, handle collision events, if applicable. (Only supported in GM 2.3+, when "_Collision_" is not in either object name.)
+            int collisionSeparatorIndex = codeEntryName.IndexOf(EventCollisionSeparator, StringComparison.Ordinal);
+            bool containsCollisionSeparator = collisionSeparatorIndex >= 0;
+            if (containsCollisionSeparator && TryParseCollisionEvent(codeEntryName, collisionSeparatorIndex, out ReadOnlySpan<char> collisionObjectName, out uint collisionSubtype))
+            {
+                // Create new object if necessary.
+                UndertaleGameObject collisionObj = Data.GameObjects.ByName(collisionObjectName);
+                if (collisionObj is null)
+                {
+                    string collisionObjectNameStr = collisionObjectName.ToString();
+                    MainThreadAction(() =>
+                    {
+                        collisionObj = new()
+                        {
+                            Name = Data.Strings.MakeString(collisionObjectNameStr)
+                        };
+                        Data.GameObjects.Add(collisionObj);
+                    });
+                }
+
+                // Link code to object's event (and create one if necessary).
+                LinkEvent(collisionObj, newEntry, EventType.Collision, collisionSubtype, MainThreadAction);
+
+                // No more processing required.
+                return newEntry;
+            }
+
+            // Not a collision event: Find positions of last two underscores in name.
             int lastUnderscore = codeEntryName.LastIndexOf('_');
             int secondLastUnderscore = codeEntryName.LastIndexOf('_', lastUnderscore - 1);
             if (lastUnderscore <= 0 || secondLastUnderscore <= 0)
             {
+                if (containsCollisionSeparator)
+                {
+                    throw new Exception($"Collision event cannot be automatically resolved; must attach to object manually ({codeEntryName})");
+                }
                 throw new Exception($"Failed to parse object code entry name: \"{codeEntryName}\"");
             }
 
             // Extract object name, event type, and event subtype
-            ReadOnlySpan<char> objectName = codeEntryName.AsSpan(new Range(objectPrefix.Length, secondLastUnderscore));
             EventType eventType = codeEntryName.AsSpan(new Range(secondLastUnderscore + 1, lastUnderscore)) switch
             {
                 "Create" => EventType.Create,
@@ -248,26 +336,33 @@ public sealed class CodeImportGroup
                 "CleanUp" => EventType.CleanUp,
                 "Gesture" => EventType.Gesture,
                 "PreCreate" => EventType.PreCreate,
-                _ => throw new Exception($"Failed to parse object code entry name: \"{codeEntryName}\"")
+                _ => containsCollisionSeparator ? 
+                    throw new Exception($"Collision event cannot be automatically resolved; must attach to object manually ({codeEntryName})") :
+                    throw new Exception($"Failed to parse object code entry name: \"{codeEntryName}\"")
             };
             if (!uint.TryParse(codeEntryName.AsSpan(lastUnderscore + 1), out uint eventSubtype))
             {
                 throw new Exception($"Failed to parse object code entry name: \"{codeEntryName}\"");
             }
 
-            // Create new object if necessary
+            // Create new object if necessary.
+            ReadOnlySpan<char> objectName = codeEntryName.AsSpan(new Range(EventObjectPrefix.Length, secondLastUnderscore));
             UndertaleGameObject obj = Data.GameObjects.ByName(objectName);
             if (obj is null)
             {
-                obj = new()
+                string objectNameStr = objectName.ToString();
+                MainThreadAction(() =>
                 {
-                    Name = Data.Strings.MakeString(objectName.ToString())
-                };
-                Data.GameObjects.Add(obj);
+                    obj = new()
+                    {
+                        Name = Data.Strings.MakeString(objectNameStr)
+                    };
+                    Data.GameObjects.Add(obj);
+                });
             }
 
-            // Link code to object's event (and create one if necessary)
-            LinkEvent(obj, newEntry, eventType, eventSubtype);
+            // Link code to object's event (and create one if necessary).
+            LinkEvent(obj, newEntry, eventType, eventSubtype, MainThreadAction);
         }
 
         return newEntry;

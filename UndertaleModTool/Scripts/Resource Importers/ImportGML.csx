@@ -34,7 +34,8 @@ await Task.Run(() =>
 {
     UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
     {
-        AutoCreateAssets = doLink
+        AutoCreateAssets = doLink,
+        MainThreadAction = MainThreadAction
     };
     foreach (string file in dirFiles)
     {
