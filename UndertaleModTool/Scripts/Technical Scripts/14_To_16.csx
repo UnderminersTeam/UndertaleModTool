@@ -88,19 +88,19 @@ If they do, you may file an issue on GitHub, but no warranty is given."); // War
                     {
                         curr.ValueVariable.InstanceType = UndertaleInstruction.InstanceType.Self;
                     }
-                    if (list.GlobalNotArray.ContainsKey(curr.ValueVariable?.Name.Content))
+                    if (list.GlobalVars.ContainsKey(curr.ValueVariable?.Name.Content))
                     {
                         if (curr.Kind == UndertaleInstruction.Opcode.Push)
                             curr.Kind = UndertaleInstruction.Opcode.PushBltn;
                         variable.InstanceType = UndertaleInstruction.InstanceType.Self;
                         variable.VarID = -6;
                     }
-                    if (list.GlobalArray.ContainsKey(curr.ValueVariable?.Name.Content))
+                    if (list.GlobalArrayVars.ContainsKey(curr.ValueVariable?.Name.Content))
                     {
                         variable.InstanceType = UndertaleInstruction.InstanceType.Self;
                         variable.VarID = -6;
                     }
-                    if (list.Instance.ContainsKey(curr.ValueVariable?.Name.Content))
+                    if (list.InstanceVars.ContainsKey(curr.ValueVariable?.Name.Content))
                     {
                         variable.InstanceType = UndertaleInstruction.InstanceType.Self;
                         variable.VarID = -6;
@@ -123,7 +123,7 @@ If they do, you may file an issue on GitHub, but no warranty is given."); // War
     }
     foreach (UndertaleVariable vari in Data.Variables)
     {
-        if ((list.GlobalNotArray.ContainsKey(vari.Name.Content)) || (list.GlobalArray.ContainsKey(vari.Name.Content)) || (list.Instance.ContainsKey(vari.Name.Content)))
+        if ((list.GlobalVars.ContainsKey(vari.Name.Content)) || (list.GlobalArrayVars.ContainsKey(vari.Name.Content)) || (list.InstanceVars.ContainsKey(vari.Name.Content)))
         {
             vari.InstanceType = (UndertaleModLib.Models.UndertaleInstruction.InstanceType)(-1);
             vari.VarID = -6;
@@ -136,7 +136,7 @@ If they do, you may file an issue on GitHub, but no warranty is given."); // War
             if (code.Instructions[j].ValueVariable != null)
             {
                 var evalme = code.Instructions[j].ValueVariable.ToString().Replace("\"", "").Replace("@", "");
-                if ((list.GlobalNotArray.ContainsKey(evalme)) || (list.GlobalArray.ContainsKey(evalme)))
+                if ((list.GlobalVars.ContainsKey(evalme)) || (list.GlobalArrayVars.ContainsKey(evalme)))
                 {
                     code.Instructions[j].Kind = UndertaleInstruction.Opcode.PushBltn;
                 }
