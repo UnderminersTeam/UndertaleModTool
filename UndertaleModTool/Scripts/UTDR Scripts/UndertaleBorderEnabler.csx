@@ -17,7 +17,10 @@ else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter
 
 ScriptMessage("Border enabler (1080p edition)\nby krzys_h");
 
-UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
+{
+    MainThreadAction = MainThreadAction
+};
 
 // Change os_type == 14 checks in scr_draw_screen_border to always pass
 importGroup.QueueFindReplace("gml_Script_scr_draw_screen_border", "os_type == os_psvita", "0");

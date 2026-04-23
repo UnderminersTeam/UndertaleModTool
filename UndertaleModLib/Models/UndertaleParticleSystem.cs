@@ -7,17 +7,43 @@ namespace UndertaleModLib.Models;
 [PropertyChanged.AddINotifyPropertyChangedInterface]
 public class UndertaleParticleSystem : UndertaleNamedResource, IDisposable
 {
-    // TODO: Documentation on these values.
+    public enum DrawOrderEnum : int
+    {
+        NewOnTop = 0,
+        OldOnTop = 1
+    }
+
+    /// <summary>
+    /// The name of the particle system.
+    /// </summary>
     public UndertaleString Name { get; set; }
 
+    /// <summary>
+    /// The x-coordinate of the origin of the particle system.
+    /// </summary>
     public int OriginX { get; set; }
 
+    /// <summary>
+    /// The y-coordinate of the origin of the particle system.
+    /// </summary>
     public int OriginY { get; set; }
 
-    public int DrawOrder { get; set; }
+    /// <summary>
+    /// The draw order of the particle system, determining whether new particles are drawn on top of or below older particles.
+    /// </summary>
+    public DrawOrderEnum DrawOrder { get; set; }
 
+    /// <summary>
+    /// Whether global space particles are enabled for the particle system, determining whether particles (don't) follow a system's position, if it moves.
+    /// </summary>
+    /// <remarks>
+    /// Added in GameMaker 2023.8.
+    /// </remarks>
     public bool GlobalSpaceParticles { get; set; }
 
+    /// <summary>
+    /// The emitters of the particle system.
+    /// </summary>
     public UndertaleSimpleResourcesList<UndertaleParticleSystemEmitter, UndertaleChunkPSEM> Emitters { get; set; } = new();
 
     /// <inheritdoc />
@@ -26,7 +52,7 @@ public class UndertaleParticleSystem : UndertaleNamedResource, IDisposable
         writer.WriteUndertaleString(Name);
         writer.Write(OriginX);
         writer.Write(OriginY);
-        writer.Write(DrawOrder);
+        writer.Write((int)DrawOrder);
         if (writer.undertaleData.IsVersionAtLeast(2023, 8))
             writer.Write(GlobalSpaceParticles);
         writer.WriteUndertaleObject(Emitters);
@@ -38,7 +64,7 @@ public class UndertaleParticleSystem : UndertaleNamedResource, IDisposable
         Name = reader.ReadUndertaleString();
         OriginX = reader.ReadInt32();
         OriginY = reader.ReadInt32();
-        DrawOrder = reader.ReadInt32();
+        DrawOrder = (DrawOrderEnum)reader.ReadInt32();
         if (reader.undertaleData.IsVersionAtLeast(2023, 8))
             GlobalSpaceParticles = reader.ReadBoolean();
         Emitters = reader.ReadUndertaleObject<UndertaleSimpleResourcesList<UndertaleParticleSystemEmitter, UndertaleChunkPSEM>>();
@@ -88,49 +114,193 @@ public class UndertaleParticleSystemEmitter : UndertaleNamedResource, INotifyPro
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 
-    // TODO: Documentation on these values
+    // TODO: More documentation needed
+    public enum EmitMode : int
+    {
+        Stream = 0,
+        Burst = 1
+    }
+    public enum DistributionEnum : int
+    {
+        Linear = 0,
+        Gaussian = 1,
+        InverseGaussian = 2
+    }
+    public enum EmitterShape : int
+    {
+        Rectangle = 0,
+        Ellipse = 1,
+        Diamond = 2,
+        Line = 3
+    }
+    public enum TextureEnum : int
+    {
+        None = -1,
+        Pixel = 0,
+        Disk = 1,
+        Square = 2,
+        Line = 3,
+        Star = 4,
+        Circle = 5,
+        Ring = 6,
+        Sphere = 7,
+        Flare = 8,
+        Spark = 9,
+        Explosion = 10,
+        Cloud = 11,
+        Smoke = 12,
+        Snow = 13
+    }
+    public enum TimeUnitEnum : int
+    {
+        Seconds = 0,
+        Frames = 1
+    }
 
+    /// <summary>
+    /// The name of the emitter
+    /// </summary>
     public UndertaleString Name { get; set; }
 
-    // 2023.6
+    /// <summary>
+    /// Whether the emitter is enabled.
+    /// </summary>
+    /// <remarks>
+    /// Added in GameMaker 2023.6.
+    /// </remarks>
     public bool Enabled { get; set; } = true;
 
+    /// <summary>
+    /// The emit mode of the emitter.
+    /// </summary>
     public EmitMode Mode { get; set; }
 
-    public int EmitCount { get; set; } = 1; // Note: technically float in 2023.8
+    /// <summary>
+    /// The amount of particles to emit.
+    /// </summary>
+    /// <remarks>
+    /// While the type of this property is <see langword="int"/>, it should be reinterpreted as the bits of a <see langword="float"/> in GameMaker 2023.8 and above.
+    /// </remarks>
+    public int EmitCount { get; set; } = 1;
 
-    // 2023.8
+    // TODO: document this, always 0?
+    /// <remarks>
+    /// Added in GameMaker 2023.8.
+    /// </remarks>
     public bool EmitRelative { get; set; }
+
+    /// <summary>
+    /// The minimum delay between particle emissions.
+    /// </summary>
+    /// <remarks>
+    /// Added in GameMaker 2023.8.
+    /// </remarks>
     public float DelayMin { get; set; }
+
+    /// <summary>
+    /// The maximum delay between particle emissions.
+    /// </summary>
+    /// <remarks>
+    /// Added in GameMaker 2023.8.
+    /// </remarks>
     public float DelayMax { get; set; }
+
+    /// <summary>
+    /// The time unit to use for <see cref="DelayMin"/> and <see cref="DelayMax"/>.
+    /// </summary>
+    /// <remarks>
+    /// Added in GameMaker 2023.8.
+    /// </remarks>
     public TimeUnitEnum DelayUnit { get; set; }
+
+    // TODO: find how interval and delay are different?
+
+    /// <summary>
+    /// The minimum interval between particle emissions.
+    /// </summary>
+    /// <remarks>
+    /// Added in GameMaker 2023.8.
+    /// </remarks>
     public float IntervalMin { get; set; }
+
+    /// <summary>
+    /// The maximum interval between particle emissions.
+    /// </summary>
+    /// <remarks>
+    /// Added in GameMaker 2023.8.
+    /// </remarks>
     public float IntervalMax { get; set; }
+
+    /// <summary>
+    /// The time unit to use for <see cref="IntervalMin"/> and <see cref="IntervalMax"/>.
+    /// </summary>
+    /// <remarks>
+    /// Added in GameMaker 2023.8.
+    /// </remarks>
     public TimeUnitEnum IntervalUnit { get; set; }
 
+    /// <summary>
+    /// The distribution type of the emitter, determining how they are distributed around the emitter.
+    /// </summary>
     public DistributionEnum Distribution { get; set; }
-
+    
+    /// <summary>
+    /// The shape of the emitter.
+    /// </summary>
     public EmitterShape Shape { get; set; }
 
+    /// <summary>
+    /// The x-coordinate of the emitter.
+    /// </summary>
     public float RegionX { get; set; }
 
+    /// <summary>
+    /// The y-coordinate of the emitter.
+    /// </summary>
     public float RegionY { get; set; }
 
+    /// <summary>
+    /// The width (in pixels) of the emitter.
+    /// </summary>
     public float RegionWidth { get; set; } = 64;
 
+    /// <summary>
+    /// The height (in pixels) of the emitter.
+    /// </summary>
     public float RegionHeight { get; set; } = 64;
 
+    /// <summary>
+    /// The angle of the emitter.
+    /// </summary>
     public float Rotation { get; set; }
 
+    /// <summary>
+    /// The sprite that this emitter uses for its particles.
+    /// </summary>
     public UndertaleSprite Sprite { get => _sprite.Resource; set { _sprite.Resource = value; OnPropertyChanged(); } }
 
+    /// <summary>
+    /// The preset textures for the emitter to use.
+    /// </summary>
     public TextureEnum Texture { get; set; }
+
+    // TODO: finish documenting these values.
 
     public float FrameIndex { get; set; }
 
-    // 2023.4
+    /// <remarks>
+    /// Added in GameMaker 2023.4.
+    /// </remarks>
     public bool Animate { get; set; }
+
+    /// <remarks>
+    /// Added in GameMaker 2023.4.
+    /// </remarks>
     public bool Stretch { get; set; }
+
+    /// <remarks>
+    /// Added in GameMaker 2023.4.
+    /// </remarks>
     public bool IsRandom { get; set; }
 
     public uint StartColor { get; set; } = 0xFFFFFFFF;
@@ -149,22 +319,64 @@ public class UndertaleParticleSystemEmitter : UndertaleNamedResource, INotifyPro
 
     public float ScaleY { get; set; } = 1;
 
-    // 2023.8
+    /// <remarks>
+    /// Added in GameMaker 2023.8, superseding <see cref="SizeMin"/>.
+    /// </remarks>
     public float SizeMinX { get; set; } = 1;
+
+    /// <remarks>
+    /// Added in GameMaker 2023.8, superseding <see cref="SizeMax"/>.
+    /// </remarks>
     public float SizeMaxX { get; set; } = 1;
+
+    /// <remarks>
+    /// Added in GameMaker 2023.8, superseding <see cref="SizeIncrease"/>.
+    /// </remarks>
     public float SizeIncreaseX { get; set; }
+
+    /// <remarks>
+    /// Added in GameMaker 2023.8, superseding <see cref="SizeWiggle"/>.
+    /// </remarks>
     public float SizeWiggleX { get; set; }
+
+    /// <remarks>
+    /// Added in GameMaker 2023.8, superseding <see cref="SizeMin"/>.
+    /// </remarks>
     public float SizeMinY { get; set; } = 1;
+
+    /// <remarks>
+    /// Added in GameMaker 2023.8, superseding <see cref="SizeMax"/>.
+    /// </remarks>
     public float SizeMaxY { get; set; } = 1;
+
+    /// <remarks>
+    /// Added in GameMaker 2023.8, superseding <see cref="SizeIncrease"/>.
+    /// </remarks>
     public float SizeIncreaseY { get; set; }
+
+    /// <remarks>
+    /// Added in GameMaker 2023.8, superseding <see cref="SizeWiggle"/>.
+    /// </remarks>
     public float SizeWiggleY { get; set; }
 
-    // These two are used and serialized prior to 2023.8, retained for compatibility.
+    /// <remarks>
+    /// Only in use prior to GameMaker 2023.8, and considered the average of <see cref="SizeMinX"/> and <see cref="SizeMinY"/> beyond that version.
+    /// </remarks>
     public float SizeMin { get => (SizeMinX + SizeMinY) / 2; set { SizeMinX = value; SizeMinY = value; } }
+
+    /// <remarks>
+    /// Only in use prior to GameMaker 2023.8, and considered the average of <see cref="SizeMaxX"/> and <see cref="SizeMaxY"/> beyond that version.
+    /// </remarks>
     public float SizeMax { get => (SizeMaxX + SizeMaxY) / 2; set { SizeMaxX = value; SizeMaxY = value; } }
 
+    /// <remarks>
+    /// Only in use prior to GameMaker 2023.8, and considered the average of <see cref="SizeIncreaseX"/> and <see cref="SizeIncreaseY"/> beyond that version.
+    /// </remarks>
     public float SizeIncrease { get => (SizeIncreaseX + SizeIncreaseY) / 2; set { SizeIncreaseX = value; SizeIncreaseY = value; } }
 
+    /// <remarks>
+    /// Only in use prior to GameMaker 2023.8, and considered the average of <see cref="SizeWiggleX"/> and <see cref="SizeWiggleY"/> beyond that version.
+    /// </remarks>
     public float SizeWiggle { get => (SizeWiggleX + SizeWiggleY) / 2; set { SizeWiggleX = value; SizeWiggleY = value; } }
 
     public float SpeedMin { get; set; } = 5;
@@ -391,48 +603,5 @@ public class UndertaleParticleSystemEmitter : UndertaleNamedResource, INotifyPro
         _sprite.Dispose();
         _spawnOnDeath.Dispose();
         _spawnOnUpdate.Dispose();
-    }
-
-    // TODO: More documentation needed
-    public enum EmitMode
-    {
-        Stream,
-        Burst
-    }
-    public enum DistributionEnum
-    {
-        Linear,
-        Gaussian,
-        InverseGaussian,
-    }
-    public enum EmitterShape
-    {
-        Rectangle,
-        Ellipse,
-        Diamond,
-        Line,
-    }
-    public enum TextureEnum
-    {
-        None = -1,
-        Pixel = 0,
-        Disk = 1,
-        Square = 2,
-        Line = 3,
-        Star = 4,
-        Circle = 5,
-        Ring = 6,
-        Sphere = 7,
-        Flare = 8,
-        Spark = 9,
-        Explosion = 10,
-        Cloud = 11,
-        Smoke = 12,
-        Snow = 13
-    }
-    public enum TimeUnitEnum
-    {
-        Seconds,
-        Frames
     }
 }

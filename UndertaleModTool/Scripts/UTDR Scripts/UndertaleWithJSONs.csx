@@ -35,7 +35,10 @@ Directory.CreateDirectory(langFolder);
 
 GlobalDecompileContext globalDecompileContext = new(Data);
 IDecompileSettings decompilerSettings = new DecompileSettings();
-UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data, globalDecompileContext, decompilerSettings);
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data, globalDecompileContext, decompilerSettings)
+{
+    MainThreadAction = MainThreadAction
+};
 
 ScriptMessage("JSONifies Undertale versions 1.05+");
 ScriptMessage(@"Switch languages using F11.

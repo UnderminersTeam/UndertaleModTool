@@ -26,7 +26,10 @@ StartProgressBarUpdater();
 SyncBinding("Strings, Variables, Functions", true);
 await Task.Run(() =>
 {
-    UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data, null, Data.ToolInfo.DecompilerSettings);
+    UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data, null, Data.ToolInfo.DecompilerSettings)
+    {
+        MainThreadAction = MainThreadAction
+    };
     foreach (UndertaleCode code in toDump)
     {
         if (code is not null)

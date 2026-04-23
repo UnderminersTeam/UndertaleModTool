@@ -8,7 +8,10 @@ var code = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPres
 
 Data.Functions.EnsureDefined("get_integer", Data.Strings);
 
-UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
+{
+    MainThreadAction = MainThreadAction
+};
 importGroup.QueueReplace(code, @"
 if (global.debug)
     room_goto(get_integer(""Go to room"", room));
