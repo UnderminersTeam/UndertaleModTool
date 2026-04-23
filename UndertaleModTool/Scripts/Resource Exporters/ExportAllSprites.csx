@@ -43,7 +43,7 @@ HideProgressBar();
 
 void FetchTexturesFromSprite(UndertaleSprite sprite)
 {
-    // empty, null, or not raster image? we cant do anything with it.
+    // Empty, null, or not a raster image? We can't do anything with it.
     if (sprite is not { SSpriteType: UndertaleSprite.SpriteType.Normal, Textures.Count: > 0 })
     {
         IncrementProgressParallel();
@@ -53,7 +53,7 @@ void FetchTexturesFromSprite(UndertaleSprite sprite)
     string outputFolder = texFolder;
     if (useSubDirectories)
     {
-        outputFolder = Path.Combine(outputFolder, sprite.Name.Content);
+        outputFolder = Paths.JoinVerifyWithinDirectory(outputFolder, sprite.Name.Content);
 
         Directory.CreateDirectory(outputFolder);
     }
@@ -63,10 +63,11 @@ void FetchTexturesFromSprite(UndertaleSprite sprite)
         if (sprite.Textures[i]?.Texture is not null)
         {
             UndertaleTexturePageItem pageItem = sprite.Textures[i].Texture;
-            // get the bag, create it if necessary $$$
+            
+            // Get the bag, or create it if necessary
             var bag = texturesToExport.GetOrAdd(pageItem.TexturePage.Name.Content, _ => new ConcurrentBag<TextureToExport>());
         
-            bag.Add(new TextureToExport(pageItem, Path.Combine(outputFolder, $"{sprite.Name.Content}_{i}.png")));
+            bag.Add(new TextureToExport(pageItem, Paths.JoinVerifyWithinDirectory(outputFolder, $"{sprite.Name.Content}_{i}.png")));
         }
     }
     IncrementProgressParallel();

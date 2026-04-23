@@ -42,11 +42,11 @@ SyncBinding("Strings, Code, CodeLocals, Scripts, GlobalInitScripts, GameObjects,
 await Task.Run(() => CheckCode());
 DisableAllSyncBindings();
 
-string failedCompilePath = Path.Combine(Path.GetDirectoryName(FilePath), "failed-compile.txt");
+string failedCompilePath = Path.Join(Path.GetDirectoryName(FilePath), "failed-compile.txt");
 File.WriteAllText(failedCompilePath, string.Join('\n', failedCompileList));
-string failedAssemblyPath = Path.Combine(Path.GetDirectoryName(FilePath), "failed-assembly.txt");
+string failedAssemblyPath = Path.Join(Path.GetDirectoryName(FilePath), "failed-assembly.txt");
 File.WriteAllText(failedAssemblyPath, string.Join('\n', failedAssemblyList));
-string failedDecompiledPath = Path.Combine(Path.GetDirectoryName(FilePath), "failed-decompiled.txt");
+string failedDecompiledPath = Path.Join(Path.GetDirectoryName(FilePath), "failed-decompiled.txt");
 File.WriteAllText(failedDecompiledPath, string.Join('\n', failedDecompiledList));
 
 string assetInfo = "";

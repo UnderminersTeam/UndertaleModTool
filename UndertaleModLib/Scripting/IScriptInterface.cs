@@ -7,28 +7,52 @@ using System.Threading.Tasks;
 using Underanalyzer.Decompiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
+using UndertaleModLib.Project;
 
 namespace UndertaleModLib.Scripting;
 
 /// <summary>
-/// The exception that is thrown when trivial errors happen during runtime of UndertaleModTool scripts. <br/>
-/// This exception does not contain a stacktrace and should more be handled like an error message that stops execution of the currently running script.
+/// An exception type that is thrown when trivial errors happen during runtime of UndertaleModTool scripts.<br/>
+/// This exception does not contain a stacktrace, and should more be handled like an error message that stops execution of the currently-running script.
 /// </summary>
-/// <example><code>if (Data is null) throw new ScriptException("Please load data.win first!);</code></example>
+/// <example><code>if (Data is null) throw new ScriptException("Please load data.win first!");</code></example>
 public class ScriptException : Exception
 {
     /// <summary>
-    /// Initializes a new instance of the IOException class with its message string set to the empty string ("").
+    /// Initializes a new instance of the ScriptException class with its message string set to the empty string ("").
     /// </summary>
     public ScriptException()
     {
     }
 
     /// <summary>
-    /// Initializes a new instance of the IOException class with its message string set to <paramref name="msg"/>.
+    /// Initializes a new instance of the ScriptException class with its message string set to <paramref name="msg"/>.
     /// </summary>
     /// <param name="msg">A <see cref="String"/> that describes the error. The content of <paramref name="msg"/> is intended to be understood by humans.</param>
     public ScriptException(string msg) : base(msg)
+    {
+    }
+}
+
+/// <summary>
+/// An exception type that is thrown when a script is cancelled by a user, e.g. due to input data not being supplied.<br/>
+/// This exception does not contain a stacktrace, and should more be handled like an error message that stops execution of the currently-running script.
+/// </summary>
+/// <example><code>if (Data is null) throw new ScriptCancelledException("The import folder was not set.");</code></example>
+public class ScriptCancelledException : ScriptException
+{
+    /// <summary>
+    /// Initializes a new instance of the ScriptCancelledException class with its message string set to the empty string ("").
+    /// </summary>
+    public ScriptCancelledException()
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the ScriptCancelledException class with its message string set to <paramref name="msg"/>.
+    /// </summary>
+    /// <param name="msg">A <see cref="String"/> that describes the error. The content of <paramref name="msg"/> is intended to be understood by humans.</param>
+    public ScriptCancelledException(string msg) : base(msg)
     {
     }
 }
@@ -43,6 +67,11 @@ public interface IScriptInterface
     /// The data file.
     /// </summary>
     UndertaleData Data { get; }
+
+    /// <summary>
+    /// Currently-open project context, if one is active, or <see langword="null"/>.
+    /// </summary>
+    ProjectContext Project { get; }
 
     /// <summary>
     /// The file path where <see cref="Data"/> resides.
@@ -96,6 +125,14 @@ public interface IScriptInterface
     /// <c>"somehow Dispatcher.Invoke() in a loop creates executable code queue that doesn't clear on app closing."</c>
     /// </summary>
     bool IsAppClosed { get; }
+
+    /// <summary>
+    /// An action that can be called to execute code on the main thread, useful for syncing with a GUI.
+    /// </summary>
+    /// <remarks>
+    /// If this is not required, it may be implemented as a pass-through call to the provided action.
+    /// </remarks>
+    Action<Action> MainThreadAction { get; }
 
     /// <summary>
     /// Ensures that a valid data file (<see cref="Data"/>) is loaded. An exception should be thrown if it isn't.

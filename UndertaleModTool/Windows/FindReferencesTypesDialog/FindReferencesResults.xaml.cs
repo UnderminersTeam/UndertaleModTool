@@ -17,6 +17,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using UndertaleModLib;
 using UndertaleModLib.Models;
+using UndertaleModLib.Util;
 
 namespace UndertaleModTool.Windows
 {
@@ -210,8 +211,13 @@ namespace UndertaleModTool.Windows
             }
                     
             string folderPath = Path.GetDirectoryName(mainWindow.FilePath);
-            string filePath = Path.Combine(folderPath, sourceObjName is null
-                                                       ? "unreferenced_assets.txt" : $"references_of_asset_{sourceObjName}.txt");
+            string filePath = Paths.TryJoinVerifyWithinDirectory(folderPath, sourceObjName is null
+                                                                            ? "unreferenced_assets.txt" : $"references_of_asset_{sourceObjName}.txt");
+            if (filePath is null)
+            {
+                this.ShowError("Failed to choose good output file name; directory escaped.");
+                return;
+            }
             if (File.Exists(filePath))
                 if (this.ShowQuestion($"File \"{filePath}\" exists.\nOverwrite?") == MessageBoxResult.No)
                     return;

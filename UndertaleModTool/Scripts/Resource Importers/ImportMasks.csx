@@ -13,7 +13,7 @@ EnsureDataLoaded();
 string importFolder = PromptChooseDirectory();
 if (importFolder is null)
 {
-    throw new ScriptException("The import folder was not set.");
+    throw new ScriptCancelledException("The import folder was not set.");
 }
 
 // Find all files in the folder.
@@ -113,6 +113,8 @@ await Task.Run(() =>
         // Import the mask.
         (int maskWidth, int maskHeight) = sprite.CalculateMaskDimensions(Data);
         sprite.CollisionMasks[frame].Data = TextureWorker.ReadMaskData(file, maskWidth, maskHeight);
+
+        Project?.MarkAssetForExport(sprite);
     }
 });
 

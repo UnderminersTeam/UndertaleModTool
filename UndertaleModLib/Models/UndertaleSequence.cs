@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using UndertaleModLib.Project;
+using UndertaleModLib.Project.SerializableAssets;
 
 namespace UndertaleModLib.Models;
 
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged, IDisposable
+public class UndertaleSequence : UndertaleNamedResource, IProjectAsset, INotifyPropertyChanged, IDisposable
 {
     /// <summary>
     /// Possible playback modes for sequences.
@@ -201,6 +203,31 @@ public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged,
         Tracks = null;
         FunctionIDs = null;
     }
+
+    /// <inheritdoc/>
+    internal ISerializableProjectAsset GenerateSerializableProjectAsset(ProjectContext projectContext)
+    {
+        SerializableSequence serializable = new();
+        serializable.PopulateFromData(projectContext, this);
+        return serializable;
+    }
+
+    /// <inheritdoc/>
+    ISerializableProjectAsset IProjectAsset.GenerateSerializableProjectAsset(ProjectContext projectContext)
+    {
+        SerializableSequence serializable = new();
+        serializable.PopulateFromData(projectContext, this);
+        return serializable;
+    }
+
+    /// <inheritdoc/>
+    public string ProjectName => Name?.Content ?? "<unknown name>";
+
+    /// <inheritdoc/>
+    public SerializableAssetType ProjectAssetType => SerializableAssetType.Sequence;
+
+    /// <inheritdoc/>
+    public bool ProjectExportable => Name?.Content is not null;
 
     /// <summary>
     /// A keyframe of data stored within a sequence track, at a given time/duration, and for some number of channels.
@@ -861,18 +888,23 @@ public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged,
         /// </summary>
         public sealed class Data : ResourceData<UndertaleSound, UndertaleChunkSOND>
         {
+            public enum SoundMode : int
+            {
+                PlayOnce = 0,
+                Looping = 1
+            }
+
             /// <summary>
-            /// Mode for the audio keyframe.
+            /// The mode of the audio keyframe.
             /// </summary>
-            // TODO: what values can this be?
-            public int Mode { get; set; }
+            public SoundMode Mode { get; set; }
 
             /// <inheritdoc />
             public override void Serialize(UndertaleWriter writer)
             {
                 base.Serialize(writer);
                 writer.Write(0);
-                writer.Write(Mode);
+                writer.Write((int)Mode);
             }
 
             /// <inheritdoc />
@@ -881,7 +913,7 @@ public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged,
                 base.Unserialize(reader);
                 if (reader.ReadUInt32() != 0)
                     throw new IOException("Expected 0 in Audio keyframe");
-                Mode = reader.ReadInt32();
+                Mode = (SoundMode)reader.ReadInt32();
             }
 
             /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>

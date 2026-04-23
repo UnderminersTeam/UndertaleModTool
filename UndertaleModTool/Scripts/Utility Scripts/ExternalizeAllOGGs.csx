@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using UndertaleModLib.Util;
 
 EnsureDataLoaded();
 
@@ -28,7 +29,7 @@ Otherwise, select 'No', and make a backup of the game before using this script.
 }
 
 //Overwrite Folder Check One
-string exportedSoundsPath = Path.Combine(winFolder, "Exported_Sounds");
+string exportedSoundsPath = Path.Join(winFolder, "Exported_Sounds");
 if (Directory.Exists(exportedSoundsPath))
 {
     bool overwriteCheckOne = ScriptQuestion(@"An 'Exported_Sounds' folder already exists.
@@ -126,7 +127,7 @@ void ExternalizeSound(UndertaleSound sound)
             {
                 relativeAudioGroupPath = $"audiogroup{sound.GroupID}.dat";
             }
-            string audioGroupPath = Path.Combine(winFolder, relativeAudioGroupPath);
+            string audioGroupPath = Paths.JoinVerifyWithinDirectory(winFolder, relativeAudioGroupPath);
             var audioGroupReadStream = (new FileStream(audioGroupPath, FileMode.Open, FileAccess.Read)); // Load the audiogroup dat into memory
             UndertaleData audioGroupDat = UndertaleIO.Read(audioGroupReadStream); // Load as UndertaleData
             audioGroupReadStream.Dispose();
@@ -166,7 +167,7 @@ string DEFAULT_AUDIOGROUP_NAME = "audiogroup_default";
 
 void MakeFolder(String folderName)
 {
-    Directory.CreateDirectory(Path.Combine(winFolder, folderName));
+    Directory.CreateDirectory(Paths.JoinVerifyWithinDirectory(winFolder, folderName));
 }
 
 Dictionary<string, IList<UndertaleEmbeddedAudio>> loadedAudioGroups;
@@ -189,7 +190,7 @@ IList<UndertaleEmbeddedAudio> GetAudioGroupData(UndertaleSound sound)
     {
         relativeAudioGroupPath = $"audiogroup{sound.GroupID}.dat";
     }
-    string groupFilePath = Path.Combine(winFolder, relativeAudioGroupPath);
+    string groupFilePath = Paths.JoinVerifyWithinDirectory(winFolder, relativeAudioGroupPath);
     if (!File.Exists(groupFilePath))
         return null; // Doesn't exist.
 
@@ -242,12 +243,12 @@ void DumpSound(UndertaleSound sound)
     // 3 = 101 = IsEmbedded, IsCompressed, Regular. '.ogg' type saved in win.
     // 4 = 110 = Regular.                           '.ogg' type saved outside win.
     string audioExt = ".ogg";
-    string soundFilePath = Path.Combine(exportedSoundsPath, soundName);
+    string soundFilePath = Paths.JoinVerifyWithinDirectory(exportedSoundsPath, soundName);
     if (groupedExport)
-        soundFilePath = Path.Combine(exportedSoundsPath, sound.AudioGroup.Name.Content, soundName);
+        soundFilePath = Paths.JoinVerifyWithinDirectory(exportedSoundsPath, sound.AudioGroup.Name.Content, soundName);
     MakeFolder("Exported_Sounds");
     if (groupedExport)
-        MakeFolder(Path.Combine("Exported_Sounds", sound.AudioGroup.Name.Content));
+        MakeFolder(Paths.JoinVerifyWithinDirectory("Exported_Sounds", sound.AudioGroup.Name.Content));
     bool process = true;
     if (flagEmbedded && !flagCompressed) // 1.
         audioExt = ".wav";

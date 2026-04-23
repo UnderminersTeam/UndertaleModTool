@@ -27,7 +27,10 @@ var code = obj_pers.EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f3, D
 
 Data.Functions.EnsureDefined("get_integer", Data.Strings);
 
-UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
+{
+    MainThreadAction = MainThreadAction
+};
 importGroup.QueueReplace(code, @"
 room_goto(get_integer(""Go to room"", room));
 ");
