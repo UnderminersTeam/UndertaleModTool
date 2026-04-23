@@ -325,18 +325,6 @@ public partial class Program : IScriptInterface
         // nothing to enable...
     }
 
-    /// <inheritdoc/>
-    public void SyncBinding(string resourceType, bool enable)
-    {
-        //there is no UI with any data binding
-    }
-
-    /// <inheritdoc/>
-    public void DisableAllSyncBindings()
-    {
-        //there is no UI with any data binding
-    }
-
     #endregion
 
     /// <inheritdoc/>

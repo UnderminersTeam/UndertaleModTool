@@ -422,7 +422,6 @@ int atlasCount = 0;
 
 // Group items based on which atlas they belong to, if they do
 var groups = texPageItems.GroupBy(item => item.Atlas);
-SyncBinding("EmbeddedTextures", true);
 await Task.Run(() =>
 {
     foreach (var group in groups)
@@ -436,7 +435,10 @@ await Task.Run(() =>
             // Textures that are contained into an atlas
             UndertaleEmbeddedTexture tex = new UndertaleEmbeddedTexture();
             tex.Name = new UndertaleString($"Texture {++lastTextPage}");
-            Data.EmbeddedTextures.Add(tex);
+            MainThreadAction(() =>
+            {
+                Data.EmbeddedTextures.Add(tex);
+            });
             
             using MagickImage newAtlasImage = new(MagickColors.Transparent, (uint)atlas.Width, (uint)atlas.Height);
 
@@ -480,7 +482,10 @@ await Task.Run(() =>
 
                 UndertaleEmbeddedTexture tex = new UndertaleEmbeddedTexture();
                 tex.Name = new UndertaleString($"Texture {++lastTextPage}");
-                Data.EmbeddedTextures.Add(tex);
+                MainThreadAction(() =>
+                {
+                    Data.EmbeddedTextures.Add(tex);
+                });
 
                 // Create POT texture if needed
                 string itemFile = item.Filename;
@@ -522,7 +527,6 @@ await Task.Run(() =>
     }
 });
 
-DisableAllSyncBindings();
 f.Close();
 
 // Done.

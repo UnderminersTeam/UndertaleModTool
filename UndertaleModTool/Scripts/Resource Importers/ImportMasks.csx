@@ -104,17 +104,27 @@ await Task.Run(() =>
         int frame = int.Parse(stripped.Substring(lastUnderscore + 1));
         UndertaleSprite sprite = Data.Sprites.ByName(spriteName);
         int collisionMaskCount = sprite.CollisionMasks.Count;
-        while (collisionMaskCount <= frame)
+        if (collisionMaskCount <= frame)
         {
-            sprite.CollisionMasks.Add(sprite.NewMaskEntry(Data));
-            collisionMaskCount += 1;
+            MainThreadAction(() =>
+            {
+                do
+                {
+                    sprite.CollisionMasks.Add(sprite.NewMaskEntry(Data));
+                    collisionMaskCount++;
+                }
+                while (collisionMaskCount <= frame);
+            });
         }
 
         // Import the mask.
         (int maskWidth, int maskHeight) = sprite.CalculateMaskDimensions(Data);
-        sprite.CollisionMasks[frame].Data = TextureWorker.ReadMaskData(file, maskWidth, maskHeight);
-
-        Project?.MarkAssetForExport(sprite);
+        var maskData = TextureWorker.ReadMaskData(file, maskWidth, maskHeight);
+        MainThreadAction(() =>
+        {
+            sprite.CollisionMasks[frame].Data = maskData;
+            Project?.MarkAssetForExport(sprite);
+        });
     }
 });
 

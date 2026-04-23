@@ -54,12 +54,35 @@ public static partial class Assembler
     [GeneratedRegex(@"^\(locals=([0-9]+)\,\s*argc=([0-9]+)\)$", RegexOptions.Compiled)]
     private static partial Regex codeEntryRegex();
 
+    // Default passthrough action for data updates that may require the main thread to perform.
+    private static readonly Action<Action> passthroughMainThreadAction = static (f) => f();
+
     /// <summary>
     /// Assembles a single <see cref="UndertaleInstruction"/>, with the provided data, and possibly local variables. Labels are not allowed.
     /// </summary>
-    public static UndertaleInstruction AssembleOne(string source, UndertaleData data, Dictionary<string, UndertaleVariable> localvars = null)
+    /// <param name="source">Single assembly instruction to assemble.</param>
+    /// <param name="data"><see cref="UndertaleData"/> instance to use for finding information, and updating code.</param>
+    /// <param name="localvars">Lookup map of local variables to use when assembling the instruction.</param>
+    /// <param name="mainThreadAction">Main thread action to be called when updating data, if necessary. Must execute the supplied callback synchronously.</param>
+    public static UndertaleInstruction AssembleOne(string source, UndertaleData data, Dictionary<string, UndertaleVariable> localvars = null, Action<Action> mainThreadAction = null)
     {
-        UndertaleInstruction instr = AssembleOne(source, data, localvars, out string label);
+        UndertaleInstruction instr = AssembleOne(source, data, localvars, out string label, mainThreadAction);
+        if (label is not null)
+        {
+            throw new Exception("Cannot use labels in this context");
+        }
+        return instr;
+    }
+
+    /// <summary>
+    /// Assembles a single <see cref="UndertaleInstruction"/>, with the provided data, and no local variables. Labels are not allowed.
+    /// </summary>
+    /// <param name="source">Single assembly instruction to assemble.</param>
+    /// <param name="data"><see cref="UndertaleData"/> instance to use for finding information, and updating code.</param>
+    /// <param name="mainThreadAction">Main thread action to be called when updating data, if necessary. Must execute the supplied callback synchronously.</param>
+    public static UndertaleInstruction AssembleOne(string source, UndertaleData data, Action<Action> mainThreadAction)
+    {
+        UndertaleInstruction instr = AssembleOne(source, data, null, out string label, mainThreadAction);
         if (label is not null)
         {
             throw new Exception("Cannot use labels in this context");
@@ -70,8 +93,16 @@ public static partial class Assembler
     /// <summary>
     /// Assembles a single <see cref="UndertaleInstruction"/>, with the provided data, and possibly local variables. Labels are not allowed.
     /// </summary>
-    public static UndertaleInstruction AssembleOne(string source, UndertaleData data, Dictionary<string, UndertaleVariable> localvars, out string label)
+    /// <param name="source">Single assembly instruction to assemble.</param>
+    /// <param name="data"><see cref="UndertaleData"/> instance to use for finding information, and updating code.</param>
+    /// <param name="localvars">Lookup map of local variables to use when assembling the instruction.</param>
+    /// <param name="label">Output label name, if one was found while parsing the instruction, or <see langword="null"/> if not.</param>
+    /// <param name="mainThreadAction">Main thread action to be called when updating data, if necessary. Must execute the supplied callback synchronously.</param>
+    public static UndertaleInstruction AssembleOne(string source, UndertaleData data, Dictionary<string, UndertaleVariable> localvars, out string label, Action<Action> mainThreadAction = null)
     {
+        // Use a passthrough main thread action if none was supplied
+        mainThreadAction ??= passthroughMainThreadAction;
+
         // Default label output to null
         label = null;
 
@@ -360,8 +391,14 @@ public static partial class Assembler
     /// <summary>
     /// Assembles many instructions, separated by newlines, using the provided data.
     /// </summary>
-    public static List<UndertaleInstruction> Assemble(string source, UndertaleData data)
+    /// <param name="source">Assembly source to assemble.</param>
+    /// <param name="data"><see cref="UndertaleData"/> instance to use for finding information, and updating code.</param>
+    /// <param name="mainThreadAction">Main thread action to be called when updating data, if necessary. Must execute the supplied callback synchronously.</param>
+    public static List<UndertaleInstruction> Assemble(string source, UndertaleData data, Action<Action> mainThreadAction = null)
     {
+        // Use a passthrough main thread action if none was supplied
+        mainThreadAction ??= passthroughMainThreadAction;
+
         // Initialize structures
         Dictionary<string, uint> labels = new();
         List<(UndertaleInstruction Instruction, uint InstructionAddress, string Label)> labelTargets = new();
@@ -400,9 +437,12 @@ public static partial class Assembler
                 }
 
                 // Update info on the code entry
-                code.LocalsCount = ushort.Parse(match.Groups[1].Value);
-                code.ArgumentsCount = ushort.Parse(match.Groups[2].Value);
-                code.Offset = address * 4;
+                mainThreadAction(() =>
+                {
+                    code.LocalsCount = ushort.Parse(match.Groups[1].Value);
+                    code.ArgumentsCount = ushort.Parse(match.Groups[2].Value);
+                    code.Offset = address * 4;
+                });
                 continue;
             }
 

@@ -42,7 +42,10 @@ void ImportTileset(UndertaleBackground tileset)
             if (File.Exists(path))
             {
                 using MagickImage img = TextureWorker.ReadBGRAImageFromFile(path);
-                tileset.Texture.ReplaceTexture(img);
+                MainThreadAction(() =>
+                {
+                    tileset.Texture.ReplaceTexture(img);
+                });
             }
         }
         catch (Exception ex)

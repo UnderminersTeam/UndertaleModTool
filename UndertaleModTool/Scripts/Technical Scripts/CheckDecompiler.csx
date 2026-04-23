@@ -38,9 +38,7 @@ List<string> failedCompileList = new();
 List<string> failedAssemblyList = new();
 List<string> failedDecompiledList = new();
 
-SyncBinding("Strings, Code, CodeLocals, Scripts, GlobalInitScripts, GameObjects, Functions, Variables", true);
 await Task.Run(() => CheckCode());
-DisableAllSyncBindings();
 
 string failedCompilePath = Path.Join(Path.GetDirectoryName(FilePath), "failed-compile.txt");
 File.WriteAllText(failedCompilePath, string.Join('\n', failedCompileList));
@@ -83,7 +81,10 @@ ScriptMessage(
 
 void CheckCode()
 {
-    CompileGroup group = new(Data, globalDecompileContext);
+    CompileGroup group = new(Data, globalDecompileContext)
+    {
+        MainThreadAction = MainThreadAction
+    };
     group.PersistLinkingLookups = true;
     foreach (UndertaleCode code in toCheck)
     {
