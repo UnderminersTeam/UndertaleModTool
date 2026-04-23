@@ -83,6 +83,10 @@ public class Scripting
             {
                 await MainVM.View!.MessageDialog(e.ToString(), title: "Script execution error");
             }
+            finally
+            {
+                scripting.Dispose();
+            }
         }
         finally
         {
@@ -93,7 +97,7 @@ public class Scripting
     }
 }
 
-public class ScriptGlobals : IScriptInterface
+public class ScriptGlobals : IScriptInterface, IDisposable
 {
     private readonly MainViewModel mainVM;
     private readonly string? scriptPath;
@@ -105,6 +109,12 @@ public class ScriptGlobals : IScriptInterface
     {
         mainVM = scripting.MainVM;
         this.scriptPath = scriptPath;
+    }
+
+    public void Dispose()
+    {
+        loaderWindow?.Close();
+        loaderWindow = null;
     }
 
     public UndertaleData? Data => mainVM.Data;
@@ -132,7 +142,11 @@ public class ScriptGlobals : IScriptInterface
     public void AddProgress(int amount)
     {
         loaderValue += amount;
-        loaderWindow!.SetValue(loaderValue);
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            loaderWindow?.SetValue(loaderValue);
+        });
     }
 
     public void AddProgressParallel(int amount)
@@ -141,7 +155,7 @@ public class ScriptGlobals : IScriptInterface
 
         Dispatcher.UIThread.Post(() =>
         {
-            loaderWindow!.SetValue(loaderValue);
+            loaderWindow?.SetValue(loaderValue);
         }, DispatcherPriority.Background);
     }
 
@@ -180,7 +194,7 @@ public class ScriptGlobals : IScriptInterface
         context ??= new(mainVM.Data);
         settings ??= mainVM.Data!.ToolInfo.DecompilerSettings;
 
-        return new Underanalyzer.Decompiler.DecompileContext(context, code, settings).DecompileToString();
+        return new DecompileContext(context, code, settings).DecompileToString();
     }
 
     public string GetDisassemblyText(string codeName)
@@ -207,7 +221,11 @@ public class ScriptGlobals : IScriptInterface
     public void IncrementProgress()
     {
         loaderValue++;
-        loaderWindow!.SetValue(loaderValue);
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            loaderWindow?.SetValue(loaderValue);
+        });
     }
 
     public void IncrementProgressParallel()
@@ -216,7 +234,7 @@ public class ScriptGlobals : IScriptInterface
 
         Dispatcher.UIThread.Post(() =>
         {
-            loaderWindow!.SetValue(loaderValue);
+            loaderWindow?.SetValue(loaderValue);
         }, DispatcherPriority.Background);
     }
 
@@ -328,7 +346,11 @@ public class ScriptGlobals : IScriptInterface
     public void SetProgress(int value)
     {
         loaderValue = value;
-        loaderWindow!.SetValue(loaderValue);
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            loaderWindow?.SetValue(loaderValue);
+        });
     }
 
     public void SetProgressBar(string message, string status, double progressValue, double maxValue)
@@ -396,7 +418,7 @@ public class ScriptGlobals : IScriptInterface
     {
         Dispatcher.UIThread.Post(() =>
         {
-            loaderWindow!.SetTextToMessageAndStatus(status: status);
+            loaderWindow?.SetTextToMessageAndStatus(status: status);
         });
     }
 
@@ -406,7 +428,7 @@ public class ScriptGlobals : IScriptInterface
 
         Dispatcher.UIThread.Post(() =>
         {
-            loaderWindow!.SetValue(loaderValue);
+            loaderWindow?.SetValue(loaderValue);
         });
     }
 }
