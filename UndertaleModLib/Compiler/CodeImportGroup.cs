@@ -81,7 +81,10 @@ public sealed class CodeImportGroup
         Data = data;
         GlobalContext = globalContext ?? new(data);
         DecompileSettings = decompileSettings ?? new DecompileSettings();
-        CompileGroup = new(Data, GlobalContext);
+        CompileGroup = new(Data, GlobalContext)
+        {
+            MainThreadAction = MainThreadAction
+        };
     }
 
     /// <summary>

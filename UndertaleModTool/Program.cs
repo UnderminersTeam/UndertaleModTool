@@ -38,7 +38,7 @@ namespace UndertaleModTool
             }
             catch (Exception e)
             {
-                File.WriteAllText(Path.Combine(GetExecutableDirectory(), "crash.txt"), e.ToString());
+                File.WriteAllText(Path.Join(GetExecutableDirectory(), "crash.txt"), e.ToString());
                 MessageBox.Show(e.ToString());
             }
         }
@@ -48,7 +48,7 @@ namespace UndertaleModTool
             ex = (Exception)e.ExceptionObject;
             ILog log = LogManager.GetLogger(typeof(Program));
             log.Error(ex.Message + "\n" + ex.StackTrace);
-            File.WriteAllText(Path.Combine(GetExecutableDirectory(), "crash2.txt"), (ex.ToString() + "\n" + ex.Message + "\n" + ex.StackTrace));
+            File.WriteAllText(Path.Join(GetExecutableDirectory(), "crash2.txt"), (ex.ToString() + "\n" + ex.Message + "\n" + ex.StackTrace));
         }
 
         private static void GlobalThreadExceptionHandler(object sender, System.Threading.ThreadExceptionEventArgs e)
@@ -57,7 +57,7 @@ namespace UndertaleModTool
             ex = e.Exception;
             ILog log = LogManager.GetLogger(typeof(Program)); //Log4NET
             log.Error(ex.Message + "\n" + ex.StackTrace);
-            File.WriteAllText(Path.Combine(GetExecutableDirectory(), "crash3.txt"), (ex.Message + "\n" + ex.StackTrace));
+            File.WriteAllText(Path.Join(GetExecutableDirectory(), "crash3.txt"), (ex.Message + "\n" + ex.StackTrace));
         }
     }
 }
