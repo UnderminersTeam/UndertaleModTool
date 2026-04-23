@@ -1513,9 +1513,9 @@ namespace UndertaleModTool
                     if (data.BuiltinList.Constants.ContainsKey(nameText))
                         return new ColorVisualLineText(nameText, CurrentContext.VisualLine, nameLength,
                                                        ConstantBrush);
-                    if (data.BuiltinList.Globals.ContainsKey(nameText) ||
+                    if (data.BuiltinList.GlobalVars.ContainsKey(nameText) ||
                         data.BuiltinList.InstanceVars.ContainsKey(nameText) ||
-                        data.BuiltinList.GlobalArrays.ContainsKey(nameText))
+                        data.BuiltinList.GlobalArrayVars.ContainsKey(nameText))
                         return new ColorVisualLineText(nameText, CurrentContext.VisualLine, nameLength,
                                                        InstanceBrush);
                     if (codeEditorInst?.CurrentLocals?.Contains(nameText) == true)
