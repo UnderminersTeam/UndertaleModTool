@@ -17,7 +17,10 @@ else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter
 
 ScriptMessage("Border enabler (1080p edition)\nby krzys_h");
 
-UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
+{
+    MainThreadAction = MainThreadAction
+};
 
 // Change os_type == 14 checks in scr_draw_screen_border to always pass
 importGroup.QueueFindReplace("gml_Script_scr_draw_screen_border", "os_type == os_psvita", "0");
@@ -59,7 +62,7 @@ importGroup.QueueAppend(Data.Code.ByName("gml_Object_obj_time_Create_0"), "windo
 importGroup.Import();
 
 // Load border textures
-string bordersPath = Path.Combine(Path.GetDirectoryName(ScriptPath), "Borders");
+string bordersPath = Path.Join(Path.GetDirectoryName(ScriptPath), "Borders");
 
 Dictionary<string, UndertaleEmbeddedTexture> textures = new();
 if (!Directory.Exists(bordersPath))

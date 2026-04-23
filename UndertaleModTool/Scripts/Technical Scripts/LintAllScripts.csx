@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using UndertaleModLib.Util;
 
-string umtBaseDir = Path.Combine(ExePath, "Scripts");
+string umtBaseDir = Path.Join(ExePath, "Scripts");
 string[] scripts = GetFilesRecursively(umtBaseDir);
 StringBuilder output = new StringBuilder();
 int scriptsCount = scripts.Length;
@@ -39,7 +39,7 @@ await Task.Run(() =>
 await StopProgressBarUpdater();
 
 // Write output either in results file, or console if former doesnt work and show results
-string outputLogLocation = Path.Combine(ExePath, "LintResults.txt");
+string outputLogLocation = Path.Join(ExePath, "LintResults.txt");
 string infoLocation = outputLogLocation;
 try
 {

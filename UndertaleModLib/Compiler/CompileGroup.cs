@@ -28,6 +28,10 @@ public sealed class CompileGroup
     /// <summary>
     /// This action will be called when main-thread operations should occur, and can be changed.
     /// </summary>
+    /// <remarks>
+    /// When the action is called, supplied action argument *must* be executed synchronously.
+    /// That is, the action must return only after the argument callback has completed execution.
+    /// </remarks>
     public Action<Action> MainThreadAction { get; set; } = static (f) => f();
 
     /// <summary>

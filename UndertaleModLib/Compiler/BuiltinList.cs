@@ -17,6 +17,11 @@ public record VariableInfo : IBuiltinVariable
     public string Name { get; }
 
     /// <summary>
+    /// Whether or not the builtin variable can be set.
+    /// </summary>
+    public bool CanSet { get; }
+
+    /// <summary>
     /// Whether or not the builtin variable is a global variable.
     /// </summary>
     public bool IsGlobal { get; }
@@ -27,16 +32,11 @@ public record VariableInfo : IBuiltinVariable
     /// </summary>
     public bool IsAutomaticArray { get; }
 
-    /// <summary>
-    /// Whether or not the builtin variable can be set.
-    /// </summary>
-    public bool CanSet { get; }
-
     public VariableInfo(string name, bool canSet, bool isGlobal = true, bool isAutoArray = false)
     {
         Name = name;
         CanSet = canSet;
-        IsGlobal = IsGlobal;
+        IsGlobal = isGlobal;
         IsAutomaticArray = isAutoArray;
     }
 }
@@ -88,10 +88,10 @@ public class BuiltinList : IBuiltins
 {
     public Dictionary<string, FunctionInfo> Functions { get; private set; } = null;
     public Dictionary<string, double> Constants { get; private set; } = null;
-    public Dictionary<string, VariableInfo> Globals { get; private set; } = null;
-    public Dictionary<string, VariableInfo> GlobalArrays { get; private set; } = null;
+    public Dictionary<string, VariableInfo> GlobalVars { get; private set; } = null;
+    public Dictionary<string, VariableInfo> GlobalArrayVars { get; private set; } = null;
     public Dictionary<string, VariableInfo> InstanceVars { get; private set; } = null;
-    public Dictionary<string, VariableInfo> InstanceLimitedEvent { get; private set; } = null;
+    public Dictionary<string, VariableInfo> InstanceLimitedVars { get; private set; } = null;
 
     public BuiltinList()
     {
@@ -124,7 +124,6 @@ public class BuiltinList : IBuiltins
                 continue;
             if (name.StartsWith("gml_Script_", StringComparison.Ordinal))
                 continue;
-
             scriptLookup.Add(name);
         }
 
@@ -140,9 +139,7 @@ public class BuiltinList : IBuiltins
             if (scriptLookup.Contains(name))
                 continue;
             if (Functions.ContainsKey(name))
-            {
                 continue;
-            }
             DefineFunction(name);
         }
     }
@@ -164,15 +161,15 @@ public class BuiltinList : IBuiltins
         {
             return instanceVar;
         }
-        if (Globals.TryGetValue(name, out VariableInfo globalNotArrayVar))
+        if (GlobalVars.TryGetValue(name, out VariableInfo globalVar))
         {
-            return globalNotArrayVar;
+            return globalVar;
         }
-        if (GlobalArrays.TryGetValue(name, out VariableInfo globalArrayVar))
+        if (GlobalArrayVars.TryGetValue(name, out VariableInfo globalArrayVar))
         {
             return globalArrayVar;
         }
-        if (InstanceLimitedEvent.TryGetValue(name, out VariableInfo instanceLimitedVar))
+        if (InstanceLimitedVars.TryGetValue(name, out VariableInfo instanceLimitedVar))
         {
             return instanceLimitedVar;
         }
@@ -214,15 +211,7 @@ public class BuiltinList : IBuiltins
     /// </summary>
     private void DefineGlobal(string name, bool canSet)
     {
-        Globals[name] = new VariableInfo(name, canSet);
-    }
-
-    /// <summary>
-    /// Helper function to define a global array variable with the given name and assignability.
-    /// </summary>
-    private void DefineGlobalArray(string name, bool canSet)
-    {
-        GlobalArrays[name] = new VariableInfo(name, canSet);
+        GlobalVars[name] = new VariableInfo(name, canSet);
     }
 
     /// <summary>
@@ -230,7 +219,7 @@ public class BuiltinList : IBuiltins
     /// </summary>
     private void DefineGlobalAutoArray(string name, bool canSet)
     {
-        GlobalArrays[name] = new VariableInfo(name, canSet, true, true);
+        GlobalArrayVars[name] = new VariableInfo(name, canSet, true, true);
     }
 
     /// <summary>
@@ -253,7 +242,7 @@ public class BuiltinList : IBuiltins
         uint build = gen8?.Build ?? 0;
 
         bool gms2 = major >= 2;
-        bool gms2_3 = major > 2 || (major == 2 && minor >= 3);
+        bool gms2_3 = major > 2 || (gms2 && minor >= 3);
 
         // Functions
         Functions = new(4096);
@@ -288,7 +277,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("matrix_stack_clear", 0);
         DefineFunction("matrix_stack_top", 0);
         DefineFunction("matrix_stack_is_empty", 0);
-        if (gms2)
+        if (!gms2)
         {
             DefineFunction("d3d_start", 0);
             DefineFunction("d3d_end", 0);
@@ -377,9 +366,6 @@ public class BuiltinList : IBuiltins
             DefineFunction("d3d_light_define_point", 6);
             DefineFunction("d3d_light_enable", 2);
             DefineFunction("d3d_set_lighting", 1);
-        }
-        if (!gms2)
-        {
             DefineFunction("action_path_old", 3);
             DefineFunction("action_set_sprite", 2);
             DefineFunction("action_draw_font", 1);
@@ -989,7 +975,7 @@ public class BuiltinList : IBuiltins
             DefineFunction("texturegroup_get_fonts", 1);
             DefineFunction("texturegroup_get_tilesets", 1);
         }
-        if (gms2_3)
+        if (gms2 || (major == 1 && minor >= 3))
         {
             DefineFunction("draw_enable_swf_aa", 1);
             DefineFunction("draw_set_swf_aa_level", 1);
@@ -2304,7 +2290,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("buffer_async_group_begin", 1);
         DefineFunction("buffer_async_group_end", 0);
         DefineFunction("buffer_async_group_option", 2);
-        if (gms2_3 && release >= 1)
+        if (major > 2 || (gms2_3 && release >= 1) || (gms2 && minor > 3))
             DefineFunction("buffer_get_surface", 3);
         else
             DefineFunction("buffer_get_surface", 5);
@@ -3344,7 +3330,7 @@ public class BuiltinList : IBuiltins
             DefineFunction("db_to_lin", 1);
         }
 
-        // List of constants
+        // Constants
         Constants = new(1024);
         Constants["self"] = -1.0;
         Constants["other"] = -2.0;
@@ -3379,7 +3365,6 @@ public class BuiltinList : IBuiltins
         Constants["c_orange"] = 4235519.0;
         if (!gms2)
             Constants["bm_complex"] = -1.0;
-
         Constants["bm_normal"] = 0.0;
         Constants["bm_add"] = 1.0;
         Constants["bm_max"] = 2.0;
@@ -3843,11 +3828,10 @@ public class BuiltinList : IBuiltins
         Constants["asset_sprite"] = 1.0;
         Constants["asset_sound"] = 2.0;
         Constants["asset_room"] = 3.0;
-        if (!gms2)
-        {
-            Constants["asset_background"] = 4.0;
+        if (gms2)
             Constants["asset_tiles"] = 9.0;
-        }
+        else
+            Constants["asset_background"] = 4.0;
         Constants["asset_path"] = 5.0;
         Constants["asset_script"] = 6.0;
         Constants["asset_font"] = 7.0;
@@ -4363,10 +4347,9 @@ public class BuiltinList : IBuiltins
             Constants["time_source_state_stopped"] = 3.0;
         }
 
-        // Moving on to the variables
-        Globals = new(128);
-        GlobalArrays = new(128);
-
+        // Global variables
+        GlobalVars = new(128);
+        GlobalArrayVars = new(128);
         DefineGlobal("argument_relative", false);
         DefineGlobal("argument_count", false);
         DefineGlobal("argument", true);
@@ -4428,8 +4411,8 @@ public class BuiltinList : IBuiltins
             DefineGlobalAutoArray("background_index", true);
             DefineGlobalAutoArray("background_x", true);
             DefineGlobalAutoArray("background_y", true);
-            DefineGlobalAutoArray("background_width", true);
-            DefineGlobalAutoArray("background_height", true);
+            DefineGlobalAutoArray("background_width", false);
+            DefineGlobalAutoArray("background_height", false);
             DefineGlobalAutoArray("background_htiled", true);
             DefineGlobalAutoArray("background_vtiled", true);
             DefineGlobalAutoArray("background_xscale", true);
@@ -4509,7 +4492,7 @@ public class BuiltinList : IBuiltins
         DefineGlobal("delta_time", true);
         DefineGlobal("webgl_enabled", false);
 
-        // Now onto instance variables
+        // Instance variables
         InstanceVars = new(128);
         DefineInstanceVar("x", true);
         DefineInstanceVar("y", true);
@@ -4587,8 +4570,8 @@ public class BuiltinList : IBuiltins
         DefineInstanceVar("phy_position_yprevious", true);
         DefineInstanceVar("phy_collision_points", false);
 
-        // There are some of them that are only available in certain physics events
-        InstanceLimitedEvent = new Dictionary<string, VariableInfo>
+        // Instance variables, limited to certain (physics) events
+        InstanceLimitedVars = new Dictionary<string, VariableInfo>
         {
             ["phy_collision_x"] = new VariableInfo("phy_collision_x", false, false, true),
             ["phy_collision_y"] = new VariableInfo("phy_collision_y", false, false, true),

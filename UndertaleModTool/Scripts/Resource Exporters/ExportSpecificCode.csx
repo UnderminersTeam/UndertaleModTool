@@ -20,9 +20,9 @@ int failed = 0;
 
 string codeFolder = PromptChooseDirectory();
 if (codeFolder == null)
-    throw new ScriptException("The export folder was not set.");
-Directory.CreateDirectory(Path.Combine(codeFolder, "Code"));
-codeFolder = Path.Combine(codeFolder, "Code");
+    throw new ScriptCancelledException("The export folder was not set.");
+codeFolder = Path.Join(codeFolder, "Code");
+Directory.CreateDirectory(codeFolder);
 
 List<String> codeToDump = new List<String>();
 List<String> gameObjectCandidates = new List<String>();
@@ -113,7 +113,7 @@ await StopProgressBarUpdater();
 
 void DumpCode(UndertaleCode code)
 {
-    string path = Path.Combine(codeFolder, code.Name.Content + ".gml");
+    string path = Paths.JoinVerifyWithinDirectory(codeFolder, code.Name.Content + ".gml");
     if (code.ParentEntry == null)
     {
         try
@@ -124,11 +124,11 @@ void DumpCode(UndertaleCode code)
         }
         catch (Exception e)
         {
-            if (!(Directory.Exists(Path.Combine(codeFolder, "Failed"))))
+            if (!Directory.Exists(Path.Join(codeFolder, "Failed")))
             {
-                Directory.CreateDirectory(Path.Combine(codeFolder, "Failed"));
+                Directory.CreateDirectory(Path.Join(codeFolder, "Failed"));
             }
-            path = Path.Combine(codeFolder, "Failed", code.Name.Content + ".gml");
+            path = Paths.JoinVerifyWithinDirectory(codeFolder, "Failed", code.Name.Content + ".gml");
             File.WriteAllText(path, "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/");
             failed += 1;
         }

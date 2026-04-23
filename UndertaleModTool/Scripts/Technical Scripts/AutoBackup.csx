@@ -24,7 +24,7 @@ bool debug_override = false;
 
 // Setup root export folder.
 string winFolder = GetFolder(FilePath); // The folder data.win is located in.
-string BackupFolder = Path.Combine(winFolder, "Backups");
+string BackupFolder = Path.Join(winFolder, "Backups");
 
 Directory.CreateDirectory(BackupFolder);
 

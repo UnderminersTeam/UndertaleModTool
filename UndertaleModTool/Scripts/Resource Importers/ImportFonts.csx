@@ -14,13 +14,15 @@ using ImageMagick.Drawing;
 EnsureDataLoaded();
 
 string importFolder = PromptChooseDirectory();
-if (importFolder == null)
-    throw new ScriptException("The import folder was not set.");
+if (importFolder is null)
+{
+    throw new ScriptCancelledException("The import folder was not set.");
+}
 
-string packagerDirPath = Path.Combine(ExePath, "Packager");
+string packagerDirPath = Path.Join(ExePath, "Packager");
 string sourcePath = importFolder;
 string searchPattern = "*.png";
-string outName = Path.Combine(packagerDirPath, "atlas.txt");
+string outName = Path.Join(packagerDirPath, "atlas.txt");
 int textureSize = 2048;
 int border = 2;
 bool debug = false;
@@ -33,7 +35,7 @@ packer.SaveAtlasses(outName);
 int lastTextPage = Data.EmbeddedTextures.Count - 1;
 int lastTextPageItem = Data.TexturePageItems.Count - 1;
 
-string prefix = outName.Replace(Path.GetExtension(outName), "");
+string prefix = Path.Join(Path.GetDirectoryName(outName), Path.GetFileNameWithoutExtension(outName));
 int atlasCount = 0;
 foreach (Atlas atlas in packer.Atlasses)
 {
@@ -93,7 +95,7 @@ ScriptMessage("Import Complete!");
 
 public void fontUpdate(UndertaleFont newFont)
 {
-    using (StreamReader reader = new StreamReader(Path.Combine(sourcePath, $"glyphs_{newFont.Name.Content}.csv")))
+    using (StreamReader reader = new StreamReader(Paths.JoinVerifyWithinDirectory(sourcePath, $"glyphs_{newFont.Name.Content}.csv")))
     {
         newFont.Glyphs.Clear();
         string line;
@@ -262,7 +264,7 @@ public class Packer
     public void SaveAtlasses(string _Destination)
     {
         int atlasCount = 0;
-        string prefix = _Destination.Replace(Path.GetExtension(_Destination), "");
+        string prefix = Path.Join(Path.GetDirectoryName(_Destination), Path.GetFileNameWithoutExtension(_Destination));
         string descFile = _Destination;
         StreamWriter tw = new StreamWriter(_Destination);
         tw.WriteLine("source_tex, atlas_tex, x, y, width, height");

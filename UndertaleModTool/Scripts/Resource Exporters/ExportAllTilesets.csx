@@ -34,7 +34,7 @@ void DumpTileset(UndertaleBackground tileset)
 {
     if (tileset?.Texture is not null)
     {
-        worker.ExportAsPNG(tileset.Texture, Path.Combine(texFolder, $"{tileset.Name.Content}.png"));
+        worker.ExportAsPNG(tileset.Texture, Paths.JoinVerifyWithinDirectory(texFolder, $"{tileset.Name.Content}.png"));
     }
 
     IncrementProgressParallel();

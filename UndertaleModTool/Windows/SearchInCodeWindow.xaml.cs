@@ -219,6 +219,17 @@ namespace UndertaleModTool.Windows
             isSearchInProgress = false;
         }
 
+        string GetCodeString(UndertaleCode code)
+        {
+            // First, try to retrieve source from project (if available)
+            if (mainWindow.Project is null || !mainWindow.Project.TryGetCodeSource(code, out string decompiled))
+            {
+                // Source isn't available - perform decompile
+                decompiled = new Underanalyzer.Decompiler.DecompileContext(decompileContext, code, mainWindow.Data.ToolInfo.DecompilerSettings).DecompileToString();
+            }
+            return decompiled;
+        }
+
         private void SearchInUndertaleCode(UndertaleCode code)
         {
             if (code is null) return;
@@ -233,7 +244,9 @@ namespace UndertaleModTool.Windows
             if (isInAssembly) {
                 try
                 {
-                    string codeText = code.Disassemble(data.Variables, data.CodeLocals?.For(code), data.CodeLocals is null);
+                    var codeText = isInAssembly
+                        ? code.Disassemble(mainWindow.Data.Variables, mainWindow.Data.CodeLocals?.For(code), mainWindow.Data.CodeLocals is null)
+                        : GetCodeString(code);
                     SearchInCodeText(code.Name.Content, codeText);
                 }
                 catch (Exception)
@@ -261,17 +274,6 @@ namespace UndertaleModTool.Windows
 
             Interlocked.Increment(ref progressCount);
             Dispatcher.Invoke(() => loaderDialog.ReportProgress(progressCount));
-        }
-
-        static string TryGetProfileModeGML(string codeName)
-        {
-            if (SettingsWindow.ProfileModeEnabled && mainWindow.ProfileHash is not null)
-            {
-                string path = Path.Join(Settings.ProfilesFolder, mainWindow.ProfileHash, "Temp", codeName + ".gml");
-                if (File.Exists(path))
-                    return File.ReadAllText(path).Replace("\r\n", "\n");
-            }
-            return null;
         }
 
         private void SearchInCodeText(string codeName, string codeText)
