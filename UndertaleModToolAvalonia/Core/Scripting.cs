@@ -139,6 +139,8 @@ public class ScriptGlobals : IScriptInterface, IDisposable
 
     public bool IsAppClosed => throw new NotImplementedException();
 
+    public Action<Action> MainThreadAction => Dispatcher.UIThread.Invoke;
+
     public void AddProgress(int amount)
     {
         loaderValue += amount;

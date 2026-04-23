@@ -751,6 +751,7 @@ namespace UndertaleModLib
                     if (IsVersionAtLeast(2024, 13))
                     {
                         room.Flags |= IsVersionAtLeast(2024, 13) ? UndertaleRoom.RoomEntryFlags.IsGM2024_13 : UndertaleRoom.RoomEntryFlags.IsGMS2;
+                        room.InstanceCreationOrderIDs ??= new();
                     }
                     else
                     {

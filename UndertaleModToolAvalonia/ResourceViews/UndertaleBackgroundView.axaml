@@ -35,8 +35,8 @@
                   Converter={StaticResource VersionCompareConverter},
                   ConverterParameter=GE2}">
 
-                <Label>Unknown Always 2</Label>
-                <TextBox Text="{Binding Background.GMS2UnknownAlways2}" />
+                <Label>Tileset version</Label>
+                <TextBox Text="{Binding Background.GMS2TilesetVersion}" />
 
                 <Label>Tile Width</Label>
                 <TextBox Text="{Binding Background.GMS2TileWidth}" />

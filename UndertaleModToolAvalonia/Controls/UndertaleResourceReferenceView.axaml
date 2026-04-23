@@ -14,7 +14,7 @@
                      IsReadOnly="True"
                      PointerReleased="TextBox_PointerReleased"
                      DoubleTapped="TextBox_DoubleTapped">
-              <TextBox.Resources>
+                <TextBox.Resources>
                     <l:UndertaleReferenceDropHandler x:Key="UndertaleReferenceDropHandler"/>
                 </TextBox.Resources>
                 <Interaction.Behaviors>

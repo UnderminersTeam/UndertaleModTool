@@ -102,7 +102,9 @@ namespace UndertaleModTool
 
             e.Handled = true;
 
-            int tileIndex = bg.GMS2TileIds.FindIndex(x => x.ID == tileID);
+            var tileIndex = bg.GMS2TileIds
+                .Select((item, index) => new { Item = item, Index = index })
+                .FirstOrDefault(x => x.Item.ID == tileID)?.Index ?? -1;
             if (tileIndex == -1)
                 return false;
 

@@ -661,9 +661,9 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
                 }
                 if (data.BuiltinList.Constants.ContainsKey(text))
                     return new ColorVisualLineText(text, CurrentContext.VisualLine, length, ConstantBrush);
-                if (data.BuiltinList.GlobalNotArray.ContainsKey(text) ||
-                    data.BuiltinList.Instance.ContainsKey(text) ||
-                    data.BuiltinList.GlobalArray.ContainsKey(text))
+                if (data.BuiltinList.GlobalVars.ContainsKey(text) ||
+                    data.BuiltinList.InstanceVars.ContainsKey(text) ||
+                    data.BuiltinList.GlobalArrayVars.ContainsKey(text))
                     return new ColorVisualLineText(text, CurrentContext.VisualLine, length, InstanceBrush);
                 if (codeView.codeLocalsCache.BinarySearch(text) >= 0)
                     return new ColorVisualLineText(text, CurrentContext.VisualLine, length, LocalBrush);
