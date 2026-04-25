@@ -50,6 +50,10 @@ public sealed class CodeImportGroup
     /// <summary>
     /// This action will be called when main-thread operations should occur, and can be changed.
     /// </summary>
+    /// <remarks>
+    /// When the action is called, supplied action argument *must* be executed synchronously.
+    /// That is, the action must return only after the argument callback has completed execution.
+    /// </remarks>
     public Action<Action> MainThreadAction { get; set; } = static (f) => f();
 
     /// <summary>
@@ -211,8 +215,17 @@ public sealed class CodeImportGroup
         }
 
         // Need to create a new entry!
-        UndertaleString newEntryName = Data.Strings.MakeString(codeEntryName);
-        UndertaleCode newEntry = UndertaleCode.CreateEmptyEntry(Data, newEntryName);
+        UndertaleString newEntryName = null;
+        UndertaleCode newEntry = null;
+        MainThreadAction(() =>
+        {
+            newEntryName = Data.Strings.MakeString(codeEntryName);
+            newEntry = UndertaleCode.CreateEmptyEntry(Data, newEntryName);
+        });
+        if (newEntryName is null || newEntry is null)
+        {
+            throw new Exception($"{nameof(MainThreadAction)} did not execute synchronously!");
+        }
 
         // If auto-creating assets is disabled, exit early
         if (!AutoCreateAssets)

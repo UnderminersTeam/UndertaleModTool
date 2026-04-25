@@ -60,12 +60,10 @@ You will have to check the code for these functions and change it accordingly.
 SetProgressBar(null, "Externalizing Sounds...", 0, Data.Sounds.Count);
 StartProgressBarUpdater();
 
-SyncBinding("Strings", true);
 await Task.Run(() => {
     DumpSounds(); // This runs sync, because it has to load audio groups.
     ExternalizeSounds(); // This runs sync, because it has to load audio groups.
 });
-DisableAllSyncBindings();
 
 await StopProgressBarUpdater();
 HideProgressBar();
@@ -110,11 +108,17 @@ void ExternalizeSound(UndertaleSound sound)
         var path_result = files[0];
         var path_relative = path_result.Replace(winFolder, "");
         var new_filename = Path.ChangeExtension(path_relative, ".ogg");
-        sound.File = Data.Strings.MakeString(new_filename);
+        MainThreadAction(() =>
+        {
+            sound.File = Data.Strings.MakeString(new_filename);
+        });
         if (sound.GroupID == Data.GetBuiltinSoundGroupID()) //For sounds embedded in the data.win itself.
         {
-            sound.AudioFile.Data = new byte[1];
-            sound.AudioFile.Data[0] = 0;
+            MainThreadAction(() =>
+            {
+                sound.AudioFile.Data = new byte[1];
+                sound.AudioFile.Data[0] = 0;
+            });
         }
         else //For sounds embedded in the external audiogroup.dat files.
         {
@@ -142,18 +146,21 @@ void ExternalizeSound(UndertaleSound sound)
         }
     }
     // Update audio entry to set AudioFile to null.
-    sound.AudioID = -1;
-    if (sound.AudioFile != null)
-        sound.AudioFile = null;
-    sound.Flags = UndertaleSound.AudioEntryFlags.Regular;
-    if (sound.Type?.Content != null)
-        sound.Type.Content = ".ogg";
-    if (usesAGRPs)
+    MainThreadAction(() =>
     {
-        // Reset audiogroup to audiogroup_default.
-        sound.GroupID = Data.GetBuiltinSoundGroupID();
-        sound.AudioGroup = Data.AudioGroups[Data.GetBuiltinSoundGroupID()];
-    }
+        sound.AudioID = -1;
+        if (sound.AudioFile != null)
+            sound.AudioFile = null;
+        sound.Flags = UndertaleSound.AudioEntryFlags.Regular;
+        if (sound.Type?.Content != null)
+            sound.Type.Content = ".ogg";
+        if (usesAGRPs)
+        {
+            // Reset audiogroup to audiogroup_default.
+            sound.GroupID = Data.GetBuiltinSoundGroupID();
+            sound.AudioGroup = Data.AudioGroups[Data.GetBuiltinSoundGroupID()];
+        }
+    });
     // if it doesn't then we shouldn't care, it's always null.
 
     sounds++;

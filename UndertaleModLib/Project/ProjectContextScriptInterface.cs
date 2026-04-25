@@ -79,12 +79,6 @@ partial class ProjectContext : IScriptInterface
     }
 
     /// <inheritdoc/>
-    public void DisableAllSyncBindings()
-    {
-        throw new NotImplementedException();
-    }
-
-    /// <inheritdoc/>
     public void EnableUI()
     {
         throw new NotImplementedException();
@@ -266,12 +260,6 @@ partial class ProjectContext : IScriptInterface
 
     /// <inheritdoc/>
     public Task StopProgressBarUpdater()
-    {
-        throw new NotImplementedException();
-    }
-
-    /// <inheritdoc/>
-    public void SyncBinding(string resourceType, bool enable)
     {
         throw new NotImplementedException();
     }

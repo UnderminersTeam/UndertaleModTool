@@ -178,14 +178,7 @@ namespace UndertaleModTests
         {
             Console.WriteLine("Enabling UI.");
         }
-        public void SyncBinding(string resourceType, bool enable)
-        {
-            Console.WriteLine($"SyncBinding(): \"{resourceType}\", {enable}");
-        }
-        public void DisableAllSyncBindings()
-        {
-            Console.WriteLine($"Disabling all enabled synced bindings.");
-        }
+
         public void StartProgressBarUpdater()
         {
             Console.WriteLine("Starting progress bar updater...");

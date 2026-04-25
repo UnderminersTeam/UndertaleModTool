@@ -25,7 +25,6 @@ bool stopOnError = ScriptQuestion("Stop importing on error?");
 SetProgressBar(null, "Files", 0, dirFiles.Length);
 StartProgressBarUpdater();
 
-SyncBinding("Strings, Code, CodeLocals, Scripts, GlobalInitScripts, GameObjects, Functions, Variables", true);
 await Task.Run(() => 
 {
     foreach (string file in dirFiles)
@@ -37,7 +36,11 @@ await Task.Run(() =>
         {
             try
             {
-                code.Replace(Assembler.Assemble(asm, Data));
+                List<UndertaleInstruction> instructions = Assembler.Assemble(asm, Data, MainThreadAction);
+                MainThreadAction(() =>
+                {
+                    code.Replace(instructions);
+                });
             }
             catch (Exception e)
             {
@@ -66,7 +69,6 @@ await Task.Run(() =>
         IncrementProgress();
     }
 });
-DisableAllSyncBindings();
 
 await StopProgressBarUpdater();
 HideProgressBar();

@@ -128,9 +128,11 @@ public interface IScriptInterface
 
     /// <summary>
     /// An action that can be called to execute code on the main thread, useful for syncing with a GUI.
+    /// If this is not required, it may be implemented as a pass-through call to the provided action.
     /// </summary>
     /// <remarks>
-    /// If this is not required, it may be implemented as a pass-through call to the provided action.
+    /// When the action is called, supplied action argument *must* be executed synchronously.
+    /// That is, the action must return only after the argument callback has completed execution.
     /// </remarks>
     Action<Action> MainThreadAction { get; }
 
@@ -423,20 +425,6 @@ public interface IScriptInterface
     /// Enables the UI.
     /// </summary>
     void EnableUI();
-
-    /// <summary>
-    /// Allows scripts to modify asset lists from the non-UI thread.
-    /// If this isn't called before attempting to modify them, a <see cref="NotSupportedException"/> will be thrown.
-    /// </summary>
-    /// <param name="resourceType">A comma separated list of asset list names. This is case sensitive.</param>
-    /// <param name="enable">Whether to enable or disable the synchronization.</param>
-    //TODO: Having resourceType as a comma separated list just screams for error. Make it use some array of predefined assets it can use.
-    void SyncBinding(string resourceType, bool enable);
-
-    /// <summary>
-    /// Stops the synchronization of all previously enabled assets.
-    /// </summary>
-    void DisableAllSyncBindings();
 
     /// <summary>
     /// Starts the task that updates a progress bar in parallel.

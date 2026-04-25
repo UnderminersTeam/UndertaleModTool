@@ -81,6 +81,10 @@ public sealed partial class ProjectContext
     /// <summary>
     /// This action should be called when main-thread operations need to occur.
     /// </summary>
+    /// <remarks>
+    /// When the action is called, supplied action argument *must* be executed synchronously.
+    /// That is, the action must return only after the argument callback has completed execution.
+    /// </remarks>
     public Action<Action> MainThreadAction { get; set; } = static (f) => f();
 
     /// <summary>

@@ -116,7 +116,10 @@ await Task.Run(() =>
             }
 
             // Actually replace texture
-            item.ReplaceTexture(image);
+            MainThreadAction(() =>
+            {
+                item.ReplaceTexture(image);
+            });
         }
         catch
         {
