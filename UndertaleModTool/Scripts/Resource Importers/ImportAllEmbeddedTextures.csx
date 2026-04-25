@@ -26,7 +26,7 @@ foreach (UndertaleEmbeddedTexture target in Data.EmbeddedTextures)
     string filename = $"{i}.png";
     try
     {
-        target.TextureData.Image = GMImage.FromPng(File.ReadAllBytes(Path.Combine(subPath, filename)))
+        target.TextureData.Image = GMImage.FromPng(File.ReadAllBytes(Paths.JoinVerifyWithinDirectory(subPath, filename)))
                                           .ConvertToFormat(target.TextureData.Image.Format);
     }
     catch (Exception ex) 

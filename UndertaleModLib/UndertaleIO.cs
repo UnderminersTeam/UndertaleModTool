@@ -398,7 +398,7 @@ namespace UndertaleModLib
                 try
                 {
                     string fileDir = Path.GetDirectoryName(Environment.ProcessPath);
-                    File.WriteAllText(Path.Combine(fileDir, "unserializeCountError.txt"),
+                    File.WriteAllText(Path.Join(fileDir, "unserializeCountError.txt"),
                                       countUnserializeExc + "\n"
                                       + countUnserializeExc.Message + "\n"
                                       + countUnserializeExc.StackTrace);

@@ -13,6 +13,7 @@ using Underanalyzer.Decompiler;
 using UndertaleModLib;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
+using UndertaleModLib.Project;
 using UndertaleModLib.Scripting;
 
 namespace UndertaleModTests
@@ -24,6 +25,7 @@ namespace UndertaleModTests
         }
 
         public UndertaleData Data => data;
+        public ProjectContext Project => null;
         public string FilePath => path;
         public object Highlighted => throw new NotImplementedException();
         public object Selected => throw new NotImplementedException();
@@ -196,7 +198,7 @@ namespace UndertaleModTests
 
         protected async Task<object> RunScript(string path)
         {
-            string scriptpath = Path.Combine("../../../UndertaleModTool/Scripts/Builtin Scripts/", path);
+            string scriptpath = Path.Join("../../../UndertaleModTool/Scripts/Builtin Scripts/", path);
             using (var loader = new InteractiveAssemblyLoader())
             {
                 loader.RegisterDependency(typeof(UndertaleObject).GetTypeInfo().Assembly);

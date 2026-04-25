@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using UndertaleModLib.Project.SerializableAssets;
+using UndertaleModLib.Project;
 
 namespace UndertaleModLib.Models;
 
@@ -10,7 +12,7 @@ namespace UndertaleModLib.Models;
 /// <remarks>For GameMaker Studio 2, this will only ever be a tileset. For GameMaker: Studio 1, this is usually a background,
 /// but is sometimes repurposed as use for a tileset as well.</remarks>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleBackground : UndertaleNamedResource, IDisposable
+public class UndertaleBackground : UndertaleNamedResource, IProjectAsset, INotifyPropertyChanged, IDisposable
 {
     /// <summary>
     /// A tile id, which can be used for referencing specific tiles in a tileset. Game Maker Studio 2 only.
@@ -130,14 +132,15 @@ public class UndertaleBackground : UndertaleNamedResource, IDisposable
     /// </remarks>
     public uint GMS2TileCount { get; set; } = 1024;
 
+    private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _gms2ExportedSprite = null;
+
     /// <summary>
-    /// Exported sprite index, if the background's corresponding sprite was marked to still be exported.
-    /// Will be either 0 or -1 (depending on GM version) when the sprite is not exported, which makes this a bit ambiguous.
+    /// Index of the exported sprite, if one was exported.
     /// </summary>
     /// <remarks>
-    /// Added in GameMaker Studio 2.
+    /// Added in GameMaker 2023.8.
     /// </remarks>
-    public int GMS2ExportedSpriteIndex { get; set; } = 0;
+    public UndertaleSprite GMS2ExportedSprite { get => _gms2ExportedSprite?.Resource; set { (_gms2ExportedSprite ??= new()).Resource = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(GMS2ExportedSprite))); } }
 
     /// <summary>
     /// The time for each frame in microseconds.
@@ -148,12 +151,15 @@ public class UndertaleBackground : UndertaleNamedResource, IDisposable
     public long GMS2FrameLength { get; set; } = 66666;
 
     /// <summary>
-    /// All tile ids of this tileset.
+    /// All tile IDs of this tileset.
     /// </summary>
     /// <remarks>
     /// Added in GameMaker Studio 2.
     /// </remarks>
-    public UndertaleObservableList<TileID> GMS2TileIds { get; set; } = new UndertaleObservableList<TileID>();
+    public UndertaleObservableList<TileID> GMS2TileIds { get; set; } = new(32);
+
+    /// <inheritdoc />
+    public event PropertyChangedEventHandler PropertyChanged;
 
     /// <remarks>
     /// Added in GameMaker 2024.14.1.
@@ -188,7 +194,14 @@ public class UndertaleBackground : UndertaleNamedResource, IDisposable
             writer.Write(GMS2TileColumns);
             writer.Write(GMS2ItemsPerTileCount);
             writer.Write(GMS2TileCount);
-            writer.Write(GMS2ExportedSpriteIndex);
+            if (writer.undertaleData.IsVersionAtLeast(2023, 8))
+            {
+                (_gms2ExportedSprite ?? new()).Serialize(writer);
+            }
+            else
+            {
+                writer.Write(0);
+            }
             writer.Write(GMS2FrameLength);
             if (GMS2TileIds.Count != GMS2TileCount * GMS2ItemsPerTileCount)
                 throw new UndertaleSerializationException("Bad tile list length, should be tile count * frame count");
@@ -220,14 +233,26 @@ public class UndertaleBackground : UndertaleNamedResource, IDisposable
             GMS2TileColumns = reader.ReadUInt32();
             GMS2ItemsPerTileCount = reader.ReadUInt32();
             GMS2TileCount = reader.ReadUInt32();
-            GMS2ExportedSpriteIndex = reader.ReadInt32();
+            if (reader.undertaleData.IsVersionAtLeast(2023, 8))
+            {
+                (_gms2ExportedSprite = new()).Unserialize(reader);
+            }
+            else
+            {
+                int id = reader.ReadInt32();
+                if (id != 0)
+                {
+                    reader.undertaleData.SetGMS2Version(2023, 8);
+                    (_gms2ExportedSprite = new()).UnserializeById(reader, id);
+                }
+            }
             GMS2FrameLength = reader.ReadInt64();
             GMS2TileIds = new((int)GMS2TileCount * (int)GMS2ItemsPerTileCount);
             for (int i = 0; i < GMS2TileCount * GMS2ItemsPerTileCount; i++)
             {
-                TileID id = new TileID();
+                TileID id = new();
                 id.Unserialize(reader);
-                GMS2TileIds.Add(id);
+                GMS2TileIds.InternalAdd(id);
             }
         }
     }
@@ -247,4 +272,21 @@ public class UndertaleBackground : UndertaleNamedResource, IDisposable
         Name = null;
         Texture = null;
     }
+
+    /// <inheritdoc/>
+    ISerializableProjectAsset IProjectAsset.GenerateSerializableProjectAsset(ProjectContext projectContext)
+    {
+        SerializableBackground serializable = new();
+        serializable.PopulateFromData(projectContext, this);
+        return serializable;
+    }
+
+    /// <inheritdoc/>
+    public string ProjectName => Name?.Content ?? "<unknown name>";
+
+    /// <inheritdoc/>
+    public SerializableAssetType ProjectAssetType => SerializableAssetType.Background;
+
+    /// <inheritdoc/>
+    public bool ProjectExportable => Name?.Content is not null && Texture is not null;
 }
