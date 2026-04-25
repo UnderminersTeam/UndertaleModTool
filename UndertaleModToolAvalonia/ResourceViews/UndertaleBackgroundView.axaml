@@ -76,7 +76,7 @@
                 <TextBox Text="{Binding Background.GMS2TileCount}" />
 
                 <Label>Exported Sprite Index</Label>
-                <TextBox Text="{Binding Background.GMS2ExportedSpriteIndex}" />
+                <l:UndertaleResourceReferenceView Reference="{Binding Background.GMS2ExportedSprite}" ReferenceType="undertalem:UndertaleSprite"/>
 
                 <Label>Frame Time (microseconds)</Label>
                 <TextBox Text="{Binding Background.GMS2FrameLength}" />

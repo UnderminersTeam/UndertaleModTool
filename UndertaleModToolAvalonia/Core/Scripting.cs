@@ -16,6 +16,7 @@ using Underanalyzer.Decompiler;
 using UndertaleModLib;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
+using UndertaleModLib.Project;
 using UndertaleModLib.Scripting;
 
 namespace UndertaleModToolAvalonia;
@@ -118,6 +119,9 @@ public class ScriptGlobals : IScriptInterface, IDisposable
     }
 
     public UndertaleData? Data => mainVM.Data;
+
+    // TODO: Get project from mainVM
+    public ProjectContext? Project => null;
 
     public string? FilePath => mainVM.DataPath;
 
