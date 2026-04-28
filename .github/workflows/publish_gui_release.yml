@@ -44,12 +44,13 @@ jobs:
         rm ./${{ matrix.os }}/Underanalyzer.pdb
     - name: Create zip for stable release Windows GUI
       run: |
-        7z a -tzip GUI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}.zip ./${{ matrix.os }}/* -mx0 
+        7z a -tzip GUI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}.zip ./${{ matrix.os }}/* -mx9 
     - name: Upload artifact
       uses: actions/upload-artifact@v7
       with:
           name: GUI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}
           path: GUI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}-isSingleFile-${{ matrix.singlefile }}.zip
+          archive: false
   
   build_cli:
 
@@ -92,11 +93,12 @@ jobs:
         rm ./CLI-${{ matrix.os }}/Underanalyzer.pdb
     - name: Create zip for stable release CLI
       run: |
-        7z a -tzip CLI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}.zip ./CLI-${{ matrix.os }}/* -mx0 
+        7z a -tzip CLI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}.zip ./CLI-${{ matrix.os }}/* -mx9 
     - name: Upload artifact
       uses: actions/upload-artifact@v7
       with:
           name: CLI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}
           path: CLI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}.zip
+          archive: false
     
 

@@ -22,7 +22,6 @@
         <ApplicationManifest>app.manifest</ApplicationManifest>
     </PropertyGroup>
     <ItemGroup>
-      <None Remove="Corrections\README.txt" />
       <None Remove="Resources\tabs_left_button.png" />
       <None Remove="Resources\tabs_right_button.png" />
       <None Remove="Resources\X_Down.png" />
@@ -111,10 +110,6 @@
     <ItemGroup>
         <Folder Include="Scripts" />
         <Content Include="Scripts/**">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        </Content>
-        <Content Include="Corrections/**">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </Content>
