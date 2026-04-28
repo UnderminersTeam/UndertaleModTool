@@ -723,14 +723,20 @@ public partial class Program : IScriptInterface
             return;
         }
 
-        string directory = $"{Output.FullName}/CodeEntries/";
+        string directory = Path.Join(Output.FullName, "CodeEntries");
 
         Directory.CreateDirectory(directory);
 
         if (Verbose)
             Console.WriteLine($"Dumping {codeEntry}");
 
-        File.WriteAllText($"{directory}/{codeEntry}.gml", GetDecompiledText(code));
+        string dest = Paths.TryJoinVerifyWithinDirectory(directory, $"{codeEntry}.gml");
+        if (dest is null)
+        {
+            Console.Error.WriteLine($"Failed to export code entry with name {codeEntry}");
+            return;
+        }
+        File.WriteAllText(dest, GetDecompiledText(code));
     }
 
     /// <summary>
@@ -752,7 +758,7 @@ public partial class Program : IScriptInterface
 
         if (Verbose)
             Console.WriteLine("Writing all strings to disk");
-        File.WriteAllText($"{directory}/strings.txt", combinedText.ToString());
+        File.WriteAllText(Path.Join(directory, "strings.txt"), combinedText.ToString());
     }
 
     /// <summary>
@@ -760,7 +766,7 @@ public partial class Program : IScriptInterface
     /// </summary>
     private void DumpAllTextures()
     {
-        string directory = $"{Output.FullName}/EmbeddedTextures/";
+        string directory = Path.Join(Output.FullName, "EmbeddedTextures");
 
         Directory.CreateDirectory(directory);
 
@@ -773,7 +779,13 @@ public partial class Program : IScriptInterface
                 Console.WriteLine($"{texture.Name} has no image assigned, skipping");
                 continue;
             }
-            using FileStream fs = new($"{directory}/{texture.Name.Content}.png", FileMode.Create);
+            string dest = Paths.TryJoinVerifyWithinDirectory(directory, $"{texture.Name.Content}.png");
+            if (dest is null)
+            {
+                Console.Error.WriteLine($"Failed to export texture with name {texture.Name.Content}");
+                return;
+            }
+            using FileStream fs = new(dest, FileMode.Create);
             texture.TextureData.Image.SavePng(fs);
         }
     }
