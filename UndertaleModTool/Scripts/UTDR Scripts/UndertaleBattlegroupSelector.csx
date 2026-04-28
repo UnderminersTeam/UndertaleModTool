@@ -33,7 +33,10 @@ var YVIEW = gms2 ? "__view_get(1, 0)" : "view_yview[0]";
 var WVIEW = gms2 ? "__view_get(2, 0)" : "view_wview[0]";
 var HVIEW = gms2 ? "__view_get(3, 0)" : "view_hview[0]";
 
-UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
+{
+    MainThreadAction = MainThreadAction
+};
 
 importGroup.QueueReplace(selector.EventHandlerFor(EventType.Create, Data), @"
 battlegroup = 0

@@ -90,26 +90,7 @@ namespace UndertaleModTool
                 Settings.Save();
             }
         }
-
-        public static bool ProfileModeEnabled
-        {
-            get => Settings.Instance.ProfileModeEnabled;
-            set
-            {
-                Settings.Instance.ProfileModeEnabled = value;
-                Settings.Save();
-            }
-        }
-
-        public static bool ProfileMessageShown
-        {
-            get => Settings.Instance.ProfileMessageShown;
-            set
-            {
-                Settings.Instance.ProfileMessageShown = value;
-                Settings.Save();
-            }
-        }
+        
         public static bool TempRunMessageShow
         {
             get => Settings.Instance.TempRunMessageShow;
@@ -146,33 +127,6 @@ namespace UndertaleModTool
             }
         }
 
-        public static bool DeleteOldProfileOnSave
-        {
-            get => Settings.Instance.DeleteOldProfileOnSave;
-            set
-            {
-                Settings.Instance.DeleteOldProfileOnSave = value;
-                Settings.Save();
-            }
-        }
-        public static bool CustomProfileName
-        {
-            get => Settings.Instance.CustomProfileName;
-            set
-            {
-                Settings.Instance.CustomProfileName = value;
-                Settings.Save();
-            }
-        }
-        public static bool RememberProfileName
-        {
-            get => Settings.Instance.RememberProfileName;
-            set
-            {
-                Settings.Instance.RememberProfileName = value;
-                Settings.Save();
-            }
-        }
         public static bool WarnOnClose
         {
             get => Settings.Instance.WarnOnClose;
@@ -357,6 +311,16 @@ namespace UndertaleModTool
             set
             {
                 Settings.Instance.RememberWindowPlacements = value;
+                Settings.Save();
+            }
+        }
+
+        public static bool RecompileAllCodeSourcesOnProjectSave
+        {
+            get => Settings.Instance.RecompileAllCodeSourcesOnProjectSave;
+            set
+            {
+                Settings.Instance.RecompileAllCodeSourcesOnProjectSave = value;
                 Settings.Save();
             }
         }

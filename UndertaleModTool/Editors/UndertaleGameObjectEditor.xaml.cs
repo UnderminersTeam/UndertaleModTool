@@ -1,5 +1,9 @@
-﻿using System;
+﻿using Microsoft.VisualBasic;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -25,6 +29,8 @@ namespace UndertaleModTool
     /// </summary>
     public partial class UndertaleGameObjectEditor : DataUserControl
     {
+        private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+
         private bool handleMouseScroll = true;
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
 
@@ -37,8 +43,33 @@ namespace UndertaleModTool
             ((System.Windows.Controls.Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
 
             ((Label)this.FindName("GameObjectObjectLabel")).Content = ((Label)mainWindow.FindName("ObjectLabel")).Content;
+            DataContextChanged += OnDataContextChanged;
+            Unloaded += OnUnloaded;
         }
-        private void DataUserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+
+        private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            var floweranim = ((System.Windows.Controls.Image)mainWindow.FindName("Flowey"));
+            //floweranim.Opacity = 1;
+
+            var controller = ImageBehavior.GetAnimationController(floweranim);
+            controller.Pause();
+            controller.GotoFrame(controller.FrameCount - 5);
+            controller.Play();
+
+            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
+            
+            if (DataContext is UndertaleGameObject oldObj)
+            {
+                oldObj.PropertyChanged -= OnPropertyChanged;
+                if (oldObj.PhysicsVertices is UndertaleObservableList<UndertaleGameObject.UndertalePhysicsVertex> vertices)
+                {
+                    vertices.CollectionChanged -= DataGrid_CollectionChanged;
+                }
+            }
+        }
+
+        private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             UndertaleGameObject code = this.DataContext as UndertaleGameObject;
 
@@ -53,25 +84,105 @@ namespace UndertaleModTool
                 idString = Convert.ToString(foundIndex);
 
             ((Label)this.FindName("GameObjectObjectLabel")).Content = idString;
+
+            if (e.OldValue is UndertaleGameObject oldObj)
+            {
+                oldObj.PropertyChanged -= OnPropertyChanged;
+                if (oldObj.PhysicsVertices is UndertaleObservableList<UndertaleGameObject.UndertalePhysicsVertex> vertices)
+                {
+                    vertices.CollectionChanged -= DataGrid_CollectionChanged;
+                }
+            }
+            if (e.NewValue is UndertaleGameObject newObj)
+            {
+                newObj.PropertyChanged += OnPropertyChanged;
+                if (newObj.PhysicsVertices is UndertaleObservableList<UndertaleGameObject.UndertalePhysicsVertex> vertices)
+                {
+                    vertices.CollectionChanged += DataGrid_CollectionChanged;
+                }
+            }
         }
-        private void DataUserControl_Unloaded(object sender, RoutedEventArgs e)
+
+        private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            var floweranim = ((System.Windows.Controls.Image)mainWindow.FindName("Flowey"));
-            //floweranim.Opacity = 1;
+            OnAssetUpdated();
+        }
 
-            var controller = ImageBehavior.GetAnimationController(floweranim);
-            controller.Pause();
-            controller.GotoFrame(controller.FrameCount - 5);
-            controller.Play();
-
-            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
+        private void OnAssetUpdated()
+        {
+            if (mainWindow.Project is null || !mainWindow.IsSelectedProjectExportable)
+            {
+                return;
+            }
+            Dispatcher.BeginInvoke(() =>
+            {
+                if (DataContext is UndertaleGameObject obj)
+                {
+                    mainWindow.Project?.MarkAssetForExport(obj);
+                }
+            });
         }
 
         private void DataGrid_AddingNewItem(object sender, AddingNewItemEventArgs e)
         {
-            UndertaleGameObject.Event obj = new UndertaleGameObject.Event();
+            UndertaleGameObject.Event obj = new();
             obj.Actions.Add(new UndertaleGameObject.EventAction());
             e.NewItem = obj;
+        }
+
+        private void DataGrid_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Attach to collection changed events
+            if (sender is not DataGrid dg || dg.ItemsSource is not ObservableCollection<UndertaleGameObject.Event> collection)
+            {
+                return;
+            }
+            collection.CollectionChanged += DataGrid_CollectionChanged;
+        }
+
+        private void DataGrid_Unloaded(object sender, RoutedEventArgs e)
+        {
+            // Detach to collection changed events
+            if (sender is not DataGrid dg || dg.ItemsSource is not ObservableCollection<UndertaleGameObject.Event> collection)
+            {
+                return;
+            }
+            collection.CollectionChanged -= DataGrid_CollectionChanged;
+        }
+
+        private void DataGrid_Actions_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Attach to collection changed events
+            if (sender is not DataGrid dg || dg.ItemsSource is not ObservableCollection<UndertaleGameObject.EventAction> collection)
+            {
+                return;
+            }
+            collection.CollectionChanged += DataGrid_CollectionChanged;
+        }
+
+        private void DataGrid_Actions_Unloaded(object sender, RoutedEventArgs e)
+        {
+            // Detach to collection changed events
+            if (sender is not DataGrid dg || dg.ItemsSource is not ObservableCollection<UndertaleGameObject.EventAction> collection)
+            {
+                return;
+            }
+            collection.CollectionChanged -= DataGrid_CollectionChanged;
+        }
+
+        private void DataGrid_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            OnAssetUpdated();
+        }
+
+        private void PhysicsVertex_ValueUpdated(object sender, DataTransferEventArgs e)
+        {
+            OnAssetUpdated();
+        }
+
+        private void UndertaleObjectReference_ObjectReferenceChanged_ActionCode(object sender, UndertaleObjectReference.ObjectReferenceChangedEventArgs e)
+        {
+            OnAssetUpdated();
         }
 
         // mouse wheel scrolling fix

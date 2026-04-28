@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -27,9 +29,12 @@ namespace UndertaleModTool
     public partial class UndertalePathEditor : DataUserControl
     {
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+
         public UndertalePathEditor()
         {
             InitializeComponent();
+            DataContextChanged += OnDataContextChanged;
+            Unloaded += OnUnloaded;
 
             ((System.Windows.Controls.Image)mainWindow.FindName("Flowey")).Opacity = 0;
             ((System.Windows.Controls.Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
@@ -37,7 +42,30 @@ namespace UndertaleModTool
 
             ((Label)this.FindName("PathObjectLabel")).Content = ((Label)mainWindow.FindName("ObjectLabel")).Content;
         }
-        private void DataUserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+
+        private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            var floweranim = ((System.Windows.Controls.Image)mainWindow.FindName("Flowey"));
+            //floweranim.Opacity = 1;
+
+            var controller = ImageBehavior.GetAnimationController(floweranim);
+            controller.Pause();
+            controller.GotoFrame(controller.FrameCount - 5);
+            controller.Play();
+
+            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
+            
+            if (DataContext is UndertalePath oldObj)
+            {
+                oldObj.PropertyChanged -= OnPropertyChanged;
+                if (oldObj.Points is UndertaleObservableList<UndertalePath.PathPoint> points)
+                {
+                    points.CollectionChanged -= CollectionChanged;
+                }
+            }
+        }
+
+        private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             UndertalePath code = this.DataContext as UndertalePath;
 
@@ -52,18 +80,53 @@ namespace UndertaleModTool
                 idString = Convert.ToString(foundIndex);
 
             ((Label)this.FindName("PathObjectLabel")).Content = idString;
+
+            if (e.OldValue is UndertalePath oldObj)
+            {
+                oldObj.PropertyChanged -= OnPropertyChanged;
+                if (oldObj.Points is UndertaleObservableList<UndertalePath.PathPoint> points)
+                {
+                    points.CollectionChanged -= CollectionChanged;
+                }
+            }
+            if (e.NewValue is UndertalePath newObj)
+            {
+                newObj.PropertyChanged += OnPropertyChanged;
+                if (newObj.Points is UndertaleObservableList<UndertalePath.PathPoint> points)
+                {
+                    points.CollectionChanged += CollectionChanged;
+                }
+            }
         }
-        private void DataUserControl_Unloaded(object sender, RoutedEventArgs e)
+
+        private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            var floweranim = ((System.Windows.Controls.Image)mainWindow.FindName("Flowey"));
-            //floweranim.Opacity = 1;
+            OnAssetUpdated();
+        }
 
-            var controller = ImageBehavior.GetAnimationController(floweranim);
-            controller.Pause();
-            controller.GotoFrame(controller.FrameCount - 5);
-            controller.Play();
+        private void OnAssetUpdated()
+        {
+            if (mainWindow.Project is null || !mainWindow.IsSelectedProjectExportable)
+            {
+                return;
+            }
+            Dispatcher.BeginInvoke(() =>
+            {
+                if (DataContext is UndertalePath obj)
+                {
+                    mainWindow.Project?.MarkAssetForExport(obj);
+                }
+            });
+        }
 
-            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
+        private void PathPoint_ValueUpdated(object sender, DataTransferEventArgs e)
+        {
+            OnAssetUpdated();
+        }
+
+        private void CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            OnAssetUpdated();
         }
 
         public class LineData

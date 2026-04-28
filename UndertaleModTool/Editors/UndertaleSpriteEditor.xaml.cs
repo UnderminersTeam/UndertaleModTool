@@ -1,5 +1,8 @@
 ﻿using Microsoft.Win32;
 using System;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -9,6 +12,7 @@ using UndertaleModLib;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
 using WpfAnimatedGif;
+using static UndertaleModLib.Models.UndertaleSprite;
 
 namespace UndertaleModTool
 {
@@ -28,9 +32,11 @@ namespace UndertaleModTool
             ((Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
 
             ((Label)this.FindName("SpritesObjectLabel")).Content = ((Label)mainWindow.FindName("ObjectLabel")).Content;
+            DataContextChanged += OnDataContextChanged;
+            Unloaded += OnUnloaded;
         }
 
-        private void UndertaleSpritesEditor_Unloaded(object sender, RoutedEventArgs e)
+        private void OnUnloaded(object sender, RoutedEventArgs e)
         {
             var floweranim = ((Image)mainWindow.FindName("Flowey"));
             //floweranim.Opacity = 1;
@@ -41,8 +47,14 @@ namespace UndertaleModTool
             controller.Play();
 
             ((Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
+
+            if (DataContext is UndertaleSprite oldObj)
+            {
+                oldObj.PropertyChanged -= OnPropertyChanged;
+            }
         }
-        private void UserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+
+        private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             UndertaleSprite code = this.DataContext as UndertaleSprite;
 
@@ -57,9 +69,90 @@ namespace UndertaleModTool
                 idString = Convert.ToString(foundIndex);
 
             ((Label)this.FindName("SpritesObjectLabel")).Content = idString;
+            
+            if (e.OldValue is UndertaleSprite oldObj)
+            {
+                oldObj.PropertyChanged -= OnPropertyChanged;
+            }
+            if (e.NewValue is UndertaleSprite newObj)
+            {
+                newObj.PropertyChanged += OnPropertyChanged;
+            }
+        }
 
-            //((Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
-            //((Image)mainWindow.FindName("Flowey")).Opacity = 0;
+        private void UndertaleObjectReference_SourceUpdated(object sender, System.Windows.Data.DataTransferEventArgs e)
+        {
+            OnAssetUpdated();
+        }
+
+        private void UndertaleObjectReference_ObjectReferenceChanged(object sender, UndertaleObjectReference.ObjectReferenceChangedEventArgs e)
+        {
+            OnAssetUpdated();
+        }
+
+        private void TextureList_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Attach to collection changed events
+            if (sender is not DataGrid dg || dg.ItemsSource is not ObservableCollection<TextureEntry> collection)
+            {
+                return;
+            }
+            collection.CollectionChanged += DataGrid_CollectionChanged;
+        }
+
+        private void TextureList_Unloaded(object sender, RoutedEventArgs e)
+        {
+            // Detach to collection changed events
+            if (sender is not DataGrid dg || dg.ItemsSource is not ObservableCollection<TextureEntry> collection)
+            {
+                return;
+            }
+            collection.CollectionChanged -= DataGrid_CollectionChanged;
+        }
+
+        private void MaskList_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Attach to collection changed events
+            if (sender is not DataGrid dg || dg.ItemsSource is not ObservableCollection<MaskEntry> collection)
+            {
+                return;
+            }
+            collection.CollectionChanged += DataGrid_CollectionChanged;
+        }
+
+        private void MaskList_Unloaded(object sender, RoutedEventArgs e)
+        {
+            // Detach to collection changed events
+            if (sender is not DataGrid dg || dg.ItemsSource is not ObservableCollection<MaskEntry> collection)
+            {
+                return;
+            }
+            collection.CollectionChanged -= DataGrid_CollectionChanged;
+        }
+
+        private void DataGrid_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            OnAssetUpdated();
+        }
+
+        private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            OnAssetUpdated();
+        }
+
+        private void OnAssetUpdated()
+        {
+            if (mainWindow.Project is null || !mainWindow.IsSelectedProjectExportable)
+            {
+                return;
+            }
+            Dispatcher.BeginInvoke(() =>
+            {
+                if (DataContext is UndertaleSprite obj)
+                {
+                    mainWindow.Project?.MarkAssetForExport(obj);
+                }
+            });
         }
 
         private void ExportAllSpine(SaveFileDialog dlg, UndertaleSprite sprite)
@@ -73,7 +166,7 @@ namespace UndertaleModTool
                 {
                     string dir = Path.GetDirectoryName(dlg.FileName);
                     string name = Path.GetFileNameWithoutExtension(dlg.FileName);
-                    string path = Path.Combine(dir, name);
+                    string path = Path.Join(dir, name);
                     string ext = Path.GetExtension(dlg.FileName);
 
                     if (sprite.SpineTextures.Count > 0)
@@ -87,7 +180,7 @@ namespace UndertaleModTool
                             {
                                 try
                                 {
-                                    File.WriteAllBytes(Path.Combine(path, tex.id + ext), tex.tex.TexBlob);
+                                    File.WriteAllBytes(Paths.JoinVerifyWithinDirectory(path, tex.id + ext), tex.tex.TexBlob);
                                 } 
                                 catch (Exception ex) 
                                 {
@@ -97,8 +190,8 @@ namespace UndertaleModTool
                         }
 
                         // json and atlas
-                        File.WriteAllText(Path.Combine(path, "spine.json"), sprite.SpineJSON);
-                        File.WriteAllText(Path.Combine(path, "spine.atlas"), sprite.SpineAtlas);
+                        File.WriteAllText(Path.Join(path, "spine.json"), sprite.SpineJSON);
+                        File.WriteAllText(Path.Join(path, "spine.atlas"), sprite.SpineAtlas);
                     }
                 }
                 catch (Exception ex)
@@ -136,7 +229,7 @@ namespace UndertaleModTool
                     {
                         string dir = Path.GetDirectoryName(dlg.FileName);
                         string name = Path.GetFileNameWithoutExtension(dlg.FileName);
-                        string path = Path.Combine(dir, name);
+                        string path = Path.Join(dir, name);
                         string ext = Path.GetExtension(dlg.FileName);
 
                         Directory.CreateDirectory(path);
@@ -144,7 +237,7 @@ namespace UndertaleModTool
                         {
                             try
                             {
-                                worker.ExportAsPNG(tex.tex.Texture, Path.Combine(path, sprite.Name.Content + "_" + tex.id + ext), null, includePadding);
+                                worker.ExportAsPNG(tex.tex.Texture, Paths.JoinVerifyWithinDirectory(path, sprite.Name.Content + "_" + tex.id + ext), null, includePadding);
                             }
                             catch (Exception ex)
                             {
@@ -197,6 +290,8 @@ namespace UndertaleModTool
                     target.Data = TextureWorker.ReadMaskData(dlg.FileName, maskWidth, maskHeight);
                     target.Width = maskWidth;
                     target.Height = maskHeight;
+
+                    OnAssetUpdated();
                 }
                 catch (Exception ex)
                 {

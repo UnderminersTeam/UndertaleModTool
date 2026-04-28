@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,8 +13,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using UndertaleModLib;
 using UndertaleModLib.Models;
+using UndertaleModLib;
 using WpfAnimatedGif;
 
 namespace UndertaleModTool
@@ -24,9 +25,12 @@ namespace UndertaleModTool
     public partial class UndertaleScriptEditor : DataUserControl
     {
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+
         public UndertaleScriptEditor()
         {
             InitializeComponent();
+            DataContextChanged += OnDataContextChanged;
+            Unloaded += OnUnloaded;
 
             ((System.Windows.Controls.Image)mainWindow.FindName("Flowey")).Opacity = 0;
             ((System.Windows.Controls.Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
@@ -34,8 +38,35 @@ namespace UndertaleModTool
 
             ((Label)this.FindName("ScriptObjectLabel")).Content = ((Label)mainWindow.FindName("ObjectLabel")).Content;
         }
-        private void DataUserControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+
+        private void OnUnloaded(object sender, RoutedEventArgs e)
         {
+            if (DataContext is UndertaleScript oldObj)
+            {
+                oldObj.PropertyChanged -= OnPropertyChanged;
+            }
+            var floweranim = ((System.Windows.Controls.Image)mainWindow.FindName("Flowey"));
+            //floweranim.Opacity = 1;
+
+            var controller = ImageBehavior.GetAnimationController(floweranim);
+            controller.Pause();
+            controller.GotoFrame(controller.FrameCount - 5);
+            controller.Play();
+
+            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
+        }
+
+        private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.OldValue is UndertaleScript oldObj)
+            {
+                oldObj.PropertyChanged -= OnPropertyChanged;
+            }
+            if (e.NewValue is UndertaleScript newObj)
+            {
+                newObj.PropertyChanged += OnPropertyChanged;
+            }
+
             UndertaleScript code = this.DataContext as UndertaleScript;
 
             int foundIndex = code is UndertaleResource res ? mainWindow.Data.IndexOf(res, false) : -1;
@@ -50,17 +81,25 @@ namespace UndertaleModTool
 
             ((Label)this.FindName("ScriptObjectLabel")).Content = idString;
         }
-        private void DataUserControl_Unloaded(object sender, RoutedEventArgs e)
+
+        private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            var floweranim = ((System.Windows.Controls.Image)mainWindow.FindName("Flowey"));
-            //floweranim.Opacity = 1;
+            OnAssetUpdated();
+        }
 
-            var controller = ImageBehavior.GetAnimationController(floweranim);
-            controller.Pause();
-            controller.GotoFrame(controller.FrameCount - 5);
-            controller.Play();
-
-            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
+        private void OnAssetUpdated()
+        {
+            if (mainWindow.Project is null || !mainWindow.IsSelectedProjectExportable)
+            {
+                return;
+            }
+            Dispatcher.BeginInvoke(() =>
+            {
+                if (DataContext is UndertaleScript obj)
+                {
+                    mainWindow.Project?.MarkAssetForExport(obj);
+                }
+            });
         }
     }
 }

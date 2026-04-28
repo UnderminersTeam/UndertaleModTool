@@ -17,11 +17,11 @@ if (texFolder is null)
 }
 
 // Create subdirectories.
-string sprFolder = Path.Combine(texFolder, "Sprites");
+string sprFolder = Path.Join(texFolder, "Sprites");
 Directory.CreateDirectory(sprFolder);
-string fntFolder = Path.Combine(texFolder, "Fonts");
+string fntFolder = Path.Join(texFolder, "Fonts");
 Directory.CreateDirectory(fntFolder);
-string bgrFolder = Path.Combine(texFolder, "Backgrounds");
+string bgrFolder = Path.Join(texFolder, "Backgrounds");
 Directory.CreateDirectory(bgrFolder);
 
 SetProgressBar(null, "Textures", 0, Data.TexturePageItems.Count);
@@ -65,7 +65,7 @@ void DumpSprite(UndertaleSprite sprite)
         if (sprite.Textures[i]?.Texture is not null)
         {
             UndertaleTexturePageItem tex = sprite.Textures[i].Texture;
-            worker.ExportAsPNG(tex, Path.Combine(sprFolder, $"{sprite.Name.Content}_{i}.png"));
+            worker.ExportAsPNG(tex, Paths.JoinVerifyWithinDirectory(sprFolder, $"{sprite.Name.Content}_{i}.png"));
         }
     }
 
@@ -80,7 +80,7 @@ void DumpFont(UndertaleFont font)
     }
 
     UndertaleTexturePageItem tex = font.Texture;
-    worker.ExportAsPNG(tex, Path.Combine(fntFolder, $"{font.Name.Content}_0.png"));
+    worker.ExportAsPNG(tex, Paths.JoinVerifyWithinDirectory(fntFolder, $"{font.Name.Content}_0.png"));
 
     IncrementProgressParallel();
 }
@@ -93,7 +93,7 @@ void DumpBackground(UndertaleBackground background)
     }
 
     UndertaleTexturePageItem tex = background.Texture;
-    worker.ExportAsPNG(tex, Path.Combine(bgrFolder, $"{background.Name.Content}_0.png"));
+    worker.ExportAsPNG(tex, Paths.JoinVerifyWithinDirectory(bgrFolder, $"{background.Name.Content}_0.png"));
 
     IncrementProgressParallel();
 }
