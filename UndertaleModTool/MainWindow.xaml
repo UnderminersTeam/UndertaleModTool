@@ -133,20 +133,7 @@
                     <MenuItem Header="Find unreferenced _assets" Name="FindUnreferencedAssetsItem" Click="MenuItem_FindUnreferencedAssets_Click"/>
                 </local:MenuItemDark>
                 <local:MenuItemDark Header="_Project">
-                    <MenuItem Header="_New project" Command="{x:Static local:MainWindow.NewProjectCommand}">
-                        <MenuItem.Style>
-                            <Style TargetType="{x:Type MenuItem}">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Data, Mode=OneWay}" Value="{x:Null}">
-                                        <Setter Property="IsEnabled" Value="False"/>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding FilePath, Mode=OneWay}" Value="{x:Null}">
-                                        <Setter Property="IsEnabled" Value="False"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </MenuItem.Style>
-                    </MenuItem>
+                    <MenuItem Header="_New project" Command="{x:Static local:MainWindow.NewProjectCommand}"></MenuItem>
                     <MenuItem Header="_Open project" Command="{x:Static local:MainWindow.OpenProjectCommand}"></MenuItem>
                     <MenuItem Header="_Save project" Command="{x:Static local:MainWindow.SaveProjectCommand}">
                         <MenuItem.Style>

@@ -3840,18 +3840,35 @@ result in loss of work.");
             return saveFilePath;
         }
 
-        private void Command_NewProject(object sender, ExecutedRoutedEventArgs e)
+        private async void Command_NewProject(object sender, ExecutedRoutedEventArgs e)
         {
-            if (Data is null || FilePath is null)
-            {
-                // No data set; this should be impossible, but abort if this does occur
-                return;
-            }
             if (Project is not null && Project.HasUnexportedAssets)
             {
                 if (this.ShowQuestionWithCancel("There are assets marked to be exported in the current project - create a new project and discard all unexported changes?", MessageBoxImage.Warning, "Project already open") != MessageBoxResult.Yes)
                 {
                     // Abort new project creation
+                    return;
+                }
+            }
+
+            // If necessary, ask for a source data file
+            if (Data is null || FilePath is null)
+            {
+                OpenFileDialog sourceDialog = new()
+                {
+                    DefaultExt = "win",
+                    Filter = DataFileFilter,
+                    Title = "Choose source data file"
+                };
+                if (sourceDialog.ShowDialog(this) != true)
+                {
+                    return;
+                }
+                await LoadFile(sourceDialog.FileName, true);
+
+                // Upon load failure, exit
+                if (Data is null || FilePath is null)
+                {
                     return;
                 }
             }
