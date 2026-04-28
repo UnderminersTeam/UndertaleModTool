@@ -5,7 +5,10 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UndertaleModTool"
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+             xmlns:gif ="http://wpfanimatedgif.codeplex.com"
              mc:Ignorable="d" 
+             Unloaded="UndertaleEmbedAudioEditor_Unloaded"
+             DataContextChanged="UserControl_DataContextChanged"
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleEmbeddedAudio}">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -46,5 +49,17 @@
             <local:ButtonDark Grid.Row="3" Grid.Column="0" x:Name="Play" Click="Play_Click">Play</local:ButtonDark>
             <local:ButtonDark Grid.Row="3" Grid.Column="2" x:Name="Stop" Click="Stop_Click">Stop</local:ButtonDark>
         </Grid>
+        <Image Margin="0,32,200,0" Grid.Column="1" Grid.RowSpan="2" gif:ImageBehavior.AnimatedSource="/Resources/spr_flowey_riseanim.gif"  Stretch="None" HorizontalAlignment="Center" VerticalAlignment="Top" Cursor="Hand" x:Name="Flowey"/>
+        <Image Margin="0,0,200,0" Grid.Column="1" Grid.RowSpan="3" Source="/Resources/spr_bubble_message.png" Stretch="None" HorizontalAlignment="Center" VerticalAlignment="Top" Cursor="Hand" x:Name="FloweyBubble"/>
+        <Label Content="None" HorizontalAlignment="Center" VerticalAlignment="Top" x:Name="EmbedAudioObjectLabel"
+                       ToolTip="This is the ID (index) of this asset. It starts from 0."
+                       ToolTipService.InitialShowDelay="200" Margin="0,0,170,0" Foreground="Black" Grid.Column="2"
+                       Width="Auto" Grid.RowSpan="3"
+               />
+        <Label Content="ID:" HorizontalAlignment="Center" VerticalAlignment="Top" x:Name="FunnyEmbedAudio"
+                       ToolTip="This is the ID (index) of this asset. It starts from 0."
+                       ToolTipService.InitialShowDelay="200" Margin="0,0,245,0" Foreground="Black" Grid.Column="2"
+                       Width="Auto" Grid.RowSpan="3"
+               />
     </Grid>
 </local:DataUserControl>

@@ -741,6 +741,21 @@ namespace UndertaleModLib
     public class ToolInfo
     {
         /// <summary>
+        /// Whether profile mode is enabled.
+        /// </summary>
+        public bool ProfileMode = false;
+
+        /// <summary>
+        /// The location of the profiles folder.
+        /// </summary>
+        public string AppDataProfiles = "";
+
+        /// <summary>
+        /// The MD5 hash of the current file.
+        /// </summary>
+        public string CurrentMD5 = "Unknown";
+
+        /// <summary>
         /// Default settings to be used by the Underanalyzer decompiler,
         /// for a tool and in any scripts that desire matching the same settings.
         /// </summary>

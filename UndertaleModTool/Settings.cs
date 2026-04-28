@@ -28,6 +28,8 @@ namespace UndertaleModTool
         public bool AssetOrderSwappingEnabled { get; set; } = false;
         public bool AutomaticFileAssociation { get; set; } = true;
         public bool TempRunMessageShow { get; set; } = true;
+        public bool PlaySaveSound {  get; set; } = false;
+        public bool MakeBackup { get; set; } = false;
 
         public bool WarnOnClose { get; set; } = true;
 
@@ -45,6 +47,7 @@ namespace UndertaleModTool
         public string TransparencyGridColor2 { get; set; } = "#FF999999";
 
         public bool EnableDarkMode { get; set; } = false;
+        public bool EnableDarkerMode { get; set; } = false;
         public bool ShowDebuggerOption { get; set; } = false;
         public DecompilerSettings DecompilerSettings { get; set; }
         public const string DefaultInstanceIdPrefix = "inst_";

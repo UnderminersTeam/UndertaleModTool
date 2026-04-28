@@ -8,8 +8,10 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using UndertaleModLib;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
+using WpfAnimatedGif;
 using static UndertaleModLib.Models.UndertaleSprite;
 
 namespace UndertaleModTool
@@ -24,12 +26,28 @@ namespace UndertaleModTool
         public UndertaleSpriteEditor()
         {
             InitializeComponent();
+
+            ((Image)mainWindow.FindName("Flowey")).Opacity = 0;
+            ((Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
+            ((Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
+
+            ((Label)this.FindName("SpritesObjectLabel")).Content = ((Label)mainWindow.FindName("ObjectLabel")).Content;
             DataContextChanged += OnDataContextChanged;
             Unloaded += OnUnloaded;
         }
 
         private void OnUnloaded(object sender, RoutedEventArgs e)
         {
+            var floweranim = ((Image)mainWindow.FindName("Flowey"));
+            //floweranim.Opacity = 1;
+
+            var controller = ImageBehavior.GetAnimationController(floweranim);
+            controller.Pause();
+            controller.GotoFrame(controller.FrameCount - 5);
+            controller.Play();
+
+            ((Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
+
             if (DataContext is UndertaleSprite oldObj)
             {
                 oldObj.PropertyChanged -= OnPropertyChanged;
@@ -38,6 +56,20 @@ namespace UndertaleModTool
 
         private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
+            UndertaleSprite code = this.DataContext as UndertaleSprite;
+
+            int foundIndex = code is UndertaleResource res ? mainWindow.Data.IndexOf(res, false) : -1;
+            string idString;
+
+            if (foundIndex == -1)
+                idString = "None";
+            else if (foundIndex == -2)
+                idString = "N/A";
+            else
+                idString = Convert.ToString(foundIndex);
+
+            ((Label)this.FindName("SpritesObjectLabel")).Content = idString;
+            
             if (e.OldValue is UndertaleSprite oldObj)
             {
                 oldObj.PropertyChanged -= OnPropertyChanged;

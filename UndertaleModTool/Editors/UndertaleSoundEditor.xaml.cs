@@ -1,5 +1,7 @@
 ﻿#pragma warning disable CA1416 // Validate platform compatibility
 
+using NAudio.Vorbis;
+using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -15,10 +17,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using NAudio.Vorbis;
-using NAudio.Wave;
 using UndertaleModLib;
 using UndertaleModLib.Models;
+using WpfAnimatedGif;
 using UndertaleModLib.Util;
 
 namespace UndertaleModTool
@@ -42,10 +43,26 @@ namespace UndertaleModTool
             InitializeComponent();
             Unloaded += OnUnloaded;
             DataContextChanged += OnDataContextChanged;
+            
+            ((Image)mainWindow.FindName("Flowey")).Opacity = 0;
+            ((Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
+            ((Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
+
+            ((Label)this.FindName("SoundsObjectLabel")).Content = ((Label)mainWindow.FindName("ObjectLabel")).Content;
         }
 
         private void OnUnloaded(object sender, RoutedEventArgs e)
         {
+            var floweranim = ((Image)mainWindow.FindName("Flowey"));
+            //floweranim.Opacity = 1;
+
+            var controller = ImageBehavior.GetAnimationController(floweranim);
+            controller.Pause();
+            controller.GotoFrame(controller.FrameCount - 5);
+            controller.Play();
+
+            ((Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
+
             waveOut?.Stop();
 
             if (DataContext is UndertaleSound oldObj)
@@ -56,6 +73,20 @@ namespace UndertaleModTool
 
         private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
+            UndertaleSound code = this.DataContext as UndertaleSound;
+
+            int foundIndex = code is UndertaleResource res ? mainWindow.Data.IndexOf(res, false) : -1;
+            string idString;
+
+            if (foundIndex == -1)
+                idString = "None";
+            else if (foundIndex == -2)
+                idString = "N/A";
+            else
+                idString = Convert.ToString(foundIndex);
+
+            ((Label)this.FindName("SoundsObjectLabel")).Content = idString;
+
             if (e.OldValue is UndertaleSound oldObj)
             {
                 oldObj.PropertyChanged -= OnPropertyChanged;

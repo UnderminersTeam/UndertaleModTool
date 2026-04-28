@@ -19,6 +19,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using UndertaleModLib;
 using UndertaleModLib.Models;
+using WpfAnimatedGif;
 
 namespace UndertaleModTool
 {
@@ -34,10 +35,26 @@ namespace UndertaleModTool
             InitializeComponent();
             DataContextChanged += OnDataContextChanged;
             Unloaded += OnUnloaded;
+
+            ((System.Windows.Controls.Image)mainWindow.FindName("Flowey")).Opacity = 0;
+            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
+            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
+
+            ((Label)this.FindName("PathObjectLabel")).Content = ((Label)mainWindow.FindName("ObjectLabel")).Content;
         }
 
         private void OnUnloaded(object sender, RoutedEventArgs e)
         {
+            var floweranim = ((System.Windows.Controls.Image)mainWindow.FindName("Flowey"));
+            //floweranim.Opacity = 1;
+
+            var controller = ImageBehavior.GetAnimationController(floweranim);
+            controller.Pause();
+            controller.GotoFrame(controller.FrameCount - 5);
+            controller.Play();
+
+            ((System.Windows.Controls.Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
+            
             if (DataContext is UndertalePath oldObj)
             {
                 oldObj.PropertyChanged -= OnPropertyChanged;
@@ -50,6 +67,20 @@ namespace UndertaleModTool
 
         private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
+            UndertalePath code = this.DataContext as UndertalePath;
+
+            int foundIndex = code is UndertaleResource res ? mainWindow.Data.IndexOf(res, false) : -1;
+            string idString;
+
+            if (foundIndex == -1)
+                idString = "None";
+            else if (foundIndex == -2)
+                idString = "N/A";
+            else
+                idString = Convert.ToString(foundIndex);
+
+            ((Label)this.FindName("PathObjectLabel")).Content = idString;
+
             if (e.OldValue is UndertalePath oldObj)
             {
                 oldObj.PropertyChanged -= OnPropertyChanged;

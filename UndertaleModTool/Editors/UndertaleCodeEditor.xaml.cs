@@ -36,6 +36,7 @@ using UndertaleModLib;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
+using WpfAnimatedGif;
 using UndertaleModLib.Project;
 using Input = System.Windows.Input;
 
@@ -89,6 +90,12 @@ namespace UndertaleModTool
         public UndertaleCodeEditor()
         {
             InitializeComponent();
+
+            ((Image)mainWindow.FindName("Flowey")).Opacity = 0;
+            ((Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
+            ((Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
+
+            ((Label)this.FindName("CodeObjectLabel")).Content = ((Label)mainWindow.FindName("ObjectLabel")).Content;
 
             // Decompiled editor styling and functionality
             DecompiledSearchPanel = SearchPanel.Install(DecompiledEditor.TextArea);
@@ -205,6 +212,15 @@ namespace UndertaleModTool
 
         private void UndertaleCodeEditor_Unloaded(object sender, RoutedEventArgs e)
         {
+            var floweranim = ((Image)mainWindow.FindName("Flowey"));
+            //floweranim.Opacity = 1;
+
+            var controller = ImageBehavior.GetAnimationController(floweranim);
+            controller.Pause();
+            controller.GotoFrame(controller.FrameCount - 5);
+            controller.Play();
+
+            ((Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
             if (DataContext is UndertaleCode oldObj)
             {
                 oldObj.PropertyChanged -= OnCodePropertyChanged;
@@ -304,6 +320,19 @@ namespace UndertaleModTool
             }
 
             UndertaleCode code = this.DataContext as UndertaleCode;
+
+            int foundIndex = code is UndertaleResource res ? mainWindow.Data.IndexOf(res, false) : -1;
+            string idString;
+
+            if (foundIndex == -1)
+                idString = "None";
+            else if (foundIndex == -2)
+                idString = "N/A";
+            else
+                idString = Convert.ToString(foundIndex);
+
+            ((Label)this.FindName("CodeObjectLabel")).Content = idString;
+
             if (code == null)
                 return;
 

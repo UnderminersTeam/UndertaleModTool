@@ -6,8 +6,10 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using UndertaleModLib;
 using UndertaleModLib.Models;
 using UndertaleModTool.Windows;
+using WpfAnimatedGif;
 
 namespace UndertaleModTool
 {
@@ -22,6 +24,12 @@ namespace UndertaleModTool
         public UndertaleBackgroundEditor()
         {
             InitializeComponent();
+
+            ((Image)mainWindow.FindName("Flowey")).Opacity = 0;
+            ((Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
+            ((Image)mainWindow.FindName("FloweyBubble")).Opacity = 0;
+
+            ((Label)this.FindName("BackgroundsObjectLabel")).Content = ((Label)mainWindow.FindName("ObjectLabel")).Content;
 
             var item = new MenuItem()
             {
@@ -104,6 +112,18 @@ namespace UndertaleModTool
             OnAssetUpdated();
         }
 
+        private void UndertaleBackgroundsEditor_Unloaded(object sender, RoutedEventArgs e)
+        {
+            var floweranim = ((Image)mainWindow.FindName("Flowey"));
+            //floweranim.Opacity = 1;
+
+            var controller = ImageBehavior.GetAnimationController(floweranim);
+            controller.Pause();
+            controller.GotoFrame(controller.FrameCount - 5);
+            controller.Play();
+
+            ((Image)mainWindow.FindName("FloweyLeave")).Opacity = 0;
+        }
         private void FindAllTileReferencesItem_Click(object sender, RoutedEventArgs e)
         {
             var tileSet = DataContext as UndertaleBackground;
@@ -202,6 +222,20 @@ namespace UndertaleModTool
         {
             if (IsLoaded)
                 MainWindow.FindVisualChild<ScrollViewer>(TileIdList)?.ScrollToTop();
+
+            UndertaleBackground code = this.DataContext as UndertaleBackground;
+
+            int foundIndex = code is UndertaleResource res ? mainWindow.Data.IndexOf(res, false) : -1;
+            string idString;
+
+            if (foundIndex == -1)
+                idString = "None";
+            else if (foundIndex == -2)
+                idString = "N/A";
+            else
+                idString = Convert.ToString(foundIndex);
+
+            ((Label)this.FindName("BackgroundsObjectLabel")).Content = idString;
         }
     }
 }
