@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using UndertaleModLib;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Models;
+using UndertaleModLib.Project;
 using UndertaleModLib.Scripting;
 using UndertaleModLib.Util;
 using static UndertaleModLib.UndertaleReader;
@@ -254,6 +255,38 @@ public partial class Program : IScriptInterface
             });
         });
 
+        // Setup project command
+        Argument<FileInfo> projectBuildFileArgument = new("file")
+        {
+            Description = "Path to the UndertaleModTool project.json file"
+        };
+        Option<FileInfo> projectBuildSourceOption = new("-s", "--source") { Description = "Source data file", Required = true };
+        Option<FileInfo> projectBuildDestinationOption = new("-d", "--destination") { Description = "Destination data file", Required = true };
+
+        Command projectBuildCommand = new("build", "Build a project")
+        {
+            projectBuildFileArgument,
+            verboseOption,
+            projectBuildSourceOption,
+            projectBuildDestinationOption
+        };
+
+        projectBuildCommand.SetAction(parseResult =>
+        {
+            return BuildProject(new ProjectBuildOptions()
+            {
+                ProjectFile = parseResult.GetValue(projectBuildFileArgument),
+                Verbose = parseResult.GetValue(verboseOption),
+                Source = parseResult.GetValue(projectBuildSourceOption),
+                Destination = parseResult.GetValue(projectBuildDestinationOption)
+            });
+        });
+
+        Command projectCommand = new("project", "Subcommands that deal with projects")
+        {
+            projectBuildCommand
+        };
+
         // Merge everything together
         RootCommand rootCommand =
         [
@@ -261,7 +294,8 @@ public partial class Program : IScriptInterface
             loadCommand,
             infoCommand,
             dumpCommand,
-            replaceCommand
+            replaceCommand,
+            projectCommand
         ];
         rootCommand.Description = "CLI tool for modding, decompiling and unpacking Undertale (and other GameMaker games)!";
         ParseResult parseResult = rootCommand.Parse(args);
@@ -570,6 +604,70 @@ public partial class Program : IScriptInterface
         // If parameter to save file was given, save the data file
         if (options.Output != null)
             program.SaveDataFile(options.Output.FullName);
+
+        return EXIT_SUCCESS;
+    }
+
+    private static int BuildProject(ProjectBuildOptions options)
+    {
+        try
+        {
+            ArgumentNullException.ThrowIfNull(options.ProjectFile);
+            ArgumentNullException.ThrowIfNull(options.Source);
+            ArgumentNullException.ThrowIfNull(options.Destination);
+        }
+        catch (Exception e)
+        {
+            Console.Error.WriteLine(e.Message);
+            return EXIT_FAILURE;
+        }
+
+        // Load source
+        Program program;
+        try
+        {
+            program = new Program(options.Source, options.Verbose);
+        }
+        catch (FileNotFoundException e)
+        {
+            Console.Error.WriteLine(e.Message);
+            return EXIT_FAILURE;
+        }
+
+        program.FilePath = options.Destination.FullName;
+
+        // Load project
+        ProjectContext newProjectContext;
+        try
+        {
+            if (program.Verbose)
+                Console.WriteLine($"Loading project file '{options.ProjectFile.FullName}'");
+
+            newProjectContext = ProjectContext.CreateWithDataFilePaths(options.Source.FullName, options.Destination.FullName, options.ProjectFile.FullName);
+
+            if (program.Verbose)
+                Console.WriteLine($"Importing project into source data file");
+
+            newProjectContext.Import(program.Data);
+        }
+        catch (ProjectException e)
+        {
+            Console.Error.WriteLine($"Failed to load project: {e.Message}");
+            return EXIT_FAILURE;
+        }
+        catch (Exception e)
+        {
+            Console.Error.WriteLine($"Error occurred when loading project:\n{e}");
+            return EXIT_FAILURE;
+        }
+
+        program.Project = newProjectContext;
+
+        // Save destination data file
+        if (program.Verbose)
+            Console.WriteLine($"Saving to destination data file");
+
+        program.SaveDataFile(options.Destination.FullName);
 
         return EXIT_SUCCESS;
     }
