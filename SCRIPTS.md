@@ -23,6 +23,7 @@ Most of these scripts will prompt you to select a folder/directory to export fil
 - `ExportAllTexturesGrouped.csx`: Same as the above script, except this one creates sub-directories for each asset.
 - `ExportAllTilesets.csx`: Exports tilesets (or backgrounds) as PNG files.
 - `ExportAllStrings.csx`: Exports all strings to a text file. Optionally includes strings with newlines (which cannot be reimported).
+- `ExportAllStringsCSV.csx`: Exports all strings to a CSV text file. Always includes strings with newlines.
 - `ExportAllStringsJSON.csx`: Exports all strings to a JSON text file. Always includes strings with newlines.
 - `ExportSpecificCode.csx`: Exports specific code entries, given the names of objects, scripts, or code entries directly.
 - `ExportSpecificSprites.csx`: Exports specific sprites, given their names. Optionally includes padding.
@@ -35,6 +36,7 @@ These are scripts designed to import assets into a game, usually requiring certa
 
 - `ApplyBasicGraphicsMod.csx`: Imports graphics without using a texture packer, by swapping the sprite in place on its texture sheet, as long as it's the same size.
 - `ImportAllStrings.csx`: Imports strings from a text file, as long as those strings are from the same unmodified game, and that strings containing newlines are not present.
+- `ImportAllStringsCSV.csx` : Imports strings from a CSV text file, as long as those strings are from the same unmodified game.
 - `ImportAllStringsJSON.csx`: Imports strings from a JSON text file, as long as those strings are from the same unmodified game.
 - `ImportAllTilesets.csx`: Imports tileset (or background) images from a folder, as long as corresponding assets already exist in the game data.
 - `ImportAssembly.csx`: Imports GML assembly.
