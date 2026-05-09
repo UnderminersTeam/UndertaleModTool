@@ -16,6 +16,7 @@ using Avalonia.Threading;
 using PropertyChanged.SourceGenerator;
 using UndertaleModLib;
 using UndertaleModLib.Models;
+using UndertaleModLib.Project;
 
 namespace UndertaleModToolAvalonia;
 
@@ -55,6 +56,9 @@ public partial class MainViewModel
     private string? _DataPath;
     [Notify]
     private (uint Major, uint Minor, uint Release, uint Build) _DataVersion;
+
+    // Project
+    public ProjectContext? Project = null;
 
     // Tree data grid
     public partial class TreeDataGridItem
@@ -344,6 +348,29 @@ public partial class MainViewModel
         return false;
     }
 
+    /// <summary>Ask if user wants to save the current project before continuing.
+    /// Returns true if either it saved successfully, or if the user didn't want to save, or if there is no project loaded, or if the project has no unexported assets.</summary>
+    public async Task<bool> AskProjectSave(string message)
+    {
+        if (Project is null || !Project.HasUnexportedAssets)
+            return true;
+
+        var result = await View!.MessageDialog(message, buttons: MessageWindow.Buttons.YesNoCancel);
+        if (result == MessageWindow.Result.Yes)
+        {
+            if (await ProjectSave())
+            {
+                return true;
+            }
+        }
+        else if (result == MessageWindow.Result.No)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     public Task<bool> NewData()
     {
         CloseData();
@@ -418,6 +445,12 @@ public partial class MainViewModel
 
         try
         {
+            // TODO: RecompileAllCodeSourcesOnProjectSave setting
+            if (Project is not null)
+            {
+                Project.RecompileAllCodeSources();
+            }
+
             await Task.Run(() => UndertaleIO.Write(stream, Data, message =>
             {
                 Dispatcher.UIThread.Post(() => w.SetText($"Saving data file... {message}"));
@@ -425,10 +458,15 @@ public partial class MainViewModel
 
             return true;
         }
+        catch (ProjectException e)
+        {
+            w.EnsureShown();
+            await View!.MessageDialog($"Recompile error:\n{e.Message}");
+        }
         catch (Exception e)
         {
             w.EnsureShown();
-            await View!.MessageDialog($"Error saving data file: {e.Message}");
+            await View!.MessageDialog($"Error saving data file:\n{e.Message}");
         }
         finally
         {
@@ -450,6 +488,8 @@ public partial class MainViewModel
         }
 
         Tabs.Clear();
+
+        ClearProject();
 
         if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
@@ -481,7 +521,8 @@ public partial class MainViewModel
     // Menus
     public async void FileNew()
     {
-        if (await AskFileSave("Save data file before creating a new one?"))
+        if (await AskProjectSave("There are assets marked to be exported in the current project. Save project before closing it?")
+            && await AskFileSave("Save data file before creating a new one?"))
         {
             await NewData();
         }
@@ -489,6 +530,8 @@ public partial class MainViewModel
 
     public async void FileOpen()
     {
+        if (!await AskProjectSave("There are assets marked to be exported in the current project. Save project before closing it?"))
+            return;
         if (!await AskFileSave("Save data file before opening a new one?"))
             return;
 
@@ -516,6 +559,25 @@ public partial class MainViewModel
         if (Data is null)
             return false;
 
+        if (Project is not null)
+        {
+            var result = await View!.MessageDialog("Save to the project's designated data file for saving?", buttons: MessageWindow.Buttons.YesNoCancel);
+            if (result == MessageWindow.Result.Yes)
+            {
+                using FileStream fileStream = File.Open(Project.SaveDataPath, FileMode.Truncate);
+                if (await SaveData(fileStream))
+                {
+                    return true;
+                }
+                return false;
+            }
+            else if (result != MessageWindow.Result.No)
+            {
+                return false;
+            }
+            // If pressed No, continue saving as if there's no project.
+        }
+
         IStorageFile? file = await View!.SaveFileDialog(new FilePickerSaveOptions()
         {
             Title = "Save data file",
@@ -539,6 +601,8 @@ public partial class MainViewModel
 
     public async void FileClose()
     {
+        if (!await AskProjectSave("There are assets marked to be exported in the current project. Save project before closing it?"))
+            return;
         if (!await AskFileSave("Save data file before closing?"))
             return;
 
@@ -621,6 +685,167 @@ public partial class MainViewModel
         await Scripting.RunScript(text, filePath);
 
         CommandTextBoxText = $"{Path.GetFileName(filePath) ?? "Script"} finished!";
+    }
+
+    void ClearProject()
+    {
+        Project = null;
+    }
+
+    void SetProject(ProjectContext projectContext)
+    {
+        Project = projectContext;
+        Project.UnexportedAssetsChanged += (s, e) =>
+        {
+            // TODO: Change bottom bar.
+        };
+    }
+
+    async Task<string?> AskProjectDestinationDataFile()
+    {
+        // Destination data file
+        // TODO: Check if same as source and if empty directory
+        IStorageFile? destinationDataFile = await View!.SaveFileDialog(new()
+        {
+            Title = "Select destination data file location",
+            FileTypeChoices = FilePickerFileTypes.Data,
+        });
+        string? destinationDataPath = destinationDataFile?.TryGetLocalPath();
+
+        return destinationDataPath;
+    }
+
+    public async void ProjectNew()
+    {
+        // TODO: Ask for source data file if nothing is opened
+        if (Data is null || DataPath is null)
+            return;
+
+        if (!await AskProjectSave("There are assets marked to be exported in the current project. Save project before creating a new one?"))
+            return;
+
+        ClearProject();
+
+        // Project name
+        string? projectName = await View!.TextBoxDialog("Project name:", $"{Data.GeneralInfo?.DisplayName?.Content ?? "New"} Mod");
+        if (projectName is null)
+            return;
+
+        // Project folder
+        IReadOnlyList<IStorageFolder> projectFolderList = await View!.OpenFolderDialog(new() { Title = "Select project folder" });
+        string? projectFolderPath = projectFolderList.ElementAtOrDefault(0)?.TryGetLocalPath();
+
+        if (projectFolderPath is null)
+            return;
+
+        string projectFilePath = Path.Join(projectFolderPath, "project.json");
+
+        // Destination data file
+        string? destinationDataPath = await AskProjectDestinationDataFile();
+        if (destinationDataPath is null)
+            return;
+
+        ProjectContext projectContext;
+        try
+        {
+            projectContext = new(Data, DataPath, destinationDataPath, projectFilePath, projectName.Trim(), Dispatcher.UIThread.Invoke);
+        }
+        catch (ProjectException e)
+        {
+            await View!.MessageDialog($"Failed to create new project:\n{e.Message}");
+            return;
+        }
+        catch (Exception e)
+        {
+            await View!.MessageDialog($"Error occurred when creating new project:\n{e}");
+            return;
+        }
+
+        DataPath = destinationDataPath;
+        SetProject(projectContext);
+    }
+
+    public async void ProjectOpen()
+    {
+        // TODO: Ask for source data file if nothing is opened
+        if (Data is null || DataPath is null)
+            return;
+
+        if (!await AskProjectSave("There are assets marked to be exported in the current project. Save project before opening a new one?"))
+            return;
+
+        ClearProject();
+
+        // Project file
+        IReadOnlyList<IStorageFile> projectFileList = await View!.OpenFileDialog(new()
+        {
+            Title = "Select project.json file",
+            FileTypeFilter = FilePickerFileTypes.JSON,
+        });
+        string? projectFilePath = projectFileList.ElementAtOrDefault(0)?.TryGetLocalPath();
+
+        // Destination data file
+        string? destinationDataPath = await AskProjectDestinationDataFile();
+        if (destinationDataPath is null)
+            return;
+
+        ProjectContext projectContext;
+        try
+        {
+            projectContext = ProjectContext.CreateWithDataFilePaths(DataPath, destinationDataPath, projectFilePath);
+            projectContext.Import(Data, null, Dispatcher.UIThread.Invoke);
+        }
+        catch (ProjectException e)
+        {
+            await View!.MessageDialog($"Failed to load project:\n{e.Message}");
+            return;
+        }
+        catch (Exception e)
+        {
+            await View!.MessageDialog($"Error occurred when loading project:\n{e}");
+            return;
+        }
+
+        DataPath = destinationDataPath;
+        SetProject(projectContext);
+    }
+
+    public async Task<bool> ProjectSave()
+    {
+        if (Project is null || Data is null || DataPath is null)
+            return false;
+
+        try
+        {
+            Project.Export(true);
+            return true;
+        }
+        catch (ProjectException e)
+        {
+            await View!.MessageDialog($"Failed to save project:\n{e.Message}");
+        }
+        catch (Exception e)
+        {
+            await View!.MessageDialog($"Error occurred when saving project:\n{e}");
+        }
+
+        return false;
+    }
+
+    public async void ProjectViewUnexportedAssets()
+    {
+        if (Project is null || Data is null || DataPath is null)
+            return;
+
+        // TODO: Window
+    }
+
+    public async void ProjectClose()
+    {
+        if (!await AskProjectSave("There are assets marked to be exported in the current project. Save project before closing?"))
+            return;
+
+        ClearProject();
     }
 
     public async void HelpGitHub()

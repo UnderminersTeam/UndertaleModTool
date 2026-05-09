@@ -120,8 +120,7 @@ public class ScriptGlobals : IScriptInterface, IDisposable
 
     public UndertaleData? Data => mainVM.Data;
 
-    // TODO: Get project from mainVM
-    public ProjectContext? Project => null;
+    public ProjectContext? Project => mainVM.Project;
 
     public string? FilePath => mainVM.DataPath;
 
@@ -178,11 +177,6 @@ public class ScriptGlobals : IScriptInterface, IDisposable
     public Task ClickableSearchOutput(string title, string query, int resultsCount, IDictionary<string, List<(int lineNum, string codeLine)>> resultsDict, bool showInDecompiledView, IEnumerable<string>? failedList = null)
     {
         throw new NotImplementedException();
-    }
-
-    public void DisableAllSyncBindings()
-    {
-        // TODO: Implement
     }
 
     public void EnableUI()
@@ -408,11 +402,6 @@ public class ScriptGlobals : IScriptInterface, IDisposable
     {
         // TODO: Implement
         return Task.CompletedTask;
-    }
-
-    public void SyncBinding(string resourceType, bool enable)
-    {
-        // TODO: Implement
     }
 
     public void UpdateProgressBar(string message, string status, double progressValue, double maxValue)

@@ -41,6 +41,15 @@
                     <NativeMenuItem Header="Run _other script" Command="{Binding ScriptsRunOtherScript}" />
                 </NativeMenu>
             </NativeMenuItem>
+            <NativeMenuItem Header="_Project">
+                <NativeMenu>
+                    <NativeMenuItem Header="_New project" Command="{Binding ProjectNew}"/>
+                    <NativeMenuItem Header="_Open project" Command="{Binding ProjectOpen}"/>
+                    <NativeMenuItem Header="_Save project" Command="{Binding ProjectSave}"/>
+                    <NativeMenuItem Header="_View unexported assets" Command="{Binding ProjectViewUnexportedAssets}"/>
+                    <NativeMenuItem Header="_Close project" Command="{Binding ProjectClose}"/>
+                </NativeMenu>
+            </NativeMenuItem>
             <NativeMenuItem Header="_Help">
                 <NativeMenu>
                     <NativeMenuItem Header="_GitHub" Command="{Binding HelpGitHub}"/>

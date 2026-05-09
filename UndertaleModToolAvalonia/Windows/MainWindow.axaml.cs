@@ -17,13 +17,14 @@ public partial class MainWindow : Window
             {
                 e.Cancel = true;
 
-                async void AskFileSaveBeforeClose()
+                async void AskSaveBeforeClose()
                 {
-                    if (await vm.AskFileSave("Save data file before quitting?"))
+                    if (await vm.AskProjectSave("There are assets marked to be exported in the current project. Save project before quitting?")
+                        && await vm.AskFileSave("Save data file before quitting?"))
                         Close();
                 }
 
-                AskFileSaveBeforeClose();
+                AskSaveBeforeClose();
             }
         }
 
