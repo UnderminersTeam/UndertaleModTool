@@ -337,17 +337,8 @@ public partial class MainView : UserControl, IView
             MainViewModel.TreeDataGridItem? item = GetItemFromTreeDataGridControl(e.Source);
             if (item is not null && vm.Data is not null)
             {
-                // TODO: Maybe do something about all references to this.
                 UndertaleResource resource = (item.Value as UndertaleResource)!;
-
-                if (await vm.View!.MessageDialog($"Delete {resource}?\nNote that the code often references objects by ID, " +
-                    $"so this operation is likely to break stuff because other items will shift up!",
-                    buttons: MessageWindow.Buttons.YesNo) == MessageWindow.Result.Yes)
-                {
-                    vm.Data[resource.GetType()].Remove(resource);
-
-                    // TODO: Close tabs, remove histories
-                }
+                vm.DataItemRemove(resource);
             }
         }
     }

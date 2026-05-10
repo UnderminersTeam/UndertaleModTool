@@ -721,8 +721,10 @@ namespace UndertaleModLib
         /// <param name="resource">The resource to initialize.</param>
         /// <param name="list">The list where the resource might reside.</param>
         /// <param name="resourceName">Name to set to resource if supported.</param>
-        public void InitializeResource(UndertaleResource resource, IList list, string resourceName)
+        public IList<UndertaleResource> InitializeResource(UndertaleResource resource, IList list, string resourceName)
         {
+            IList<UndertaleResource> newResources = [];
+
             // Set up name
             if (resource is UndertaleNamedResource namedResource)
             {
@@ -784,6 +786,8 @@ namespace UndertaleModLib
                 {
                     script.Code = UndertaleCode.CreateEmptyEntry(this, Strings.MakeString($"gml_Script_{script.Name.Content}", createNew: true));
                 }
+
+                newResources.Add(script.Code);
             }
             else if (resource is UndertaleCode code)
             {
@@ -816,6 +820,8 @@ namespace UndertaleModLib
                 shader.HLSL9_Vertex = Strings.MakeString("", createNew: true);
                 shader.HLSL9_Fragment = Strings.MakeString("", createNew: true);
             }
+
+            return newResources;
         }
 
         /// <inheritdoc/>

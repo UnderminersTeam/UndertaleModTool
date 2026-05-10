@@ -84,6 +84,10 @@ public partial class MainViewModel
     [Notify]
     private int _TabSelectedIndex;
     [Notify]
+    private bool _TabIsMarkedForExport = false;
+    [Notify]
+    private bool _TabCanMarkedForExport = false;
+    [Notify]
     private string _TabSelectedResourceIdString = "None";
 
     // Command text box
@@ -697,8 +701,10 @@ public partial class MainViewModel
         Project = projectContext;
         Project.UnexportedAssetsChanged += (s, e) =>
         {
-            // TODO: Change bottom bar.
+            UpdateSelectedTabProperties();
         };
+
+        UpdateSelectedTabProperties();
     }
 
     async Task<string?> AskProjectDestinationDataFile()
@@ -901,7 +907,7 @@ public partial class MainViewModel
             }
         }
 
-        Data.InitializeResource(res, list, name);
+        var newResources = Data.InitializeResource(res, list, name);
 
         if (res is UndertaleRoom room)
         {
@@ -911,9 +917,43 @@ public partial class MainViewModel
 
         list.Add(res);
 
+        if (Project is not null && res is IProjectAsset { ProjectExportable: true } projectAsset)
+        {
+            Project.MarkAssetForExport(projectAsset);
+
+            foreach (UndertaleResource newResource in newResources)
+            {
+                if (newResource is IProjectAsset { ProjectExportable: true } newProjectAsset)
+                {
+                    Project.MarkAssetForExport(newProjectAsset);
+                }
+            }
+        }
+
         if (Settings!.OpenNewResourceAfterCreatingIt)
         {
             TabOpen(res, inNewTab: true);
+        }
+    }
+
+    public async void DataItemRemove(UndertaleResource resource)
+    {
+        if (Data is null)
+            return;
+
+        if (await View!.MessageDialog($"Delete {resource}?\nNote that the code often references objects by ID, " +
+                    $"so this operation is likely to break stuff because other items will shift up!",
+                    buttons: MessageWindow.Buttons.YesNo) == MessageWindow.Result.Yes)
+        {
+            // TODO: Maybe do something about all references to this.
+            Data[resource.GetType()].Remove(resource);
+
+            if (Project is not null && resource is IProjectAsset projectAsset)
+            {
+                Project.UnmarkAssetForExport(projectAsset);
+            }
+
+            // TODO: Close tabs, remove histories
         }
     }
 
@@ -960,7 +1000,7 @@ public partial class MainViewModel
         {
             if (!inNewTab && TabSelected is not null)
             {
-                TabSelected.GoTo(content);
+                TabGoTo(content);
                 return TabSelected;
             }
             else
@@ -1023,25 +1063,69 @@ public partial class MainViewModel
             TabSelectedIndex = 0;
     }
 
+    public void TabGoTo(ITabContent content)
+    {
+        TabSelected?.GoTo(content);
+        UpdateSelectedTabProperties();
+    }
+
     public void TabGoBack()
     {
         TabSelected?.GoBack();
+        UpdateSelectedTabProperties();
     }
 
     public void TabGoForward()
     {
         TabSelected?.GoForward();
+        UpdateSelectedTabProperties();
     }
 
     private void OnTabSelectedChanged()
     {
+        UpdateSelectedTabProperties();
+    }
+
+    // Bottom bar
+    private void UpdateSelectedTabProperties()
+    {
         if (Data is not null && TabSelected?.Content is IUndertaleResourceViewModel vm)
         {
             TabSelectedResourceIdString = Data.IndexOf(vm.Resource).ToString();
+
+            if (Project is not null)
+            {
+                if (vm.Resource is IProjectAsset { ProjectExportable: true } projectAsset)
+                {
+                    TabIsMarkedForExport = Project.IsAssetMarkedForExport(projectAsset);
+                    TabCanMarkedForExport = true;
+                    return;
+                }
+            }
         }
         else
         {
             TabSelectedResourceIdString = "None";
+        }
+
+        TabIsMarkedForExport = false;
+        TabCanMarkedForExport = false;
+    }
+
+    private void OnTabIsMarkedForExportChanged()
+    {
+        if (Project is not null
+            && TabSelected?.Content is IUndertaleResourceViewModel vm
+            && vm.Resource is IProjectAsset { ProjectExportable: true } projectAsset)
+        {
+            if (TabIsMarkedForExport)
+            {
+                Project.MarkAssetForExport(projectAsset);
+            }
+            else
+            {
+                Project.UnmarkAssetForExport(projectAsset);
+            }
         }
     }
 }

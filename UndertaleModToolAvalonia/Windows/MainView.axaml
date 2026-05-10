@@ -43,9 +43,10 @@
     <DockPanel>
         <NativeMenuBar DockPanel.Dock="Top" />
         
-        <Grid DockPanel.Dock="Bottom" ColumnDefinitions="*,auto">
+        <Grid DockPanel.Dock="Bottom" ColumnDefinitions="*,Auto,Auto">
             <TextBox Grid.Column="0" Name="CommandTextBox" Text="{Binding CommandTextBoxText}" AcceptsReturn="True" />
-            <Label Grid.Column="1" Content="{Binding TabSelectedResourceIdString}"
+            <CheckBox Grid.Column="1" Content="Marked for export" IsChecked="{Binding TabIsMarkedForExport}" IsEnabled="{Binding TabCanMarkedForExport}" />
+            <Label Grid.Column="2" Content="{Binding TabSelectedResourceIdString}" MinWidth="100" HorizontalContentAlignment="Right"
                    ToolTip.Tip="This is an ID (index) of the currently open asset, item, or object. It starts from 0."/>
         </Grid>
         
