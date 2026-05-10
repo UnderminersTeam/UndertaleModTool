@@ -339,7 +339,7 @@ public partial class MainViewModel
         var result = await View!.MessageDialog(message, buttons: MessageWindow.Buttons.YesNoCancel);
         if (result == MessageWindow.Result.Yes)
         {
-            if (await FileSave())
+            if (await FileSaveTask())
             {
                 return true;
             }
@@ -362,7 +362,7 @@ public partial class MainViewModel
         var result = await View!.MessageDialog(message, buttons: MessageWindow.Buttons.YesNoCancel);
         if (result == MessageWindow.Result.Yes)
         {
-            if (await ProjectSave())
+            if (await ProjectSaveTask())
             {
                 return true;
             }
@@ -558,7 +558,12 @@ public partial class MainViewModel
         }
     }
 
-    public async Task<bool> FileSave()
+    public async void FileSave()
+    {
+        await FileSaveTask();
+    }
+
+    public async Task<bool> FileSaveTask()
     {
         if (Data is null)
             return false;
@@ -568,7 +573,7 @@ public partial class MainViewModel
             var result = await View!.MessageDialog("Save to the project's designated data file for saving?", buttons: MessageWindow.Buttons.YesNoCancel);
             if (result == MessageWindow.Result.Yes)
             {
-                using FileStream fileStream = File.Open(Project.SaveDataPath, FileMode.Truncate);
+                using FileStream fileStream = File.Open(Project.SaveDataPath, FileMode.Create);
                 if (await SaveData(fileStream))
                 {
                     return true;
@@ -816,7 +821,12 @@ public partial class MainViewModel
         SetProject(projectContext);
     }
 
-    public async Task<bool> ProjectSave()
+    public async void ProjectSave()
+    {
+        await ProjectSaveTask();
+    }
+
+    public async Task<bool> ProjectSaveTask()
     {
         if (Project is null || Data is null || DataPath is null)
             return false;
