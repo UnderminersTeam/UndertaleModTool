@@ -167,14 +167,17 @@ public partial class SearchInCodeViewModel
 
             if (!IsInAssembly)
             {
-                try
+                if (MainVM.Project is null || !MainVM.Project.TryGetCodeSource(code, out codeText))
                 {
-                    codeText = new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext!, code, MainVM.Data!.ToolInfo.DecompilerSettings).DecompileToString();
-                }
-                catch (Underanalyzer.Decompiler.DecompilerException)
-                {
-                    Interlocked.Increment(ref failedCount);
-                    return;
+                    try
+                    {
+                        codeText = new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext!, code, MainVM.Data!.ToolInfo.DecompilerSettings).DecompileToString();
+                    }
+                    catch (Underanalyzer.Decompiler.DecompilerException)
+                    {
+                        Interlocked.Increment(ref failedCount);
+                        return;
+                    }
                 }
             }
             else
@@ -202,7 +205,7 @@ public partial class SearchInCodeViewModel
             }
             else
             {
-                StringComparison comparisonType = IsCaseSensitive ? StringComparison.CurrentCulture : StringComparison.CurrentCultureIgnoreCase;
+                StringComparison comparisonType = IsCaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 
                 int index = 0;
                 while ((index = codeText.IndexOf(searchText, index, comparisonType)) != -1)

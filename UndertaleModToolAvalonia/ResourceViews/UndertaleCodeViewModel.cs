@@ -62,19 +62,26 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
 
         loaderWindow?.SetText("Decompiling to GML...");
 
-        GlobalDecompileContext context = new(MainVM.Data);
+        string text;
 
-        try
+        if (MainVM.Project is null || !MainVM.Project.TryGetCodeSource(Code, out text))
         {
-            GMLTextDocument.Text = await Task.Run(() => new Underanalyzer.Decompiler.DecompileContext(context, Code, MainVM.Data!.ToolInfo.DecompilerSettings).DecompileToString());
-            GMLOutdated = false;
+            GlobalDecompileContext context = new(MainVM.Data);
+
+            try
+            {
+                text = await Task.Run(() => new Underanalyzer.Decompiler.DecompileContext(context, Code, MainVM.Data!.ToolInfo.DecompilerSettings).DecompileToString());
+            }
+            catch (Underanalyzer.Decompiler.DecompilerException e)
+            {
+                loaderWindow?.EnsureShown();
+                await MainVM.View!.MessageDialog(e.ToString(), title: "GML decompilation error");
+                return false;
+            }
         }
-        catch (Underanalyzer.Decompiler.DecompilerException e)
-        {
-            loaderWindow?.EnsureShown();
-            await MainVM.View!.MessageDialog(e.ToString(), title: "GML decompilation error");
-            return false;
-        }
+
+        GMLTextDocument.Text = text;
+        GMLOutdated = false;
 
         return true;
     }
@@ -101,6 +108,12 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
                 await DecompileToGML();
             }
             return false;
+        }
+
+        if (MainVM.Project is not null)
+        {
+            MainVM.Project.UpdateCodeSource(Code, GMLTextDocument.Text);
+            MainVM.Project.MarkAssetForExport(Code);
         }
 
         return true;
@@ -134,6 +147,16 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
             return false;
 
         loaderWindow?.SetText("Compiling from ASM...");
+
+        if (MainVM.Project is not null && MainVM.Project.TryGetCodeSource(Code, out _))
+        {
+            // The user really shouldn't be editing disassembly - warn them about this in detail
+            loaderWindow?.EnsureShown();
+            await MainVM.View!.MessageDialog("Editing disassembly while in an open project (even through scripts) can cause " +
+                "desyncs with source code in the project.\n\n" +
+                "The source code will not change unless you directly modify it, " +
+                "or if you remove the code asset from the project entirely.");
+        }
 
         try
         {
@@ -195,6 +218,19 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
         CodeProcessEnd();
 
         View?.ProcessLastGoToLocation();
+    }
+
+    public void CompileAndDecompileCurrent()
+    {
+        switch (SelectedTab)
+        {
+            case Tab.GML:
+                CompileAndDecompileGML(false);
+                break;
+            case Tab.ASM:
+                CompileAndDecompileASM(false);
+                break;
+        }
     }
 
     public void CompileAndDecompileGML() => CompileAndDecompileGML(false);
