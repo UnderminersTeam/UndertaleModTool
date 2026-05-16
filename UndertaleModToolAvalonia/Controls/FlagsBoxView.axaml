@@ -16,7 +16,7 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <StackPanel>
-                                <CheckBox Content="{Binding Name}" IsChecked="{Binding Checked}" Checked="CheckBox_Checked" Unchecked="CheckBox_Checked"></CheckBox>
+                                <CheckBox Content="{Binding Name}" IsChecked="{Binding Checked}" IsCheckedChanged="Checked_IsCheckChanged"></CheckBox>
                             </StackPanel>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>

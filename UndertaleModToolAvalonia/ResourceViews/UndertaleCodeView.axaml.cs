@@ -268,7 +268,7 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
         vm.LastGoToLocation = null;
     }
 
-    private void GMLTextEditor_GotFocus(object? sender, GotFocusEventArgs e)
+    private void GMLTextEditor_GotFocus(object? sender, FocusChangedEventArgs e)
     {
         if (DataContext is not UndertaleCodeViewModel vm)
             return;
@@ -278,7 +278,7 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
         UpdateHighlightingCache();
     }
 
-    private void ASMTextEditor_GotFocus(object? sender, GotFocusEventArgs e)
+    private void ASMTextEditor_GotFocus(object? sender, FocusChangedEventArgs e)
     {
         if (DataContext is not UndertaleCodeViewModel vm)
             return;

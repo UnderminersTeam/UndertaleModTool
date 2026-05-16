@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 using Avalonia.Headless.XUnit;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -8,7 +9,7 @@ namespace UndertaleModToolAvalonia.Tests;
 public class HeadlessTest
 {
     [AvaloniaFact]
-    public async void Save_New_Data()
+    public async Task Save_New_Data()
     {
         MainViewModel vm = App.Services.GetRequiredService<MainViewModel>();
 

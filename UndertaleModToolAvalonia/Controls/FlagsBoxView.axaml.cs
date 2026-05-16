@@ -76,7 +76,7 @@ public partial class FlagsBoxView : UserControl
         }
     }
 
-    public void CheckBox_Checked(object? sender, RoutedEventArgs e)
+    public void Checked_IsCheckChanged(object? sender, RoutedEventArgs e)
     {
         CheckBox checkBox = (sender as CheckBox)!;
         if (checkBox.DataContext is Flag flag)

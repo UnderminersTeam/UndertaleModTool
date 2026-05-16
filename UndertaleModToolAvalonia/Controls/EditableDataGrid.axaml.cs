@@ -72,7 +72,7 @@ public partial class EditableDataGrid : UserControl
 
             SelectionChanged?.Invoke(DataGridControl.SelectedItem);
         };
-        DataGridControl.GotFocus += (object? sender, GotFocusEventArgs e) =>
+        DataGridControl.GotFocus += (object? sender, FocusChangedEventArgs e) =>
         {
             if (e.Source is Control control)
             {

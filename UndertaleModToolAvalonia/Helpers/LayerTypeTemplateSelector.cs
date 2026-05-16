@@ -1,6 +1,8 @@
-﻿using Avalonia.Controls;
+﻿using System;
+using System.Reactive.Disposables;
+using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using Avalonia.Data;
 using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia;
@@ -33,23 +35,23 @@ public class LayerTypeTemplateSelector : ITreeDataTemplate
         return false;
     }
 
-    public InstancedBinding? ItemsSelector(object item)
+    public IDisposable BindChildren(AvaloniaObject target, AvaloniaProperty targetProperty, object item)
     {
         if (item is UndertaleRoom.Layer layer)
         {
             return layer.LayerType switch
             {
-                UndertaleRoom.LayerType.Path => PathTemplate?.ItemsSelector(layer),
-                UndertaleRoom.LayerType.Path2 => PathTemplate?.ItemsSelector(layer),
-                UndertaleRoom.LayerType.Background => BackgroundTemplate?.ItemsSelector(layer),
-                UndertaleRoom.LayerType.Instances => InstancesTemplate?.ItemsSelector(layer),
-                UndertaleRoom.LayerType.Assets => AssetsTemplate?.ItemsSelector(layer),
-                UndertaleRoom.LayerType.Tiles => TilesTemplate?.ItemsSelector(layer),
-                UndertaleRoom.LayerType.Effect => EffectTemplate?.ItemsSelector(layer),
+                UndertaleRoom.LayerType.Path => PathTemplate?.BindChildren(target, targetProperty, item),
+                UndertaleRoom.LayerType.Path2 => PathTemplate?.BindChildren(target, targetProperty, item),
+                UndertaleRoom.LayerType.Background => BackgroundTemplate?.BindChildren(target, targetProperty, item),
+                UndertaleRoom.LayerType.Instances => InstancesTemplate?.BindChildren(target, targetProperty, item),
+                UndertaleRoom.LayerType.Assets => AssetsTemplate?.BindChildren(target, targetProperty, item),
+                UndertaleRoom.LayerType.Tiles => TilesTemplate?.BindChildren(target, targetProperty, item),
+                UndertaleRoom.LayerType.Effect => EffectTemplate?.BindChildren(target, targetProperty, item),
                 _ => null,
-            };
+            } ?? Disposable.Empty;
         }
-        return null;
+        return Disposable.Empty;
     }
 
     public Control? Build(object? param)

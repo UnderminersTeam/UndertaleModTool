@@ -45,7 +45,7 @@ public class SKImageViewer : Control
             if (Image is UndertaleTexturePageItem)
             {
                 // Bind these values to a property so we can get updates when they change.
-                IList<IBinding> bindings =
+                IList<BindingBase> bindings =
                 [
                     new Binding("Image.TexturePage.TextureData.Image")
                         {Source = this},
