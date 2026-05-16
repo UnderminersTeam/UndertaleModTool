@@ -13,7 +13,7 @@ The most complete tool for modding, decompiling and unpacking Undertale (and oth
 ## Windows
 
 1. Find the latest stable (or nightly) release from the [Downloads](#downloads) section below
-2. Download the GUI version (e.g. `UndertaleModTool_v0.8.4.1-Windows.zip`), or the CLI version if you know what you're doing
+2. Download the GUI version (e.g. `UndertaleModTool_v0.9.0.0-Windows.zip`), or the CLI version if you know what you're doing
 3. Extract the ZIP file to a folder (do not run from inside the archive!)
 4. Run `UndertaleModTool.exe` to start the tool
 5. Open your game's data file (e.g. `data.win`, `game.ios`, `game.unx`, etc.) via File → Open

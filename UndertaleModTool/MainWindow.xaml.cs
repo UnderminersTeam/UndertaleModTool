@@ -3798,14 +3798,14 @@ result in loss of work.");
             UpdateObjectLabel(Selected);
         }
 
-        private string ChooseProjectSaveFile()
+        private string ChooseProjectSaveFile(string sourceFilePath)
         {
             // Choose data file to save project to (when loading or saving in general)
             SaveFileDialog saveDataDialog = new()
             {
                 DefaultExt = "win",
                 Filter = MainDataFileFilter,
-                Title = "Choose data file to save project to"
+                Title = "Choose destination data file"
             };
             if (saveDataDialog.ShowDialog(this) != true)
             {
@@ -3815,9 +3815,9 @@ result in loss of work.");
             // Check if the directories are the same and warn if so (note: not a fully exhaustive check, but decent)
             string saveFilePath = saveDataDialog.FileName;
             if (Path.GetFullPath(Path.GetDirectoryName(saveFilePath)).Equals(
-                    Path.GetFullPath(Path.GetDirectoryName(FilePath)), StringComparison.OrdinalIgnoreCase))
+                    Path.GetFullPath(Path.GetDirectoryName(sourceFilePath)), StringComparison.OrdinalIgnoreCase))
             {
-                if (this.ShowQuestionWithCancel("The save file path was set to the same directory as the loaded file path. This may permanently overwrite external data files. Proceed?", MessageBoxImage.Warning, "Save file in same directory as loaded file") != MessageBoxResult.Yes)
+                if (this.ShowQuestionWithCancel("The destination data file is in the same directory as the source data file. This may permanently overwrite external data files. Proceed?", MessageBoxImage.Warning, "Destination file in same directory as source file") != MessageBoxResult.Yes)
                 {
                     // Abort
                     return null;
@@ -3829,7 +3829,7 @@ result in loss of work.");
             {
                 if (!Directory.EnumerateFileSystemEntries(Path.GetDirectoryName(saveFilePath)).Any())
                 {
-                    this.ShowWarning("Currently, the save file's directory is empty. You will likely want to copy all other game files to the save directory, so that external assets can be loaded correctly (both in-game and in this tool), and so the game can run from there.");
+                    this.ShowWarning("Currently, the destination data file's directory is empty. You will likely want to copy all other game files to the destination directory, so that external assets can be loaded correctly (both in-game and in this tool), and so the game can be started.");
                 }
             }
             catch (Exception)
@@ -3840,13 +3840,8 @@ result in loss of work.");
             return saveFilePath;
         }
 
-        private void Command_NewProject(object sender, ExecutedRoutedEventArgs e)
+        private async void Command_NewProject(object sender, ExecutedRoutedEventArgs e)
         {
-            if (Data is null || FilePath is null)
-            {
-                // No data set; this should be impossible, but abort if this does occur
-                return;
-            }
             if (Project is not null && Project.HasUnexportedAssets)
             {
                 if (this.ShowQuestionWithCancel("There are assets marked to be exported in the current project - create a new project and discard all unexported changes?", MessageBoxImage.Warning, "Project already open") != MessageBoxResult.Yes)
@@ -3856,12 +3851,26 @@ result in loss of work.");
                 }
             }
 
-            // Ask for save file directory
-            string saveFilePath = ChooseProjectSaveFile();
-            if (saveFilePath is null)
+            // If necessary, ask for a source data file
+            if (Data is null || FilePath is null)
             {
-                // Save file prompt failed or was cancelled
-                return;
+                OpenFileDialog sourceDialog = new()
+                {
+                    DefaultExt = "win",
+                    Filter = DataFileFilter,
+                    Title = "Choose source data file"
+                };
+                if (sourceDialog.ShowDialog(this) != true)
+                {
+                    return;
+                }
+                await LoadFile(sourceDialog.FileName, true);
+
+                // Upon load failure, exit
+                if (Data is null || FilePath is null)
+                {
+                    return;
+                }
             }
 
             // Ask for name
@@ -3880,6 +3889,14 @@ result in loss of work.");
             {
                 // Directory prompt was canceled
                 SetUMTConsoleText("Cancelled new project creation.");
+                return;
+            }
+
+            // Ask for save file directory
+            string saveFilePath = ChooseProjectSaveFile(FilePath);
+            if (saveFilePath is null)
+            {
+                // Save file prompt failed or was cancelled
                 return;
             }
 
@@ -3909,11 +3926,6 @@ result in loss of work.");
 
         private async void Command_OpenProject(object sender, ExecutedRoutedEventArgs e)
         {
-            if (Data is null || FilePath is null)
-            {
-                // No data set; this should be impossible, but abort if this does occur
-                return;
-            }
             if (Project is not null && Project.HasUnexportedAssets)
             {
                 if (this.ShowQuestionWithCancel("There are assets marked to be exported in the current project - open another new project and discard all unexported changes?", MessageBoxImage.Warning, "Project already open") != MessageBoxResult.Yes)
@@ -3923,18 +3935,6 @@ result in loss of work.");
                 }
             }
 
-            // Ask for save file directory
-            string saveFilePath = ChooseProjectSaveFile();
-            if (saveFilePath is null)
-            {
-                // Save file prompt failed or was cancelled
-                return;
-            }
-
-            // Change main file path to the save data file path
-            string loadFilePath = FilePath;
-            FilePath = saveFilePath;
-
             // Choose project file to open
             OpenFileDialog openProjectDialog = new()
             {
@@ -3942,43 +3942,85 @@ result in loss of work.");
                 Filter = "UndertaleModTool project files (.json)|*.json|All files|*",
                 Title = "Open project file"
             };
-            if (openProjectDialog.ShowDialog(this) == true)
+            if (openProjectDialog.ShowDialog(this) != true)
             {
-                ProjectContext newProjectContext = null;
+                return;
+            }
 
-                // Attempt loading project from the specific JSON
-                IsEnabled = false;
-                await Task.Run(() =>
+            // If necessary, ask for a source data file
+            string dataFilePathToLoad = null;
+            if (Data is null || FilePath is null)
+            {
+                OpenFileDialog sourceDialog = new()
                 {
-                    try
-                    {
-                        newProjectContext = ProjectContext.CreateWithDataFilePaths(loadFilePath, saveFilePath, openProjectDialog.FileName);
-                        newProjectContext.Import(Data, null, (f) => Dispatcher.Invoke(f));
-                    }
-                    catch (ProjectException ex)
-                    {
-                        newProjectContext = null;
-                        this.ShowError(ex.Message, "Failed to load project");
-                    }
-                    catch (Exception ex)
-                    {
-                        newProjectContext = null;
-                        this.ShowError($"Error occurred when loading project:\n{ex}");
-                    }
-                });
-                IsEnabled = true;
-
-                // Don't assign new project context if load failed
-                if (newProjectContext is null)
+                    DefaultExt = "win",
+                    Filter = DataFileFilter,
+                    Title = "Choose source data file"
+                };
+                if (sourceDialog.ShowDialog(this) != true)
                 {
-                    SetUMTConsoleText("Project failed to open.");
                     return;
                 }
-
-                // Start using new project context
-                AssignNewProject(newProjectContext);
-                SetUMTConsoleText($"Opened project \"{newProjectContext.Name}\".");
+                dataFilePathToLoad = sourceDialog.FileName;
             }
+
+            // Ask for save file directory
+            string saveFilePath = ChooseProjectSaveFile(dataFilePathToLoad ?? FilePath);
+            if (saveFilePath is null)
+            {
+                // Save file prompt failed or was cancelled
+                return;
+            }
+
+            // Load data file if needed
+            if (dataFilePathToLoad is not null)
+            {
+                await LoadFile(dataFilePathToLoad, true);
+
+                // Upon load failure, exit
+                if (Data is null || FilePath is null)
+                {
+                    return;
+                }
+            }
+
+            // Change main file path to the save data file path
+            string loadFilePath = FilePath;
+            FilePath = saveFilePath;
+
+            // Attempt loading project from the specific JSON
+            ProjectContext newProjectContext = null;
+            IsEnabled = false;
+            await Task.Run(() =>
+            {
+                try
+                {
+                    newProjectContext = ProjectContext.CreateWithDataFilePaths(loadFilePath, saveFilePath, openProjectDialog.FileName);
+                    newProjectContext.Import(Data, null, (f) => Dispatcher.Invoke(f));
+                }
+                catch (ProjectException ex)
+                {
+                    newProjectContext = null;
+                    this.ShowError(ex.Message, "Failed to load project");
+                }
+                catch (Exception ex)
+                {
+                    newProjectContext = null;
+                    this.ShowError($"Error occurred when loading project:\n{ex}");
+                }
+            });
+            IsEnabled = true;
+
+            // Don't assign new project context if load failed
+            if (newProjectContext is null)
+            {
+                SetUMTConsoleText("Project failed to open.");
+                return;
+            }
+
+            // Start using new project context
+            AssignNewProject(newProjectContext);
+            SetUMTConsoleText($"Opened project \"{newProjectContext.Name}\".");
         }
         private async void Command_SaveProject(object sender, ExecutedRoutedEventArgs e)
         {
