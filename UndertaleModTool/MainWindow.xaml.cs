@@ -49,6 +49,8 @@ using System.Windows.Controls.Primitives;
 using System.Runtime.CompilerServices;
 using System.Windows.Interop;
 using System.Windows.Media.Imaging;
+using Underanalyzer.Decompiler;
+using UndertaleModLib.Project;
 
 namespace UndertaleModTool
 {
@@ -62,16 +64,22 @@ namespace UndertaleModTool
 
         public UndertaleData Data { get; set; }
         public string FilePath { get; set; }
+        public ProjectContext Project { get; set; } = null;
         public string ScriptPath { get; set; } // For the scripting interface specifically
 
         public string TitleMain { get; set; }
 
-        public static RoutedUICommand CloseTabCommand = new RoutedUICommand("Close current tab", "CloseTab", typeof(MainWindow));
-        public static RoutedUICommand CloseAllTabsCommand = new RoutedUICommand("Close all tabs", "CloseAllTabs", typeof(MainWindow));
-        public static RoutedUICommand RestoreClosedTabCommand = new RoutedUICommand("Restore last closed tab", "RestoreClosedTab", typeof(MainWindow));
-        public static RoutedUICommand SwitchToNextTabCommand = new RoutedUICommand("Switch to the next tab", "SwitchToNextTab", typeof(MainWindow));
-        public static RoutedUICommand SwitchToPrevTabCommand = new RoutedUICommand("Switch to the previous tab", "SwitchToPrevTab", typeof(MainWindow));
-        public static RoutedUICommand SearchInCodeCommand = new("Search in code", "SearchInCode", typeof(MainWindow));
+        public static readonly RoutedUICommand CloseTabCommand = new RoutedUICommand("Close current tab", "CloseTab", typeof(MainWindow));
+        public static readonly RoutedUICommand CloseAllTabsCommand = new RoutedUICommand("Close all tabs", "CloseAllTabs", typeof(MainWindow));
+        public static readonly RoutedUICommand RestoreClosedTabCommand = new RoutedUICommand("Restore last closed tab", "RestoreClosedTab", typeof(MainWindow));
+        public static readonly RoutedUICommand SwitchToNextTabCommand = new RoutedUICommand("Switch to the next tab", "SwitchToNextTab", typeof(MainWindow));
+        public static readonly RoutedUICommand SwitchToPrevTabCommand = new RoutedUICommand("Switch to the previous tab", "SwitchToPrevTab", typeof(MainWindow));
+        public static readonly RoutedUICommand SearchInCodeCommand = new("Search in code", "SearchInCode", typeof(MainWindow));
+        public static readonly RoutedUICommand NewProjectCommand = new("New project", "NewProject", typeof(MainWindow));
+        public static readonly RoutedUICommand OpenProjectCommand = new("Open project", "OpenProject", typeof(MainWindow));
+        public static readonly RoutedUICommand SaveProjectCommand = new("Save project", "SaveProject", typeof(MainWindow));
+        public static readonly RoutedUICommand ViewProjectAssetsCommand = new("View project assets", "ViewProjectAssets", typeof(MainWindow));
+        public static readonly RoutedUICommand CloseProjectCommand = new("Close project", "CloseProject", typeof(MainWindow));
 
         public ObservableCollection<Tab> Tabs { get; set; } = new();
         public Tab CurrentTab
@@ -96,16 +104,24 @@ namespace UndertaleModTool
                 OpenInTab(value);
             } 
         }
-        
+
+        /// <summary>
+        /// Whether the currently-selected object is exportable to a project.
+        /// </summary>
+        public bool IsSelectedProjectExportable { get; private set; }
+
         private static Visibility ToVisibility(bool visible) => visible ? Visibility.Visible : Visibility.Collapsed;
 
-        public Visibility IsGMS2 => ToVisibility((Data?.GeneralInfo?.Major ?? 0) >= 2);
-        public Visibility IsExtProductIDEligible => ToVisibility(UndertaleExtension.ProductDataEligible(Data));
+        public Visibility IsGMS2 => (Data?.GeneralInfo?.Major ?? 0) >= 2 ? Visibility.Visible : Visibility.Collapsed;
+        // God this is so ugly, if there's a better way, please, put in a pull request
+        public Visibility IsExtProductIDEligible => (((Data?.GeneralInfo?.Major ?? 0) >= 2) || (((Data?.GeneralInfo?.Major ?? 0) == 1) && (((Data?.GeneralInfo?.Build ?? 0) >= 1773) || ((Data?.GeneralInfo?.Build ?? 0) == 1539)))) ? Visibility.Visible : Visibility.Collapsed;
 
         public List<Tab> ClosedTabsHistory { get; } = new();
 
         private List<(GMImage, WeakReference<BitmapSource>)> _bitmapSourceLookup { get; } = new();
         private object _bitmapSourceLookupLock = new();
+
+        private ProjectAssetsWindow _projectAssetsWindow = null;
 
         public bool CanSave { get; set; }
         public bool CanSafelySave = false;
@@ -186,14 +202,8 @@ namespace UndertaleModTool
 
         private LoaderDialog scriptDialog;
 
-        // Related to profile system and appdata
-        public byte[] MD5PreviouslyLoaded = null;
-        public byte[] MD5CurrentlyLoaded = null;
+        // Folder used for configuration, etc.
         public static string AppDataFolder => Settings.AppDataFolder;
-        public static string ProfilesFolder { get; } = Path.Combine(Settings.AppDataFolder, "Profiles");
-        public static string CorrectionsFolder { get; } = Path.Combine(Program.GetExecutableDirectory(), "Corrections");
-        public string ProfileHash = null;
-        public bool CrashedWhileEditing = false;
 
         // Scripting interface-related
         private ScriptOptions scriptOptions;
@@ -227,6 +237,10 @@ namespace UndertaleModTool
             { SystemColors.InactiveSelectionHighlightBrushKey, new SolidColorBrush(Color.FromArgb(255, 112, 112, 112)) }
         };
 
+        // Filters for all data files, and for only main data files
+        private const string DataFileFilter = "GameMaker data files (.win, .unx, .ios, .droid, audiogroup*.dat)|*.win;*.unx;*.ios;*.droid;audiogroup*.dat|All files|*";
+        private const string MainDataFileFilter = "GameMaker main data files (.win, .unx, .ios, .droid)|*.win;*.unx;*.ios;*.droid|All files|*";
+
         public MainWindow()
         {
             InitializeComponent();
@@ -242,18 +256,10 @@ namespace UndertaleModTool
 
             scriptSetupTask = Task.Run(() =>
             {
-                scriptOptions = ScriptOptions.Default
-                                .AddImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler",
-                                            "UndertaleModLib.Scripting", "UndertaleModLib.Compiler",
-                                            "UndertaleModTool", "System", "System.IO", "System.Collections.Generic",
-                                            "System.Text.RegularExpressions")
-                                .AddReferences(typeof(UndertaleObject).GetTypeInfo().Assembly,
-                                                GetType().GetTypeInfo().Assembly,
-                                                typeof(JsonConvert).GetTypeInfo().Assembly,
-                                                typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly,
-                                                typeof(ImageMagick.MagickImage).GetTypeInfo().Assembly,
-                                                typeof(Underanalyzer.Decompiler.DecompileContext).Assembly)
-                                .WithEmitDebugInformation(true); //when script throws an exception, add a exception location (line number)
+                scriptOptions = ScriptingUtil.CreateDefaultScriptOptions()
+                                             .AddImports("UndertaleModTool")
+                                             .AddReferences(GetType().GetTypeInfo().Assembly,
+                                                            typeof(JsonConvert).GetTypeInfo().Assembly);
             });
 
             var resources = Application.Current.Resources;
@@ -306,11 +312,6 @@ namespace UndertaleModTool
                 _bitmapSourceLookup.Add((image, new WeakReference<BitmapSource>(bitmap)));
                 return bitmap;
             }
-        }
-
-        private void SetIDString(string str)
-        {
-            ((Label)this.FindName("ObjectLabel")).Content = str;
         }
 
         // "attr" is actually "DwmWindowAttribute", but I only need the one value from it
@@ -448,7 +449,7 @@ namespace UndertaleModTool
                         {
                             bool deleted = false;
                             string exMessage = "(error message is missing)";
-                            string tempFolder = Path.Combine(Path.GetTempPath(), "UndertaleModTool");
+                            string tempFolder = Path.Join(Path.GetTempPath(), "UndertaleModTool");
 
                             for (int i = 0; i <= 5; i++)
                             {
@@ -480,18 +481,23 @@ namespace UndertaleModTool
                     var runtime = picker.Pick(FilePath, Data);
                     if (runtime == null)
                         return;
-                    Process.Start(runtime.Path, "-game \"" + FilePath + "\"");
+                    Process.Start(new ProcessStartInfo(runtime.Path, ["-game", FilePath]));
                     Environment.Exit(0);
                 }
                 else if (isLaunch)
                 {
                     string gameExeName = Data?.GeneralInfo?.FileName?.Content;
-                    if (gameExeName == null || FilePath == null)
+                    if (gameExeName is null || FilePath is null)
                     {
                         ScriptError("Null game executable name or location");
                         Environment.Exit(0);
                     }
-                    string gameExePath = Path.Combine(Path.GetDirectoryName(FilePath), gameExeName + ".exe");
+                    string gameExePath = Paths.TryJoinVerifyWithinDirectory(Path.GetDirectoryName(FilePath), gameExeName + ".exe");
+                    if (gameExePath is null)
+                    {
+                        ScriptError("Failed to find valid game executable path; escaped directory");
+                        Environment.Exit(0);
+                    }
                     if (!File.Exists(gameExePath))
                     {
                         ScriptError("Cannot find game executable path, expected: " + gameExePath);
@@ -502,8 +508,7 @@ namespace UndertaleModTool
                         ScriptError("Cannot find data file path, expected: " + FilePath);
                         Environment.Exit(0);
                     }
-                    if (gameExeName != null)
-                        Process.Start(gameExePath, "-game \"" + FilePath + "\" -debugoutput \"" + Path.ChangeExtension(FilePath, ".gamelog.txt") + "\"");
+                    Process.Start(new ProcessStartInfo(gameExePath, ["-game", FilePath, "-debugoutput", Path.ChangeExtension(FilePath, ".gamelog.txt")]));
                     Environment.Exit(0);
                 }
                 else if (args.Length > 2)
@@ -511,10 +516,6 @@ namespace UndertaleModTool
                     _ = ListenChildConnection(args[2]);
                 }
             }
-
-            // Copy the known code corrections into the profile, if they don't already exist.
-            ApplyCorrections();
-            CrashCheck();
 
             RunGMSDebuggerItem.Visibility = ToVisibility(Settings.Instance.ShowDebuggerOption);
         }
@@ -542,7 +543,13 @@ namespace UndertaleModTool
             string key = Guid.NewGuid().ToString();
 
             string dir = Path.GetDirectoryName(FilePath);
-            Process.Start(Environment.ProcessPath, "\"" + Path.Combine(dir, filename) + "\" " + key);
+            string childFilePath = Paths.TryJoinVerifyWithinDirectory(dir, filename);
+            if (childFilePath is null)
+            {
+                ScriptError("Failed to open child data file; escaped directory.");
+                return;
+            }
+            Process.Start(new ProcessStartInfo(Environment.ProcessPath, [childFilePath, key]));
 
             var server = new NamedPipeServerStream(key);
             server.WaitForConnection();
@@ -743,10 +750,11 @@ namespace UndertaleModTool
 
         public async Task<bool> DoOpenDialog()
         {
-            OpenFileDialog dlg = new OpenFileDialog();
-
-            dlg.DefaultExt = "win";
-            dlg.Filter = "GameMaker data files (.win, .unx, .ios, .droid, audiogroup*.dat)|*.win;*.unx;*.ios;*.droid;audiogroup*.dat|All files|*";
+            OpenFileDialog dlg = new()
+            {
+                DefaultExt = "win",
+                Filter = DataFileFilter
+            };
 
             if (dlg.ShowDialog(this) == true)
             {
@@ -757,12 +765,24 @@ namespace UndertaleModTool
         }
         public async Task<bool> DoSaveDialog(bool suppressDebug = false)
         {
-            SaveFileDialog dlg = new SaveFileDialog();
+            // If a project is open, save to its save data file specifically
+            if (Project is not null)
+            {
+                if (this.ShowQuestionWithCancel("Save to the project's designated data file for saving?") == MessageBoxResult.Yes)
+                {
+                    await SaveFile(Project.SaveDataPath, suppressDebug);
+                    return true;
+                }
+                return false;
+            }
 
-            dlg.DefaultExt = "win";
-            dlg.Filter = "GameMaker data files (.win, .unx, .ios, .droid, audiogroup*.dat)|*.win;*.unx;*.ios;*.droid;audiogroup*.dat|All files|*";
-            dlg.FileName = FilePath;
-
+            // Regular save dialog
+            SaveFileDialog dlg = new()
+            {
+                DefaultExt = "win",
+                Filter = DataFileFilter,
+                FileName = FilePath
+            };
             if (dlg.ShowDialog(this) == true)
             {
                 await SaveFile(dlg.FileName, suppressDebug);
@@ -809,6 +829,15 @@ namespace UndertaleModTool
 
         private void Command_Open(object sender, ExecutedRoutedEventArgs e)
         {
+            if (Project is not null)
+            {
+                if (this.ShowQuestionWithCancel("A project is currently open - open another data file and discard all unsaved changes?", MessageBoxImage.Warning, "Project currently open") != MessageBoxResult.Yes)
+                {
+                    // Abort opening new file
+                    return;
+                }
+            }
+
             _ = DoOpenDialog();
         }
 
@@ -834,7 +863,16 @@ namespace UndertaleModTool
 
                 bool save = false;
 
-                if (SettingsWindow.WarnOnClose)
+                if (Project is not null && Project.HasUnexportedAssets)
+                {
+                    MessageBoxResult result = this.ShowQuestionWithCancel("There are assets marked to be exported in the current project.\nReally quit?", MessageBoxImage.Warning, "Warning");
+
+                    if (result != MessageBoxResult.Yes)
+                    {
+                        return;
+                    }
+                }
+                else if (SettingsWindow.WarnOnClose)
                 {
                     MessageBoxResult result = this.ShowQuestionWithCancel("Save changes before quitting?");
 
@@ -864,12 +902,6 @@ namespace UndertaleModTool
                         return;
                     }
                 }
-                else
-                {
-                    RevertProfile();
-                }
-
-                DestroyUMTLastEdited();
 
                 CloseOtherWindows();
 
@@ -991,6 +1023,9 @@ namespace UndertaleModTool
                 Tabs.Clear();
                 ClosedTabsHistory.Clear();
 
+                // Get rid of project
+                UnloadProject();
+
                 // Update GUI and wait for all background processes to finish
                 UpdateLayout();
                 Dispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
@@ -1059,7 +1094,7 @@ namespace UndertaleModTool
                     return;
                 }
 
-                Dispatcher.Invoke(async () =>
+                Dispatcher.Invoke(() =>
                 {
                     if (data is not null)
                     {
@@ -1079,7 +1114,6 @@ namespace UndertaleModTool
                         {
                             CanSave = true;
                             CanSafelySave = true;
-                            await UpdateProfile(data, filename);
                             data.ToolInfo.DecompilerSettings = SettingsWindow.DecompilerSettings;
                             data.ToolInfo.InstanceIdPrefix = () => SettingsWindow.InstanceIdPrefix;
                         }
@@ -1140,10 +1174,12 @@ namespace UndertaleModTool
             GC.Collect();
         }
 
-        private async Task SaveFile(string filename, bool suppressDebug = false)
+        private async Task<bool> SaveFile(string filename, bool suppressDebug = false)
         {
             if (Data == null || Data.UnsupportedBytecodeVersion)
-                return;
+            {
+                return false;
+            }
 
             bool isDifferentPath = FilePath != filename;
 
@@ -1155,14 +1191,48 @@ namespace UndertaleModTool
             FilePath = filename;
             OnPropertyChanged("FilePath");
             if (Path.GetDirectoryName(FilePath) != Path.GetDirectoryName(filename))
+            {
                 CloseChildFiles();
+            }
 
             DebugDataDialog.DebugDataMode debugMode = DebugDataDialog.DebugDataMode.NoDebug;
             if (!suppressDebug && Data.GeneralInfo != null && !Data.GeneralInfo.IsDebuggerDisabled)
                 this.ShowWarning("You are saving the game in GameMaker Studio debug mode. Unless the debugger is running, the normal runtime will simply hang after loading. You can turn this off in General Info by checking the \"Disable Debugger\" box and saving.", "GMS Debugger");
-            Task t = Task.Run(async () =>
+            Task<bool> t = Task.Run(() =>
             {
-                bool SaveSucceeded = true;
+                // Recompile code sources before doing anything, if needed
+                if (Settings.Instance.RecompileAllCodeSourcesOnProjectSave)
+                {
+                    try
+                    {
+                        if (Project is not null)
+                        {
+                            FileMessageEvent?.Invoke("Recompiling GML code, please wait...");
+                            Project.RecompileAllCodeSources();
+                            FileMessageEvent?.Invoke("Saving data file, please wait...");
+                        }
+                    }
+                    catch (ProjectException e)
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            dialog.TryClose();
+                            this.ShowError(e.Message, "Recompile error");
+                        });
+                        return false;
+                    }
+                    catch (Exception e)
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            dialog.TryClose();
+                            this.ShowError("An error occurred while trying to recompile code sources:\n" + e.Message, "Recompile error");
+                        });
+                        return false;
+                    }
+                }
+
+                bool saveSucceeded = true;
 
                 try
                 {
@@ -1266,20 +1336,17 @@ namespace UndertaleModTool
                         this.ShowError("An error occurred while trying to save:\n" + e.Message, "Save error");
                     });
 
-                    SaveSucceeded = false;
+                    saveSucceeded = false;
                 }
                 // Don't make any changes unless the save succeeds.
                 try
                 {
-                    if (SaveSucceeded)
+                    if (saveSucceeded)
                     {
                         // It saved successfully!
                         // If we're overwriting a previously existing data file, we're going to overwrite it now.
                         // Then, we're renaming it back to the proper (non-temp) file name.
                         File.Move(filename + "temp", filename, true);
-
-                        // Also make the changes to the profile system.
-                        await ProfileSaveEvent(Data, filename);
                     }
                     else
                     {
@@ -1287,7 +1354,6 @@ namespace UndertaleModTool
                         // We need to delete the temp file though (if it exists).
                         if (File.Exists(filename + "temp"))
                             File.Delete(filename + "temp");
-                        // No profile system changes, since the save failed, like a save was never attempted.
                     }
                 }
                 catch (Exception exc)
@@ -1297,7 +1363,7 @@ namespace UndertaleModTool
                         this.ShowError("An error occurred while trying to save:\n" + exc.Message, "Save error");
                     });
 
-                    SaveSucceeded = false;
+                    saveSucceeded = false;
                 }
 
                 UndertaleCodeEditor.gettextJSON = null;
@@ -1306,12 +1372,16 @@ namespace UndertaleModTool
                 {
                     dialog.TryClose();
                 });
+
+                return saveSucceeded;
             });
             dialog.ShowDialog();
-            await t;
+            bool succeeded = await t;
 
             GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
             GC.Collect();
+
+            return succeeded;
         }
 
         public string GenerateMD5(string filename)
@@ -1539,8 +1609,16 @@ namespace UndertaleModTool
             bool isLast = list.IndexOf(obj) == list.Count - 1;
             if (this.ShowQuestion("Delete " + obj + "?" + (!isLast ? "\n\nNote that the code often references objects by ID, so this operation is likely to break stuff because other items will shift up!" : ""), isLast ? MessageBoxImage.Question : MessageBoxImage.Warning, "Confirmation" ) == MessageBoxResult.Yes)
             {
+                // Remove object from list
                 list.Remove(obj);
 
+                // If we're in a project, and this asset is marked for export, unmark it
+                if (Project is not null && obj is IProjectAsset projectAsset)
+                {
+                    Project.UnmarkAssetForExport(projectAsset);
+                }
+
+                // Close tabs and update tree
                 while (CloseTab(obj)) ;
                 UpdateTree();
 
@@ -1842,6 +1920,9 @@ namespace UndertaleModTool
                         {
                             scriptResource.Code = UndertaleCode.CreateEmptyEntry(Data, $"gml_Script_{newName}");
                         }
+
+                        // If we're in a project, mark code entry for export
+                        Project?.MarkAssetForExport(scriptResource.Code);
                     }
                     else if (obj is UndertaleCode codeResource)
                     {
@@ -1880,6 +1961,13 @@ namespace UndertaleModTool
                 str.Content = "string" + list.Count;
             }
             list.Add(obj);
+
+            // If object is a project asset type, and we're in a project, mark it for export
+            if (Project is not null && obj is IProjectAsset projectAsset)
+            {
+                Project.MarkAssetForExport(projectAsset);
+            }
+
             UpdateTree();
             HighlightObject(obj);
             OpenInTab(obj, true);
@@ -1887,7 +1975,7 @@ namespace UndertaleModTool
 
         private void RootMenuItem_SubmenuOpened(object sender, RoutedEventArgs e)
         {
-            MenuItem_RunScript_SubmenuOpened(sender, e, Path.Combine(ExePath, "Scripts"));
+            MenuItem_RunScript_SubmenuOpened(sender, e, Path.Join(ExePath, "Scripts"));
         }
 
         private void MenuItem_RunScript_SubmenuOpened(object sender, RoutedEventArgs e, string folderDir)
@@ -1972,7 +2060,7 @@ namespace UndertaleModTool
         {
             string path = (string)(sender as MenuItem).CommandParameter;
             if (!File.Exists(path))
-                path = Path.Combine(Program.GetExecutableDirectory(), path);
+                path = Paths.TryJoinVerifyWithinDirectory(Program.GetExecutableDirectory(), path);
 
             if (File.Exists(path))
                 await RunScript(path);
@@ -2067,77 +2155,6 @@ namespace UndertaleModTool
         {
             if (!this.IsEnabled)
                 this.IsEnabled = true;
-        }
-
-        public void SyncBinding(string resourceType, bool enable)
-        {
-            if (resourceType.Contains(',')) // if several types are listed
-            {
-                string[] resTypes = resourceType.Replace(" ", "").Split(',');
-
-                if (enable)
-                {
-                    foreach (string resType in resTypes)
-                    {
-                        if (Data[resType] is IEnumerable resListCollection)
-                        {
-                            BindingOperations.EnableCollectionSynchronization(resListCollection, bindingLock);
-
-                            syncBindings.Add(resType);
-                        }
-                    }
-                }
-                else
-                {
-                    foreach (string resType in resTypes)
-                    {
-                        if (syncBindings.Contains(resType))
-                        {
-                            if (Data[resType] is IEnumerable resListCollection)
-                            {
-                                BindingOperations.DisableCollectionSynchronization(resListCollection);
-                            }
-
-                            syncBindings.Remove(resType);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                if (enable)
-                {
-                    if (Data[resourceType] is IEnumerable resListCollection)
-                    {
-                        BindingOperations.EnableCollectionSynchronization(resListCollection, bindingLock);
-
-                        syncBindings.Add(resourceType);
-                    }
-                }
-                else if (syncBindings.Contains(resourceType))
-                {
-                    if (Data[resourceType] is IEnumerable resListCollection)
-                    {
-                        BindingOperations.DisableCollectionSynchronization(resListCollection);
-                    }
-
-                    syncBindings.Remove(resourceType);
-                }
-            }
-        }
-        public void DisableAllSyncBindings() // disable all sync. bindings
-        {
-            if (syncBindings.Count <= 0) return;
-
-            foreach (string resType in syncBindings)
-            {
-                if (Data[resType] is IEnumerable resListCollection)
-                {
-                    BindingOperations.DisableCollectionSynchronization(resListCollection);
-                }
-            }
-
-            syncBindings.Clear();
         }
 
         private void ProgressUpdater()
@@ -2266,141 +2283,6 @@ namespace UndertaleModTool
             }
         }
 
-        public string ProcessException(in Exception exc)
-        {
-            // Collect all original trace lines that we want to parse
-            List<string> traceLines = new();
-            Dictionary<string, int> exTypesDict = null;
-            if (exc is AggregateException)
-            {
-                List<string> exTypes = new();
-
-                // Collect trace lines of inner exceptions, and track their exception type names
-                foreach (Exception ex in (exc as AggregateException).InnerExceptions)
-                {
-                    traceLines.AddRange(ex.StackTrace.Split(Environment.NewLine));
-                    exTypes.Add(ex.GetType().FullName);
-                }
-
-                // Create a mapping of each exception type to the number of its occurrences
-                if (exTypes.Count > 1)
-                {
-                    exTypesDict = exTypes.GroupBy(x => x)
-                                         .Select(x => new { Name = x.Key, Count = x.Count() })
-                                         .OrderByDescending(x => x.Count)
-                                         .ToDictionary(x => x.Name, x => x.Count);
-                }
-            }
-            else if (exc.InnerException is not null)
-            {
-                // Collect trace lines of single inner exception
-                traceLines.AddRange(exc.InnerException.StackTrace.Split(Environment.NewLine));
-            }
-            traceLines.AddRange(exc.StackTrace.Split(Environment.NewLine));
-
-            // Iterate over all lines in the stack trace, finding their line numbers and file names
-            List<(string SourceFile, int LineNum)> loadedScriptLineNums = new();
-            int expectedNumScriptTraceLines = 0;
-            try
-            {
-                foreach (string traceLine in traceLines)
-                {
-                    // Only handle trace lines that come from a script
-                    if (traceLine.TrimStart()[..13] == "at Submission") 
-                    {
-                        // Add to total count of expected script trace lines
-                        expectedNumScriptTraceLines++;
-
-                        // Get full path of the script file, within the line
-                        string sourceFile = Regex.Match(traceLine, @"(?<=in ).*\.csx(?=:line \d+)").Value;
-                        if (!File.Exists(sourceFile))
-                            continue;
-
-                        // Try to find line number from the line
-                        const string pattern = ":line ";
-                        int linePos = traceLine.IndexOf(pattern);
-                        if (linePos > 0 && int.TryParse(traceLine[(linePos + pattern.Length)..], out int lineNum))
-                        {
-                            loadedScriptLineNums.Add((sourceFile, lineNum));
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                string excString = exc.ToString();
-
-                int endOfPrevStack = excString.IndexOf("--- End of stack trace from previous location ---");
-                if (endOfPrevStack != -1)
-                {
-                    // Keep only stack trace of the script
-                    excString = excString[..endOfPrevStack];
-                }
-
-                return $"An error occurred while processing the exception text.\nError message - \"{e.Message}\"\nThe unprocessed text is below.\n\n" + excString;
-            }
-
-            // Generate final exception text to show.
-            // If we found the expected number of script trace lines, then use them; otherwise, use the regular exception text.
-            string excText;
-            if (loadedScriptLineNums.Count == expectedNumScriptTraceLines)
-            {                
-                // Read the code for the files to know what the code line associated with the stack trace is
-                Dictionary<string, List<string>> scriptsCode = new();
-                foreach ((string sourceFile, int _) in loadedScriptLineNums)
-                {
-                    if (!scriptsCode.ContainsKey(sourceFile))
-                    {
-                        string scriptCode = null;
-                        try
-                        {
-                            scriptCode = File.ReadAllText(sourceFile, Encoding.UTF8);
-                        }
-                        catch (Exception e)
-                        {
-                            string excString = exc.ToString();
-
-                            return $"An error occurred while processing the exception text.\nError message - \"{e.Message}\"\nThe unprocessed text is below.\n\n" + excString;
-                        }
-                        scriptsCode.Add(sourceFile, scriptCode.Split('\n').ToList());
-                    }
-                }
-
-                // Generate custom stack trace
-                string excLines = string.Join('\n', loadedScriptLineNums.Select(pair =>
-                {
-                    string scriptName = Path.GetFileName(pair.SourceFile);
-                    string scriptLine = scriptsCode[pair.SourceFile][pair.LineNum - 1]; // - 1 because line numbers start from 1
-                    return $"Line {pair.LineNum} in script {scriptName}: {scriptLine}"; 
-                }));
-
-                if (exTypesDict is not null)
-                {
-                    string exTypesStr = string.Join(",\n", exTypesDict.Select(x => $"{x.Key}{((x.Value > 1) ? " (x" + x.Value + ")" : string.Empty)}"));
-                    excText = $"{exc.GetType().FullName}: One on more errors occurred:\n{exTypesStr}\n\nThe current stacktrace:\n{excLines}";
-                }
-                else
-                {
-                    excText = $"{exc.GetType().FullName}: {exc.Message}\n\nThe current stacktrace:\n{excLines}";
-                }
-            }
-            else
-            {
-                string excString = exc.ToString();
-
-                int endOfPrevStack = excString.IndexOf("--- End of stack trace from previous location ---");
-                if (endOfPrevStack != -1)
-                {
-                    // Keep only stack trace of the script
-                    excString = excString[..endOfPrevStack];
-                }
-
-                excText = excString;
-            }
-
-            return excText;
-        }
-
         public void InitializeProgressDialog(string title, string msg)
         {
             scriptDialog ??= new LoaderDialog(title, msg)
@@ -2460,17 +2342,11 @@ namespace UndertaleModTool
             }
             catch (Exception exc)
             {
-                bool isScriptException = exc is ScriptException;
-                string excString = string.Empty;
-
-                if (!isScriptException)
-                    excString = ProcessException(in exc);
-
                 await StopProgressBarUpdater();
 
                 Console.WriteLine(exc.ToString());
                 Dispatcher.Invoke(() => CommandBox.Text = exc.Message);
-                this.ShowError(isScriptException ? exc.Message : excString, "Script error");
+                this.ShowError(ScriptingUtil.PrettifyException(in exc), "Script error");
                 ScriptExecutionSuccess = false;
                 ScriptErrorMessage = exc.Message;
                 ScriptErrorType = "Exception";
@@ -2480,11 +2356,54 @@ namespace UndertaleModTool
             scriptText = null;
         }
 
+        public string GetDecompiledText(string codeName, GlobalDecompileContext context = null, IDecompileSettings settings = null)
+        {
+            return GetDecompiledText(Data.Code.ByName(codeName), context, settings);
+        }
+        public string GetDecompiledText(UndertaleCode code, GlobalDecompileContext context = null, IDecompileSettings settings = null)
+        {
+            if (code.ParentEntry is not null)
+                return $"// This code entry is a reference to an anonymous function within \"{code.ParentEntry.Name.Content}\", decompile that instead.";
+
+            GlobalDecompileContext globalDecompileContext = context is null ? new(Data) : context;
+            try
+            {
+                return code != null
+                    ? new Underanalyzer.Decompiler.DecompileContext(globalDecompileContext, code, settings ?? Data.ToolInfo.DecompilerSettings).DecompileToString()
+                    : "";
+            }
+            catch (Exception e)
+            {
+                return "/*\nDECOMPILER FAILED!\n\n" + e.ToString() + "\n*/";
+            }
+        }
+
+        public string GetDisassemblyText(UndertaleCode code)
+        {
+            if (code.ParentEntry is not null)
+                return $"; This code entry is a reference to an anonymous function within \"{code.ParentEntry.Name.Content}\", disassemble that instead.";
+
+            try
+            {
+                return code != null ? code.Disassemble(Data.Variables, Data.CodeLocals?.For(code)) : "";
+            }
+            catch (Exception e)
+            {
+                return "/*\nDISASSEMBLY FAILED!\n\n" + e.ToString() + "\n*/"; // Please don't
+            }
+        }
+        public string GetDisassemblyText(string codeName)
+        {
+            return GetDisassemblyText(Data.Code.ByName(codeName));
+        }
+
         public string PromptLoadFile(string defaultExt, string filter)
         {
-            OpenFileDialog dlg = new OpenFileDialog();
-            dlg.DefaultExt = defaultExt ?? "win";
-            dlg.Filter = filter ?? "GameMaker data files (.win, .unx, .ios, .droid, audiogroup*.dat)|*.win;*.unx;*.ios;*.droid;audiogroup*.dat|All files|*";
+            OpenFileDialog dlg = new()
+            {
+                DefaultExt = defaultExt ?? "win",
+                Filter = filter ?? DataFileFilter
+            };
             return dlg.ShowDialog() == true ? dlg.FileName : null;
         }
 
@@ -2739,7 +2658,7 @@ namespace UndertaleModTool
             }
 
             string configStr = Version.Contains("Git:") ? "Debug" : "Release";
-            bool isSingleFile = !File.Exists(Path.Combine(ExePath, "UndertaleModTool.dll"));
+            bool isSingleFile = !File.Exists(Path.Join(ExePath, "UndertaleModTool.dll"));
             string assemblyLocation = AppDomain.CurrentDomain.GetAssemblies()
                                       .First(x => x.GetName().Name.StartsWith("System.Collections")).Location; // any of currently used assemblies
             bool isBundled = !Regex.Match(assemblyLocation, @"C:\\Program Files( \(x86\))*\\dotnet\\shared\\").Success;
@@ -2778,7 +2697,7 @@ namespace UndertaleModTool
                 return;
             }
 
-            DateTime currDate = File.GetLastWriteTime(Path.Combine(ExePath, "UndertaleModTool.exe"));
+            DateTime currDate = File.GetLastWriteTime(Path.Join(ExePath, "UndertaleModTool.exe"));
             DateTime lastDate = (DateTime)action["updated_at"];
             if (lastDate.Subtract(currDate).TotalMinutes <= 10)
                 if (this.ShowQuestion("UndertaleModTool is already up to date.\nUpdate anyway?") != MessageBoxResult.Yes)
@@ -2832,10 +2751,10 @@ namespace UndertaleModTool
             string baseDownloadUrl = artifact["archive_download_url"].ToString();
             string downloadUrl = baseDownloadUrl.Replace("api.github.com/repos", "nightly.link").Replace("/zip", ".zip");
 
-            string tempFolder = Path.Combine(Path.GetTempPath(), "UndertaleModTool");
+            string tempFolder = Path.Join(Path.GetTempPath(), "UndertaleModTool");
             Directory.CreateDirectory(tempFolder); // We're about to download, so make sure the download dir actually exists
 
-            string downloadOutput = Path.Combine(tempFolder, "Update.zip.zip");
+            string downloadOutput = Path.Join(tempFolder, "Update.zip.zip");
 
             // It's time to download; let's use a cool progress bar
             scriptDialog = new("Downloading", "Downloading new version...")
@@ -2894,17 +2813,17 @@ namespace UndertaleModTool
                     HideProgressBar();
 
                     // Extract ZIP
-                    string updaterFolderTemp = Path.Combine(tempFolder, "Updater");
+                    string updaterFolderTemp = Path.Join(tempFolder, "Updater");
                     bool extractedSuccessfully = false;
                     try
                     {
                         // Unzip double-zipped update
                         ZipFile.ExtractToDirectory(downloadOutput, tempFolder, true);
-                        File.Move(Path.Combine(tempFolder, $"{patchName}.zip"), Path.Combine(tempFolder, "Update.zip"), true);
+                        File.Move(Path.Join(tempFolder, $"{patchName}.zip"), Path.Join(tempFolder, "Update.zip"), true);
                         File.Delete(downloadOutput);
 
-                        string updaterFolder = Path.Combine(ExePath, "Updater");
-                        if (!File.Exists(Path.Combine(updaterFolder, "UndertaleModToolUpdater.exe")))
+                        string updaterFolder = Path.Join(ExePath, "Updater");
+                        if (!File.Exists(Path.Join(updaterFolder, "UndertaleModToolUpdater.exe")))
                         {
                             this.ShowError("Updater not found! Aborting update, report this to the devs!\nLocation checked: " + updaterFolder);
                             return;
@@ -2918,7 +2837,7 @@ namespace UndertaleModTool
                             Directory.CreateDirectory(updaterFolderTemp);
                             foreach (string file in Directory.GetFiles(updaterFolder))
                             {
-                                File.Copy(file, Path.Combine(updaterFolderTemp, Path.GetFileName(file)));
+                                File.Copy(file, Path.Join(updaterFolderTemp, Path.GetFileName(file)));
                             }
                         }
                         catch (Exception ex)
@@ -2926,7 +2845,7 @@ namespace UndertaleModTool
                             this.ShowError($"Can't copy the updater app to the temporary folder.\n{ex}");
                             return;
                         }
-                        File.WriteAllText(Path.Combine(updaterFolderTemp, "actualAppFolder"), ExePath);
+                        File.WriteAllText(Path.Join(updaterFolderTemp, "actualAppFolder"), ExePath);
 
                         extractedSuccessfully = true;
                     }
@@ -2945,7 +2864,7 @@ namespace UndertaleModTool
                         this.ShowMessage("UndertaleModTool will now close to finish the update.");
 
                         // Invoke updater
-                        Process.Start(new ProcessStartInfo(Path.Combine(updaterFolderTemp, "UndertaleModToolUpdater.exe"))
+                        Process.Start(new ProcessStartInfo(Path.Join(updaterFolderTemp, "UndertaleModToolUpdater.exe"))
                         {
                             WorkingDirectory = updaterFolderTemp
                         });
@@ -2974,70 +2893,95 @@ namespace UndertaleModTool
 
         private async void Command_Run(object sender, ExecutedRoutedEventArgs e)
         {
-            if (Data == null)
+            if (Data is null || FilePath is null)
             {
                 ScriptError("Nothing to run!");
                 return;
             }
-            if ((!WasWarnedAboutTempRun) && SettingsWindow.TempRunMessageShow)
+
+            // Get expected game EXE name
+            string gameExeName = Data?.GeneralInfo?.FileName?.Content;
+            if (gameExeName is null)
             {
-                ScriptMessage(@"WARNING:
+                ScriptError("Null game executable name or location");
+                return;
+            }
+
+            // Change behavior depending on whether a project is loaded currently
+            string saveDataFilePath, gameExePath;
+            bool saveSucceeded;
+            if (Project is not null)
+            {
+                // Project is loaded - try to find game EXE in save directory
+                saveDataFilePath = Project.SaveDataPath;
+                gameExePath = Paths.TryJoinVerifyWithinDirectory(Path.GetDirectoryName(saveDataFilePath), $"{gameExeName}.exe");
+                if (gameExePath is null)
+                {
+                    ScriptError("Failed to find valid game executable path; escaped directory");
+                    return;
+                }
+                if (!File.Exists(gameExePath))
+                {
+                    ScriptError($"Cannot find game executable path, expected to find it at: {gameExePath}");
+                    return;
+                }
+
+                // Save to the file that was designated for the project
+                saveSucceeded = await SaveFile(saveDataFilePath, false);
+            }
+            else
+            {
+                // No project loaded - warn about temp run not permanently saving anything
+                if (!WasWarnedAboutTempRun && SettingsWindow.TempRunMessageShow)
+                {
+                    ScriptMessage(@"WARNING:
 Temp running the game does not permanently 
 save your changes. Please ""Save"" the game
 to save your changes. Closing UndertaleModTool
 without using the ""Save"" option can
 result in loss of work.");
-                WasWarnedAboutTempRun = true;
-            }
-            bool saveOk = true;
-            string oldFilePath = FilePath;
-            bool oldDisableDebuggerState = true;
-            int oldSteamValue = 0;
-            oldDisableDebuggerState = Data.GeneralInfo.IsDebuggerDisabled;
-            oldSteamValue = Data.GeneralInfo.SteamAppID;
-            Data.GeneralInfo.SteamAppID = 0;
-            Data.GeneralInfo.IsDebuggerDisabled = true;
-            string TempFilesFolder = (oldFilePath != null ? Path.Combine(Path.GetDirectoryName(oldFilePath), "MyMod.temp") : "");
-            await SaveFile(TempFilesFolder, false);
-            Data.GeneralInfo.SteamAppID = oldSteamValue;
-            FilePath = oldFilePath;
-            Data.GeneralInfo.IsDebuggerDisabled = oldDisableDebuggerState;
-            if (TempFilesFolder == null)
-            {
-                this.ShowWarning("Temp folder is null.");
-                return;
-            }
-            else if (saveOk)
-            {
-                string gameExeName = Data?.GeneralInfo?.FileName?.Content;
-                if (gameExeName == null || FilePath == null)
+                    WasWarnedAboutTempRun = true;
+                }
+
+                // Try to find game EXE
+                gameExePath = Paths.TryJoinVerifyWithinDirectory(Path.GetDirectoryName(FilePath), $"{gameExeName}.exe");
+                if (gameExePath is null)
                 {
-                    ScriptError("Null game executable name or location");
+                    ScriptError("Failed to find valid game executable path; escaped directory");
                     return;
                 }
-                string gameExePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(FilePath), gameExeName + ".exe");
                 if (!File.Exists(gameExePath))
                 {
-                    ScriptError("Cannot find game executable path, expected: " + gameExePath);
+                    ScriptError($"Cannot find game executable path, expected to find it at: {gameExePath}");
                     return;
                 }
-                if (!File.Exists(TempFilesFolder))
+
+                // Disable debugger/Steam, and save to the folder where the game was loaded from
+                bool oldDisableDebuggerState = Data.GeneralInfo.IsDebuggerDisabled;
+                int oldSteamValue = Data.GeneralInfo.SteamAppID;
+                Data.GeneralInfo.SteamAppID = 0;
+                Data.GeneralInfo.IsDebuggerDisabled = true;
+                saveDataFilePath = Path.Join(Path.GetDirectoryName(FilePath), "mod_temprun.temp");
+                saveSucceeded = await SaveFile(saveDataFilePath, false);
+                Data.GeneralInfo.SteamAppID = oldSteamValue;
+                Data.GeneralInfo.IsDebuggerDisabled = oldDisableDebuggerState;
+            }
+            
+            // Run the game using new data file
+            if (saveSucceeded)
+            {
+                if (!File.Exists(saveDataFilePath))
                 {
-                    ScriptError("Cannot find game path, expected: " + TempFilesFolder);
+                    ScriptError($"Cannot find game path, expected to find it at: {saveDataFilePath}");
                     return;
                 }
-                if (gameExeName != null)
-                    Process.Start(gameExePath, "-game \"" + TempFilesFolder + "\" -debugoutput \"" + Path.ChangeExtension(TempFilesFolder, ".gamelog.txt") + "\"");
+                // TODO: possibly have a setting to add debug output via
+                //          -debugoutput \"{Path.ChangeExtension(saveDataFilePath, ".gamelog.txt")}\"
+                Process.Start(new ProcessStartInfo(gameExePath, ["-game", saveDataFilePath]));
             }
-            else if (!saveOk)
+            else
             {
-                this.ShowWarning("Temp save failed, cannot run.");
-                return;
-            }
-            if (File.Exists(TempFilesFolder))
-            {
-                await Task.Delay(3000);
-                //File.Delete(TempFilesFolder);
+                this.ShowWarning("Save failed, cannot run.");
             }
         }
         private async void Command_RunSpecial(object sender, ExecutedRoutedEventArgs e)
@@ -3080,8 +3024,10 @@ result in loss of work.");
                 RuntimePicker picker = new RuntimePicker();
                 picker.Owner = this;
                 var runtime = picker.Pick(FilePath, Data);
-                if (runtime != null)
-                    Process.Start(runtime.Path, "-game \"" + FilePath + "\" -debugoutput \"" + Path.ChangeExtension(FilePath, ".gamelog.txt") + "\"");
+                if (runtime is not null)
+                {
+                    Process.Start(new ProcessStartInfo(runtime.Path, ["-game", FilePath, "-debugoutput", Path.ChangeExtension(FilePath, ".gamelog.txt")]));
+                }
             }
         }
 
@@ -3138,7 +3084,7 @@ result in loss of work.");
   </TutorialState>
 </assets>");
 
-                Process.Start(runtime.Path, "-game \"" + FilePath + "\" -debugoutput \"" + Path.ChangeExtension(FilePath, ".gamelog.txt") + "\"");
+                Process.Start(new ProcessStartInfo(runtime.Path, ["-game", FilePath, "-debugoutput", Path.ChangeExtension(FilePath, ".gamelog.txt")]));
                 Process.Start(runtime.DebuggerPath, "-d=\"" + Path.ChangeExtension(FilePath, ".yydebug") + "\" -t=\"127.0.0.1\" -tp=" + Data.GeneralInfo.DebuggerPort + " -p=\"" + tempProject + "\"");
             }
             Data.GeneralInfo.IsDebuggerDisabled = origDbg;
@@ -3158,17 +3104,70 @@ result in loss of work.");
 
         public void UpdateObjectLabel(object obj)
         {
-            int foundIndex = obj is UndertaleResource res ? Data.IndexOf(res, false) : -2;
-            string idString;
+            // Try to get index
+            int foundIndex = obj is UndertaleResource res ? Data.IndexOf(res, false) : -1;
 
+			// Determine ID
+			string idString;
             if (foundIndex == -2)
+			{	
                 idString = "None";
+        	}
             else if (foundIndex == -1)
+            {
                 idString = "N/A";
+            }
             else
-                idString = Convert.ToString(foundIndex);
+            {
+                idString = foundIndex.ToString();
+            }
 
-            SetIDString(idString);
+            // Update main label
+            ObjectLabel.Content = $"ID: {idString}";
+
+            // If this object is a project asset (and we're in an open project), then show/update marked for export status
+            if (Project is not null && foundIndex >= 0 && obj is IProjectAsset { ProjectExportable: true } projectAsset)
+            {
+                IsSelectedProjectExportable = true;
+                MarkedForExportGroup.Visibility = Visibility.Visible;
+                MarkedForExportCheckBox.IsChecked = Project.IsAssetMarkedForExport(projectAsset);
+            }
+            else
+            {
+                IsSelectedProjectExportable = false;
+                MarkedForExportGroup.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void MarkedForExport_CheckBoxChanged(object sender, RoutedEventArgs e)
+        {
+            // Ensure we actually have a bool value (could be null)
+            if (MarkedForExportCheckBox.IsChecked is not bool isChecked)
+            {
+                return;
+            }
+
+            // Ensure we're actually in a project
+            if (Project is null)
+            {
+                return;
+            }
+
+            // Ensure our current object is actually a project asset
+            if (Selected is not IProjectAsset projectAsset)
+            {
+                return;
+            }
+
+            // Change state in the project
+            if (isChecked)
+            {
+                Project.MarkAssetForExport(projectAsset);
+            }
+            else
+            {
+                Project.UnmarkAssetForExport(projectAsset);
+            }
         }
 
         public void HighlightObject(object obj, bool silent = true)
@@ -3306,7 +3305,7 @@ result in loss of work.");
             OpenFileDialog dlg = new OpenFileDialog();
 
             dlg.DefaultExt = "win";
-            dlg.Filter = "GameMaker data files (.win, .unx, .ios, .droid)|*.win;*.unx;*.ios;*.droid|All files|*";
+            dlg.Filter = MainDataFileFilter;
 
             if (dlg.ShowDialog() == true)
             {
@@ -3778,6 +3777,346 @@ result in loss of work.");
             }
 
             return false;
+        }
+
+        private void UnloadProject()
+        {
+            Project = null;
+            _projectAssetsWindow?.Close();
+            _projectAssetsWindow = null;
+        }
+
+        private void AssignNewProject(ProjectContext project)
+        {
+            UnloadProject();
+
+            Project = project;
+            project.UnexportedAssetsChanged += (sender, args) =>
+            {
+                UpdateObjectLabel(Selected);
+            };
+            UpdateObjectLabel(Selected);
+        }
+
+        private string ChooseProjectSaveFile(string sourceFilePath)
+        {
+            // Choose data file to save project to (when loading or saving in general)
+            SaveFileDialog saveDataDialog = new()
+            {
+                DefaultExt = "win",
+                Filter = MainDataFileFilter,
+                Title = "Choose destination data file"
+            };
+            if (saveDataDialog.ShowDialog(this) != true)
+            {
+                return null;
+            }
+
+            // Check if the directories are the same and warn if so (note: not a fully exhaustive check, but decent)
+            string saveFilePath = saveDataDialog.FileName;
+            if (Path.GetFullPath(Path.GetDirectoryName(saveFilePath)).Equals(
+                    Path.GetFullPath(Path.GetDirectoryName(sourceFilePath)), StringComparison.OrdinalIgnoreCase))
+            {
+                if (this.ShowQuestionWithCancel("The destination data file is in the same directory as the source data file. This may permanently overwrite external data files. Proceed?", MessageBoxImage.Warning, "Destination file in same directory as source file") != MessageBoxResult.Yes)
+                {
+                    // Abort
+                    return null;
+                }
+            }
+
+            // Check if the save directory is empty, and warn if so
+            try
+            {
+                if (!Directory.EnumerateFileSystemEntries(Path.GetDirectoryName(saveFilePath)).Any())
+                {
+                    this.ShowWarning("Currently, the destination data file's directory is empty. You will likely want to copy all other game files to the destination directory, so that external assets can be loaded correctly (both in-game and in this tool), and so the game can be started.");
+                }
+            }
+            catch (Exception)
+            {
+                // Ignore filesystem errors on the above check; we don't really care
+            }
+
+            return saveFilePath;
+        }
+
+        private async void Command_NewProject(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (Project is not null && Project.HasUnexportedAssets)
+            {
+                if (this.ShowQuestionWithCancel("There are assets marked to be exported in the current project - create a new project and discard all unexported changes?", MessageBoxImage.Warning, "Project already open") != MessageBoxResult.Yes)
+                {
+                    // Abort new project creation
+                    return;
+                }
+            }
+
+            // If necessary, ask for a source data file
+            if (Data is null || FilePath is null)
+            {
+                OpenFileDialog sourceDialog = new()
+                {
+                    DefaultExt = "win",
+                    Filter = DataFileFilter,
+                    Title = "Choose source data file"
+                };
+                if (sourceDialog.ShowDialog(this) != true)
+                {
+                    return;
+                }
+                await LoadFile(sourceDialog.FileName, true);
+
+                // Upon load failure, exit
+                if (Data is null || FilePath is null)
+                {
+                    return;
+                }
+            }
+
+            // Ask for name
+            string projectName = SimpleTextInput("Choose project name", "Choose a name for the new project", $"{Data.GeneralInfo?.DisplayName?.Content ?? "New"} Mod", false, true);
+            if (projectName is null)
+            {
+                // Name prompt was canceled
+                SetUMTConsoleText("Cancelled new project creation.");
+                return;
+            }
+            projectName = projectName.Trim();
+
+            // Prompt location for project file
+            string directory = PromptChooseDirectory();
+            if (directory is null)
+            {
+                // Directory prompt was canceled
+                SetUMTConsoleText("Cancelled new project creation.");
+                return;
+            }
+
+            // Ask for save file directory
+            string saveFilePath = ChooseProjectSaveFile(FilePath);
+            if (saveFilePath is null)
+            {
+                // Save file prompt failed or was cancelled
+                return;
+            }
+
+            // Attempt making project at the specified location (will fail if the folder isn't empty, etc.)
+            ProjectContext newProjectContext;
+            try
+            {
+                newProjectContext = new(Data, FilePath, saveFilePath, Path.Join(directory, "project.json"), projectName, (f) => Dispatcher.Invoke(f));
+            }
+            catch (ProjectException ex)
+            {
+                this.ShowError(ex.Message, "Failed to create new project");
+                SetUMTConsoleText("Project creation failed.");
+                return;
+            }
+            catch (Exception ex)
+            {
+                this.ShowError($"Error occurred when creating new project:\n{ex}");
+                SetUMTConsoleText("Project creation failed.");
+                return;
+            }
+
+            // Start using new project context
+            AssignNewProject(newProjectContext);
+            SetUMTConsoleText($"Project \"{projectName}\" created successfully!");
+        }
+
+        private async void Command_OpenProject(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (Project is not null && Project.HasUnexportedAssets)
+            {
+                if (this.ShowQuestionWithCancel("There are assets marked to be exported in the current project - open another new project and discard all unexported changes?", MessageBoxImage.Warning, "Project already open") != MessageBoxResult.Yes)
+                {
+                    // Abort opening project
+                    return;
+                }
+            }
+
+            // Choose project file to open
+            OpenFileDialog openProjectDialog = new()
+            {
+                DefaultExt = "json",
+                Filter = "UndertaleModTool project files (.json)|*.json|All files|*",
+                Title = "Open project file"
+            };
+            if (openProjectDialog.ShowDialog(this) != true)
+            {
+                return;
+            }
+
+            // If necessary, ask for a source data file
+            string dataFilePathToLoad = null;
+            if (Data is null || FilePath is null)
+            {
+                OpenFileDialog sourceDialog = new()
+                {
+                    DefaultExt = "win",
+                    Filter = DataFileFilter,
+                    Title = "Choose source data file"
+                };
+                if (sourceDialog.ShowDialog(this) != true)
+                {
+                    return;
+                }
+                dataFilePathToLoad = sourceDialog.FileName;
+            }
+
+            // Ask for save file directory
+            string saveFilePath = ChooseProjectSaveFile(dataFilePathToLoad ?? FilePath);
+            if (saveFilePath is null)
+            {
+                // Save file prompt failed or was cancelled
+                return;
+            }
+
+            // Load data file if needed
+            if (dataFilePathToLoad is not null)
+            {
+                await LoadFile(dataFilePathToLoad, true);
+
+                // Upon load failure, exit
+                if (Data is null || FilePath is null)
+                {
+                    return;
+                }
+            }
+
+            // Change main file path to the save data file path
+            string loadFilePath = FilePath;
+            FilePath = saveFilePath;
+
+            // Attempt loading project from the specific JSON
+            ProjectContext newProjectContext = null;
+            IsEnabled = false;
+            await Task.Run(() =>
+            {
+                try
+                {
+                    newProjectContext = ProjectContext.CreateWithDataFilePaths(loadFilePath, saveFilePath, openProjectDialog.FileName);
+                    newProjectContext.Import(Data, null, (f) => Dispatcher.Invoke(f));
+                }
+                catch (ProjectException ex)
+                {
+                    newProjectContext = null;
+                    this.ShowError(ex.Message, "Failed to load project");
+                }
+                catch (Exception ex)
+                {
+                    newProjectContext = null;
+                    this.ShowError($"Error occurred when loading project:\n{ex}");
+                }
+            });
+            IsEnabled = true;
+
+            // Don't assign new project context if load failed
+            if (newProjectContext is null)
+            {
+                SetUMTConsoleText("Project failed to open.");
+                return;
+            }
+
+            // Start using new project context
+            AssignNewProject(newProjectContext);
+            SetUMTConsoleText($"Opened project \"{newProjectContext.Name}\".");
+        }
+        private async void Command_SaveProject(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (Data is null || FilePath is null)
+            {
+                // No data set; this should be impossible, but abort if this does occur
+                return;
+            }
+            if (Project is null)
+            {
+                // No project set; this should also be impossible
+                return;
+            }
+
+            // Attempt saving project
+            IsEnabled = false;
+            bool success = false;
+            await Task.Run(() =>
+            {
+                try
+                {
+                    Project.Export(true);
+                    success = true;
+                }
+                catch (ProjectException ex)
+                {
+                    this.ShowError(ex.Message, "Failed to save project");
+                }
+                catch (Exception ex)
+                {
+                    this.ShowError($"Error occurred when saving project:\n{ex}");
+                }
+            });
+            IsEnabled = true;
+            SetUMTConsoleText(success ? "Saved project successfully." : "Project failed to save.");
+        }
+
+        private void Command_ViewProjectAssets(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (Data is null || FilePath is null)
+            {
+                // No data set; this should be impossible, but abort if this does occur
+                return;
+            }
+            if (Project is null)
+            {
+                // No project set; this should also be impossible
+                return;
+            }
+
+            // Focus existing window if already there...
+            if (_projectAssetsWindow is not null)
+            {
+                _projectAssetsWindow.Focus();
+                return;
+            }
+
+            // Open project save window to handle the rest
+            _projectAssetsWindow = new()
+            {
+                Owner = this
+            };
+            _projectAssetsWindow.Closed += (sender, args) =>
+            {
+                _projectAssetsWindow = null;
+            };
+            _projectAssetsWindow.Show();
+        }
+
+        private void Command_CloseProject(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (Data is null || FilePath is null)
+            {
+                // No data set; this should be impossible, but abort if this does occur
+                return;
+            }
+            if (Project is null)
+            {
+                // No project set; this should also be impossible
+                return;
+            }
+
+            // Ensure user really wants to do this
+            if (Project is not null && Project.HasUnexportedAssets)
+            {
+                MessageBoxResult result = this.ShowQuestionWithCancel("There are assets marked to be exported in the current project. Really close?");
+
+                if (result != MessageBoxResult.Yes)
+                {
+                    return;
+                }
+            }
+
+            UnloadProject();
+            UpdateObjectLabel(Selected);
+            SetUMTConsoleText("Project closed.");
         }
     }
 

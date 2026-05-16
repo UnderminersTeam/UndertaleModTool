@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using UndertaleModLib;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Models;
+using UndertaleModLib.Project;
 using UndertaleModLib.Scripting;
 using UndertaleModLib.Util;
 using static UndertaleModLib.UndertaleReader;
@@ -254,6 +255,38 @@ public partial class Program : IScriptInterface
             });
         });
 
+        // Setup project command
+        Argument<FileInfo> projectBuildFileArgument = new("file")
+        {
+            Description = "Path to the UndertaleModTool project.json file"
+        };
+        Option<FileInfo> projectBuildSourceOption = new("-s", "--source") { Description = "Source data file", Required = true };
+        Option<FileInfo> projectBuildDestinationOption = new("-d", "--destination") { Description = "Destination data file", Required = true };
+
+        Command projectBuildCommand = new("build", "Build a project")
+        {
+            projectBuildFileArgument,
+            verboseOption,
+            projectBuildSourceOption,
+            projectBuildDestinationOption
+        };
+
+        projectBuildCommand.SetAction(parseResult =>
+        {
+            return BuildProject(new ProjectBuildOptions()
+            {
+                ProjectFile = parseResult.GetValue(projectBuildFileArgument),
+                Verbose = parseResult.GetValue(verboseOption),
+                Source = parseResult.GetValue(projectBuildSourceOption),
+                Destination = parseResult.GetValue(projectBuildDestinationOption)
+            });
+        });
+
+        Command projectCommand = new("project", "Subcommands that deal with projects")
+        {
+            projectBuildCommand
+        };
+
         // Merge everything together
         RootCommand rootCommand =
         [
@@ -261,7 +294,8 @@ public partial class Program : IScriptInterface
             loadCommand,
             infoCommand,
             dumpCommand,
-            replaceCommand
+            replaceCommand,
+            projectCommand
         ];
         rootCommand.Description = "CLI tool for modding, decompiling and unpacking Undertale (and other GameMaker games)!";
         ParseResult parseResult = rootCommand.Parse(args);
@@ -285,21 +319,9 @@ public partial class Program : IScriptInterface
         this.Data = ReadDataFile(datafile, WarningHandler, this.Verbose ? MessageHandler : DummyHandler);
 
         FinishedMessageEnabled = true;
-        this.CliScriptOptions = ScriptOptions.Default
-            .AddImports("UndertaleModLib", "UndertaleModLib.Models", "UndertaleModLib.Decompiler",
-                "UndertaleModLib.Scripting", "UndertaleModLib.Compiler",
-                "UndertaleModLib.Util", "System", "System.IO", "System.Collections.Generic",
-                "System.Text.RegularExpressions")
-            .AddReferences(typeof(UndertaleObject).GetTypeInfo().Assembly,
-                GetType().GetTypeInfo().Assembly,
-                typeof(JsonConvert).GetTypeInfo().Assembly,
-                typeof(System.Text.RegularExpressions.Regex).GetTypeInfo().Assembly,
-                typeof(TextureWorker).GetTypeInfo().Assembly,
-                typeof(ImageMagick.MagickImage).GetTypeInfo().Assembly,
-                typeof(Underanalyzer.Decompiler.DecompileContext).Assembly)
-            // "WithEmitDebugInformation(true)" not only lets us to see a script line number which threw an exception,
-            // but also provides other useful debug info when we run UMT in "Debug".
-            .WithEmitDebugInformation(true);
+        this.CliScriptOptions = ScriptingUtil.CreateDefaultScriptOptions()
+                                             .AddReferences(GetType().GetTypeInfo().Assembly,
+                                                            typeof(JsonConvert).GetTypeInfo().Assembly);
     }
 
     public Program(FileInfo datafile, bool verbose, DirectoryInfo output = null)
@@ -586,6 +608,70 @@ public partial class Program : IScriptInterface
         return EXIT_SUCCESS;
     }
 
+    private static int BuildProject(ProjectBuildOptions options)
+    {
+        try
+        {
+            ArgumentNullException.ThrowIfNull(options.ProjectFile);
+            ArgumentNullException.ThrowIfNull(options.Source);
+            ArgumentNullException.ThrowIfNull(options.Destination);
+        }
+        catch (Exception e)
+        {
+            Console.Error.WriteLine(e.Message);
+            return EXIT_FAILURE;
+        }
+
+        // Load source
+        Program program;
+        try
+        {
+            program = new Program(options.Source, options.Verbose);
+        }
+        catch (FileNotFoundException e)
+        {
+            Console.Error.WriteLine(e.Message);
+            return EXIT_FAILURE;
+        }
+
+        program.FilePath = options.Destination.FullName;
+
+        // Load project
+        ProjectContext newProjectContext;
+        try
+        {
+            if (program.Verbose)
+                Console.WriteLine($"Loading project file '{options.ProjectFile.FullName}'");
+
+            newProjectContext = ProjectContext.CreateWithDataFilePaths(options.Source.FullName, options.Destination.FullName, options.ProjectFile.FullName);
+
+            if (program.Verbose)
+                Console.WriteLine($"Importing project into source data file");
+
+            newProjectContext.Import(program.Data);
+        }
+        catch (ProjectException e)
+        {
+            Console.Error.WriteLine($"Failed to load project: {e.Message}");
+            return EXIT_FAILURE;
+        }
+        catch (Exception e)
+        {
+            Console.Error.WriteLine($"Error occurred when loading project:\n{e}");
+            return EXIT_FAILURE;
+        }
+
+        program.Project = newProjectContext;
+
+        // Save destination data file
+        if (program.Verbose)
+            Console.WriteLine($"Saving to destination data file");
+
+        program.SaveDataFile(options.Destination.FullName);
+
+        return EXIT_SUCCESS;
+    }
+
     /// <summary>
     /// Runs the interactive menu indefinitely until user quits out of it.
     /// </summary>
@@ -735,14 +821,20 @@ public partial class Program : IScriptInterface
             return;
         }
 
-        string directory = $"{Output.FullName}/CodeEntries/";
+        string directory = Path.Join(Output.FullName, "CodeEntries");
 
         Directory.CreateDirectory(directory);
 
         if (Verbose)
             Console.WriteLine($"Dumping {codeEntry}");
 
-        File.WriteAllText($"{directory}/{codeEntry}.gml", GetDecompiledText(code));
+        string dest = Paths.TryJoinVerifyWithinDirectory(directory, $"{codeEntry}.gml");
+        if (dest is null)
+        {
+            Console.Error.WriteLine($"Failed to export code entry with name {codeEntry}");
+            return;
+        }
+        File.WriteAllText(dest, GetDecompiledText(code));
     }
 
     /// <summary>
@@ -764,7 +856,7 @@ public partial class Program : IScriptInterface
 
         if (Verbose)
             Console.WriteLine("Writing all strings to disk");
-        File.WriteAllText($"{directory}/strings.txt", combinedText.ToString());
+        File.WriteAllText(Path.Join(directory, "strings.txt"), combinedText.ToString());
     }
 
     /// <summary>
@@ -772,7 +864,7 @@ public partial class Program : IScriptInterface
     /// </summary>
     private void DumpAllTextures()
     {
-        string directory = $"{Output.FullName}/EmbeddedTextures/";
+        string directory = Path.Join(Output.FullName, "EmbeddedTextures");
 
         Directory.CreateDirectory(directory);
 
@@ -785,7 +877,13 @@ public partial class Program : IScriptInterface
                 Console.WriteLine($"{texture.Name} has no image assigned, skipping");
                 continue;
             }
-            using FileStream fs = new($"{directory}/{texture.Name.Content}.png", FileMode.Create);
+            string dest = Paths.TryJoinVerifyWithinDirectory(directory, $"{texture.Name.Content}.png");
+            if (dest is null)
+            {
+                Console.Error.WriteLine($"Failed to export texture with name {texture.Name.Content}");
+                return;
+            }
+            using FileStream fs = new(dest, FileMode.Create);
             texture.TextureData.Image.SavePng(fs);
         }
     }

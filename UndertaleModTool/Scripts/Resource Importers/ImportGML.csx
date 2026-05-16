@@ -29,7 +29,6 @@ bool doLink = ScriptQuestion("Do you want to automatically attempt to link impor
 SetProgressBar(null, "Files", 0, dirFiles.Length);
 StartProgressBarUpdater();
 
-SyncBinding("Strings, Code, CodeLocals, Scripts, GlobalInitScripts, GameObjects, Functions, Variables", true);
 await Task.Run(() =>
 {
     UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
@@ -48,7 +47,6 @@ await Task.Run(() =>
     SetProgressBar(null, "Performing final import...", dirFiles.Length, dirFiles.Length);
     importGroup.Import();
 });
-DisableAllSyncBindings();
 
 await StopProgressBarUpdater();
 HideProgressBar();

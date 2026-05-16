@@ -1,14 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <LangVersion>11</LangVersion>
+    <LangVersion>13.0</LangVersion>
     <OutputType>Library</OutputType>
     <!-- AssemblyInfo -->
     <AssemblyTitle>UndertaleModLib</AssemblyTitle>
     <ProductName>UndertaleModLib</ProductName>
     <Copyright>Copyright ©  2018-2026, licensed under GPLv3</Copyright>
-    <AssemblyVersion>0.8.4.1</AssemblyVersion>
-    <FileVersion>0.8.4.1</FileVersion>
+    <AssemblyVersion>0.9.0.0</AssemblyVersion>
+    <FileVersion>0.9.0.0</FileVersion>
     <DebugType>embedded</DebugType>
     <Platforms>AnyCPU;x64</Platforms>
     <RuntimeIdentifiers>win-x64;win-x86</RuntimeIdentifiers>
@@ -28,7 +28,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="14.12.0" />
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="14.13.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="5.3.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Scripting.Common" Version="5.3.0" />
     <PackageReference Include="PropertyChanged.Fody" Version="4.1.0" />
     <PackageReference Include="SharpZipLib" Version="1.4.2" />
   </ItemGroup>
@@ -47,27 +49,35 @@
     <None Remove="gitversion.txt" />
     <Content Include="GameSpecificData\README.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
     <Content Include="GameSpecificData\Underanalyzer\deltarune.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
     <Content Include="GameSpecificData\Underanalyzer\template.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
     <Content Include="GameSpecificData\Underanalyzer\gamemaker.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
     <Content Include="GameSpecificData\Underanalyzer\undertale.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
     <Content Include="GameSpecificData\Definitions\deltarune.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
     <Content Include="GameSpecificData\Definitions\gamemaker.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
     <Content Include="GameSpecificData\Definitions\undertale.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </Content>
     <EmbeddedResource Include="gitversion.txt" />
   </ItemGroup>
