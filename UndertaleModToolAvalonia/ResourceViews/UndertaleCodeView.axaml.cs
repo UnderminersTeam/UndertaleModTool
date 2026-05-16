@@ -391,13 +391,16 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
             string text = document.GetText(offset, length);
             ClickVisualLineText visualLine = new(text, CurrentContext.VisualLine, length);
 
-            visualLine.Clicked += (text, button) =>
+            visualLine.Clicked += bool (string text, MouseButton button, bool controlKey) =>
             {
+                if (!textEditor.TextArea.IsFocused)
+                    return false;
+
                 if (button != MouseButton.Right)
-                    return;
+                    return false;
 
                 if (!int.TryParse(text, out int id))
-                    return;
+                    return false;
 
                 int documentOffset = visualLine.ParentVisualLine.StartOffset + visualLine.RelativeTextOffset;
 
@@ -486,7 +489,10 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
 
                 codeViewModel.GMLFocused = false;
                 codeViewModel.ASMFocused = false;
+
                 contextMenu.Open(textEditor);
+
+                return true;
             };
 
             return visualLine;
@@ -670,17 +676,20 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
                 return null;
             }
 
-            ClickVisualLineText line = new(text, CurrentContext.VisualLine, length, isFunction ? FunctionBrush : ConstantBrush);
+            ClickVisualLineText visualLine = new(text, CurrentContext.VisualLine, length, isFunction ? FunctionBrush : ConstantBrush);
             if (isFunction)
             {
                 // Make function references bold as well as a different color
-                line.Bold = true;
+                visualLine.Bold = true;
             }
             if (namedResource is not null)
             {
                 // Add click operation when we have a resource
-                line.Clicked += (text, button) =>
+                visualLine.Clicked += bool (string text, MouseButton button, bool controlKey) =>
                 {
+                    if (!textEditor.TextArea.IsFocused)
+                        return false;
+
                     if (button == MouseButton.Right)
                     {
                         contextMenu.Items.Clear();
@@ -707,15 +716,19 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
                         codeViewModel.ASMFocused = false;
 
                         contextMenu.Open(textEditor);
+                        return true;
                     }
-                    else if (button == MouseButton.Middle)
+                    if (button == MouseButton.Middle || (button == MouseButton.Left && controlKey))
                     {
+                        textEditor.TextArea.Focus();
                         codeViewModel.MainVM.TabOpen(namedResource, true);
+                        return true;
                     }
+                    return false;
                 };
             }
 
-            return line;
+            return visualLine;
         }
     }
 
@@ -748,7 +761,7 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
 
     public class ClickVisualLineText : VisualLineText
     {
-        public delegate void ClickHandler(string text, MouseButton button);
+        public delegate bool ClickHandler(string text, MouseButton button, bool controlKey);
         public event ClickHandler? Clicked;
 
         private string Text { get; set; }
@@ -770,33 +783,15 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
             return base.CreateTextRun(startVisualColumn, context);
         }
 
-        bool LinkIsClickable(PointerEventArgs e)
+        protected override void OnPointerPressed(PointerPressedEventArgs e)
         {
-            return !string.IsNullOrEmpty(Text) && e.KeyModifiers.HasFlag(KeyModifiers.Control);
-        }
-
-        protected override void OnQueryCursor(PointerEventArgs e)
-        {
-            if (LinkIsClickable(e))
-            {
-                e.Handled = true;
-            }
-        }
-
-        protected override void OnPointerReleased(PointerEventArgs e)
-        {
-            if (e.Handled)
-                return;
-
             MouseButton button = e.GetCurrentPoint(null).Properties.PointerUpdateKind.GetMouseButton();
 
-            if ((button == MouseButton.Left && LinkIsClickable(e))
-                || button == MouseButton.Middle
-                || button == MouseButton.Right)
+            if (Clicked != null)
             {
-                if (Clicked != null)
+                bool controlKey = e.KeyModifiers.HasFlag(KeyModifiers.Control);
+                if (Clicked(Text, button, controlKey))
                 {
-                    Clicked(Text, button);
                     e.Handled = true;
                 }
             }
