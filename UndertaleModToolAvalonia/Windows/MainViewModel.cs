@@ -74,6 +74,9 @@ public partial class MainViewModel
     [Notify]
     private ObservableCollection<TreeDataGridItem> _TreeDataGridData = [];
 
+    [Notify]
+    private string _FilterText = "";
+
     public event Action<string>? FilterTextChanged;
 
     // Tabs
@@ -210,6 +213,8 @@ public partial class MainViewModel
                     {
                         view.SetFilter(item => AssetNameContainsText(item, filterText));
                     };
+
+                    view.SetFilter(item => AssetNameContainsText(item, FilterText));
 
                     return view.Output;
                 }

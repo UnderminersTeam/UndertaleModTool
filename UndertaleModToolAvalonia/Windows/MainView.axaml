@@ -57,7 +57,7 @@
                         <Button Command="{Binding TabGoBack}" IsEnabled="{Binding TabSelected.CanGoBack, FallbackValue=False}">←</Button>
                         <Button Command="{Binding TabGoForward}" IsEnabled="{Binding TabSelected.CanGoForward, FallbackValue=False}">→</Button>
                     </StackPanel>
-                    <TextBox Name="FilterTextBox" Watermark="Filter by name..." TextChanged="FilterTextBox_TextChanged"/>
+                    <TextBox Name="FilterTextBox" Watermark="Filter by name..." Text="{Binding FilterText}" TextChanged="FilterTextBox_TextChanged"/>
                 </StackPanel>
 
                 <TreeDataGrid Name="MainTreeDataGrid" Grid.Row="1" ShowColumnHeaders="False"

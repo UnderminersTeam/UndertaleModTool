@@ -93,7 +93,7 @@ public partial class MainView : UserControl, IView
     {
         if (DataContext is MainViewModel vm)
         {
-            vm.SetFilterText(FilterTextBox.Text ?? "");
+            vm.SetFilterText(vm.FilterText ?? "");
         }
     }
 
