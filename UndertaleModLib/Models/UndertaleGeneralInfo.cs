@@ -11,7 +11,7 @@ namespace UndertaleModLib.Models;
 /// General info about a data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleGeneralInfo : UndertaleObject, IDisposable
+public partial class UndertaleGeneralInfo : UndertaleObject, IDisposable
 {
     /// <summary>
     /// Information flags a data file can use.

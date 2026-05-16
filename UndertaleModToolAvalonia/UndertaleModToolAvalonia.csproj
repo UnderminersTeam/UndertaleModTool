@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <Version>0.9.0.0</Version>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <AvaloniaResource Include="Assets\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Avalonia" Version="12.0.3" />
+        <PackageReference Include="Avalonia.AvaloniaEdit" Version="12.0.0" />
+        <PackageReference Include="Avalonia.Controls.ColorPicker" Version="12.0.3" />
+        <PackageReference Include="Avalonia.Controls.DataGrid" Version="12.0.0" />
+        <PackageReference Include="Avalonia.Markup.Xaml.Loader" Version="12.0.3" />
+        <PackageReference Include="Avalonia.Skia" Version="12.0.3" />
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="12.0.3" />
+        <PackageReference Include="AvaloniaEdit.TextMate" Version="12.0.0" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="5.3.0" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.8" />
+        <PackageReference Include="PropertyChanged.SourceGenerator" Version="1.1.2">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="SDL3-CS" Version="3.4.2" />
+        <PackageReference Include="SDL3-CS.Native" Version="3.4.2" />
+        <PackageReference Include="SDL3-CS.Native.Mixer" Version="3.2.0" />
+        <PackageReference Include="SkiaSharp" Version="3.119.4-preview.1.1" />
+        <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="3.119.4-preview.1.1" />
+        <PackageReference Include="TreeDataGrid" Version="12.0.0" />
+        <PackageReference Include="Xaml.Behaviors" Version="12.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\UndertaleModLib\UndertaleModLib.csproj" />
+    </ItemGroup>
+</Project>
