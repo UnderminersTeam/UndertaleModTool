@@ -52,7 +52,7 @@ public partial class UndertaleShaderViewModel : IUndertaleResourceViewModel
 
         using Stream stream = await files[0].OpenReadAsync();
         byte[] bytes = new byte[stream.Length];
-        await stream.ReadAsync(bytes);
+        await stream.ReadExactlyAsync(bytes);
 
         UndertaleShader.UndertaleRawShaderData? rawShaderData = GetRawShaderDataFromString(parameter);
 

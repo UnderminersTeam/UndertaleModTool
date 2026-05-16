@@ -8,7 +8,6 @@ using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using PropertyChanged.SourceGenerator;
-using SkiaSharp;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 using static UndertaleModLib.Models.UndertaleRoom;

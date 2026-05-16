@@ -57,7 +57,7 @@ public partial class UndertaleResourceReferenceView : UserControl
 
         if (change.Property == ReferenceTypeProperty)
         {
-            this.Find<TextBox>("TextBox")!.Watermark = "(" + ReferenceType.Name + " reference)";
+            this.Find<TextBox>("TextBox")!.PlaceholderText = "(" + ReferenceType.Name + " reference)";
         }
     }
 
@@ -70,7 +70,8 @@ public partial class UndertaleResourceReferenceView : UserControl
         }
     }
 
-    private void TextBox_DoubleTapped(object? sender, TappedEventArgs e) {
+    private void TextBox_DoubleTapped(object? sender, TappedEventArgs e)
+    {
         Open();
     }
 

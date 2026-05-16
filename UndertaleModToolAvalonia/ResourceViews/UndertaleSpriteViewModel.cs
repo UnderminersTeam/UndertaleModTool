@@ -4,7 +4,6 @@ using System.IO;
 using Avalonia.Platform.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using PropertyChanged.SourceGenerator;
-using SkiaSharp;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 
