@@ -224,8 +224,9 @@ namespace UndertaleModTool.Windows
             // First, try to retrieve source from project (if available)
             if (mainWindow.Project is null || !mainWindow.Project.TryGetCodeSource(code, out string decompiled))
             {
-                // Source isn't available - perform decompile
-                decompiled = new Underanalyzer.Decompiler.DecompileContext(decompileContext, code, mainWindow.Data.ToolInfo.DecompilerSettings).DecompileToString();
+                // Source code isn't available - perform decompilation
+                Underanalyzer.Decompiler.DecompileContext ctx = new(decompileContext, code, mainWindow.Data.ToolInfo.DecompilerSettings);
+                decompiled = ctx.DecompileToString();
             }
             return decompiled;
         }
@@ -239,37 +240,17 @@ namespace UndertaleModTool.Windows
 
             UndertaleData data = mainWindow.Data;
 
-            // TODO: Look at specific exceptions
-
-            if (isInAssembly) {
-                try
-                {
-                    var codeText = isInAssembly
-                        ? code.Disassemble(mainWindow.Data.Variables, mainWindow.Data.CodeLocals?.For(code), mainWindow.Data.CodeLocals is null)
-                        : GetCodeString(code);
-                    SearchInCodeText(code.Name.Content, codeText);
-                }
-                catch (Exception)
-                {
-                    failedList.Add(code.Name.Content);
-                }
-            }
-            else
+            try
             {
-                try
-                {
-
-                    var codeText = TryGetProfileModeGML(code.Name.Content);
-                    if (codeText is null) {
-                        DecompileContext ctx = new(decompileContext, code, data.ToolInfo.DecompilerSettings);
-                        codeText = ctx.DecompileToString();
-                    }
-                    SearchInCodeText(code.Name.Content, codeText);
-                }
-                catch (Exception)
-                {
-                    failedList.Add(code.Name.Content);
-                }
+                string codeText = isInAssembly
+                    ? code.Disassemble(data.Variables, data.CodeLocals?.For(code), data.CodeLocals is null)
+                    : codeText = GetCodeString(code);
+                SearchInCodeText(code.Name.Content, codeText);
+            }
+            catch (Exception)
+            {
+                // TODO: Look at specific exceptions
+                failedList.Add(code.Name.Content);
             }
 
             Interlocked.Increment(ref progressCount);
