@@ -2861,7 +2861,9 @@ UndertaleModTool可能会导致工作丢失。</value>
     <value>欢迎使用 UndertaleModTool！</value>
   </data>
   <data name="Main_WelcomeDescription" xml:space="preserve">
-    <value>打开 data.win 文件开始使用，然后双击左侧的项来查看它们。</value>
+    <value>打开 data.win 文件开始使用，然后双击左侧的项来查看它们。
+
+简体中文的本地化由 Github：@GenOuka (哔哩哔哩：秋冥散雨_GenOuka) 完成。</value>
   </data>
   <data name="Main_WelcomeDescription2" xml:space="preserve">
     <value>新文件已创建，祝您从零开始制作游戏愉快
