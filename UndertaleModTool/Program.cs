@@ -1,4 +1,4 @@
-﻿#pragma warning disable CA1416 // Validate platform compatibility
+#pragma warning disable CA1416 // Validate platform compatibility
 
 using System;
 using System.Collections.Generic;
@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using Microsoft.CodeAnalysis;
+using UndertaleModTool.Localization;
 
 namespace UndertaleModTool
 {
@@ -39,7 +40,7 @@ namespace UndertaleModTool
             catch (Exception e)
             {
                 File.WriteAllText(Path.Join(GetExecutableDirectory(), "crash.txt"), e.ToString());
-                MessageBox.Show(e.ToString());
+                MessageBox.Show(string.Format(LocalizationSource.GetString("Msg_UnhandledException"), e.ToString()));
             }
         }
         private static void GlobalUnhandledExceptionHandler(object sender, UnhandledExceptionEventArgs e)

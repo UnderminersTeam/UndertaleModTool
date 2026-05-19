@@ -1,15 +1,16 @@
-﻿<UserControl x:Class="UndertaleModTool.UndertaleStringReference"
+<UserControl x:Class="UndertaleModTool.UndertaleStringReference"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:UndertaleModTool"
-             mc:Ignorable="d" 
+             xmlns:loc="clr-namespace:UndertaleModTool.Localization"
+             mc:Ignorable="d"
              d:DesignHeight="20" d:DesignWidth="300">
     <UserControl.Resources>
         <local:ContextMenuDark x:Key="contextMenu" Opened="MenuItem_ContextMenuOpened">
-            <MenuItem Header="Open in new tab" Click="OpenInNewTabItem_Click"/>
-            <MenuItem Header="Find all references" Click="FindAllReferencesItem_Click"/>
+            <MenuItem Header="{loc:Loc Common_OpenInNewTab}" Click="OpenInNewTabItem_Click"/>
+            <MenuItem Header="{loc:Loc FindRef_FindAllReferences}" Click="FindAllReferencesItem_Click"/>
         </local:ContextMenuDark>
     </UserControl.Resources>
     <Grid>
@@ -18,7 +19,7 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <local:TextBoxDark Grid.Column="0" x:Name="ObjectText" AllowDrop="True"
-                           ToolTip="This is an string reference. Change the value here to edit this just this value of all referenced values, or drag and drop another string instance from the tree on the left to change the reference"
+                           ToolTip="{loc:Loc Ctrl_StringRefToolTip}"
                            Text="{Binding ObjectReference.Content, RelativeSource={RelativeSource AncestorType=UserControl}, UpdateSourceTrigger=Explicit}"
                            PreviewDragOver="TextBox_DragOver" PreviewDrop="TextBox_Drop" LostFocus="TextBox_LostFocus" PreviewMouseDown="Details_MouseDown">
             <TextBox.Style>
@@ -26,12 +27,12 @@
                     <Style.Resources>
                         <VisualBrush x:Key="EmptyBrush" AlignmentX="Left" AlignmentY="Top" Stretch="None">
                             <VisualBrush.Visual>
-                                <Label Padding="2, 0" Content="(empty)" Foreground="DarkGray"/>
+                                <Label Padding="2, 0" Content="{loc:Loc Common_Empty}" Foreground="DarkGray"/>
                             </VisualBrush.Visual>
                         </VisualBrush>
                         <VisualBrush x:Key="NullBrush" AlignmentX="Left" AlignmentY="Top" Stretch="None">
                             <VisualBrush.Visual>
-                                <Label Padding="2, 0" Content="(null)" Foreground="DarkGray"/>
+                                <Label Padding="2, 0" Content="{loc:Loc Common_Null}" Foreground="DarkGray"/>
                             </VisualBrush.Visual>
                         </VisualBrush>
                     </Style.Resources>
@@ -51,7 +52,7 @@
                 </Style>
             </TextBox.Style>
         </local:TextBoxDark>
-        <local:ButtonDark Grid.Column="1" Click="Details_Click" MouseDown="Details_MouseDown" Content=" ... " ToolTip="Open referenced object">
+        <local:ButtonDark Grid.Column="1" Click="Details_Click" MouseDown="Details_MouseDown" Content=" ... " ToolTip="{loc:Loc Ctrl_OpenReferencedObject}">
             <Button.Style>
                 <Style TargetType="{x:Type Button}">
                     <Style.Triggers>

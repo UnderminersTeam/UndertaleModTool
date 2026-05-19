@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
@@ -18,6 +18,7 @@ using System.Windows.Media.Imaging;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
+using UndertaleModTool.Localization;
 
 namespace UndertaleModTool.Windows
 {
@@ -52,18 +53,18 @@ namespace UndertaleModTool.Windows
             else if (sourceObj is UndertaleString str)
                 sourceObjName = str.Content;
             else if (sourceObj is ValueTuple<UndertaleBackground, UndertaleBackground.TileID> tileTuple)
-                sourceObjName = $"Tile {tileTuple.Item2.ID} of {tileTuple.Item1.Name.Content}";
+                sourceObjName = string.Format(LocalizationSource.GetString("Msg_TileOfFormat"), tileTuple.Item2.ID, tileTuple.Item1.Name.Content);
             else
                 sourceObjName = sourceObj.GetType().Name;
             this.sourceObjName = sourceObjName;
 
-            Title = $"The references of game asset \"{sourceObjName}\"";
-            label.Text = $"The search results for the game asset\n\"{sourceObjName}\".";
+            Title = string.Format(LocalizationSource.GetString("Dialog_ReferencesOfAsset"), sourceObjName);
+            label.Text = string.Format(LocalizationSource.GetString("Msg_ReferencesOfAsset"), sourceObjName);
 
             if (results is null)
                 ResultsTree.Background = new VisualBrush(new Label()
                 {
-                    Content = "No references found.",
+                    Content = LocalizationSource.GetString("Msg_NoReferencesFound"),
                     FontSize = 16
                 }) { Stretch = Stretch.None };
             else
@@ -75,13 +76,13 @@ namespace UndertaleModTool.Windows
 
             this.data = data;
 
-            Title = "The unreferenced game assets";
-            label.Text = "The search results for the unreferenced game assets.";
+            Title = LocalizationSource.GetString("Dialog_UnreferencedGameAssets");
+            label.Text = LocalizationSource.GetString("Msg_UnreferencedGameAssets");
 
             if (results is null)
                 ResultsTree.Background = new VisualBrush(new Label()
                 {
-                    Content = "No unreferenced assets found.",
+                    Content = LocalizationSource.GetString("Msg_NoUnreferencedAssetsFound"),
                     FontSize = 16
                 })
                 { Stretch = Stretch.None };
@@ -159,7 +160,7 @@ namespace UndertaleModTool.Windows
         {
             if (data.FORM is null)
             {
-                this.ShowError($"The object references are stale - a different game data was loaded.");
+                this.ShowError(LocalizationSource.GetString("Msg_ObjectReferencesAreStale"));
                 return;
             }
 
@@ -199,7 +200,7 @@ namespace UndertaleModTool.Windows
 
             if (sb.Length == initContent.Length)
             {
-                this.ShowError("No results to export.");
+                this.ShowError(LocalizationSource.GetString("Msg_NoResultsToExport"));
                 return;
             }
             sb.Remove(sb.Length - 2, 2);
@@ -215,22 +216,22 @@ namespace UndertaleModTool.Windows
                                                                             ? "unreferenced_assets.txt" : $"references_of_asset_{sourceObjName}.txt");
             if (filePath is null)
             {
-                this.ShowError("Failed to choose good output file name; directory escaped.");
+                this.ShowError(LocalizationSource.GetString("Msg_FailedToChooseOutputFileName"));
                 return;
             }
             if (File.Exists(filePath))
-                if (this.ShowQuestion($"File \"{filePath}\" exists.\nOverwrite?") == MessageBoxResult.No)
+                if (this.ShowQuestion(string.Format(LocalizationSource.GetString("Msg_FileExistsOverwrite"), filePath)) == MessageBoxResult.No)
                     return;
 
             File.WriteAllText(filePath, sb.ToString());
-            this.ShowMessage($"The results were successfully saved at path\n\"{filePath}\".");
+            this.ShowMessage(string.Format(LocalizationSource.GetString("Msg_ResultsSavedSuccessfully"), filePath));
         }
 
         private void Open(object obj, bool inNewTab = false)
         {
             if (data.FORM is null)
             {
-                this.ShowError($"The object reference is stale - a different game data was loaded.");
+                this.ShowError(LocalizationSource.GetString("Msg_ObjectReferenceIsStale"));
                 return;
             }
 
@@ -251,7 +252,7 @@ namespace UndertaleModTool.Windows
                 {
                     if (!mainWindow.HasEditorForAsset(inst[^1]))
                     {
-                        this.ShowError("The type of this object reference doesn't have an editor/viewer.");
+                        this.ShowError(LocalizationSource.GetString("Msg_ObjectReferenceNoEditor"));
                         return;
                     }
                 }
@@ -260,14 +261,14 @@ namespace UndertaleModTool.Windows
             {
                 if (!mainWindow.HasEditorForAsset(obj))
                 {
-                    this.ShowError("The type of this object reference doesn't have an editor/viewer.");
+                    this.ShowError(LocalizationSource.GetString("Msg_ObjectReferenceNoEditor"));
                     return;
                 }
 
                 mainWindow.Focus();
 
                 mainWindow.ChangeSelection(obj, inNewTab);
-            } 
+            }
         }
 
         private void MenuItem_ContextMenuOpened(object sender, RoutedEventArgs e)
@@ -276,7 +277,7 @@ namespace UndertaleModTool.Windows
             foreach (var item in menu.Items)
             {
                 var menuItem = item as MenuItem;
-                if ((menuItem.Header as string) == "Find all references")
+                if ((menuItem.Header as string) == LocalizationSource.GetString("Menu_FindAllReferences"))
                 {
                     Type objType = menu.DataContext is object[] inst
                                    ? inst[^1].GetType() : menu.DataContext.GetType();
@@ -311,8 +312,7 @@ namespace UndertaleModTool.Windows
                 }
                 catch (Exception ex)
                 {
-                    this.ShowError("Can't copy the item name to clipboard due to this error:\n" +
-                                   ex.Message + ".\nYou probably should try again.");
+                    this.ShowError(string.Format(LocalizationSource.GetString("Msg_CantCopyToClipboard"), ex.Message));
                 }
             }
         }
@@ -328,7 +328,7 @@ namespace UndertaleModTool.Windows
 
             if (res is null)
             {
-                this.ShowError("The selected object is not an \"UndertaleResource\".");
+                this.ShowError(LocalizationSource.GetString("Msg_SelectedObjectNotUndertaleResource"));
                 return;
             }
 
@@ -340,8 +340,7 @@ namespace UndertaleModTool.Windows
             }
             catch (Exception ex)
             {
-                this.ShowError("An error occurred in the object references related window.\n" +
-                               $"Please report this on GitHub.\n\n{ex}");
+                this.ShowError(string.Format(LocalizationSource.GetString("Msg_ObjectReferencesWindowError"), ex));
             }
             finally
             {

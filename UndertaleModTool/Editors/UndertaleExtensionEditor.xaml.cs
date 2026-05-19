@@ -16,6 +16,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using UndertaleModLib;
 using UndertaleModLib.Models;
+using UndertaleModTool.Localization;
 using static UndertaleModLib.Models.UndertaleExtensionOption;
 
 namespace UndertaleModTool
@@ -77,7 +78,7 @@ namespace UndertaleModTool
             UndertaleExtensionFile obj = new()
             {
                 Kind = UndertaleExtensionKind.Dll,
-                Filename = mainWindow.Data.Strings.MakeString($"NewExtensionFile{lastItem}.dll"),
+                Filename = mainWindow.Data.Strings.MakeString(string.Format(LocalizationSource.GetString("Editor_NewExtensionFile"), lastItem)),
                 Functions = new UndertalePointerList<UndertaleExtensionFunction>()
             };
             extension.Files.Add(obj);
@@ -91,7 +92,7 @@ namespace UndertaleModTool
 
             UndertaleExtensionOption obj = new()
             {
-                Name = mainWindow.Data.Strings.MakeString($"extensionOption{lastItem}"),
+                Name = mainWindow.Data.Strings.MakeString(string.Format(LocalizationSource.GetString("Editor_NewExtensionOption"), lastItem)),
                 Value = mainWindow.Data.Strings.MakeString("", true)
             };
             extension.Options.Add(obj);
@@ -112,9 +113,9 @@ namespace UndertaleModTool
                 
                 case OptionKind.Boolean:
                     if (option.Value.Content.ToLowerInvariant() == "true")
-                        option.Value.Content = "True";
+                        option.Value.Content = LocalizationSource.GetString("Common_True");
                     else
-                        option.Value.Content = "False";
+                        option.Value.Content = LocalizationSource.GetString("Common_False");
                     break;
                 
                 case OptionKind.Number:
@@ -177,13 +178,13 @@ namespace UndertaleModTool
             {
                 case "boolean":
                     if (value is not bool b)
-                        return new ValidationResult(false, "Invalid boolean value");
-                    return (b ? "True" : "False");
-                
+                        return new ValidationResult(false, LocalizationSource.GetString("Msg_InvalidBooleanValue"));
+                    return (b ? LocalizationSource.GetString("Common_True") : LocalizationSource.GetString("Common_False"));
+
                 case "number":
                     if (value is string s && Double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out double _))
                         return s;
-                    return new ValidationResult(false, "Invalid number string");
+                    return new ValidationResult(false, LocalizationSource.GetString("Msg_InvalidNumberString"));
                 
                 default:
                     return null;

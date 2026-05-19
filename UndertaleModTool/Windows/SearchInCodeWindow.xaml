@@ -1,19 +1,20 @@
-﻿<Window
+<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UndertaleModTool"
+        xmlns:loc="clr-namespace:UndertaleModTool.Localization"
         xmlns:UndertaleModTool="clr-namespace:UndertaleModTool" x:Class="UndertaleModTool.Windows.SearchInCodeWindow"
         mc:Ignorable="d"
-        Title="Search in code" Height="500" Width="800" Closing="Window_Closing" IsVisibleChanged="Window_IsVisibleChanged" WindowStartupLocation="CenterScreen"
+        Title="{loc:Loc Dialog_SearchInCode}" Height="500" Width="800" Closing="Window_Closing" IsVisibleChanged="Window_IsVisibleChanged" WindowStartupLocation="CenterScreen"
         FocusManager.FocusedElement="{Binding ElementName=SearchTextBox}" DataContext="{Binding Mode=OneWay, RelativeSource={RelativeSource Self}}">
     <Window.Resources>
         <local:ContextMenuDark x:Key="ListViewItemContextMenu">
-            <MenuItem Header="Open" Click="MenuItemOpen_Click"/>
-            <MenuItem Header="Open in new tab" Click="MenuItemOpenInNewTab_Click"/>
-            <MenuItem Header="Copy" Command="Copy"/>
-            <MenuItem Header="Copy all" Click="MenuItemCopyAll_Click"/>
+            <MenuItem Header="{loc:Loc Common_Open}" Click="MenuItemOpen_Click"/>
+            <MenuItem Header="{loc:Loc Common_OpenInNewTab}" Click="MenuItemOpenInNewTab_Click"/>
+            <MenuItem Header="{loc:Loc Common_Copy}" Command="Copy"/>
+            <MenuItem Header="{loc:Loc Common_CopyAll}" Click="MenuItemCopyAll_Click"/>
         </local:ContextMenuDark>
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
     </Window.Resources>
@@ -32,22 +33,22 @@
             </Grid.RowDefinitions>
             <UndertaleModTool:TextBoxDark x:Name="SearchTextBox" Grid.Row="0" TextWrapping="Wrap" AcceptsReturn="True" Height="36" VerticalScrollBarVisibility="Auto" PreviewKeyDown="SearchTextBox_PreviewKeyDown"/>
             <StackPanel Orientation="Horizontal" Grid.Row="1" Margin="0,5,0,0">
-                <CheckBox Name="CaseSensitiveCheckBox" Content="Case sensitive" Height="15" Margin="0,0,5,0"/>
-                <CheckBox Name="RegexSearchCheckBox" Content="Regex search" Height="15" Margin="0,0,5,0"/>
-                <CheckBox Name="MultilineRegexCheckBox" Content="Multiline regex" Height="15" Margin="0,0,5,0"
+                <CheckBox Name="CaseSensitiveCheckBox" Content="{loc:Loc SearchInCode_CaseSensitive}" Height="15" Margin="0,0,5,0"/>
+                <CheckBox Name="RegexSearchCheckBox" Content="{loc:Loc SearchInCode_RegexSearch}" Height="15" Margin="0,0,5,0"/>
+                <CheckBox Name="MultilineRegexCheckBox" Content="{loc:Loc SearchInCode_MultilineRegex}" Height="15" Margin="0,0,5,0"
                           Visibility="{Binding IsChecked, ElementName=RegexSearchCheckBox, Converter={StaticResource BoolToVisConverter}}"/>
-                <CheckBox Name="InAssemblyCheckBox" Content="In assembly" Height="15" Margin="0,0,12,0"/>
+                <CheckBox Name="InAssemblyCheckBox" Content="{loc:Loc SearchInCode_InAssembly}" Height="15" Margin="0,0,12,0"/>
             </StackPanel>
-            <Expander Name="FilterByNameExpander" Grid.Row="2" Margin="0,0,0,6" Header="Filter by code name" IsExpanded="False">
+            <Expander Name="FilterByNameExpander" Grid.Row="2" Margin="0,0,0,6" Header="{loc:Loc SearchInCode_FilterByCodeName}" IsExpanded="False">
                 <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
                     <UndertaleModTool:TextBoxDark x:Name="NameFilterTextBox" AcceptsReturn="False" Height="18" Width="280" HorizontalAlignment="Left" Margin="0,0,10,0"
                                                   IsEnabled="{Binding IsExpanded, ElementName=FilterByNameExpander}"/>
-                    <CheckBox Name="NameCaseSensitiveCheckBox" Content="Case sensitive" Height="15" Margin="0,0,5,0" IsEnabled="{Binding IsExpanded, ElementName=FilterByNameExpander}"/>
-                    <CheckBox Name="NameRegexSearchCheckBox" Content="Regex search" Height="15" Margin="0,0,5,0" IsEnabled="{Binding IsExpanded, ElementName=FilterByNameExpander}"/>
+                    <CheckBox Name="NameCaseSensitiveCheckBox" Content="{loc:Loc SearchInCode_CaseSensitive}" Height="15" Margin="0,0,5,0" IsEnabled="{Binding IsExpanded, ElementName=FilterByNameExpander}"/>
+                    <CheckBox Name="NameRegexSearchCheckBox" Content="{loc:Loc SearchInCode_RegexSearch}" Height="15" Margin="0,0,5,0" IsEnabled="{Binding IsExpanded, ElementName=FilterByNameExpander}"/>
                 </StackPanel>
             </Expander>
 
-            <UndertaleModTool:ButtonDark x:Name="SearchButton" Grid.Row="1" Content="Search" Width="68" Margin="0,5,0,0" FontSize="14"
+            <UndertaleModTool:ButtonDark x:Name="SearchButton" Grid.Row="1" Content="{loc:Loc Common_Search}" Width="68" Margin="0,5,0,0" FontSize="14"
                                          Click="SearchButton_Click" HorizontalAlignment="Right" IsDefault="True"/>
 
             <ListView ItemsSource="{Binding Results}" Name="ResultsListView" Grid.Row="3" Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}">
@@ -93,9 +94,9 @@
                                 <Setter Property="Foreground" Value="Black" />
                             </Style>
                         </GridView.ColumnHeaderContainerStyle>
-                        <GridViewColumn Header="Code" DisplayMemberBinding="{Binding Code}" Width="auto"/>
-                        <GridViewColumn Header="Line" DisplayMemberBinding="{Binding LineNumber}" Width="auto"/>
-                        <GridViewColumn Header="Text" DisplayMemberBinding="{Binding LineText}" Width="auto"/>
+                        <GridViewColumn Header="{loc:Loc SearchInCode_CodeColumn}" DisplayMemberBinding="{Binding Code}" Width="auto"/>
+                        <GridViewColumn Header="{loc:Loc SearchInCode_LineColumn}" DisplayMemberBinding="{Binding LineNumber}" Width="auto"/>
+                        <GridViewColumn Header="{loc:Loc SearchInCode_TextColumn}" DisplayMemberBinding="{Binding LineText}" Width="auto"/>
                     </GridView>
                 </ListView.View>
             </ListView>

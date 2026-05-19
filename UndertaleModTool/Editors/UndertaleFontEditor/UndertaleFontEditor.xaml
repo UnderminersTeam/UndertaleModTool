@@ -1,10 +1,11 @@
-﻿<local:DataUserControl x:Class="UndertaleModTool.UndertaleFontEditor"
+<local:DataUserControl x:Class="UndertaleModTool.UndertaleFontEditor"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UndertaleModTool"
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+             xmlns:loc="clr-namespace:UndertaleModTool.Localization"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleFont}">
     <Grid>
@@ -49,29 +50,29 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="{loc:Loc Common_Name}"/>
         <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Display name</TextBlock>
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="{loc:Loc Editor_DisplayName}"/>
         <local:UndertaleStringReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding DisplayName}"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Font size</TextBlock>
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" Text="{loc:Loc Editor_FontSize}"/>
         <Grid Grid.Row="2" Grid.Column="1" Margin="3">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <local:TextBoxDark Grid.Column="0" Text="{Binding EmSize}"/>
-            <TextBlock Grid.Column="1" Text=" em"/>
+            <TextBlock Grid.Column="1" Text="{loc:Loc Editor_EmUnit}"/>
         </Grid>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Bold</TextBlock>
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="{loc:Loc Editor_Bold}"/>
         <CheckBox Grid.Row="3" Grid.Column="1" Margin="3" IsChecked="{Binding Bold}"/>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Italic</TextBlock>
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Text="{loc:Loc Editor_Italic}"/>
         <CheckBox Grid.Row="4" Grid.Column="1" Margin="3" IsChecked="{Binding Italic}"/>
 
-        <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Range</TextBlock>
+        <TextBlock Grid.Row="5" Grid.Column="0" Margin="3" Text="{loc:Loc Editor_Range}"/>
         <Grid Grid.Row="5" Grid.Column="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -79,20 +80,20 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <local:TextBoxDark Grid.Column="0" Margin="3" Text="{Binding RangeStart}"/>
-            <TextBlock Grid.Column="1" Margin="3" Text=" - "/>
+            <TextBlock Grid.Column="1" Margin="3" Text="{loc:Loc Editor_RangeSeparator}"/>
             <local:TextBoxDark Grid.Column="2" Margin="3" Text="{Binding RangeEnd}"/>
         </Grid>
 
-        <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">Charset</TextBlock>
+        <TextBlock Grid.Row="6" Grid.Column="0" Margin="3" Text="{loc:Loc Editor_Charset}"/>
         <local:TextBoxDark Grid.Row="6" Grid.Column="1" Margin="3" Text="{Binding Charset}"/>
 
-        <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">Anti Aliasing</TextBlock>
+        <TextBlock Grid.Row="7" Grid.Column="0" Margin="3" Text="{loc:Loc Editor_AntiAliasing}"/>
         <local:TextBoxDark Grid.Row="7" Grid.Column="1" Margin="3" Text="{Binding AntiAliasing}"/>
 
-        <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Texture</TextBlock>
+        <TextBlock Grid.Row="8" Grid.Column="0" Margin="3" Text="{loc:Loc Common_Texture}"/>
         <local:UndertaleObjectReference Grid.Row="8" Grid.Column="1" Margin="3" ObjectReference="{Binding Texture}" ObjectType="{x:Type undertale:UndertaleTexturePageItem}"/>
 
-        <TextBlock Grid.Row="9" Grid.Column="0" Margin="3">Scale</TextBlock>
+        <TextBlock Grid.Row="9" Grid.Column="0" Margin="3" Text="{loc:Loc Common_Scale}"/>
         <Grid Grid.Row="9" Grid.Column="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -102,29 +103,28 @@
             <local:TextBoxDark Grid.Column="1" Margin="3" Text="{Binding ScaleY}"/>
         </Grid>
 
-        <TextBlock Grid.Row="10" Grid.Column="0" Margin="3" Text="Ascender"
+        <TextBlock Grid.Row="10" Grid.Column="0" Margin="3" Text="{loc:Loc Editor_Ascender}"
                    Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2022.2}"/>
         <local:TextBoxDark Grid.Row="10" Grid.Column="1" Margin="3" Text="{Binding Ascender}"
                            Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2022.2}"/>
 
-        <TextBlock Grid.Row="11" Grid.Column="0" Margin="3" Text="Ascender offset"
+        <TextBlock Grid.Row="11" Grid.Column="0" Margin="3" Text="{loc:Loc Editor_AscenderOffset}"
                    Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2022.2}"/>
         <local:TextBoxDark Grid.Row="11" Grid.Column="1" Margin="3" Text="{Binding AscenderOffset}"
                            Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2022.2}"/>
 
-        <TextBlock Grid.Row="12" Grid.Column="0" Margin="3" Text="SDF spread value"
+        <TextBlock Grid.Row="12" Grid.Column="0" Margin="3" Text="{loc:Loc Editor_SDFSpreadValue}"
                    Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2023.2}"/>
         <local:TextBoxDark Grid.Row="12" Grid.Column="1" Margin="3" Text="{Binding SDFSpread}"
                            Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2023.2}"/>
 
-        <TextBlock Grid.Row="13" Grid.Column="0" Margin="3" Text="Line height"
+        <TextBlock Grid.Row="13" Grid.Column="0" Margin="3" Text="{loc:Loc Editor_LineHeight}"
                    Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2023.6}"/>
         <local:TextBoxDark Grid.Row="13" Grid.Column="1" Margin="3" Text="{Binding LineHeight}"
                            Visibility="{Binding Mode=OneTime, Converter={StaticResource IsVersionAtLeastConverter}, ConverterParameter=2023.6}"/>
 
-        <TextBlock Grid.Row="14" Grid.ColumnSpan="2" Margin="3,30,3,3" HorizontalAlignment="Center" Foreground="DarkGray" FontStyle="Italic" TextWrapping="Wrap" TextAlignment="Center">
-            Hint: You can click on any glyph here to highlight it in the "Glyphs".
-        </TextBlock>
+        <TextBlock Grid.Row="14" Grid.ColumnSpan="2" Margin="3,30,3,3" HorizontalAlignment="Center" Foreground="DarkGray" FontStyle="Italic" TextWrapping="Wrap" TextAlignment="Center"
+                   Text="{loc:Loc Editor_GlyphHint}"/>
         <Viewbox Grid.Row="15" Grid.ColumnSpan="2" Margin="3" Stretch="Uniform" StretchDirection="DownOnly">
             <Grid MouseDown="Grid_MouseDown" Cursor="Hand">
                 <Grid.Background>
@@ -221,15 +221,15 @@
                     <TextBlock>
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
-                                <Setter Property="Text" Value="Edit a selected glyph rectangle"/>
+                                <Setter Property="Text" Value="{loc:Loc Editor_EditSelectedGlyphRectangle}"/>
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding SelectedItem.SourceWidth, ElementName=GlyphsGrid, Mode=OneWay, FallbackValue=-1}"
                                                  Value="0">
-                                        <Setter Property="Text" Value="Select a region of an empty glyph"/>
+                                        <Setter Property="Text" Value="{loc:Loc Editor_SelectRegionEmptyGlyph}"/>
                                     </DataTrigger>
                                     <DataTrigger Binding="{Binding SelectedItem.SourceHeight, ElementName=GlyphsGrid, Mode=OneWay, FallbackValue=-1}"
                                                  Value="0">
-                                        <Setter Property="Text" Value="Select a region of an empty glyph"/>
+                                        <Setter Property="Text" Value="{loc:Loc Editor_SelectRegionEmptyGlyph}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -238,10 +238,10 @@
                 </Button.Content>
             </local:ButtonDark>
 
-            <local:ButtonDark Margin="3" Width="200" Content="Create an empty glyph" Click="CreateGlyphButton_Click"/>
+            <local:ButtonDark Margin="3" Width="200" Content="{loc:Loc Editor_CreateEmptyGlyph}" Click="CreateGlyphButton_Click"/>
         </StackPanel>
 
-        <TextBlock Name="GlyphsLabel" Grid.Row="17" Grid.ColumnSpan="2" Margin="3" HorizontalAlignment="Left">Glyphs:</TextBlock>
+        <TextBlock Name="GlyphsLabel" Grid.Row="17" Grid.ColumnSpan="2" Margin="3" HorizontalAlignment="Left" Text="{loc:Loc Editor_Glyphs}"/>
         <Grid Grid.Row="18" Grid.ColumnSpan="2" MaxHeight="370" Margin="3">
             <local:DataGridDark x:Name="GlyphsGrid" ItemsSource="{Binding Glyphs, Mode=OneWay}"
                                 AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow"
@@ -265,7 +265,7 @@
                                 <Setter Property="Template">
                                     <Setter.Value>
                                         <ControlTemplate>
-                                            <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                            <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic" Text="{loc:Loc Common_DoubleClickToAdd}"/>
                                         </ControlTemplate>
                                     </Setter.Value>
                                 </Setter>
@@ -273,17 +273,17 @@
                         </Style.Triggers>
                     </Style>
                     <Style x:Key="kerningButtonStyle" TargetType="Button">
-                        <Setter Property="Content" Value="Edit"/>
+                        <Setter Property="Content" Value="{loc:Loc Common_Edit}"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding Kerning.Count, Mode=OneWay, FallbackValue=0}"
                                          Value="0">
-                                <Setter Property="Content" Value="Add"/>
+                                <Setter Property="Content" Value="{loc:Loc Common_Add}"/>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </DataGrid.Resources>
                 <DataGrid.Columns>
-                    <DataGridTemplateColumn Header="Char" Width="*">
+                    <DataGridTemplateColumn Header="{loc:Loc Editor_Char}" Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <local:TextBoxDark Text="{Binding Character, Mode=TwoWay, UpdateSourceTrigger=LostFocus, Converter={StaticResource CharConverter}}"
@@ -302,7 +302,7 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridTemplateColumn Header="Source position/size" Width="*">
+                    <DataGridTemplateColumn Header="{loc:Loc Editor_SourcePositionSize}" Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Grid>
@@ -323,9 +323,9 @@
                     <DataGridTemplateColumn Width="*">
                         <DataGridTemplateColumn.Header>
                             <StackPanel Orientation="Horizontal" ToolTipService.InitialShowDelay="250"
-                                    ToolTip="The number of pixels to shift right when advancing to the next character.&#13;It's highlighed in green on the texture above.">
-                                <TextBlock Text="Shift" Margin="0,0,3,0"/>
-                                <TextBlock Text="(?)" Foreground="Gray" FontSize="11" Margin="0,0,3,0"/>
+                                    ToolTip="{loc:Loc Editor_ShiftTooltip}">
+                                <TextBlock Text="{loc:Loc Editor_Shift}" Margin="0,0,3,0"/>
+                                <TextBlock Text="{loc:Loc Editor_QuestionMark}" Foreground="Gray" FontSize="11" Margin="0,0,3,0"/>
                                 <Rectangle Width="7" Height="7" Fill="LawnGreen"/>
                             </StackPanel>
                         </DataGridTemplateColumn.Header>
@@ -338,9 +338,9 @@
                     <DataGridTemplateColumn Width="*">
                         <DataGridTemplateColumn.Header>
                             <StackPanel Orientation="Horizontal" ToolTipService.InitialShowDelay="250"
-                                    ToolTip="The number of pixels to horizontally offset the rendering of the glyph.&#13;It's highlighed in blue on the texture above.">
-                                <TextBlock Text="Offset" Margin="0,0,3,0"/>
-                                <TextBlock Text="(?)" Foreground="Gray" FontSize="11" Margin="0,0,3,0"/>
+                                    ToolTip="{loc:Loc Editor_OffsetTooltip}">
+                                <TextBlock Text="{loc:Loc Editor_Offset}" Margin="0,0,3,0"/>
+                                <TextBlock Text="{loc:Loc Editor_QuestionMark}" Foreground="Gray" FontSize="11" Margin="0,0,3,0"/>
                                 <Rectangle Width="7" Height="7" Fill="Blue"/>
                             </StackPanel>
                         </DataGridTemplateColumn.Header>
@@ -350,7 +350,7 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridTemplateColumn Header="Kerning" Width="60">
+                    <DataGridTemplateColumn Header="{loc:Loc Editor_Kerning}" Width="60">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <local:ButtonDark Margin="0,-1" Click="EditKerningButton_Click" Style="{StaticResource kerningButtonStyle}"/>
@@ -382,7 +382,7 @@
                                 </Image.Style>
                             </Image>
                         </local:ButtonDark>
-                        <TextBlock Text="Go back" Margin="3,-1,0,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="{loc:Loc Editor_GoBack}" Margin="3,-1,0,0" VerticalAlignment="Center"/>
                     </StackPanel>
 
                     <local:DataGridDark x:Name="GlyphKerningGrid" IsEnabled="False" Visibility="{Binding Visibility, Mode=OneWay, ElementName=GlyphKerningBorder}"
@@ -407,7 +407,7 @@
                                         <Setter Property="Template">
                                             <Setter.Value>
                                                 <ControlTemplate>
-                                                    <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                                    <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic" Text="{loc:Loc Common_DoubleClickToAdd}"/>
                                                 </ControlTemplate>
                                             </Setter.Value>
                                         </Setter>
@@ -416,7 +416,7 @@
                             </Style>
                         </DataGrid.Resources>
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="Preceeding char" Width="Auto">
+                            <DataGridTemplateColumn Header="{loc:Loc Editor_PreceedingChar}" Width="Auto">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <local:TextBoxDark Text="{Binding Character, Mode=TwoWay, UpdateSourceTrigger=LostFocus, Converter={StaticResource CharConverter}}"
@@ -434,7 +434,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header="Add. shift" Width="Auto">
+                            <DataGridTemplateColumn Header="{loc:Loc Editor_AddShift}" Width="Auto">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <local:TextBoxDark Text="{Binding ShiftModifier, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
@@ -448,18 +448,15 @@
         </Grid>
 
         <TextBlock Grid.Row="19" Grid.ColumnSpan="2" Margin="3" TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center">
-            Note that the glyphs need to be specified in ascending order.<LineBreak/>
-            Press the button below to sort them appropriately.
+            <Run Text="{loc:Loc Editor_GlyphSortNote1}"/><LineBreak/><Run Text="{loc:Loc Editor_GlyphSortNote2}"/>
         </TextBlock>
         <local:ButtonDark Grid.Row="20" Grid.ColumnSpan="2" Margin="3" Click="Button_Sort_Click"
-                          Content="Sort glyphs" Width="200" FontSize="14" Style="{StaticResource glyphsOperationButtonStyle}"/>
+                          Content="{loc:Loc Editor_SortGlyphs}" Width="200" FontSize="14" Style="{StaticResource glyphsOperationButtonStyle}"/>
 
         <TextBlock Grid.Row="21" Grid.ColumnSpan="2" Margin="3,6,3,3" TextWrapping="Wrap" HorizontalAlignment="Center" TextAlignment="Center">
-            Also, if you have added new characters or changed the character<LineBreak/>
-            of an existing glyph, you should update the font range.<LineBreak/>
-            Press the button below to do that.
+            <Run Text="{loc:Loc Editor_UpdateRangeNote1}"/><LineBreak/><Run Text="{loc:Loc Editor_UpdateRangeNote2}"/><LineBreak/><Run Text="{loc:Loc Editor_UpdateRangeNote3}"/>
         </TextBlock>
         <local:ButtonDark Grid.Row="22" Grid.ColumnSpan="2" Margin="3" Click="Button_UpdateRange_Click"
-                          Content="Update range" Width="200" FontSize="14" Style="{StaticResource glyphsOperationButtonStyle}"/>
+                          Content="{loc:Loc Editor_UpdateRange}" Width="200" FontSize="14" Style="{StaticResource glyphsOperationButtonStyle}"/>
     </Grid>
 </local:DataUserControl>

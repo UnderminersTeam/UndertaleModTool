@@ -1,4 +1,4 @@
-﻿using Microsoft.Win32;
+using Microsoft.Win32;
 using NAudio.Vorbis;
 using NAudio.Wave;
 using System;
@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using UndertaleModLib.Models;
+using UndertaleModTool.Localization;
 
 namespace UndertaleModTool
 {
@@ -26,7 +27,7 @@ namespace UndertaleModTool
             {
                 if (DataContext is not UndertaleEmbeddedAudio target)
                 {
-                    return "Unknown";
+                    return LocalizationSource.GetString("Common_Unknown");
                 }
 
                 if (IsWav(target.Data))
@@ -37,7 +38,7 @@ namespace UndertaleModTool
                 {
                     return "OGG";
                 }
-                return "Unknown";
+                return LocalizationSource.GetString("Common_Unknown");
             }
         }
 
@@ -62,20 +63,20 @@ namespace UndertaleModTool
 
             OpenFileDialog dlg = new();
 
-            if (IsWav(target.Data)) 
+            if (IsWav(target.Data))
             {
                 dlg.DefaultExt = ".wav";
-                dlg.Filter = "WAV files|*.wav|All files|*";
-            } 
-            else if (IsOgg(target.Data)) 
+                dlg.Filter = LocalizationSource.GetString("FileFilter_WAV") + "|*.wav|" + LocalizationSource.GetString("FileFilter_AllFiles") + "|*";
+            }
+            else if (IsOgg(target.Data))
             {
                 dlg.DefaultExt = ".ogg";
-                dlg.Filter = "OGG files|*.ogg|All files|*";
-            } 
-            else 
+                dlg.Filter = LocalizationSource.GetString("FileFilter_OGG") + "|*.ogg|" + LocalizationSource.GetString("FileFilter_AllFiles") + "|*";
+            }
+            else
             {
                 dlg.DefaultExt = "";
-                dlg.Filter = "All files|*";
+                dlg.Filter = LocalizationSource.GetString("FileFilter_AllFiles") + "|*";
             }
 
             if (dlg.ShowDialog() == true)
@@ -83,9 +84,9 @@ namespace UndertaleModTool
                 try
                 {
                     byte[] data = File.ReadAllBytes(dlg.FileName);
-                    if (!IsWav(data) && !IsOgg(data)) 
+                    if (!IsWav(data) && !IsOgg(data))
                     {
-                        if (mainWindow.ShowQuestionWithCancel("Warning: File being imported is not a WAV or OGG. Import anyway?\r\n\r\nThis may corrupt the sound.", MessageBoxImage.Warning, "Unknown format") != MessageBoxResult.Yes)
+                        if (mainWindow.ShowQuestionWithCancel(LocalizationSource.GetString("Msg_ImportNonAudioWarning"), MessageBoxImage.Warning, LocalizationSource.GetString("Dialog_UnknownFormat")) != MessageBoxResult.Yes)
                         {
                             return;
                         }
@@ -93,18 +94,17 @@ namespace UndertaleModTool
                     else if ((IsWav(target.Data) && IsOgg(data)) || (IsOgg(target.Data) && IsWav(data)))
                     {
                         if (mainWindow.ShowQuestionWithCancel(
-                            "Warning: Filetype being imported does not match existing filetype. Import anyway?\r\n\r\n" +
-                            "This may corrupt the sound, unless sound asset compression settings are adjusted as well.", MessageBoxImage.Warning, "Format mismatch") != MessageBoxResult.Yes)
+                            LocalizationSource.GetString("Msg_ImportFormatMismatchWarning"), MessageBoxImage.Warning, LocalizationSource.GetString("Dialog_FormatMismatch")) != MessageBoxResult.Yes)
                         {
                             return;
                         }
-                    } 
+                    }
                     target.Data = data;
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FileType)));
                 }
                 catch (Exception ex)
                 {
-                    mainWindow.ShowError("Failed to import file: " + ex.Message, "Failed to import file");
+                    mainWindow.ShowError(string.Format(LocalizationSource.GetString("Msg_FailedToImportFile"), ex.Message), LocalizationSource.GetString("Dialog_FailedToImportFile"));
                 }
             }
         }
@@ -115,20 +115,20 @@ namespace UndertaleModTool
 
             SaveFileDialog dlg = new SaveFileDialog();
 
-            if (IsWav(target.Data)) 
+            if (IsWav(target.Data))
             {
                 dlg.DefaultExt = ".wav";
-                dlg.Filter = "WAV files|*.wav|All files|*";
-            } 
-            else if (IsOgg(target.Data)) 
+                dlg.Filter = LocalizationSource.GetString("FileFilter_WAV") + "|*.wav|" + LocalizationSource.GetString("FileFilter_AllFiles") + "|*";
+            }
+            else if (IsOgg(target.Data))
             {
                 dlg.DefaultExt = ".ogg";
-                dlg.Filter = "OGG files|*.ogg|All files|*";
-            } 
-            else 
+                dlg.Filter = LocalizationSource.GetString("FileFilter_OGG") + "|*.ogg|" + LocalizationSource.GetString("FileFilter_AllFiles") + "|*";
+            }
+            else
             {
                 dlg.DefaultExt = "";
-                dlg.Filter = "All files|*";
+                dlg.Filter = LocalizationSource.GetString("FileFilter_AllFiles") + "|*";
             }
 
             if (dlg.ShowDialog() == true)
@@ -139,7 +139,7 @@ namespace UndertaleModTool
                 }
                 catch (Exception ex)
                 {
-                    mainWindow.ShowError("Failed to export file: " + ex.Message, "Failed to export file");
+                    mainWindow.ShowError(string.Format(LocalizationSource.GetString("Msg_FailedToExportFile"), ex.Message), LocalizationSource.GetString("Dialog_FailedToExportFile"));
                 }
             }
         }
@@ -178,13 +178,13 @@ namespace UndertaleModTool
                 }
                 else
                 {
-                    mainWindow.ShowError("Failed to play audio!\r\nNot a WAV or OGG.", "Audio failure");
+                    mainWindow.ShowError(LocalizationSource.GetString("Msg_FailedToPlayAudioNotWavOgg"), LocalizationSource.GetString("Dialog_AudioFailure"));
                 }
             } 
             catch (Exception ex)
             {
                 waveOut = null;
-                mainWindow.ShowError("Failed to play audio!\r\n" + ex.Message, "Audio failure");
+                mainWindow.ShowError(string.Format(LocalizationSource.GetString("Msg_FailedToPlayAudio"), ex.Message), LocalizationSource.GetString("Dialog_AudioFailure"));
             }
         }
 

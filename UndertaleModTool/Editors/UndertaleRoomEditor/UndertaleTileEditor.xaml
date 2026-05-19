@@ -1,4 +1,4 @@
-﻿<Window x:Class="UndertaleModTool.UndertaleTileEditor"
+<Window x:Class="UndertaleModTool.UndertaleTileEditor"
         IsVisibleChanged="Window_IsVisibleChanged" Closing="Window_Closing" Closed="Window_Closed"
         MouseLeave="Window_MouseLeave"
         MouseUp="Tiles_MouseUp" MouseMove="Tiles_MouseMove"
@@ -7,15 +7,15 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UndertaleModTool"
+        xmlns:loc="clr-namespace:UndertaleModTool.Localization"
         mc:Ignorable="d"
-        Title="Edit Tile Data"
+        Title="{loc:Loc Tile_EditTitle}"
         Height="400" Width="800" MinHeight="300" MinWidth="300"
         WindowStartupLocation="CenterOwner"
 >
     <Window.Resources>
         <local:CachedTileDataLoader x:Key="CachedTileDataLoader"/>
         <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
-        <!-- (built-in converter) -->
         <Style x:Key="NearestNeighbor">
             <Setter Property="RenderOptions.BitmapScalingMode" Value="NearestNeighbor"/>
             <Setter Property="UIElement.SnapsToDevicePixels" Value="True"/>
@@ -78,52 +78,52 @@
                         Margin="3,1" Padding="3,2" VerticalAlignment="Center"
                         Content="🡘" Click="Command_Mirror"
                         Width="22"
-                        ToolTip="Mirror the brush around the X axis (X)"
+                        ToolTip="{loc:Loc Tile_MirrorX}"
                     ></local:ButtonDark>
                     <local:ButtonDark
                         Margin="3,1" Padding="3,2" VerticalAlignment="Center"
                         Width="22"
                         Content="🡙" Click="Command_Flip"
-                        ToolTip="Flip the brush around the Y axis (Y/Z)"
+                        ToolTip="{loc:Loc Tile_FlipY}"
                     ></local:ButtonDark>
                     <local:ButtonDark
                         Margin="3,1" Padding="3,2" VerticalAlignment="Center"
                         Content="⟳" Click="Command_RotateCW"
                         Width="22"
-                        ToolTip="Rotate the brush 90 degrees (Q, R)"
+                        ToolTip="{loc:Loc Tile_Rotate90}"
                     ></local:ButtonDark>
                 </StackPanel>
                 <StackPanel Grid.Column="2" Orientation="Horizontal">
-                    <CheckBox 
-                        ToolTip="Show the rest of the room behind the tilemap (P)"
+                    <CheckBox
+                        ToolTip="{loc:Loc Tile_ShowRoomBehind}"
                         Margin="9,3,3,3" IsChecked="{Binding settings.RoomPreviewBool}"
                     />
-                    <TextBlock Margin="3">Preview</TextBlock>
-                    <CheckBox 
-                        ToolTip="Enable the &quot;tiling&quot; behavior when using multi-tile brushes (B)"
+                    <TextBlock Margin="3" Text="{loc:Loc Tile_Preview}"/>
+                    <CheckBox
+                        ToolTip="{loc:Loc Tile_EnableTiling}"
                         Margin="9,3,3,3" IsChecked="{Binding settings.BrushTiling}"
                     />
-                    <TextBlock Margin="3">Brush Tiling</TextBlock>
-                    <CheckBox ToolTip="Show the tile grid (G)" Margin="9,3,3,3" IsChecked="{Binding settings.ShowGridBool}"/>
-                    <TextBlock Margin="3">Grid</TextBlock>
+                    <TextBlock Margin="3" Text="{loc:Loc Tile_BrushTiling}"/>
+                    <CheckBox ToolTip="{loc:Loc Tile_ShowGrid}" Margin="9,3,3,3" IsChecked="{Binding settings.ShowGridBool}"/>
+                    <TextBlock Margin="3" Text="{loc:Loc Tile_Grid}"/>
                     <local:ButtonDark
                         Margin="3,1" Padding="3,2" VerticalAlignment="Center"
                         Content="↩" Click="Command_Undo"
                         Width="22"
-                        ToolTip="Undo (Ctrl+Z)" IsEnabled="{Binding UndoEnabled, Mode=OneWay}"
+                        ToolTip="{loc:Loc Tile_Undo}" IsEnabled="{Binding UndoEnabled, Mode=OneWay}"
                     ></local:ButtonDark>
                     <local:ButtonDark
                         Margin="3,1" Padding="3,2" VerticalAlignment="Center"
                         Content="↪" Click="Command_Redo"
                         Width="22"
-                        ToolTip="Redo (Ctrl+Y, Ctrl+Shift+Z)" IsEnabled="{Binding RedoEnabled, Mode=OneWay}"
+                        ToolTip="{loc:Loc Tile_Redo}" IsEnabled="{Binding RedoEnabled, Mode=OneWay}"
                     ></local:ButtonDark>
                 </StackPanel>
             </Grid>
 
             <ScrollViewer
                 Name="TilesScroll"
-                Grid.Row="1" Grid.Column="0" Margin="3,3,11,3" 
+                Grid.Row="1" Grid.Column="0" Margin="3,3,11,3"
                 HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible"
                 PreviewMouseWheel="Scroll_MouseWheel"
                 Background="DarkGray"
@@ -256,15 +256,14 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="96"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Margin="3" TextAlignment="Right">Tileset columns</TextBlock>
-                <local:TextBoxDark Grid.Column="1" Margin="3,1" Padding="0,2" Text="{Binding PaletteColumns}" 
-                        ToolTip="Number of columns to use for the tile palette. Adjust if the tileset looks broken.
-Persists when the tile editor is closed, but not when the file is saved and reopened."/>
+                <TextBlock Grid.Column="0" Margin="3" TextAlignment="Right" Text="{loc:Loc Tile_TilesetColumns}"/>
+                <local:TextBoxDark Grid.Column="1" Margin="3,1" Padding="0,2" Text="{Binding PaletteColumns}"
+                        ToolTip="{loc:Loc Tile_TilesetColumnsToolTip}"/>
             </Grid>
 
             <ScrollViewer
                 Name="PaletteScroll"
-                Grid.Row="1" Grid.Column="2" Margin="11,3,3,3" 
+                Grid.Row="1" Grid.Column="2" Margin="11,3,3,3"
                 HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible"
                 PreviewMouseWheel="Scroll_MouseWheel"
                 Background="DarkGray"
@@ -379,18 +378,18 @@ Persists when the tile editor is closed, but not when the file is saved and reop
                 ></TextBlock>
                 <TextBlock
                     Grid.Row="1" VerticalAlignment="Center"
-                    Text="Ctrl+LMB: Fill (+Shift: Global)    Alt+LMB: Pick    MMB: Scroll/Pick"
+                    Text="{loc:Loc Tile_ControlsHint}"
                 ></TextBlock>
             </Grid>
             <local:ButtonDark
                 x:Name="CancelButton"
                 Grid.Column="1" Margin="3,3" Padding="5,3"
-                VerticalAlignment="Center" Content="Cancel" Click="CancelButton_Click"
+                VerticalAlignment="Center" Content="{loc:Loc Tile_Cancel}" Click="CancelButton_Click"
             ></local:ButtonDark>
             <local:ButtonDark
                 x:Name="ApplyButton"
                 Grid.Column="2" Margin="3,3" Padding="5,3"
-                VerticalAlignment="Center" Content="Apply" Click="ApplyButton_Click"
+                VerticalAlignment="Center" Content="{loc:Loc Tile_Apply}" Click="ApplyButton_Click"
             ></local:ButtonDark>
         </Grid>
 

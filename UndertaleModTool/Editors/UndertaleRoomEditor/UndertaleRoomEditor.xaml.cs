@@ -33,6 +33,7 @@ using UndertaleModLib;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
 using UndertaleModTool.Editors;
+using UndertaleModTool.Localization;
 using static UndertaleModLib.Models.UndertaleRoom;
 
 namespace UndertaleModTool
@@ -161,7 +162,7 @@ namespace UndertaleModTool
 
             dlg.FileName = (DataContext as UndertaleRoom).Name.Content + ".png";
             dlg.DefaultExt = ".png";
-            dlg.Filter = "PNG files (.png)|*.png|All files|*";
+            dlg.Filter = LocalizationSource.GetString("FileFilter_PNG") + "|*.png|" + LocalizationSource.GetString("FileFilter_AllFiles") + "|*";
 
             if (dlg.ShowDialog() == true)
             {
@@ -174,7 +175,7 @@ namespace UndertaleModTool
                 }
                 catch (Exception ex)
                 {
-                    mainWindow.ShowError("Failed to export file: " + ex.Message, "Failed to export file");
+                    mainWindow.ShowError(string.Format(LocalizationSource.GetString("Msg_FailedToExportFile"), ex.Message), LocalizationSource.GetString("Dialog_FailedToExportFile"));
                 }
             }
         }
@@ -226,8 +227,8 @@ namespace UndertaleModTool
             if (DataContext is UndertaleRoom room)
             {
                 GameObjItems.Header = (room.Flags.HasFlag(RoomEntryFlags.IsGMS2) || room.Flags.HasFlag(RoomEntryFlags.IsGM2024_13))
-                                      ? "Game objects (from all layers)"
-                                      : "Game objects";
+                                      ? LocalizationSource.GetString("Editor_GameObjectsAllLayers")
+                                      : LocalizationSource.GetString("Editor_GameObjects");
                 SetupRoomWithGrids(room);
                 GenerateSpriteCache(DataContext as UndertaleRoom);
 
@@ -263,7 +264,7 @@ namespace UndertaleModTool
                             {
                                 _ = mainWindow.Dispatcher.InvokeAsync(() =>
                                 {
-                                    mainWindow.ShowWarning($"The instances list of layer \"{layer.LayerName.Content}\" is empty, but the layer has the instances ID.");
+                                    mainWindow.ShowWarning(string.Format(LocalizationSource.GetString("Msg_LayerInstancesEmpty"), layer.LayerName.Content));
                                 }, DispatcherPriority.ContextIdle);
                             }
 
@@ -607,7 +608,7 @@ namespace UndertaleModTool
             {
                 if (layer != null && layer.AssetsData == null)
                 {
-                    mainWindow.ShowError("Please select an assets layer.");
+                    mainWindow.ShowError(LocalizationSource.GetString("Msg_SelectAssetsLayer"));
                     return null;
                 }
 
@@ -651,7 +652,7 @@ namespace UndertaleModTool
             {
                 if (layer != null && layer.InstancesData == null)
                 {
-                    mainWindow.ShowError("Please select an instance layer.");
+                    mainWindow.ShowError(LocalizationSource.GetString("Msg_SelectInstanceLayer"));
                     return null;
                 }
 
@@ -686,7 +687,7 @@ namespace UndertaleModTool
             {
                 if (layer != null && layer.AssetsData == null)
                 {
-                    mainWindow.ShowError("Please select an assets layer.");
+                    mainWindow.ShowError(LocalizationSource.GetString("Msg_SelectAssetsLayer"));
                     return null;
                 }
 
@@ -718,7 +719,7 @@ namespace UndertaleModTool
             {
                 if (layer != null && layer.AssetsData == null)
                 {
-                    mainWindow.ShowError("Please select an assets layer.");
+                    mainWindow.ShowError(LocalizationSource.GetString("Msg_SelectAssetsLayer"));
                     return null;
                 }
 
@@ -1263,7 +1264,7 @@ namespace UndertaleModTool
                         SelectObject(firstBG);
                     }
                     else
-                        mainWindow.ShowError("No empty room backgrounds.");
+                        mainWindow.ShowError(LocalizationSource.GetString("Msg_NoEmptyRoomBackgrounds"));
                 }
                 else if (sourceItem is UndertaleGameObject droppedObj)
                 {
@@ -1290,7 +1291,7 @@ namespace UndertaleModTool
                         }
                         if (!foundLayer)
                         {
-                            layer = AddLayer<Layer.LayerInstancesData>(LayerType.Instances, "Instances");
+                            layer = AddLayer<Layer.LayerInstancesData>(LayerType.Instances, LocalizationSource.GetString("Editor_InstancesLayer"));
                         }
                     }
 
@@ -1324,12 +1325,12 @@ namespace UndertaleModTool
 
                     if (mainWindow.IsGMS2 == Visibility.Visible && layer == null)
                     {
-                        mainWindow.ShowError("Please select a layer.");
+                        mainWindow.ShowError(LocalizationSource.GetString("Msg_SelectLayer"));
                         return;
                     }
                     if (layer != null && layer.AssetsData == null)
                     {
-                        mainWindow.ShowError("Please select an assets layer.");
+                        mainWindow.ShowError(LocalizationSource.GetString("Msg_SelectAssetsLayer"));
                         return;
                     }
 
@@ -1522,7 +1523,7 @@ namespace UndertaleModTool
 
                 if (mainWindow.IsGMS2 == Visibility.Visible && layer == null)
                 {
-                    mainWindow.ShowError("Please select a layer.");
+                    mainWindow.ShowError(LocalizationSource.GetString("Msg_SelectLayer"));
                     return;
                 }
 
@@ -1550,7 +1551,7 @@ namespace UndertaleModTool
             if (room is null)
             {
                 // (not sure if it's possible)
-                mainWindow.ShowError("Room is null.");
+                mainWindow.ShowError(LocalizationSource.GetString("Msg_RoomIsNull"));
                 return null;
             }
 
@@ -1583,7 +1584,7 @@ namespace UndertaleModTool
                     if (layerDepth + 1 > Int32.MaxValue)
                     {
                         layerDepth -= 1;
-                        mainWindow.ShowWarning("Warning - the maximum layer depth is reached.\nYou probably should change the depth of the new layer.");
+                        mainWindow.ShowWarning(LocalizationSource.GetString("Msg_MaxLayerDepthReached"));
                     }
                     else
                         layerDepth += 1;
@@ -1855,17 +1856,17 @@ namespace UndertaleModTool
         {
             if (obj is Layer)
             {
-                mainWindow.ShowError("Layers don't support this feature currently, change the layer depths instead.");
+                mainWindow.ShowError(LocalizationSource.GetString("Msg_LayersDontSupportFeature"));
                 return;
             }
             if (obj is View)
             {
-                mainWindow.ShowError("Views don't support this feature.");
+                mainWindow.ShowError(LocalizationSource.GetString("Msg_ViewsDontSupportFeature"));
                 return;
             }
             if (obj is Background)
             {
-                mainWindow.ShowError("Backgrounds don't support this feature.");
+                mainWindow.ShowError(LocalizationSource.GetString("Msg_BackgroundsDontSupportFeature"));
                 return;
             }
 
@@ -1909,7 +1910,7 @@ namespace UndertaleModTool
             };
             if (list is null)
             {
-                mainWindow.ShowError("Can't change the object position - no list for the selected object was found.");
+                mainWindow.ShowError(LocalizationSource.GetString("Msg_CantChangeObjectPosition"));
                 return;
             }
 
@@ -1936,22 +1937,22 @@ namespace UndertaleModTool
 
         private void MenuItem_NewLayerInstances_Click(object sender, RoutedEventArgs e)
         {
-            AddLayer<Layer.LayerInstancesData>(LayerType.Instances, "NewInstancesLayer");
+            AddLayer<Layer.LayerInstancesData>(LayerType.Instances, LocalizationSource.GetString("Editor_NewInstancesLayer"));
         }
 
         private void MenuItem_NewLayerTiles_Click(object sender, RoutedEventArgs e)
         {
-            AddLayer<Layer.LayerTilesData>(LayerType.Tiles, "NewTilesLayer");
+            AddLayer<Layer.LayerTilesData>(LayerType.Tiles, LocalizationSource.GetString("Editor_NewTilesLayer"));
         }
 
         private void MenuItem_NewLayerBackground_Click(object sender, RoutedEventArgs e)
         {
-            AddLayer<Layer.LayerBackgroundData>(LayerType.Background, "NewBackgroundLayer");
+            AddLayer<Layer.LayerBackgroundData>(LayerType.Background, LocalizationSource.GetString("Editor_NewBackgroundLayer"));
         }
 
         private void MenuItem_NewLayerAssets_Click(object sender, RoutedEventArgs e)
         {
-            AddLayer<Layer.LayerAssetsData>(LayerType.Assets, "NewAssetsLayer");
+            AddLayer<Layer.LayerAssetsData>(LayerType.Assets, LocalizationSource.GetString("Editor_NewAssetsLayer"));
         }
 
         private void MenuItem_NewGMS2ObjectInstance_Click(object sender, RoutedEventArgs e)
@@ -2124,7 +2125,7 @@ namespace UndertaleModTool
 
             if (layer.TilesData.TileData.Length == 0)
             {
-                mainWindow.ShowError("Tile data is empty.");
+                mainWindow.ShowError(LocalizationSource.GetString("Msg_TileDataEmpty"));
                 return;
             }
 
@@ -2141,11 +2142,11 @@ namespace UndertaleModTool
             }
             catch (Exception ex)
             {
-                mainWindow.ShowError($"Error while saving the file - \"{ex.Message}\".");
+                mainWindow.ShowError(string.Format(LocalizationSource.GetString("Msg_ErrorWhileSavingFile"), ex.Message));
                 return;
             }
 
-            mainWindow.ShowMessage("Exported file path: " + filePath);
+            mainWindow.ShowMessage(string.Format(LocalizationSource.GetString("Msg_ExportedFilePath"), filePath));
         }
         private void TileDataImport_Click(object sender, RoutedEventArgs e)
         {
@@ -2154,14 +2155,14 @@ namespace UndertaleModTool
 
             if (layer.TilesData.TilesX == 0 || layer.TilesData.TilesY == 0)
             {
-                mainWindow.ShowError("Tile data size can't be zero.");
+                mainWindow.ShowError(LocalizationSource.GetString("Msg_TileDataSizeCantBeZero"));
                 return;
             }
 
             OpenFileDialog dlg = new()
             {
                 DefaultExt = "csv",
-                Filter = "CSV table|*.csv|All files|*"
+                Filter = LocalizationSource.GetString("FileFilter_CSV") + "|*.csv|" + LocalizationSource.GetString("FileFilter_AllFiles") + "|*"
             };
 
             if (dlg.ShowDialog() == true)
@@ -2174,13 +2175,13 @@ namespace UndertaleModTool
                 }
                 catch (Exception ex)
                 {
-                    mainWindow.ShowError($"Error while opening file - \"{ex.Message}\".");
+                    mainWindow.ShowError(string.Format(LocalizationSource.GetString("Msg_ErrorWhileOpeningFile"), ex.Message));
                     return;
                 }
 
                 if (tileDataLines?.Length != tileDataNew.Length)
                 {
-                    mainWindow.ShowError("Error - selected file line count doesn't match tile layer height.");
+                    mainWindow.ShowError(LocalizationSource.GetString("Msg_FileLineCountMismatch"));
                     return;
                 }
 
@@ -2188,7 +2189,7 @@ namespace UndertaleModTool
                 Func<string, uint> numParseFunc = (x) => UInt32.Parse(x);
                 if (tileDataLines[0].Count(x => x == ',') > 1)
                 {
-                    var res = mainWindow.ShowQuestion("Was the data exported from \"Tiled\"?");
+                    var res = mainWindow.ShowQuestion(LocalizationSource.GetString("Msg_WasDataExportedFromTiled"));
                     if (res == MessageBoxResult.Yes)
                     {
                         delimChar = ',';
@@ -2220,7 +2221,7 @@ namespace UndertaleModTool
                     }
                     else
                     {
-                        mainWindow.ShowError("The file has invalid data.");
+                        mainWindow.ShowError(LocalizationSource.GetString("Msg_FileHasInvalidData"));
                         return;
                     }
                 }
@@ -2234,13 +2235,13 @@ namespace UndertaleModTool
                     }
                     catch (Exception ex)
                     {
-                        mainWindow.ShowError($"Error while parsing line {i + 1} - \"{ex.Message}\".");
+                        mainWindow.ShowError(string.Format(LocalizationSource.GetString("Msg_ErrorWhileParsingLine"), i + 1, ex.Message));
                         return;
                     }
 
                     if (dataRow.Length != layer.TilesData.TilesX)
                     {
-                        mainWindow.ShowError($"Length of line {i + 1} is not equal to the tile data width.");
+                        mainWindow.ShowError(string.Format(LocalizationSource.GetString("Msg_LineLengthNotEqualTileWidth"), i + 1));
                         return;
                     }
 
@@ -2249,7 +2250,7 @@ namespace UndertaleModTool
 
                 layer.TilesData.TileData = tileDataNew;
 
-                mainWindow.ShowMessage("Imported successfully.");
+                mainWindow.ShowMessage(LocalizationSource.GetString("Msg_ImportedSuccessfully"));
             }
         }
 
@@ -2308,21 +2309,21 @@ namespace UndertaleModTool
 
                 if (data.Background is null)
                 {
-                    mainWindow.ShowMessage("The layer must have a tileset set!");
+                    mainWindow.ShowMessage(LocalizationSource.GetString("Msg_LayerMustHaveTileset"));
                     return;
                 }
                 if (data.TilesX <= 0 && data.TilesY <= 0)
                 {
-                    mainWindow.ShowMessage("The layer's horizontal and vertical size must be larger than 0 tiles!\n(Use the Auto button to set the tilemap size based on the room size.)");
+                    mainWindow.ShowMessage(LocalizationSource.GetString("Msg_LayerSizeMustBeLargerBoth"));
                     return;
                 }
                 else if (data.TilesX <= 0)
                 {
-                    mainWindow.ShowMessage("The layer's horizontal size must be larger than 0 tiles!\n(Use the Auto button to set the tilemap size based on the room size.)");
+                    mainWindow.ShowMessage(LocalizationSource.GetString("Msg_LayerHorizontalSizeMustBeLarger"));
                     return;
                 } else if (data.TilesY <= 0)
                 {
-                    mainWindow.ShowMessage("The layer's vertical size must be larger than 0 tiles!\n(Use the Auto button to set the tilemap size based on the room size.)");
+                    mainWindow.ShowMessage(LocalizationSource.GetString("Msg_LayerVerticalSizeMustBeLarger"));
                     return;
                 }
 
@@ -2340,7 +2341,7 @@ namespace UndertaleModTool
 
                 if (data.Background is null)
                 {
-                    mainWindow.ShowMessage("The layer must have a tileset set!");
+                    mainWindow.ShowMessage(LocalizationSource.GetString("Msg_LayerMustHaveTileset"));
                     return;
                 }
                 data.TilesX = (uint)Math.Ceiling(
@@ -2722,7 +2723,7 @@ namespace UndertaleModTool
                             {
                                 try
                                 {
-                                    mainWindow.Dispatcher.BeginInvoke(() => mainWindow.ShowError("Room flags of GM 2024.13+ games must contain the \"IsGM2024_13\" flag, otherwise the game will crash when loading that room."));
+                                    mainWindow.Dispatcher.BeginInvoke(() => mainWindow.ShowError(LocalizationSource.GetString("Msg_RoomFlagsMustContainGM2024_13")));
                                 }
                                 catch { }
                             }
@@ -2735,7 +2736,7 @@ namespace UndertaleModTool
                             {
                                 try
                                 {
-                                    mainWindow.Dispatcher.BeginInvoke(() => mainWindow.ShowError("Room flags of GMS 2+ games must contain the \"IsGMS2\" flag, otherwise the game will crash when loading that room."));
+                                    mainWindow.Dispatcher.BeginInvoke(() => mainWindow.ShowError(LocalizationSource.GetString("Msg_RoomFlagsMustContainIsGMS2")));
                                 }
                                 catch { }
                             }
@@ -3131,7 +3132,7 @@ namespace UndertaleModTool
                 catch (Exception ex)
                 {
                     Window mainWindow = Application.Current?.MainWindow;
-                    mainWindow.ShowError($"An error occurred while generating \"Rectangles\" for tile layer {tilesData.ParentLayer.LayerName}.\n\n{ex}");
+                    mainWindow.ShowError(string.Format(LocalizationSource.GetString("Msg_ErrorGeneratingTileRectangles"), tilesData.ParentLayer.LayerName, ex));
                     return null;
                 }
             }

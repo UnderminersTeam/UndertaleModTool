@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -14,12 +15,10 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using UndertaleModTool.Localization;
 
 namespace UndertaleModTool
 {
-    /// <summary>
-    /// Logika interakcji dla klasy SettingsWindow.xaml
-    /// </summary>
     public partial class SettingsWindow : Window
     {
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
@@ -62,7 +61,6 @@ namespace UndertaleModTool
                 Settings.Instance.ShowNullEntriesInResourceTree = value;
                 Settings.Save();
 
-                // Refresh the tree for the change to take effect
                 mainWindow.UpdateTree();
             }
         }
@@ -87,8 +85,7 @@ namespace UndertaleModTool
 
                 if (!value && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
-                    // Prompt user if they want to unassociate
-                    if (mainWindow.ShowQuestion("Remove current file associations, if they exist?", MessageBoxImage.Question, "File associations") == MessageBoxResult.Yes)
+                    if (mainWindow.ShowQuestion(LocalizationSource.GetString("Settings_RemoveFileAssociations"), MessageBoxImage.Question, LocalizationSource.GetString("Settings_FileAssociations")) == MessageBoxResult.Yes)
                     {
                         try
                         {
@@ -96,7 +93,7 @@ namespace UndertaleModTool
                         }
                         catch (Exception ex)
                         {
-                            mainWindow.ScriptError(ex.ToString(), "Unassociation failed", false);
+                            mainWindow.ScriptError(ex.ToString(), LocalizationSource.GetString("Settings_UnassociationFailed"), false);
                         }
                     }
                 }
@@ -216,8 +213,7 @@ namespace UndertaleModTool
                 MainWindow.SetDarkMode(value);
 
                 if (value)
-                    mainWindow.ShowWarning("The message boxes (like this one) aren't compatible with the dark mode.\n" +
-                                           "This will be fixed in future versions.");
+                    mainWindow.ShowWarning(LocalizationSource.GetString("Settings_DarkModeMsgBoxWarning"));
             }
         }
 
@@ -282,6 +278,16 @@ namespace UndertaleModTool
             InitializeComponent();
             this.DataContext = this;
             Settings.Load();
+
+            string lang = Settings.Instance.Language ?? "en";
+            for (int i = 0; i < LanguageComboBox.Items.Count; i++)
+            {
+                if ((LanguageComboBox.Items[i] as ComboBoxItem)?.Tag as string == lang)
+                {
+                    LanguageComboBox.SelectedIndex = i;
+                    break;
+                }
+            }
         }
 
         private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -291,6 +297,22 @@ namespace UndertaleModTool
 
             if (Settings.Instance.EnableDarkMode)
                 MainWindow.SetDarkTitleBarForWindow(this, true, false);
+        }
+
+        private void LanguageComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (LanguageComboBox.SelectedItem is ComboBoxItem item)
+            {
+                string lang = item.Tag as string;
+                if (lang != null && lang != Settings.Instance.Language)
+                {
+                    Settings.Instance.Language = lang;
+                    Settings.Save();
+
+                    var culture = new CultureInfo(lang);
+                    LocalizationSource.Instance.CurrentCulture = culture;
+                }
+            }
         }
 
         private void AppDataButton_Click(object sender, RoutedEventArgs e)

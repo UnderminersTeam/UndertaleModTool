@@ -333,3 +333,4 @@ Test/Test - Backup.csproj
 UndertaleModLib/UndertaleModLib - Backup.csproj
 UndertaleModTests/UndertaleModTests - Backup.csproj
 UndertaleModLib/gitversion.txt
+/UndertaleModTool/Localization/Strings.Designer.cs

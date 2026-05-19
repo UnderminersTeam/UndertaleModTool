@@ -1,10 +1,11 @@
-﻿<local:DataUserControl x:Class="UndertaleModTool.UndertaleTextureGroupInfoEditor"
+<local:DataUserControl x:Class="UndertaleModTool.UndertaleTextureGroupInfoEditor"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UndertaleModTool"
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+             xmlns:loc="clr-namespace:UndertaleModTool.Localization"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleTextureGroupInfo}">
   
@@ -18,7 +19,7 @@
 
   <StackPanel>
         <StackPanel>
-            <TextBlock Text="Texture Group" FontWeight="Bold"/>
+            <TextBlock Text="{loc:Loc Editor_TextureGroup}" FontWeight="Bold"/>
             <Separator/>
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -52,13 +53,13 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Group Name</TextBlock>
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="{loc:Loc Editor_GroupName}"/>
                 <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
 
               <!--Texture Page List-->
-              <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Texture Pages</TextBlock>
-              <Expander Grid.Row="1" Grid.Column="1" Margin="3" Name="TextureListExpander" Header="List">
+              <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="{loc:Loc Editor_TexturePages}"/>
+              <Expander Grid.Row="1" Grid.Column="1" Margin="3" Name="TextureListExpander" Header="{loc:Loc Common_List}">
                 <local:DataGridDark ItemsSource="{Binding TexturePages}" MaxHeight="370" x:Name="TextureListGrid"
                                     AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
                                     ScrollViewer.CanContentScroll="True"
@@ -81,7 +82,7 @@
                           <Setter Property="Template">
                             <Setter.Value>
                               <ControlTemplate>
-                                <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic" Text="{loc:Loc Common_DoubleClickToAdd}"/>
                               </ControlTemplate>
                             </Setter.Value>
                           </Setter>
@@ -102,8 +103,8 @@
               </Expander>
 
               <!--Sprite List-->
-              <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">Sprites</TextBlock>
-              <Expander Grid.Row="2" Grid.Column="1" Margin="3" Name="SpriteListExpander" Header="List">
+              <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" Text="{loc:Loc Editor_Sprites}"/>
+              <Expander Grid.Row="2" Grid.Column="1" Margin="3" Name="SpriteListExpander" Header="{loc:Loc Common_List}">
                 <local:DataGridDark ItemsSource="{Binding Sprites}" MaxHeight="370" x:Name="SpriteListGrid"
                                     AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
                                     ScrollViewer.CanContentScroll="True"
@@ -126,7 +127,7 @@
                           <Setter Property="Template">
                             <Setter.Value>
                               <ControlTemplate>
-                                <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic" Text="{loc:Loc Common_DoubleClickToAdd}"/>
                               </ControlTemplate>
                             </Setter.Value>
                           </Setter>
@@ -147,8 +148,8 @@
               </Expander>
 
               <!--Spine Sprite List-->
-              <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Spine Sprites</TextBlock>
-              <Expander Grid.Row="3" Grid.Column="1" Margin="3" Name="SpineSprListExpander" Header="List">
+              <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="{loc:Loc Editor_SpineSprites}"/>
+              <Expander Grid.Row="3" Grid.Column="1" Margin="3" Name="SpineSprListExpander" Header="{loc:Loc Common_List}">
                 <local:DataGridDark ItemsSource="{Binding SpineSprites}" MaxHeight="370" x:Name="SpineSprListGrid"
                                     AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
                                     ScrollViewer.CanContentScroll="True"
@@ -171,7 +172,7 @@
                           <Setter Property="Template">
                             <Setter.Value>
                               <ControlTemplate>
-                                <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic" Text="{loc:Loc Common_DoubleClickToAdd}"/>
                               </ControlTemplate>
                             </Setter.Value>
                           </Setter>
@@ -192,8 +193,8 @@
               </Expander>
 
               <!--Font List-->
-              <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Fonts</TextBlock>
-              <Expander Grid.Row="4" Grid.Column="1" Margin="3" Name="FontListExpander" Header="List">
+              <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Text="{loc:Loc Editor_Fonts}"/>
+              <Expander Grid.Row="4" Grid.Column="1" Margin="3" Name="FontListExpander" Header="{loc:Loc Common_List}">
                 <local:DataGridDark ItemsSource="{Binding Fonts}" MaxHeight="370" x:Name="FontListGrid"
                                     AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
                                     ScrollViewer.CanContentScroll="True"
@@ -216,7 +217,7 @@
                           <Setter Property="Template">
                             <Setter.Value>
                               <ControlTemplate>
-                                <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic" Text="{loc:Loc Common_DoubleClickToAdd}"/>
                               </ControlTemplate>
                             </Setter.Value>
                           </Setter>
@@ -237,8 +238,8 @@
               </Expander>
 
               <!--Tileset List-->
-              <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Tilesets</TextBlock>
-              <Expander Grid.Row="5" Grid.Column="1" Margin="3" Name="TilesetListExpander" Header="List">
+              <TextBlock Grid.Row="5" Grid.Column="0" Margin="3" Text="{loc:Loc Editor_Tilesets}"/>
+              <Expander Grid.Row="5" Grid.Column="1" Margin="3" Name="TilesetListExpander" Header="{loc:Loc Common_List}">
                 <local:DataGridDark ItemsSource="{Binding Tilesets}" MaxHeight="370" x:Name="TilesetListGrid"
                                     AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow"
                                     ScrollViewer.CanContentScroll="True"
@@ -261,7 +262,7 @@
                           <Setter Property="Template">
                             <Setter.Value>
                               <ControlTemplate>
-                                <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic" Text="{loc:Loc Common_DoubleClickToAdd}"/>
                               </ControlTemplate>
                             </Setter.Value>
                           </Setter>

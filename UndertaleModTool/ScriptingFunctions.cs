@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.IO;
 using System.Threading;
@@ -16,6 +16,7 @@ using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using System.IO.Pipes;
 using System.Threading.Tasks;
+using UndertaleModTool.Localization;
 
 namespace UndertaleModTool
 {
@@ -27,19 +28,19 @@ namespace UndertaleModTool
             // By Grossley
             if (!File.Exists(path))
             {
-                ScriptError(path + " does not exist!");
+                ScriptError(string.Format(LocalizationSource.GetString("Msg_ScriptDoesNotExist"), path));
                 return false;
             }
             RunScript(path).GetAwaiter().GetResult();
             if (!ScriptExecutionSuccess)
-                ScriptError("An error of type \"" + ScriptErrorType + "\" occurred. The error is:\n\n" + ScriptErrorMessage, ScriptErrorType);
+                ScriptError(string.Format(LocalizationSource.GetString("Msg_ScriptErrorWithType"), ScriptErrorType, ScriptErrorMessage), ScriptErrorType);
             return ScriptExecutionSuccess;
         }
         public void InitializeScriptDialog()
         {
             if (scriptDialog == null)
             {
-                scriptDialog = new LoaderDialog("Script in progress...", "Please wait...");
+                scriptDialog = new LoaderDialog(LocalizationSource.GetString("Dialog_ScriptInProgress"), LocalizationSource.GetString("Msg_ScriptPleaseWait"));
                 scriptDialog.Owner = this;
                 scriptDialog.PreventClose = true;
             }
@@ -49,7 +50,7 @@ namespace UndertaleModTool
             // By Grossley
             if (!File.Exists(path))
             {
-                ScriptError(path + " does not exist!");
+                ScriptError(string.Format(LocalizationSource.GetString("Msg_ScriptDoesNotExist"), path));
                 return false;
             }
             try
@@ -60,7 +61,7 @@ namespace UndertaleModTool
             }
             catch (CompilationErrorException exc)
             {
-                ScriptError(exc.Message, "Script compile error");
+                ScriptError(exc.Message, LocalizationSource.GetString("Dialog_ScriptCompileError"));
                 ScriptExecutionSuccess = false;
                 ScriptErrorMessage = exc.Message;
                 ScriptErrorType = "CompilationErrorException";

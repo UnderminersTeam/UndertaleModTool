@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UndertaleModLib;
 using UndertaleModLib.Models;
+using UndertaleModTool.Localization;
 
 namespace UndertaleModTool.Windows
 {
@@ -27,7 +28,7 @@ namespace UndertaleModTool.Windows
                         Version = (1, 0, 0),
                         Types = new[]
                         {
-                            (typeof(UndertaleGameObject), "Game objects")
+                            (typeof(UndertaleGameObject), LocalizationSource.GetString("RefType_GameObjects"))
                         }
                     },
                     new TypesForVersion
@@ -35,9 +36,9 @@ namespace UndertaleModTool.Windows
                         Version = (2, 0, 0),
                         Types = new[]
                         {
-                            (typeof(UndertaleRoom.Tile), "Room tiles"),
-                            (typeof(UndertaleRoom.SpriteInstance), "Room sprite instances"),
-                            (typeof(UndertaleRoom.Layer.LayerBackgroundData), "Room background layers")
+                            (typeof(UndertaleRoom.Tile), LocalizationSource.GetString("RefType_RoomTiles")),
+                            (typeof(UndertaleRoom.SpriteInstance), LocalizationSource.GetString("RefType_RoomSpriteInstances")),
+                            (typeof(UndertaleRoom.Layer.LayerBackgroundData), LocalizationSource.GetString("RefType_RoomBackgroundLayers"))
                         }
                     },
                     new TypesForVersion
@@ -45,7 +46,7 @@ namespace UndertaleModTool.Windows
                         Version = (2, 2, 1),
                         Types = new[]
                         {
-                            (typeof(UndertaleTextureGroupInfo), "Texture groups")
+                            (typeof(UndertaleTextureGroupInfo), LocalizationSource.GetString("RefType_TextureGroups"))
                         }
                     },
                     new TypesForVersion
@@ -53,7 +54,7 @@ namespace UndertaleModTool.Windows
                         Version = (2023, 2, 0),
                         Types = new[]
                         {
-                            (typeof(UndertaleParticleSystemEmitter), "Particle system emitters")
+                            (typeof(UndertaleParticleSystemEmitter), LocalizationSource.GetString("RefType_ParticleSystemEmitters"))
                         }
                     }
                 }
@@ -67,8 +68,8 @@ namespace UndertaleModTool.Windows
                         Version = (1, 0, 0),
                         Types = new[]
                         {
-                            (typeof(UndertaleRoom.Background), "Room backgrounds"),
-                            (typeof(UndertaleRoom.Tile), "Room tiles")
+                            (typeof(UndertaleRoom.Background), LocalizationSource.GetString("RefType_RoomBackgrounds")),
+                            (typeof(UndertaleRoom.Tile), LocalizationSource.GetString("RefType_RoomTiles"))
                         }
                     },
                     new TypesForVersion
@@ -78,7 +79,7 @@ namespace UndertaleModTool.Windows
                         {
                             (typeof(UndertaleRoom.Background), null),
                             (typeof(UndertaleRoom.Tile), null),
-                            (typeof(UndertaleRoom.Layer), "Room tile layers")
+                            (typeof(UndertaleRoom.Layer), LocalizationSource.GetString("RefType_RoomTileLayers"))
                         }
                     },
                     new TypesForVersion
@@ -86,7 +87,7 @@ namespace UndertaleModTool.Windows
                         Version = (2, 2, 1),
                         Types = new[]
                         {
-                            (typeof(UndertaleTextureGroupInfo), "Texture groups")
+                            (typeof(UndertaleTextureGroupInfo), LocalizationSource.GetString("RefType_TextureGroups"))
                         }
                     }
                 }
@@ -100,7 +101,7 @@ namespace UndertaleModTool.Windows
                         Version = (1, 0, 0),
                         Types = new[]
                         {
-                            (typeof(UndertaleTexturePageItem), "Texture page items")
+                            (typeof(UndertaleTexturePageItem), LocalizationSource.GetString("RefType_TexturePageItems"))
                         }
                     },
                     new TypesForVersion
@@ -108,7 +109,7 @@ namespace UndertaleModTool.Windows
                         Version = (2, 2, 1),
                         Types = new[]
                         {
-                            (typeof(UndertaleTextureGroupInfo), "Texture groups")
+                            (typeof(UndertaleTextureGroupInfo), LocalizationSource.GetString("RefType_TextureGroups"))
                         }
                     },
                 }
@@ -122,9 +123,9 @@ namespace UndertaleModTool.Windows
                         Version = (1, 0, 0),
                         Types = new[]
                         {
-                            (typeof(UndertaleSprite), "Sprites"),
-                            (typeof(UndertaleBackground), "Backgrounds"),
-                            (typeof(UndertaleFont), "Fonts")
+                            (typeof(UndertaleSprite), LocalizationSource.GetString("RefType_Sprites")),
+                            (typeof(UndertaleBackground), LocalizationSource.GetString("RefType_Backgrounds")),
+                            (typeof(UndertaleFont), LocalizationSource.GetString("RefType_Fonts"))
                         }
                     },
                     new TypesForVersion()
@@ -132,8 +133,8 @@ namespace UndertaleModTool.Windows
                         Version = (2, 0, 0),
                         Types = new[]
                         {
-                            (typeof(UndertaleBackground), "Tile sets"),
-                            (typeof(UndertaleEmbeddedImage), "Embedded images")
+                            (typeof(UndertaleBackground), LocalizationSource.GetString("RefType_TileSets")),
+                            (typeof(UndertaleEmbeddedImage), LocalizationSource.GetString("RefType_EmbeddedImages"))
                         }
                     }
                 }
@@ -147,26 +148,26 @@ namespace UndertaleModTool.Windows
                         Version = (1, 0, 0),
                         Types = new[]
                         {
-                            (typeof(UndertaleBackground), "Backgrounds"),
-                            (typeof(UndertaleCode), "Code entries (name and contents)"),
-                            (typeof(UndertaleVariable), "Variables"),
-                            (typeof(UndertaleFunction), "Functions"),
-                            (typeof(UndertaleSound), "Sounds"),
-                            (typeof(UndertaleAudioGroup), "Audio groups"),
-                            (typeof(UndertaleSprite), "Sprites"),
-                            (typeof(UndertaleExtension), "Extensions"),
-                            (typeof(UndertaleExtensionFile), "Extension files"),
-                            (typeof(UndertaleExtensionOption), "Extension options"),
-                            (typeof(UndertaleExtensionFunction), "Extension functions"),
-                            (typeof(UndertaleFont), "Fonts"),
-                            (typeof(UndertaleGameObject), "Game objects"),
-                            (typeof(UndertaleGeneralInfo), "General info"),
-                            (typeof(UndertaleOptions.Constant), "Game options constants"),
-                            (typeof(UndertalePath), "Paths"),
-                            (typeof(UndertaleRoom), "Rooms"),
-                            (typeof(UndertaleScript), "Scripts"),
-                            (typeof(UndertaleShader), "Shaders"),
-                            (typeof(UndertaleTimeline), "Timelines")
+                            (typeof(UndertaleBackground), LocalizationSource.GetString("RefType_Backgrounds")),
+                            (typeof(UndertaleCode), LocalizationSource.GetString("RefType_CodeEntriesNameAndContents")),
+                            (typeof(UndertaleVariable), LocalizationSource.GetString("RefType_Variables")),
+                            (typeof(UndertaleFunction), LocalizationSource.GetString("RefType_Functions")),
+                            (typeof(UndertaleSound), LocalizationSource.GetString("RefType_Sounds")),
+                            (typeof(UndertaleAudioGroup), LocalizationSource.GetString("RefType_AudioGroups")),
+                            (typeof(UndertaleSprite), LocalizationSource.GetString("RefType_Sprites")),
+                            (typeof(UndertaleExtension), LocalizationSource.GetString("RefType_Extensions")),
+                            (typeof(UndertaleExtensionFile), LocalizationSource.GetString("RefType_ExtensionFiles")),
+                            (typeof(UndertaleExtensionOption), LocalizationSource.GetString("RefType_ExtensionOptions")),
+                            (typeof(UndertaleExtensionFunction), LocalizationSource.GetString("RefType_ExtensionFunctions")),
+                            (typeof(UndertaleFont), LocalizationSource.GetString("RefType_Fonts")),
+                            (typeof(UndertaleGameObject), LocalizationSource.GetString("RefType_GameObjects")),
+                            (typeof(UndertaleGeneralInfo), LocalizationSource.GetString("RefType_GeneralInfo")),
+                            (typeof(UndertaleOptions.Constant), LocalizationSource.GetString("RefType_GameOptionsConstants")),
+                            (typeof(UndertalePath), LocalizationSource.GetString("RefType_Paths")),
+                            (typeof(UndertaleRoom), LocalizationSource.GetString("RefType_Rooms")),
+                            (typeof(UndertaleScript), LocalizationSource.GetString("RefType_Scripts")),
+                            (typeof(UndertaleShader), LocalizationSource.GetString("RefType_Shaders")),
+                            (typeof(UndertaleTimeline), LocalizationSource.GetString("RefType_Timelines"))
                         }
                     },
                     new TypesForVersion
@@ -176,7 +177,7 @@ namespace UndertaleModTool.Windows
                         BeforeVersion = (2024, 8, 0),
                         Types = new[]
                         {
-                            (typeof(UndertaleCodeLocals), "Code locals")
+                            (typeof(UndertaleCodeLocals), LocalizationSource.GetString("RefType_CodeLocals"))
                         }
                     },
                     new TypesForVersion
@@ -185,7 +186,7 @@ namespace UndertaleModTool.Windows
                         Version = (16, uint.MaxValue, uint.MaxValue),
                         Types = new[]
                         {
-                            (typeof(UndertaleLanguage), "Languages"),
+                            (typeof(UndertaleLanguage), LocalizationSource.GetString("RefType_Languages")),
                         }
                     },
                     new TypesForVersion
@@ -193,10 +194,10 @@ namespace UndertaleModTool.Windows
                         Version = (2, 0, 0),
                         Types = new[]
                         {
-                            (typeof(UndertaleBackground), "Tile sets"),
-                            (typeof(UndertaleEmbeddedImage), "Embedded images"),
-                            (typeof(UndertaleRoom.Layer), "Room layers"),
-                            (typeof(UndertaleRoom.SpriteInstance), "Room sprite instances")
+                            (typeof(UndertaleBackground), LocalizationSource.GetString("RefType_TileSets")),
+                            (typeof(UndertaleEmbeddedImage), LocalizationSource.GetString("RefType_EmbeddedImages")),
+                            (typeof(UndertaleRoom.Layer), LocalizationSource.GetString("RefType_RoomLayers")),
+                            (typeof(UndertaleRoom.SpriteInstance), LocalizationSource.GetString("RefType_RoomSpriteInstances"))
                         }
                     },
                     new TypesForVersion
@@ -204,7 +205,7 @@ namespace UndertaleModTool.Windows
                         Version = (2, 2, 1),
                         Types = new[]
                         {
-                            (typeof(UndertaleTextureGroupInfo), "Texture groups")
+                            (typeof(UndertaleTextureGroupInfo), LocalizationSource.GetString("RefType_TextureGroups"))
                         }
                     },
                     new TypesForVersion
@@ -212,14 +213,14 @@ namespace UndertaleModTool.Windows
                         Version = (2, 3, 0),
                         Types = new[]
                         {
-                            (typeof(UndertaleAnimationCurve), "Animation curves"),
-                            (typeof(UndertaleAnimationCurve.Channel), "Animation curve channels"),
-                            (typeof(UndertaleRoom.SequenceInstance), "Room sequence instances"),
-                            (typeof(UndertaleSequence), "Sequences"),
-                            (typeof(UndertaleSequence.Track), "Sequence tracks"),
-                            (typeof(UndertaleSequence.BroadcastMessage), "Sequence broadcast messages"),
-                            (typeof(UndertaleSequence.Moment), "Sequence moments"),
-                            (typeof(UndertaleSequence.StringKeyframes), "Sequence string keyframes")
+                            (typeof(UndertaleAnimationCurve), LocalizationSource.GetString("RefType_AnimationCurves")),
+                            (typeof(UndertaleAnimationCurve.Channel), LocalizationSource.GetString("RefType_AnimationCurveChannels")),
+                            (typeof(UndertaleRoom.SequenceInstance), LocalizationSource.GetString("RefType_RoomSequenceInstances")),
+                            (typeof(UndertaleSequence), LocalizationSource.GetString("RefType_Sequences")),
+                            (typeof(UndertaleSequence.Track), LocalizationSource.GetString("RefType_SequenceTracks")),
+                            (typeof(UndertaleSequence.BroadcastMessage), LocalizationSource.GetString("RefType_SequenceBroadcastMessages")),
+                            (typeof(UndertaleSequence.Moment), LocalizationSource.GetString("RefType_SequenceMoments")),
+                            (typeof(UndertaleSequence.StringKeyframes), LocalizationSource.GetString("RefType_SequenceStringKeyframes"))
                         }
                     },
                     new TypesForVersion
@@ -227,7 +228,7 @@ namespace UndertaleModTool.Windows
                         Version = (2, 3, 6),
                         Types = new[]
                         {
-                            (typeof(UndertaleFilterEffect), "Filter effects")
+                            (typeof(UndertaleFilterEffect), LocalizationSource.GetString("RefType_FilterEffects"))
                         }
                     },
                     new TypesForVersion
@@ -235,7 +236,7 @@ namespace UndertaleModTool.Windows
                         Version = (2022, 1, 0),
                         Types = new[]
                         {
-                            (typeof(UndertaleRoom.EffectProperty), "Room effect properties")
+                            (typeof(UndertaleRoom.EffectProperty), LocalizationSource.GetString("RefType_RoomEffectProperties"))
                         }
                     },
                     new TypesForVersion
@@ -243,7 +244,7 @@ namespace UndertaleModTool.Windows
                         Version = (2022, 2, 0),
                         Types = new[]
                         {
-                            (typeof(UndertaleSequence.TextKeyframes), "Sequence track text keyframes")
+                            (typeof(UndertaleSequence.TextKeyframes), LocalizationSource.GetString("RefType_SequenceTextKeyframes"))
                         }
                     },
                     new TypesForVersion
@@ -251,9 +252,9 @@ namespace UndertaleModTool.Windows
                         Version = (2023, 2, 0),
                         Types = new[]
                         {
-                            (typeof(UndertaleParticleSystem), "Particle systems"),
-                            (typeof(UndertaleParticleSystemEmitter), "Particle system emitters"),
-                            (typeof(UndertaleRoom.ParticleSystemInstance), "Room particle system instances")
+                            (typeof(UndertaleParticleSystem), LocalizationSource.GetString("RefType_ParticleSystems")),
+                            (typeof(UndertaleParticleSystemEmitter), LocalizationSource.GetString("RefType_ParticleSystemEmitters")),
+                            (typeof(UndertaleRoom.ParticleSystemInstance), LocalizationSource.GetString("RefType_RoomParticleSystemInstances"))
                         }
                     }
                 }
@@ -267,7 +268,7 @@ namespace UndertaleModTool.Windows
                         Version = (1, 0, 0),
                         Types = new[]
                         {
-                            (typeof(UndertaleRoom.GameObject), "Room object instance")
+                            (typeof(UndertaleRoom.GameObject), LocalizationSource.GetString("RefType_RoomObjectInstance"))
                         }
                     },
                     new TypesForVersion
@@ -275,7 +276,7 @@ namespace UndertaleModTool.Windows
                         Version = (2, 3, 0),
                         Types = new[]
                         {
-                            (typeof(UndertaleSequence.InstanceKeyframes), "Sequence instance keyframes")
+                            (typeof(UndertaleSequence.InstanceKeyframes), LocalizationSource.GetString("RefType_SequenceInstanceKeyframes"))
                         }
                     },
                 }
@@ -289,10 +290,10 @@ namespace UndertaleModTool.Windows
                         Version = (1, 0, 0),
                         Types = new[]
                         {
-                            (typeof(UndertaleGameObject), "Game objects"),
-                            (typeof(UndertaleRoom), "Rooms"),
-                            (typeof(UndertaleGlobalInit), "Global initialization and game end scripts"),
-                            (typeof(UndertaleScript), "Scripts")
+                            (typeof(UndertaleGameObject), LocalizationSource.GetString("RefType_GameObjects")),
+                            (typeof(UndertaleRoom), LocalizationSource.GetString("RefType_Rooms")),
+                            (typeof(UndertaleGlobalInit), LocalizationSource.GetString("RefType_GlobalInitAndGameEndScripts")),
+                            (typeof(UndertaleScript), LocalizationSource.GetString("RefType_Scripts"))
                         }
                     }
                 }
@@ -306,7 +307,7 @@ namespace UndertaleModTool.Windows
                         Version = (1, 0, 0),
                         Types = new[]
                         {
-                            (typeof(UndertaleSound), "Sounds")
+                            (typeof(UndertaleSound), LocalizationSource.GetString("RefType_Sounds"))
                         }
                     }
                 }
@@ -320,7 +321,7 @@ namespace UndertaleModTool.Windows
                         Version = (1, 0, 0),
                         Types = new[]
                         {
-                            (typeof(UndertaleSound), "Sounds")
+                            (typeof(UndertaleSound), LocalizationSource.GetString("RefType_Sounds"))
                         }
                     }
                 }
@@ -334,7 +335,7 @@ namespace UndertaleModTool.Windows
                         Version = (1, 0, 0),
                         Types = new[]
                         {
-                            (typeof(UndertaleCode), "Code")
+                            (typeof(UndertaleCode), LocalizationSource.GetString("RefType_Code"))
                         }
                     }
                 }
@@ -348,7 +349,7 @@ namespace UndertaleModTool.Windows
                         Version = (1, 0, 0),
                         Types = new[]
                         {
-                            (typeof(UndertaleCode), "Code")
+                            (typeof(UndertaleCode), LocalizationSource.GetString("RefType_Code"))
                         }
                     }
                 }
@@ -362,7 +363,7 @@ namespace UndertaleModTool.Windows
                         Version = (2, 0, 0),
                         Types = new[]
                         {
-                            (typeof(UndertaleRoom.Layer), "Room tile layer")
+                            (typeof(UndertaleRoom.Layer), LocalizationSource.GetString("RefType_RoomTileLayer"))
                         }
                     }
                 }
@@ -376,7 +377,7 @@ namespace UndertaleModTool.Windows
                         Version = (2023, 2, 0),
                         Types = new[]
                         {
-                            (typeof(UndertaleRoom.ParticleSystemInstance), "Room particle system instances")
+                            (typeof(UndertaleRoom.ParticleSystemInstance), LocalizationSource.GetString("RefType_RoomParticleSystemInstances"))
                         }
                     }
                 }
@@ -390,8 +391,8 @@ namespace UndertaleModTool.Windows
                         Version = (2023, 2, 0),
                         Types = new[]
                         {
-                            (typeof(UndertaleParticleSystem), "Particle systems"),
-                            (typeof(UndertaleParticleSystemEmitter), "Particle system emitters")
+                            (typeof(UndertaleParticleSystem), LocalizationSource.GetString("RefType_ParticleSystems")),
+                            (typeof(UndertaleParticleSystemEmitter), LocalizationSource.GetString("RefType_ParticleSystemEmitters"))
                         }
                     }
                 }
@@ -400,19 +401,19 @@ namespace UndertaleModTool.Windows
 
         private static readonly Dictionary<Type, string> referenceableTypes = new()
         {
-            { typeof(UndertaleSprite), "Sprites" },
-            { typeof(UndertaleBackground), "Backgrounds" },
-            { typeof(UndertaleEmbeddedTexture), "Embedded textures" },
-            { typeof(UndertaleTexturePageItem), "Texture page items" },
-            { typeof(UndertaleString), "Strings" },
-            { typeof(UndertaleGameObject), "Game objects" },
-            { typeof(UndertaleCode), "Code entries" },
-            { typeof(UndertaleFunction), "Functions" },
-            { typeof(UndertaleVariable), "Variables" },
-            { typeof(UndertaleEmbeddedAudio), "Embedded audio" },
-            { typeof(UndertaleAudioGroup), "Audio groups" },
-            { typeof(UndertaleParticleSystem), "Particle systems" },
-            { typeof(UndertaleParticleSystemEmitter), "Particle system emitters" }
+            { typeof(UndertaleSprite), LocalizationSource.GetString("RefType_Sprites") },
+            { typeof(UndertaleBackground), LocalizationSource.GetString("RefType_Backgrounds") },
+            { typeof(UndertaleEmbeddedTexture), LocalizationSource.GetString("RefType_EmbeddedTextures") },
+            { typeof(UndertaleTexturePageItem), LocalizationSource.GetString("RefType_TexturePageItems") },
+            { typeof(UndertaleString), LocalizationSource.GetString("RefType_Strings") },
+            { typeof(UndertaleGameObject), LocalizationSource.GetString("RefType_GameObjects") },
+            { typeof(UndertaleCode), LocalizationSource.GetString("RefType_CodeEntries") },
+            { typeof(UndertaleFunction), LocalizationSource.GetString("RefType_Functions") },
+            { typeof(UndertaleVariable), LocalizationSource.GetString("RefType_Variables") },
+            { typeof(UndertaleEmbeddedAudio), LocalizationSource.GetString("RefType_EmbeddedAudio") },
+            { typeof(UndertaleAudioGroup), LocalizationSource.GetString("RefType_AudioGroups") },
+            { typeof(UndertaleParticleSystem), LocalizationSource.GetString("RefType_ParticleSystems") },
+            { typeof(UndertaleParticleSystemEmitter), LocalizationSource.GetString("RefType_ParticleSystemEmitters") }
         };
         
         public static readonly HashSet<Type> CodeTypes = new()
@@ -462,7 +463,7 @@ namespace UndertaleModTool.Windows
         public static Dictionary<Type, string> GetReferenceableTypes((uint, uint, uint) version)
         {
             referenceableTypes[typeof(UndertaleBackground)] = version.CompareTo((2, 0, 0)) >= 0
-                                                              ? "Tile sets" : "Backgrounds";
+                                                              ? LocalizationSource.GetString("RefType_TileSets") : LocalizationSource.GetString("RefType_Backgrounds");
 
             return referenceableTypes;
         }

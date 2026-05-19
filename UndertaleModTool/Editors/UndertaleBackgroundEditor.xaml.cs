@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using UndertaleModLib.Models;
+using UndertaleModTool.Localization;
 using UndertaleModTool.Windows;
 
 namespace UndertaleModTool
@@ -25,7 +26,7 @@ namespace UndertaleModTool
 
             var item = new MenuItem()
             {
-                Header = "Find all references of this tile"
+                Header = LocalizationSource.GetString("Menu_FindAllReferencesOfTile")
             };
             item.Click += FindAllTileReferencesItem_Click;
             tileContextMenu.Items.Add(item);
@@ -122,8 +123,7 @@ namespace UndertaleModTool
             }
             catch (Exception ex)
             {
-                mainWindow.ShowError("An error occurred in the object references related window.\n" +
-                                    $"Please report this on GitHub.\n\n{ex}");
+                mainWindow.ShowError(string.Format(LocalizationSource.GetString("Msg_ObjectReferencesWindowError"), ex));
                 dialog?.Close();
             }
         }
@@ -146,7 +146,7 @@ namespace UndertaleModTool
             ScrollViewer tileListViewer = MainWindow.FindVisualChild<ScrollViewer>(TileIdList);
             if (tileListViewer is null)
             {
-                mainWindow.ShowError("Cannot find the tile ID list scroll viewer.");
+                mainWindow.ShowError(LocalizationSource.GetString("Msg_CannotFindTileIdListScrollViewer"));
                 return false;
             }
             tileListViewer.ScrollToVerticalOffset(tileIndex + 1 - (tileListViewer.ViewportHeight / 2)); // DataGrid offset is logical

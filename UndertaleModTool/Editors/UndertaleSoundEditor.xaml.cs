@@ -1,4 +1,4 @@
-﻿#pragma warning disable CA1416 // Validate platform compatibility
+#pragma warning disable CA1416 // Validate platform compatibility
 
 using System;
 using System.Collections.Generic;
@@ -20,6 +20,7 @@ using NAudio.Wave;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
+using UndertaleModTool.Localization;
 
 namespace UndertaleModTool
 {
@@ -140,7 +141,7 @@ namespace UndertaleModTool
                 } catch (Exception ex)
                 {
                     waveOut = null;
-                    mainWindow.ShowError("Failed to play audio!\r\n" + ex.Message, "Audio failure");
+                    mainWindow.ShowError(LocalizationSource.GetString("Msg_FailedPlayAudio") + "\r\n" + ex.Message, LocalizationSource.GetString("Msg_AudioFailure"));
                 }
                 return;
             }
@@ -177,11 +178,11 @@ namespace UndertaleModTool
                         target = audioGroupData.EmbeddedAudio[sound.AudioID];
                     }
                     else
-                        throw new Exception("Failed to find audio group file.");
+                        throw new Exception(LocalizationSource.GetString("Msg_FailedFindAudioGroupFile"));
                 } catch (Exception ex)
                 {
                     waveOut = null;
-                    mainWindow.ShowError("Failed to play audio!\r\n" + ex.Message, "Audio failure");
+                    mainWindow.ShowError(LocalizationSource.GetString("Msg_FailedPlayAudio") + "\r\n" + ex.Message, LocalizationSource.GetString("Msg_AudioFailure"));
                     return;
                 }
             } else
@@ -218,7 +219,7 @@ namespace UndertaleModTool
                 }
             }
             else
-                mainWindow.ShowError("Failed to play audio!\r\nNo options for playback worked.", "Audio failure");
+                mainWindow.ShowError(LocalizationSource.GetString("Msg_FailedPlayAudioNoPlayback"), LocalizationSource.GetString("Msg_AudioFailure"));
         }
 
 

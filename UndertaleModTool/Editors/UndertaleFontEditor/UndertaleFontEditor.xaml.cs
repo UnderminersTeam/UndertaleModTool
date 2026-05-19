@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -15,6 +15,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using UndertaleModLib.Models;
 using UndertaleModTool.Editors.UndertaleFontEditor;
+using UndertaleModTool.Localization;
 
 namespace UndertaleModTool
 {
@@ -42,7 +43,7 @@ namespace UndertaleModTool
             foreach (var glyph in copy)
                 font.Glyphs.Add(glyph);
 
-            mainWindow.ShowMessage("The glyphs were sorted successfully.");
+            mainWindow.ShowMessage(LocalizationSource.GetString("Msg_GlyphsSortedSuccessfully"));
         }
         private void Button_UpdateRange_Click(object sender, RoutedEventArgs e)
         {
@@ -53,7 +54,7 @@ namespace UndertaleModTool
             font.RangeStart = characters.Min();
             font.RangeEnd = characters.Max();
 
-            mainWindow.ShowMessage("The range was updated successfully.");
+            mainWindow.ShowMessage(LocalizationSource.GetString("Msg_RangeUpdatedSuccessfully"));
         }
 
         private void Grid_MouseDown(object sender, MouseButtonEventArgs e)
@@ -91,7 +92,7 @@ namespace UndertaleModTool
             ScrollViewer glyphListViewer = MainWindow.FindVisualChild<ScrollViewer>(GlyphsGrid);
             if (glyphListViewer is null)
             {
-                mainWindow.ShowError("Cannot find the glyphs table scroll viewer.");
+                mainWindow.ShowError(LocalizationSource.GetString("Msg_CannotFindGlyphsScrollViewer"));
                 return;
             }
             glyphListViewer.ScrollToVerticalOffset(glyphIndex + 1 - (glyphListViewer.ViewportHeight / 2)); // DataGrid offset is logical
@@ -111,13 +112,13 @@ namespace UndertaleModTool
         {
             if (GlyphsGrid.SelectedItem is not UndertaleFont.Glyph glyph)
             {
-                mainWindow.ShowError("No glyph selected.");
+                mainWindow.ShowError(LocalizationSource.GetString("Msg_NoGlyphSelected"));
                 return;
             }
 
             if (DataContext is UndertaleFont font && font.Texture is null)
             {
-                mainWindow.ShowError("The font has no texture.");
+                mainWindow.ShowError(LocalizationSource.GetString("Msg_FontHasNoTexture"));
                 return;
             }
 
@@ -133,8 +134,7 @@ namespace UndertaleModTool
             }
             catch (Exception ex)
             {
-                mainWindow.ShowError("An error occurred in the glyph rectangle editor window.\n" +
-                                     $"Please report this on GitHub.\n\n{ex}");
+                mainWindow.ShowError(string.Format(LocalizationSource.GetString("Msg_GlyphRectEditorError"), ex));
             }
             finally
             {
@@ -152,8 +152,7 @@ namespace UndertaleModTool
                 if (font.Glyphs[index].SourceWidth == 0
                 || font.Glyphs[index].SourceHeight == 0)
                 {
-                    mainWindow.ShowWarning("The last glyph has zero size.\n" +
-                                           "You can use the button on the left to fix that.");
+                    mainWindow.ShowWarning(LocalizationSource.GetString("Msg_LastGlyphZeroSize"));
                     return;
                 }
             }
@@ -180,7 +179,7 @@ namespace UndertaleModTool
 
             char? ch = (char?)CharConverter.Instance.Convert(glyph.Character, null, null, null);
             ch ??= default;
-            GlyphsLabel.Text = $"Kerning of glyph '{ch}' (code - {glyph.Character}):";
+            GlyphsLabel.Text = string.Format(LocalizationSource.GetString("Editor_KerningOfGlyph"), ch, glyph.Character);
         }
 
         private void KerningBackButton_Click(object sender, RoutedEventArgs e)
@@ -192,7 +191,7 @@ namespace UndertaleModTool
             GlyphsGrid.Visibility = Visibility.Visible;
             GlyphsGrid.IsEnabled = true;
 
-            GlyphsLabel.Text = "Glyphs:";
+            GlyphsLabel.Text = LocalizationSource.GetString("Editor_Glyphs");
         }
         private void Command_GoBack(object sender, ExecutedRoutedEventArgs e)
         {
@@ -211,7 +210,7 @@ namespace UndertaleModTool
             if (value is not ushort charNum)
             {
                 if (value is not short charNum1)
-                    return "(error)";
+                    return LocalizationSource.GetString("Common_Error");
 
                 try
                 {
@@ -219,7 +218,7 @@ namespace UndertaleModTool
                 }
                 catch
                 {
-                    return "(error)";
+                    return LocalizationSource.GetString("Common_Error");
                 }
             }
 
@@ -236,7 +235,7 @@ namespace UndertaleModTool
             uint charNum = charStr[0];
             if (charNum > ushort.MaxValue)
             {
-                mainWindow.ShowError("The character code is greater than the maximum (65535)");
+                mainWindow.ShowError(LocalizationSource.GetString("Msg_CharCodeExceedsMax"));
                 return new ValidationResult(false, null);
             }
 

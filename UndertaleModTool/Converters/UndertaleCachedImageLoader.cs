@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Buffers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -18,6 +18,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
+using UndertaleModTool.Localization;
 using static UndertaleModLib.Models.UndertaleRoom;
 
 namespace UndertaleModTool
@@ -479,8 +480,7 @@ namespace UndertaleModTool
                 if (outOfBounds)
                 {
                     mainWindow.Dispatcher.BeginInvoke(() => 
-                        mainWindow.ShowError($"Tileset of \"{tilesData.ParentLayer.LayerName.Content}\" tile layer has wrong parameters (tile size, output border, etc.).\n" +
-                                             "It can't be displayed."));
+                        mainWindow.ShowError(string.Format(LocalizationSource.GetString("Msg_TilesetWrongParameters"), tilesData.ParentLayer.LayerName.Content)));
                     return "Error";
                 }
 

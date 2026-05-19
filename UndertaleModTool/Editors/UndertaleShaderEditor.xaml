@@ -1,12 +1,13 @@
-﻿<local:DataUserControl x:Class="UndertaleModTool.UndertaleShaderEditor"
+<local:DataUserControl x:Class="UndertaleModTool.UndertaleShaderEditor"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:local="clr-namespace:UndertaleModTool" 
-             xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:UndertaleModTool"
+             xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
-             mc:Ignorable="d" 
+             xmlns:loc="clr-namespace:UndertaleModTool.Localization"
+             mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleShader}">
     <UserControl.Resources>
         <ObjectDataProvider MethodName="GetValues" ObjectType="{x:Type sys:Enum}" x:Key="ShaderType">
@@ -32,15 +33,15 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="{loc:Loc Common_Name}"/>
         <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">Type</TextBlock>
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="{loc:Loc Editor_Type}"/>
         <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource ShaderType}}" SelectedItem="{Binding Path=Type}"
                             Grid.Row="1" Grid.Column="1" Margin="3"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">GLSL ES vertex source</TextBlock>
-        <Expander Grid.Row="2" Grid.Column="1" Margin="3" Header="Code">
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" Text="{loc:Loc Editor_GLSLESVertexSource}"/>
+        <Expander Grid.Row="2" Grid.Column="1" Margin="3" Header="{loc:Loc Editor_Code}">
             <avalonEdit:TextEditor xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
                 DataContext="{Binding GLSL_ES_Vertex}"
                 FontFamily="Consolas" WordWrap="True" FontSize="10pt"
@@ -51,8 +52,8 @@
                 DataContextChanged="TextEditor_DataContextChanged"/>
         </Expander>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">GLSL ES fragment source</TextBlock>
-        <Expander Grid.Row="3" Grid.Column="1" Margin="3" Header="Code">
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="{loc:Loc Editor_GLSLESFragmentSource}"/>
+        <Expander Grid.Row="3" Grid.Column="1" Margin="3" Header="{loc:Loc Editor_Code}">
             <avalonEdit:TextEditor xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
                 DataContext="{Binding GLSL_ES_Fragment}"
                 FontFamily="Consolas" WordWrap="True" FontSize="10pt"
@@ -63,8 +64,8 @@
                 DataContextChanged="TextEditor_DataContextChanged"/>
         </Expander>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">GLSL vertex source</TextBlock>
-        <Expander Grid.Row="4" Grid.Column="1" Margin="3" Header="Code">
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Text="{loc:Loc Editor_GLSLVertexSource}"/>
+        <Expander Grid.Row="4" Grid.Column="1" Margin="3" Header="{loc:Loc Editor_Code}">
             <avalonEdit:TextEditor xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
                 DataContext="{Binding GLSL_Vertex}"
                 FontFamily="Consolas" WordWrap="True" FontSize="10pt"
@@ -75,8 +76,8 @@
                 DataContextChanged="TextEditor_DataContextChanged"/>
         </Expander>
 
-        <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">GLSL fragment source</TextBlock>
-        <Expander Grid.Row="5" Grid.Column="1" Margin="3" Header="Code">
+        <TextBlock Grid.Row="5" Grid.Column="0" Margin="3" Text="{loc:Loc Editor_GLSLFragmentSource}"/>
+        <Expander Grid.Row="5" Grid.Column="1" Margin="3" Header="{loc:Loc Editor_Code}">
             <avalonEdit:TextEditor xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
                 DataContext="{Binding GLSL_Fragment}"
                 FontFamily="Consolas" WordWrap="True" FontSize="10pt"
@@ -87,8 +88,8 @@
                 DataContextChanged="TextEditor_DataContextChanged"/>
         </Expander>
 
-        <TextBlock Grid.Row="6" Grid.Column="0" Margin="3">HLSL9 vertex source</TextBlock>
-        <Expander Grid.Row="6" Grid.Column="1" Margin="3" Header="Code">
+        <TextBlock Grid.Row="6" Grid.Column="0" Margin="3" Text="{loc:Loc Editor_HLSL9VertexSource}"/>
+        <Expander Grid.Row="6" Grid.Column="1" Margin="3" Header="{loc:Loc Editor_Code}">
             <avalonEdit:TextEditor xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
                 DataContext="{Binding HLSL9_Vertex}"
                 FontFamily="Consolas" WordWrap="True" FontSize="10pt"
@@ -99,8 +100,8 @@
                 DataContextChanged="TextEditor_DataContextChanged"/>
         </Expander>
 
-        <TextBlock Grid.Row="7" Grid.Column="0" Margin="3">HLSL9 fragment source</TextBlock>
-        <Expander Grid.Row="7" Grid.Column="1" Margin="3" Header="Code">
+        <TextBlock Grid.Row="7" Grid.Column="0" Margin="3" Text="{loc:Loc Editor_HLSL9FragmentSource}"/>
+        <Expander Grid.Row="7" Grid.Column="1" Margin="3" Header="{loc:Loc Editor_Code}">
             <avalonEdit:TextEditor xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
                 DataContext="{Binding HLSL9_Fragment}"
                 FontFamily="Consolas" WordWrap="True" FontSize="10pt"
@@ -111,7 +112,7 @@
                 DataContextChanged="TextEditor_DataContextChanged"/>
         </Expander>
 
-        <TextBlock Grid.Row="8" Grid.Column="0" Margin="3">Vertex shader attributes</TextBlock>
+        <TextBlock Grid.Row="8" Grid.Column="0" Margin="3" Text="{loc:Loc Editor_VertexShaderAttributes}"/>
         <local:DataGridDark Grid.Row="8" Grid.Column="1" Margin="3" ItemsSource="{Binding VertexShaderAttributes}" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="Column" SelectionMode="Single" SelectionUnit="FullRow">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
@@ -130,7 +131,7 @@
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate>
-                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic" Text="{loc:Loc Common_DoubleClickToAdd}"/>
                                     </ControlTemplate>
                                 </Setter.Value>
                             </Setter>
@@ -139,7 +140,7 @@
                 </Style>
             </DataGrid.Resources>
             <DataGrid.Columns>
-                <DataGridTemplateColumn Header="Name" Width="*">
+                <DataGridTemplateColumn Header="{loc:Loc Common_Name}" Width="*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <local:UndertaleStringReference Margin="20,0,0,0" ObjectReference="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>

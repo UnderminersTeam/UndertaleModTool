@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,6 +13,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using UndertaleModTool.Localization;
 using static UndertaleModTool.UndertaleCodeEditor;
 
 namespace UndertaleModTool.Windows
@@ -98,14 +99,14 @@ namespace UndertaleModTool.Windows
 
                     if (failedCount == 1)
                     {
-                        errorStr = "There is 1 code entry that encountered an error while searching:";
+                        errorStr = LocalizationSource.GetString("Msg_OneCodeEntryError");
                         errLines.Add(new Run(errorStr) { FontWeight = FontWeights.Bold });
                         errLines.Add(new LineBreak());
                         errLines.Add(new Run(failedList.First()));
                     }
                     else
                     {
-                        errorStr = $"There are {failedCount} code entries that encountered an error while searching:";
+                        errorStr = string.Format(LocalizationSource.GetString("Msg_MultipleCodeEntriesError"), failedCount);
                         errLines.Add(new Run(errorStr) { FontWeight = FontWeights.Bold });
                         errLines.Add(new LineBreak());
 
@@ -131,14 +132,14 @@ namespace UndertaleModTool.Windows
             }
 
             int resCount = resultsDict.Count;
-            Paragraph headerPara = new(new Run($"{ResultsCount} results in {resCount} code entries for \"{Query}\".")) { FontWeight = FontWeights.Bold };
+            Paragraph headerPara = new(new Run(string.Format(LocalizationSource.GetString("Msg_ResultsInCodeEntries"), ResultsCount, resCount, Query))) { FontWeight = FontWeights.Bold };
             headerPara.Inlines.Add(new LineBreak());
             doc.Blocks.Add(headerPara);
 
             int totalLineCount = resultsDict.Select(x => x.Value.Count).Sum();
             bool tooManyLines = totalLineCount > 10000;
             if (tooManyLines)
-                mainWindow.ShowWarning($"There are too many code lines to display ({totalLineCount}), so the line numbers aren't clickable.");
+                mainWindow.ShowWarning(string.Format(LocalizationSource.GetString("Msg_TooManyCodeLines"), totalLineCount));
 
             foreach (KeyValuePair<string, List<(int lineNum, string codeLine)>> result in resultsDict)
             {
@@ -146,7 +147,7 @@ namespace UndertaleModTool.Windows
                 Paragraph resPara = new();
 
                 Underline resHeader = new();
-                resHeader.Inlines.Add(new Run("Results in "));
+                resHeader.Inlines.Add(new Run(LocalizationSource.GetString("Msg_ResultsIn") + " "));
                 resHeader.Inlines.Add(new Hyperlink(new Run(result.Key)));
                 resHeader.Inlines.Add(new Run(":"));
                 resHeader.Inlines.Add(new LineBreak());
@@ -157,7 +158,7 @@ namespace UndertaleModTool.Windows
                 {
                     if (!tooManyLines)
                     {
-                        Hyperlink lineLink = new(new Run($"Line {lineNum}")
+                        Hyperlink lineLink = new(new Run(string.Format(LocalizationSource.GetString("Msg_Line"), lineNum))
                         {
                             Tag = result.Key // code entry name
                         });
@@ -167,7 +168,7 @@ namespace UndertaleModTool.Windows
                     }
                     else
                     {
-                        Run lineRun = new($"Line {lineNum}: {codeLine}");
+                        Run lineRun = new(string.Format(LocalizationSource.GetString("Msg_LineWithContent"), lineNum, codeLine));
 
                         resPara.Inlines.Add(lineRun);
                     }
@@ -225,9 +226,10 @@ namespace UndertaleModTool.Windows
                 || String.IsNullOrEmpty(linkRun.Text))
                 return;
 
-            if (linkRun.Text.StartsWith("Line "))
+            string linePrefix = LocalizationSource.GetString("Msg_LinePrefix");
+            if (linkRun.Text.StartsWith(linePrefix))
             {
-                if (!Int32.TryParse(linkRun.Text[5..], out int lineNum))
+                if (!Int32.TryParse(linkRun.Text[linePrefix.Length..], out int lineNum))
                 {
                     e.Handled = true;
                     return;

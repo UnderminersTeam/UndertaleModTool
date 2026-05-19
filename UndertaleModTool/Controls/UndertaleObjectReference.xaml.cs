@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -18,6 +18,7 @@ using System.Windows.Shapes;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 using UndertaleModLib.Scripting;
+using UndertaleModTool.Localization;
 using UndertaleModTool.Windows;
 
 namespace UndertaleModTool
@@ -198,9 +199,9 @@ namespace UndertaleModTool
                 n = "n";
 
             if (CanChange)
-                label.Content = $"(drag & drop a{n} {typeName})";
+                label.Content = string.Format(LocalizationSource.GetString("Msg_DragDropAType"), n, typeName);
             else
-                label.Content = $"(empty {typeName} reference)";
+                label.Content = string.Format(LocalizationSource.GetString("Msg_EmptyTypeReference"), typeName);
         }
 
         public void ClearRemoveClickHandler()
@@ -310,7 +311,7 @@ namespace UndertaleModTool
             var obj = (sender as FrameworkElement)?.DataContext;
             if (obj is not UndertaleResource res)
             {
-                mainWindow.ShowError("The selected object is not an \"UndertaleResource\".");
+                mainWindow.ShowError(LocalizationSource.GetString("Msg_SelectedObjectNotUndertaleResource"));
                 return;
             }
 
@@ -322,8 +323,7 @@ namespace UndertaleModTool
             }
             catch (Exception ex)
             {
-                mainWindow.ShowError("An error occurred in the object references related window.\n" +
-                                     $"Please report this on GitHub.\n\n{ex}");
+                mainWindow.ShowError(string.Format(LocalizationSource.GetString("Msg_ObjectReferencesWindowError"), ex));
             }
             finally
             {
