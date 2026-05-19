@@ -4201,7 +4201,8 @@ To select a region of tile, hold down ALT.</value>
     <value>new_extension_function_{0}_ext</value>
   </data>
   <data name="Editor_OffsetTooltip" xml:space="preserve">
-    <value>Offset</value>
+    <value>The number of pixels to horizontally offset the rendering of the glyph.
+It's highlighed in blue on the texture above.</value>
   </data>
   <data name="Editor_PathGM2024" xml:space="preserve">
     <value>Path (GM 2024.14+)</value>
@@ -4619,7 +4620,8 @@ It can't be displayed.</value>
     <value>Select a region of an empty glyph</value>
   </data>
   <data name="Editor_ShiftTooltip" xml:space="preserve">
-    <value>Shift</value>
+    <value>The number of pixels to shift right when advancing to the next character.
+It's highlighed in green on the texture above.</value>
   </data>
   <data name="Editor_TextureFailedToLoad" xml:space="preserve">
     <value>Warning: Texture failed to load!</value>

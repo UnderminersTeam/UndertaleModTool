@@ -730,7 +730,7 @@
     <value>时间戳</value>
   </data>
   <data name="Editor_TimestampTooltip" xml:space="preserve">
-    <value>本地时间，悬停查看 GMT+0</value>
+    <value>本地时间，悬停查看 GMT+0 时间</value>
   </data>
   <data name="Editor_DisplayName" xml:space="preserve">
     <value>显示名称</value>
@@ -4203,7 +4203,8 @@ UndertaleModTool 通过取平均值来表示。
     <value>新扩展函数_{0}_ext</value>
   </data>
   <data name="Editor_OffsetTooltip" xml:space="preserve">
-    <value>偏移</value>
+    <value>水平偏移字形渲染的像素数。
+上面的纹理以蓝色为亮点。</value>
   </data>
   <data name="Editor_PathGM2024" xml:space="preserve">
     <value>路径（GM 2024.14+）</value>
@@ -4621,7 +4622,8 @@ UndertaleModTool的32位（x86）版本已过时。</value>
     <value>选择空白字形的区域</value>
   </data>
   <data name="Editor_ShiftTooltip" xml:space="preserve">
-    <value>偏移</value>
+    <value>前进到下一个字符时向右移动的像素数。
+上面的纹理以绿色为主。</value>
   </data>
   <data name="Editor_TextureFailedToLoad" xml:space="preserve">
     <value>警告：纹理加载失败！</value>
