@@ -203,6 +203,7 @@ public partial class Program : IScriptInterface
         };
         Option<bool> dumpStringsOption = new("-s", "--strings") { Description = "Whether to dump all strings" };
         Option<bool> dumpTexturesOption = new("-t", "--textures") { Description = "Whether to dump all embedded textures" };
+        Option<bool> dumpSpritesOption = new("--sprites") { Description = "Whether to dump all sprites" };
         Command dumpCommand = new("dump", "Dump certain properties about the game data file")
         {
             dataFileArgument,
@@ -210,7 +211,8 @@ public partial class Program : IScriptInterface
             dumpOutputOption,
             dumpCodeOption,
             dumpStringsOption,
-            dumpTexturesOption
+            dumpTexturesOption,
+            dumpSpritesOption
         };
         dumpCommand.SetAction(parseResult =>
         {
@@ -221,7 +223,8 @@ public partial class Program : IScriptInterface
                 Output = parseResult.GetValue(dumpOutputOption),
                 Code = parseResult.GetValue(dumpCodeOption),
                 Strings = parseResult.GetValue(dumpStringsOption),
-                Textures = parseResult.GetValue(dumpTexturesOption)
+                Textures = parseResult.GetValue(dumpTexturesOption),
+                Sprites = parseResult.GetValue(dumpSpritesOption)
             });
         });
 
@@ -513,6 +516,9 @@ public partial class Program : IScriptInterface
         // If user wanted to dump embedded textures, dump all of them
         if (options.Textures)
             program.DumpAllTextures();
+
+        if (options.Sprites)
+            program.DumpAllSprites();
 
         return EXIT_SUCCESS;
     }
@@ -885,6 +891,37 @@ public partial class Program : IScriptInterface
             }
             using FileStream fs = new(dest, FileMode.Create);
             texture.TextureData.Image.SavePng(fs);
+        }
+    }
+
+    /// <summary>
+    /// Dumps all sprites in a data file.
+    /// </summary>
+    private void DumpAllSprites()
+    {
+        string directory = Path.Join(Output.FullName, "Sprites");
+
+        Directory.CreateDirectory(directory);
+
+        foreach (UndertaleSprite sprite in Data.Sprites)
+        {
+            if (Verbose)
+                Console.WriteLine($"Dumping {sprite.Name}");
+
+            for (int i = 0; i < sprite.Textures.Count; i++)
+            {
+                if (sprite.Textures[i]?.Texture is not null)
+                {
+                    string dest = Paths.JoinVerifyWithinDirectory(directory, $"{sprite.Name.Content}_{i}.png");
+                    if (dest is null)
+                    {
+                        Console.Error.WriteLine($"Failed to export sprite with name {sprite.Name.Content}");
+                        return;
+                    }
+                    using FileStream fs = new(dest, FileMode.Create);
+                    sprite.Textures[i]?.Texture.TexturePage.TextureData.Image.SavePng(fs);
+                }
+            }
         }
     }
 
