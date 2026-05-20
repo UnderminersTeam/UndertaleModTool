@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.Scripting;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.IO;
@@ -20,6 +21,15 @@ using UndertaleModLib.Util;
 using static UndertaleModLib.UndertaleReader;
 
 namespace UndertaleModCli;
+
+class TextureToExport
+{
+    public UndertaleTexturePageItem PageItem { get; set; }
+    public UndertaleEmbeddedTexture Page => PageItem.TexturePage;
+    public string FileExportLocation { get; set; }
+
+    public TextureToExport(UndertaleTexturePageItem pageItem, string fileExportLocation) => (PageItem, FileExportLocation) = (pageItem, fileExportLocation);
+}
 
 /// <summary>
 /// Main CLI Program
@@ -518,7 +528,9 @@ public partial class Program : IScriptInterface
             program.DumpAllTextures();
 
         if (options.Sprites)
-            program.DumpAllSprites();
+        {
+            int _wait = program.DumpAllSprites().Result;
+        }
 
         return EXIT_SUCCESS;
     }
@@ -897,32 +909,70 @@ public partial class Program : IScriptInterface
     /// <summary>
     /// Dumps all sprites in a data file.
     /// </summary>
-    private void DumpAllSprites()
+    private async Task<int> DumpAllSprites()
     {
         string directory = Path.Join(Output.FullName, "Sprites");
 
         Directory.CreateDirectory(directory);
 
-        foreach (UndertaleSprite sprite in Data.Sprites)
+        // this code is copied over from the ExportAllSprites script
+
+        // TODO: configurable
+        bool padded = true;
+
+        ConcurrentDictionary<string, ConcurrentBag<TextureToExport>> texturesToExport = new();
+
+        Console.WriteLine("Fetching sprite textures...");
+        await Task.Run(() => Parallel.ForEach(Data.Sprites, spr =>
         {
-            if (Verbose)
-                Console.WriteLine($"Dumping {sprite.Name}");
+            FetchTexturesFromSprite(spr);
+        }));
+
+        Console.WriteLine("Exporting sprite textures...");
+        await Task.Run(() => ExportTextures());
+
+        void FetchTexturesFromSprite(UndertaleSprite sprite)
+        {
+            if (sprite is not { SSpriteType: UndertaleSprite.SpriteType.Normal, Textures.Count: > 0 })
+            {
+                // IncrementProgressParallel();
+                return;
+            }
 
             for (int i = 0; i < sprite.Textures.Count; i++)
             {
                 if (sprite.Textures[i]?.Texture is not null)
                 {
-                    string dest = Paths.JoinVerifyWithinDirectory(directory, $"{sprite.Name.Content}_{i}.png");
-                    if (dest is null)
-                    {
-                        Console.Error.WriteLine($"Failed to export sprite with name {sprite.Name.Content}");
-                        return;
-                    }
-                    using FileStream fs = new(dest, FileMode.Create);
-                    sprite.Textures[i]?.Texture.TexturePage.TextureData.Image.SavePng(fs);
+                    UndertaleTexturePageItem pageItem = sprite.Textures[i].Texture;
+
+                    var bag = texturesToExport.GetOrAdd(pageItem.TexturePage.Name.Content, _ => new ConcurrentBag<TextureToExport>());
+
+                    bag.Add(new TextureToExport(pageItem, Paths.JoinVerifyWithinDirectory(directory, $"{sprite.Name.Content}_{i}.png")));
                 }
             }
+            // IncrementProgressParallel();
         }
+
+        void ExportTextures()
+        {
+            int totalCores = Environment.ProcessorCount;
+            int outerLimit = Math.Max(1, totalCores / 4);
+            Parallel.ForEach(texturesToExport, new ParallelOptions { MaxDegreeOfParallelism = outerLimit }, kvp =>
+            {
+                using (TextureWorker localWorker = new TextureWorker())
+                {
+                    foreach (TextureToExport tte in kvp.Value)
+                    {
+                        if (Verbose)
+                            Console.WriteLine($"Dumping {tte.PageItem.Name}");
+                        localWorker.ExportAsPNG(tte.PageItem, tte.FileExportLocation, null, padded);
+                    }
+                }
+                // IncrementProgressParallel();
+            });
+        }
+
+        return 0;
     }
 
     /// <summary>
