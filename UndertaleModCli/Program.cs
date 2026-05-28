@@ -22,15 +22,6 @@ using static UndertaleModLib.UndertaleReader;
 
 namespace UndertaleModCli;
 
-class TextureToExport
-{
-    public UndertaleTexturePageItem PageItem { get; set; }
-    public UndertaleEmbeddedTexture Page => PageItem.TexturePage;
-    public string FileExportLocation { get; set; }
-
-    public TextureToExport(UndertaleTexturePageItem pageItem, string fileExportLocation) => (PageItem, FileExportLocation) = (pageItem, fileExportLocation);
-}
-
 /// <summary>
 /// Main CLI Program
 /// </summary>
@@ -527,10 +518,9 @@ public partial class Program : IScriptInterface
         if (options.Textures)
             program.DumpAllTextures();
 
+        // If user wanted to dump sprites, dump all of them
         if (options.Sprites)
-        {
-            int _wait = program.DumpAllSprites().Result;
-        }
+            program.DumpAllSprites().Wait();
 
         return EXIT_SUCCESS;
     }
@@ -907,17 +897,29 @@ public partial class Program : IScriptInterface
     }
 
     /// <summary>
+    /// Helper class for exporting texture page items, e.g. for dumping sprites.
+    /// </summary>
+    private class TextureToExport
+    {
+        public UndertaleTexturePageItem PageItem { get; set; }
+        public UndertaleEmbeddedTexture Page => PageItem.TexturePage;
+        public string FileExportLocation { get; set; }
+
+        public TextureToExport(UndertaleTexturePageItem pageItem, string fileExportLocation) => (PageItem, FileExportLocation) = (pageItem, fileExportLocation);
+    }
+
+    /// <summary>
     /// Dumps all sprites in a data file.
     /// </summary>
-    private async Task<int> DumpAllSprites()
+    private async Task DumpAllSprites()
     {
         string directory = Path.Join(Output.FullName, "Sprites");
 
         Directory.CreateDirectory(directory);
 
-        // this code is copied over from the ExportAllSprites script
+        // As of writing, this code is copied over from the ExportAllSprites.csx script
 
-        // TODO: configurable
+        // TODO: make this configurable, but this is a reasonable default
         bool padded = true;
 
         ConcurrentDictionary<string, ConcurrentBag<TextureToExport>> texturesToExport = new();
@@ -946,7 +948,6 @@ public partial class Program : IScriptInterface
                     UndertaleTexturePageItem pageItem = sprite.Textures[i].Texture;
 
                     var bag = texturesToExport.GetOrAdd(pageItem.TexturePage.Name.Content, _ => new ConcurrentBag<TextureToExport>());
-
                     bag.Add(new TextureToExport(pageItem, Paths.JoinVerifyWithinDirectory(directory, $"{sprite.Name.Content}_{i}.png")));
                 }
             }
@@ -959,20 +960,17 @@ public partial class Program : IScriptInterface
             int outerLimit = Math.Max(1, totalCores / 4);
             Parallel.ForEach(texturesToExport, new ParallelOptions { MaxDegreeOfParallelism = outerLimit }, kvp =>
             {
-                using (TextureWorker localWorker = new TextureWorker())
+                using TextureWorker localWorker = new();
+
+                foreach (TextureToExport tte in kvp.Value)
                 {
-                    foreach (TextureToExport tte in kvp.Value)
-                    {
-                        if (Verbose)
-                            Console.WriteLine($"Dumping {tte.PageItem.Name}");
-                        localWorker.ExportAsPNG(tte.PageItem, tte.FileExportLocation, null, padded);
-                    }
+                    if (Verbose)
+                        Console.WriteLine($"Dumping {tte.PageItem.Name}");
+                    localWorker.ExportAsPNG(tte.PageItem, tte.FileExportLocation, null, padded);
                 }
                 // IncrementProgressParallel();
             });
         }
-
-        return 0;
     }
 
     /// <summary>
