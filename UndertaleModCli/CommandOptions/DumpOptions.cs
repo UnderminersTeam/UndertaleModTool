@@ -36,4 +36,9 @@ public class DumpOptions
 	/// Determines if embedded textures should get dumped
 	/// </summary>
 	public bool Textures { get; set; }
+
+	/// <summary>
+	/// Determines if all sprites should get dumped
+	/// </summary>
+	public bool Sprites { get; set; }
 }
