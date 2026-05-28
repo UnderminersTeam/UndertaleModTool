@@ -1855,10 +1855,10 @@ Note that the code often references objects by ID, so this operation is likely t
     <value>The references of game object ""</value>
   </data>
   <data name="Filter_DataFiles" xml:space="preserve">
-    <value>GameMaker data files (.win, .unx, .ios, .droid, audiogroup*.dat)|*.win;*.unx;*.ios;*.droid;audiogroup*.dat|All files|*</value>
+    <value>GameMaker data files (.win, .unx, .ios, .droid, audiogroup*.dat)</value>
   </data>
   <data name="Filter_MainDataFiles" xml:space="preserve">
-    <value>GameMaker main data files (.win, .unx, .ios, .droid)|*.win;*.unx;*.ios;*.droid|All files|*</value>
+    <value>GameMaker main data files (.win, .unx, .ios, .droid)</value>
   </data>
   <data name="Cmd_CloseCurrentTab" xml:space="preserve">
     <value>Close current tab</value>
