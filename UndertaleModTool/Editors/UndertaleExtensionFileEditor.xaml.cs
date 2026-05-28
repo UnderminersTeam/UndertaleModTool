@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using UndertaleModLib;
 using UndertaleModLib.Models;
+using UndertaleModTool.Localization;
 
 namespace UndertaleModTool
 {
@@ -34,8 +35,8 @@ namespace UndertaleModTool
 
             UndertaleExtensionFunction obj = new UndertaleExtensionFunction()
             {
-                Name = (Application.Current.MainWindow as MainWindow).Data.Strings.MakeString($"new_extension_function_{lastItem}"),
-                ExtName = (Application.Current.MainWindow as MainWindow).Data.Strings.MakeString($"new_extension_function_{lastItem}_ext"),
+                Name = (Application.Current.MainWindow as MainWindow).Data.Strings.MakeString(string.Format(LocalizationSource.GetString("Editor_NewExtensionFunction"), lastItem)),
+                ExtName = (Application.Current.MainWindow as MainWindow).Data.Strings.MakeString(string.Format(LocalizationSource.GetString("Editor_NewExtensionFunctionExt"), lastItem)),
                 RetType = UndertaleExtensionVarType.Double,
                 Arguments = new UndertaleSimpleList<UndertaleExtensionFunctionArg>(),
                 Kind = 11, // ???

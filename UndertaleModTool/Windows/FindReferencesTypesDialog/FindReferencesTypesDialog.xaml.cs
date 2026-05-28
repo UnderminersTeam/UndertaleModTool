@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using UndertaleModLib;
 using UndertaleModLib.Models;
+using UndertaleModTool.Localization;
 
 namespace UndertaleModTool.Windows
 {
@@ -49,7 +50,7 @@ namespace UndertaleModTool.Windows
 
             if (data.GeneralInfo is null)
             {
-                this.ShowError("Cannot determine GameMaker version - \"General Info\" is null.");
+                this.ShowError(LocalizationSource.GetString("Msg_GeneralInfoNull"));
                 dontShowWindow = true;
                 return;
             }
@@ -57,7 +58,7 @@ namespace UndertaleModTool.Windows
             (Type, string)[] sourceTypes = UndertaleResourceReferenceMap.GetTypeMapForVersion(obj.GetType(), data);
             if (sourceTypes is null)
             {
-                this.ShowError($"Cannot get the source types for object of type \"{obj.GetType()}\".");
+                this.ShowError(string.Format(LocalizationSource.GetString("Msg_CannotGetSourceTypes"), obj.GetType()));
                 dontShowWindow = true;
                 return;
             }
@@ -81,7 +82,7 @@ namespace UndertaleModTool.Windows
 
             if (data.GeneralInfo is null)
             {
-                this.ShowError("Cannot determine GameMaker version - \"General Info\" is null.");
+                this.ShowError(LocalizationSource.GetString("Msg_GeneralInfoNull"));
                 dontShowWindow = true;
                 return;
             }
@@ -138,7 +139,7 @@ namespace UndertaleModTool.Windows
 
                 if (typesList.Count == 0)
                 {
-                    this.ShowError("At least one type should be selected.");
+                    this.ShowError(LocalizationSource.GetString("Msg_AtLeastOneTypeSelected"));
                     return;
                 }
 
@@ -151,8 +152,7 @@ namespace UndertaleModTool.Windows
                 }
                 catch (Exception ex)
                 {
-                    mainWindow.ShowError("An error occurred in the object references related window.\n" +
-                                         $"Please report this on GitHub.\n\n{ex}");
+                    mainWindow.ShowError(string.Format(LocalizationSource.GetString("Msg_ObjectReferencesWindowError"), ex));
                     dialog?.Close();
 
                 }
@@ -172,16 +172,14 @@ namespace UndertaleModTool.Windows
 
                 if (typesDict.Count == 0)
                 {
-                    this.ShowError("At least one type should be selected.");
+                    this.ShowError(LocalizationSource.GetString("Msg_AtLeastOneTypeSelected"));
                     return;
                 }
 
                 if (typesDict.Count > 1 && typesDict.ContainsKey(typeof(UndertaleString))
                     && data.Strings.Count > 5000)
                 {
-                    var res = this.ShowQuestion("You have selected the \"Strings\" when there are a lot of strings.\n" +
-                                                "That could make the search process noticeably longer.\n" +
-                                                "Do you want to proceed?");
+                    var res = this.ShowQuestion(LocalizationSource.GetString("Msg_ManyStringsSelectedWarning"));
                     if (res != MessageBoxResult.Yes)
                         return;
                 }
@@ -196,8 +194,7 @@ namespace UndertaleModTool.Windows
                 }
                 catch (Exception ex)
                 {
-                    mainWindow.ShowError("An error occurred in the object references related window.\n" +
-                                         $"Please report this on GitHub.\n\n{ex}");
+                    mainWindow.ShowError(string.Format(LocalizationSource.GetString("Msg_ObjectReferencesWindowError"), ex));
                     dialog?.Close();
                 }
             }

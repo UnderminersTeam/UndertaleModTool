@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
@@ -14,6 +14,7 @@ using ImageMagick;
 using Microsoft.Win32;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
+using UndertaleModTool.Localization;
 using UndertaleModTool.Windows;
 
 namespace UndertaleModTool
@@ -42,12 +43,12 @@ namespace UndertaleModTool
 
             var newTabItem = new MenuItem()
             {
-                Header = "Open in new tab"
+                Header = LocalizationSource.GetString("Menu_OpenInNewTab")
             };
             newTabItem.Click += OpenInNewTabItem_Click;
             var referencesItem = new MenuItem()
             {
-                Header = "Find all references to this page item"
+                Header = LocalizationSource.GetString("Menu_FindAllReferencesToPageItem")
             };
             referencesItem.Click += FindAllItemReferencesItem_Click;
             pageContextMenu.Items.Add(newTabItem);
@@ -137,8 +138,7 @@ namespace UndertaleModTool
             }
             catch (Exception ex)
             {
-                mainWindow.ShowError("An error occurred in the object references related window.\n" +
-                                     $"Please report this on GitHub.\n\n{ex}");
+                mainWindow.ShowError(string.Format(LocalizationSource.GetString("Msg_ObjectReferencesWindowError"), ex));
             }
             finally
             {
@@ -203,7 +203,7 @@ namespace UndertaleModTool
             OpenFileDialog dlg = new OpenFileDialog();
 
             dlg.DefaultExt = ".png";
-            dlg.Filter = "PNG files (.png)|*.png|All files|*";
+            dlg.Filter = LocalizationSource.GetString("FileFilter_PNG") + "|*.png|" + LocalizationSource.GetString("FileFilter_AllFiles") + "|*";
 
             if (dlg.ShowDialog() == true)
             {
@@ -234,7 +234,7 @@ namespace UndertaleModTool
                     uint width = (uint)image.Width, height = (uint)image.Height;
                     if ((width & (width - 1)) != 0 || (height & (height - 1)) != 0)
                     {
-                        mainWindow.ShowWarning("WARNING: Texture page dimensions are not powers of 2. Sprite blurring is very likely in-game.", "Unexpected texture dimensions");
+                        mainWindow.ShowWarning(LocalizationSource.GetString("Msg_TexturePageDimensionsNotPowerOf2"), LocalizationSource.GetString("Dialog_UnexpectedTextureDimensions"));
                     }
 
                     var previousFormat = target.TextureData.Image?.Format;
@@ -247,7 +247,7 @@ namespace UndertaleModTool
                     // If texture was DDS, warn user that texture has been converted to PNG
                     if (previousFormat == GMImage.ImageFormat.Dds && currentFormat == GMImage.ImageFormat.Png)
                     {
-                        mainWindow.ShowMessage($"{target} was converted into PNG format since we don't support converting images into DDS format. This might have performance issues in the game.");
+                        mainWindow.ShowMessage(string.Format(LocalizationSource.GetString("Msg_TextureConvertedToPNG"), target));
                     }
 
                     // Update width/height properties in the UI
@@ -256,7 +256,7 @@ namespace UndertaleModTool
                 }
                 catch (Exception ex)
                 {
-                    mainWindow.ShowError("Failed to import file: " + ex.Message, "Failed to import file");
+                    mainWindow.ShowError(string.Format(LocalizationSource.GetString("Msg_FailedToImportFile"), ex.Message), LocalizationSource.GetString("Dialog_FailedToImportFile"));
                 }
             }
         }
@@ -268,7 +268,7 @@ namespace UndertaleModTool
             SaveFileDialog dlg = new SaveFileDialog();
 
             dlg.DefaultExt = ".png";
-            dlg.Filter = "PNG files (.png)|*.png|All files|*";
+            dlg.Filter = LocalizationSource.GetString("FileFilter_PNG") + "|*.png|" + LocalizationSource.GetString("FileFilter_AllFiles") + "|*";
 
             if (dlg.ShowDialog() == true)
             {
@@ -279,7 +279,7 @@ namespace UndertaleModTool
                 }
                 catch (Exception ex)
                 {
-                    mainWindow.ShowError("Failed to export file: " + ex.Message, "Failed to export file");
+                    mainWindow.ShowError(string.Format(LocalizationSource.GetString("Msg_FailedToExportFile"), ex.Message), LocalizationSource.GetString("Dialog_FailedToExportFile"));
                 }
             }
         }

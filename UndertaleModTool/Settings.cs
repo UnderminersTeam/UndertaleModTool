@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -9,6 +9,7 @@ using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Windows;
 using Underanalyzer.Decompiler;
+using UndertaleModTool.Localization;
 
 namespace UndertaleModTool
 {
@@ -56,6 +57,8 @@ namespace UndertaleModTool
         public bool RememberWindowPlacements { get; set; } = false;
 
         public bool RecompileAllCodeSourcesOnProjectSave { get; set; } = false;
+
+        public string Language { get; set; } = "en";
 
         public static Settings Instance { get; private set; }
 
@@ -125,7 +128,7 @@ namespace UndertaleModTool
             } 
             catch (Exception e)
             {
-                MessageBox.Show($"Failed to load settings.json! Using default values.\n{e.Message}");
+                MessageBox.Show(string.Format(LocalizationSource.GetString("Msg_FailedLoadSettings"), e.Message));
                 new Settings() { DecompilerSettings = existingDecompilerSettings ?? new() };
             }
         }
@@ -141,7 +144,7 @@ namespace UndertaleModTool
             }
             catch (Exception e)
             {
-                MessageBox.Show($"Failed to save settings.json!\n{e.Message}");
+                MessageBox.Show(string.Format(LocalizationSource.GetString("Msg_FailedSaveSettings"), e.Message));
             }
         }
     }

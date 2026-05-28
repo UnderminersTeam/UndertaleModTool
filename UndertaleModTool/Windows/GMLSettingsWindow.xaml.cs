@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -12,6 +12,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using UndertaleModTool.Localization;
 
 namespace UndertaleModTool
 {
@@ -57,10 +58,10 @@ namespace UndertaleModTool
             }
             return kind switch
             {
-                DecompilerSettings.IndentStyleKind.FourSpaces => "4 spaces",
-                DecompilerSettings.IndentStyleKind.TwoSpaces => "2 spaces",
-                DecompilerSettings.IndentStyleKind.Tabs => "Tabs",
-                _ => throw new Exception("Unknown indent style kind")
+                DecompilerSettings.IndentStyleKind.FourSpaces => LocalizationSource.GetString("Editor_4Spaces"),
+                DecompilerSettings.IndentStyleKind.TwoSpaces => LocalizationSource.GetString("Editor_2Spaces"),
+                DecompilerSettings.IndentStyleKind.Tabs => LocalizationSource.GetString("Editor_Tabs"),
+                _ => throw new Exception(LocalizationSource.GetString("Msg_UnknownIndentStyle"))
             };
         }
 

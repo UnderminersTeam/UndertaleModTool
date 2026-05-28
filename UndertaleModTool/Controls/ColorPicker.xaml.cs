@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using UndertaleModTool.Localization;
 
 namespace UndertaleModTool
 {
@@ -59,7 +60,7 @@ namespace UndertaleModTool
             ColorText.SetBinding(TextBox.TextProperty, binding);
 
             ColorText.MaxLength = HasAlpha ? 9 : 7;
-            ColorText.ToolTip = $"#{(HasAlpha ? "AA" : "")}BBGGRR";
+            ColorText.ToolTip = string.Format(LocalizationSource.GetString("Msg_ColorFormatHint"), HasAlpha ? "AA" : "");
             ToolTipService.SetInitialShowDelay(ColorText, 250);
         }
 
@@ -78,7 +79,7 @@ namespace UndertaleModTool
             colorPicker.ColorText.SetBinding(TextBox.TextProperty, binding);
 
             colorPicker.ColorText.MaxLength = hasAlpha ? 9 : 7;
-            colorPicker.ColorText.ToolTip = $"#{(hasAlpha ? "AA" : "")}BBGGRR";
+            colorPicker.ColorText.ToolTip = string.Format(LocalizationSource.GetString("Msg_ColorFormatHint"), hasAlpha ? "AA" : "");
         }
     }
 
@@ -123,11 +124,11 @@ namespace UndertaleModTool
                 bool hasAlpha = bool.Parse((string)parameter);
 
                 if (val[0] != '#')
-                    return new ValidationResult(false, "Invalid color string");
+                    return new ValidationResult(false, LocalizationSource.GetString("Msg_InvalidColorString"));
 
                 val = val[1..];
                 if (val.Length != (hasAlpha ? 8 : 6))
-                    return new ValidationResult(false, "Invalid color string");
+                    return new ValidationResult(false, LocalizationSource.GetString("Msg_InvalidColorString"));
 
                 if (!hasAlpha)
                     val = "FF" + val; // add alpha (255)

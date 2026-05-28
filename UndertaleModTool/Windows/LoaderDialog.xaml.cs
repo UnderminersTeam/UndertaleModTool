@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -17,6 +17,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Windows.Shell;
+using UndertaleModTool.Localization;
 
 namespace UndertaleModTool
 {
@@ -30,7 +31,7 @@ namespace UndertaleModTool
         public string Message { get; set; }
         public bool PreventClose { get; set; }
 
-        public string StatusText { get; set; } = "Please wait...";
+        public string StatusText { get; set; } = LocalizationSource.GetString("Msg_PleaseWait");
         public string SavedStatusText { get; set; }
         public double? Maximum
         {
@@ -143,16 +144,18 @@ namespace UndertaleModTool
         {
             StatusText = status;
         }
-        public void ReportProgress(double value) //update without status text changing
+        public void ReportProgress(double value)
         {
             try
             {
-                ReportProgress(value + "/" + Maximum + (!String.IsNullOrEmpty(SavedStatusText) ? ": " + SavedStatusText : ""));
+                var format = !String.IsNullOrEmpty(SavedStatusText)
+                    ? LocalizationSource.GetString("LoaderDialog_ProgressFormatWithStatus")
+                    : LocalizationSource.GetString("LoaderDialog_ProgressFormat");
+                ReportProgress(string.Format(format, value, Maximum, SavedStatusText));
                 UpdateValue(value);
             }
             catch
             {
-                //Silently fail...
             }
         }
         public void UpdateValue(double value)
@@ -167,12 +170,14 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    ReportProgress(value + "/" + Maximum + (!String.IsNullOrEmpty(status) ? ": " + status : "")); //update status
+                    var format = !String.IsNullOrEmpty(status)
+                        ? LocalizationSource.GetString("LoaderDialog_ProgressFormatWithStatus")
+                        : LocalizationSource.GetString("LoaderDialog_ProgressFormat");
+                    ReportProgress(string.Format(format, value, Maximum, status));
                     UpdateValue(value);
                 }
                 catch
                 {
-                    // Silently fail...
                 }
             });
         }

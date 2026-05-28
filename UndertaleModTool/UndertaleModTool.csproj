@@ -15,8 +15,8 @@
         <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
         <StartupObject>UndertaleModTool.Program</StartupObject>
         <NeutralLanguage>en</NeutralLanguage>
-        <ResourceLanguages>en</ResourceLanguages>
-        <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+        <ResourceLanguages>en;zh-CN</ResourceLanguages>
+        <SatelliteResourceLanguages>en;zh-CN</SatelliteResourceLanguages>
         <!-- Suppress all missing XML comment warnings -->
         <NoWarn>1591</NoWarn>
         <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -34,6 +34,12 @@
         <Resource Include="Resources\tabs_right_button.png" />
         <Resource Include="Resources\X.png" />
         <Resource Include="Resources\X_Down.png" />
+    </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Update="Localization\Strings.resx">
+            <Generator>PublicResXFileCodeGenerator</Generator>
+            <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Underanalyzer\Underanalyzer\Underanalyzer.csproj" />
@@ -113,5 +119,12 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </Content>
+    </ItemGroup>
+    <ItemGroup>
+      <Compile Update="Localization\Strings.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Strings.resx</DependentUpon>
+      </Compile>
     </ItemGroup>
 </Project>

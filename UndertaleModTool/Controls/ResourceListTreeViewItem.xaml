@@ -1,31 +1,29 @@
 <TreeViewItem x:Class="UndertaleModTool.ResourceListTreeViewItem"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:UndertaleModTool"
              xmlns:undertalelib="clr-namespace:UndertaleModLib;assembly=UndertaleModLib"
+             xmlns:loc="clr-namespace:UndertaleModTool.Localization"
              mc:Ignorable="d">
 
     <TreeViewItem.Resources>
         <DataTemplate x:Key="DefaultNullItemTemplate">
-            <TextBlock Text="(null)"/>
+            <TextBlock Text="{loc:Loc Common_Null}"/>
         </DataTemplate>
 
         <local:ImplementsInterfaceConverter x:Key="ImplementsInterfaceConverter"/>
 
         <local:ContextMenuDark x:Key="UndertaleResourceMenu" Opened="MenuItem_ContextMenuOpened">
-            <MenuItem Header="Open in new tab" Click="MenuItem_OpenInNewTab_Click"/>
-            <MenuItem Header="Find all references" Click="MenuItem_FindAllReferences_Click" Name="FindAllReferences"/>
-            <MenuItem Header="Copy name to clipboard" Click="MenuItem_CopyName_Click"/>
-            <MenuItem Header="Delete" Click="MenuItem_Delete_Click"/>
+            <MenuItem Header="{loc:Loc Common_OpenInNewTab}" Click="MenuItem_OpenInNewTab_Click"/>
+            <MenuItem Header="{loc:Loc FindRef_FindAllReferences}" Click="MenuItem_FindAllReferences_Click" Name="FindAllReferences"/>
+            <MenuItem Header="{loc:Loc FindRef_CopyNameToClipboard}" Click="MenuItem_CopyName_Click"/>
+            <MenuItem Header="{loc:Loc Common_Delete}" Click="MenuItem_Delete_Click"/>
         </local:ContextMenuDark>
 
-        <!-- TODO: Would need some way to know the ID, IndexOf won't be reliable -->
         <local:ContextMenuDark x:Key="NullItemReplaceMenu" Opened="MenuItem_NullDataContext_ContextMenuOpened">
-            <!--<MenuItem IsEnabled="False" Header="ID: " Name="ObjectIdLabel" />
-            <Separator />-->
-            <MenuItem IsEnabled="False" Header="Add in place (unimplemented)" />
+            <MenuItem IsEnabled="False" Header="{loc:Loc Ctrl_AddInPlaceUnimplemented}" />
         </local:ContextMenuDark>
 
         <Style x:Key="UndertaleModTool.ResourceListTreeViewItem.ItemContainerStyle" TargetType="{x:Type TreeViewItem}" BasedOn="{StaticResource {x:Type TreeViewItem}}">

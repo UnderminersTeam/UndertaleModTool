@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -17,6 +17,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using UndertaleModLib;
 using UndertaleModLib.Util;
+using UndertaleModTool.Localization;
 
 namespace UndertaleModTool
 {
@@ -73,7 +74,7 @@ namespace UndertaleModTool
             if (!File.Exists(gameExePath))
                 return;
 
-            Runtimes.Add(new Runtime() { Version = "Game EXE", Path = gameExePath });
+            Runtimes.Add(new Runtime() { Version = LocalizationSource.GetString("RuntimePicker_GameEXE"), Path = gameExePath });
         }
 
         private void DiscoverGMS1()
@@ -86,7 +87,7 @@ namespace UndertaleModTool
             if (!File.Exists(studioDebugger))
                 studioDebugger = null;
 
-            Runtimes.Add(new Runtime() { Version = "1.4.xxx", Path = studioRunner, DebuggerPath = studioDebugger });
+            Runtimes.Add(new Runtime() { Version = LocalizationSource.GetString("RuntimePicker_GMS14Version"), Path = studioRunner, DebuggerPath = studioDebugger });
         }
 
         private void DiscoverGMS2()
@@ -118,7 +119,7 @@ namespace UndertaleModTool
             DiscoverRuntimes(dataFilePath, data);
             if (Runtimes.Count == 0)
             {
-                this.ShowError("Unable to find game EXE or any installed Studio runtime", "Run error");
+                this.ShowError(LocalizationSource.GetString("RuntimePicker_UnableToFindRuntime"), LocalizationSource.GetString("Dialog_RunError"));
                 return null;
             }
             else if (Runtimes.Count == 1)

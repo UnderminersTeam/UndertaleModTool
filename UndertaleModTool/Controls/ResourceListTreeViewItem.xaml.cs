@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using UndertaleModLib;
+using UndertaleModTool.Localization;
 using UndertaleModTool.Windows;
 using System.Linq;
 
@@ -96,7 +97,7 @@ namespace UndertaleModTool
         {
             if ((sender as FrameworkElement)?.DataContext is not UndertaleResource obj)
             {
-                mainWindow.ShowError("The selected object is not an \"UndertaleResource\".");
+                mainWindow.ShowError(LocalizationSource.GetString("Msg_SelectedObjectNotUndertaleResource"));
                 return;
             }
 
@@ -108,8 +109,7 @@ namespace UndertaleModTool
             }
             catch (Exception ex)
             {
-                mainWindow.ShowError("An error occured in the object references related window.\n" +
-                               $"Please report this on GitHub.\n\n{ex}");
+                mainWindow.ShowError(string.Format(LocalizationSource.GetString("Msg_ObjectReferencesWindowError"), ex));
             }
             finally
             {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using UndertaleModLib;
 using UndertaleModLib.Project;
+using UndertaleModTool.Localization;
 
 namespace UndertaleModTool
 {
@@ -92,7 +93,7 @@ namespace UndertaleModTool
 
                 if (!mainWindow.HasEditorForAsset(obj))
                 {
-                    this.ShowError("The type of this object doesn't have an editor/viewer.");
+                    this.ShowError(LocalizationSource.GetString("ProjectAssets_NoEditorForType"));
                     return;
                 }
 

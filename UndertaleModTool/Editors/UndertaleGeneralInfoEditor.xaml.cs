@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -15,6 +15,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using UndertaleModLib;
 using UndertaleModLib.Models;
+using UndertaleModTool.Localization;
 
 namespace UndertaleModTool
 {
@@ -48,8 +49,7 @@ namespace UndertaleModTool
                 return;
 
             e.Handled = true;
-            var result = mainWindow.ShowQuestion("Are you sure that you want to enable GMS debugger?\n" +
-                                                 "If you want to enable a debug mode in some game, then you need to use one of the scripts.");
+            var result = mainWindow.ShowQuestion(LocalizationSource.GetString("Msg_EnableGMSDebugger"));
             if (result == MessageBoxResult.Yes)
                 checkBox.IsChecked = false;
         }
@@ -60,10 +60,10 @@ namespace UndertaleModTool
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is not ulong timestamp)
-                return "(error)";
+                return LocalizationSource.GetString("Common_Error");
             DateTimeOffset dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds((long)timestamp);
             if (parameter is string par && par == "GMT")
-                return "GMT+0: " + dateTimeOffset.UtcDateTime.ToString();
+                return LocalizationSource.GetString("Editor_GMT0") + " " + dateTimeOffset.UtcDateTime.ToString();
             else
                 return dateTimeOffset.LocalDateTime.ToString();
         }
@@ -71,9 +71,9 @@ namespace UndertaleModTool
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if (value is not string dateTimeStr)
-                return new ValidationResult(false, "The value is not a string.");
+                return new ValidationResult(false, LocalizationSource.GetString("Msg_ValueIsNotString"));
             if (!DateTime.TryParse(dateTimeStr, out DateTime dateTime))
-                return new ValidationResult(false, "Invalid date time format.");
+                return new ValidationResult(false, LocalizationSource.GetString("Msg_InvalidDateTimeFormat"));
 
             return (ulong)(new DateTimeOffset(dateTime).ToUnixTimeSeconds());
         }

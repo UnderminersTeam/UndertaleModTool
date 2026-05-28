@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -15,6 +15,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using UndertaleModLib;
 using UndertaleModLib.Models;
+using UndertaleModTool.Localization;
 using UndertaleModTool.Windows;
 
 namespace UndertaleModTool
@@ -112,8 +113,7 @@ namespace UndertaleModTool
             }
             catch (Exception ex)
             {
-                mainWindow.ShowError("An error occurred in the object references related window.\n" +
-                                     $"Please report this on GitHub.\n\n{ex}");
+                mainWindow.ShowError(string.Format(LocalizationSource.GetString("Msg_ObjectReferencesWindowError"), ex));
             }
             finally
             {

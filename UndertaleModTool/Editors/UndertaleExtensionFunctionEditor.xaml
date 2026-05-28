@@ -1,11 +1,12 @@
-﻿<local:DataUserControl x:Class="UndertaleModTool.UndertaleExtensionFunctionEditor"
+<local:DataUserControl x:Class="UndertaleModTool.UndertaleExtensionFunctionEditor"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:UndertaleModTool"
              xmlns:undertale="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:loc="clr-namespace:UndertaleModTool.Localization"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800" d:DataContext="{d:DesignInstance undertale:UndertaleExtensionFunction}">
     <UserControl.Resources>
@@ -30,23 +31,23 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="3" Text="{loc:Loc Common_Name}"/>
         <local:UndertaleStringReference Grid.Row="0" Grid.Column="1" Margin="3" ObjectReference="{Binding Name}"/>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3">External Name</TextBlock>
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="{loc:Loc Editor_ExtFuncExternalName}"/>
         <local:UndertaleStringReference Grid.Row="1" Grid.Column="1" Margin="3" ObjectReference="{Binding ExtName}"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3">ID</TextBlock>
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="3" Text="{loc:Loc Editor_ID}"/>
         <local:TextBoxDark Grid.Row="2" Grid.Column="1" Margin="3" Text="{Binding ID}"/>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3">Kind</TextBlock>
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="3" Text="{loc:Loc Common_Kind}"/>
         <local:TextBoxDark Grid.Row="3" Grid.Column="1" Margin="3" Text="{Binding Kind}"/>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3">Return Type</TextBlock>
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Text="{loc:Loc Editor_ReturnType}"/>
         <local:ComboBoxDark ItemsSource="{Binding Source={StaticResource VarType}}" SelectedItem="{Binding RetType}"
                             Grid.Row="4" Grid.Column="1" Margin="3"/>
 
-        <TextBlock Grid.Row="5" Grid.Column="0" Margin="3">Argument Types</TextBlock>
+        <TextBlock Grid.Row="5" Grid.Column="0" Margin="3" Text="{loc:Loc Editor_ArgumentTypes}"/>
         <local:DataGridDark Grid.Row="5" Grid.Column="1" Margin="3" ItemsSource="{Binding Arguments}" x:Name="ArgumentTypesList" AutoGenerateColumns="False" CanUserAddRows="True" CanUserDeleteRows="True" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" HeadersVisibility="None" SelectionMode="Single" SelectionUnit="FullRow" IsSynchronizedWithCurrentItem="True">
             <DataGrid.Resources>
                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF26A0DA"/>
@@ -65,7 +66,7 @@
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate>
-                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic">Double click to add</TextBlock>
+                                        <TextBlock Margin="5" TextAlignment="Center" FontStyle="Italic" Text="{loc:Loc Common_DoubleClickToAdd}"/>
                                     </ControlTemplate>
                                 </Setter.Value>
                             </Setter>
@@ -85,11 +86,7 @@
         </local:DataGridDark>
 
         <StackPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2">
-            <TextBlock Foreground="Red" FontStyle="Italic">
-                Runner literally doesn't care about the 'Kind' value.
-                <LineBreak/>
-                The 'ID' does matter though, so make sure you don't have any overlaps.
-            </TextBlock>
+            <TextBlock Foreground="Red" FontStyle="Italic" Text="{loc:Loc Editor_ExtFunc_KindNote}"/>
         </StackPanel>
     </Grid>
 </local:DataUserControl>

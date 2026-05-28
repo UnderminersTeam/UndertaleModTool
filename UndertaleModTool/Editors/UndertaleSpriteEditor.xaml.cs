@@ -1,4 +1,4 @@
-﻿using Microsoft.Win32;
+using Microsoft.Win32;
 using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -10,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
+using UndertaleModTool.Localization;
 using static UndertaleModLib.Models.UndertaleSprite;
 
 namespace UndertaleModTool
@@ -125,8 +126,7 @@ namespace UndertaleModTool
 
         private void ExportAllSpine(SaveFileDialog dlg, UndertaleSprite sprite)
         {
-            mainWindow.ShowWarning("This seems to be a Spine sprite, .json and .atlas files will be exported together with the frames. " +
-                                 "PLEASE EDIT THEM CAREFULLY! SOME MANUAL EDITING OF THE JSON MAY BE REQUIRED! THE DATA IS EXPORTED AS-IS.", "Spine warning");
+            mainWindow.ShowWarning(LocalizationSource.GetString("Msg_SpineSpriteWarning"), LocalizationSource.GetString("Dialog_SpineWarning"));
 
             if (dlg.ShowDialog() == true)
             {
@@ -152,7 +152,7 @@ namespace UndertaleModTool
                                 } 
                                 catch (Exception ex) 
                                 {
-                                    mainWindow.ShowError("Failed to export file: " + ex.Message, "Failed to export file");
+                                    mainWindow.ShowError(string.Format(LocalizationSource.GetString("Msg_FailedToExportFile"), ex.Message), LocalizationSource.GetString("Dialog_FailedToExportFile"));
                                 }
                             }
                         }
@@ -164,7 +164,7 @@ namespace UndertaleModTool
                 }
                 catch (Exception ex)
                 {
-                    mainWindow.ShowError("Failed to export: " + ex.Message, "Failed to export sprite");
+                    mainWindow.ShowError(string.Format(LocalizationSource.GetString("Msg_FailedToExportSprite"), ex.Message), LocalizationSource.GetString("Dialog_FailedToExportSprite"));
                 }
             }
         }
@@ -177,7 +177,7 @@ namespace UndertaleModTool
 
             dlg.FileName = sprite.Name.Content + ".png";
             dlg.DefaultExt = ".png";
-            dlg.Filter = "PNG files (.png)|*.png|All files|*";
+            dlg.Filter = LocalizationSource.GetString("FileFilter_PNG") + "|*.png|" + LocalizationSource.GetString("FileFilter_AllFiles") + "|*";
 
             if (sprite.IsSpineSprite)
             {
@@ -190,7 +190,7 @@ namespace UndertaleModTool
             {
                 try
                 {
-                    bool includePadding = (mainWindow.ShowQuestion("Include padding?") == MessageBoxResult.Yes);
+                    bool includePadding = (mainWindow.ShowQuestion(LocalizationSource.GetString("Msg_IncludePadding")) == MessageBoxResult.Yes);
 
                     using TextureWorker worker = new();
                     if (sprite.Textures.Count > 1)
@@ -209,7 +209,7 @@ namespace UndertaleModTool
                             }
                             catch (Exception ex)
                             {
-                                mainWindow.ShowError("Failed to export file: " + ex.Message, "Failed to export file");
+                                mainWindow.ShowError(string.Format(LocalizationSource.GetString("Msg_FailedToExportFile"), ex.Message), LocalizationSource.GetString("Dialog_FailedToExportFile"));
                             }
                         }
                     }
@@ -221,17 +221,17 @@ namespace UndertaleModTool
                         }
                         catch (Exception ex)
                         {
-                            mainWindow.ShowError("Failed to export file: " + ex.Message, "Failed to export file");
+                            mainWindow.ShowError(string.Format(LocalizationSource.GetString("Msg_FailedToExportFile"), ex.Message), LocalizationSource.GetString("Dialog_FailedToExportFile"));
                         }
                     }
                     else
                     {
-                        mainWindow.ShowError("No frames to export", "Failed to export sprite");
+                        mainWindow.ShowError(LocalizationSource.GetString("Msg_NoFramesToExport"), LocalizationSource.GetString("Dialog_FailedToExportSprite"));
                     }
                 }
                 catch (Exception ex)
                 {
-                    mainWindow.ShowError("Failed to export: " + ex.Message, "Failed to export sprite");
+                    mainWindow.ShowError(string.Format(LocalizationSource.GetString("Msg_FailedToExportSprite"), ex.Message), LocalizationSource.GetString("Dialog_FailedToExportSprite"));
                 }
             }
         }
@@ -248,7 +248,7 @@ namespace UndertaleModTool
 
             OpenFileDialog dlg = new OpenFileDialog();
             dlg.DefaultExt = ".png";
-            dlg.Filter = "PNG files (.png)|*.png|All files|*";
+            dlg.Filter = LocalizationSource.GetString("FileFilter_PNG") + "|*.png|" + LocalizationSource.GetString("FileFilter_AllFiles") + "|*";
 
             if (dlg.ShowDialog() == true)
             {
@@ -263,7 +263,7 @@ namespace UndertaleModTool
                 }
                 catch (Exception ex)
                 {
-                    mainWindow.ShowError("Failed to import file: " + ex.Message, "Failed to import file");
+                    mainWindow.ShowError(string.Format(LocalizationSource.GetString("Msg_FailedToImportFile"), ex.Message), LocalizationSource.GetString("Dialog_FailedToImportFile"));
                 }
             }
         }
@@ -276,7 +276,7 @@ namespace UndertaleModTool
             SaveFileDialog dlg = new SaveFileDialog();
 
             dlg.DefaultExt = ".png";
-            dlg.Filter = "PNG files (.png)|*.png|All files|*";
+            dlg.Filter = LocalizationSource.GetString("FileFilter_PNG") + "|*.png|" + LocalizationSource.GetString("FileFilter_AllFiles") + "|*";
 
             if (dlg.ShowDialog() == true)
             {
@@ -287,7 +287,7 @@ namespace UndertaleModTool
                 }
                 catch (Exception ex)
                 {
-                    mainWindow.ShowError("Failed to export file: " + ex.Message, "Failed to export file");
+                    mainWindow.ShowError(string.Format(LocalizationSource.GetString("Msg_FailedToExportFile"), ex.Message), LocalizationSource.GetString("Dialog_FailedToExportFile"));
                 }
             }
         }
@@ -298,9 +298,9 @@ namespace UndertaleModTool
 
             objRef.ClearRemoveClickHandler();
             objRef.RemoveButton.Click += Remove_Click_Override;
-            objRef.RemoveButton.ToolTip = "Remove texture entry";
+            objRef.RemoveButton.ToolTip = LocalizationSource.GetString("Editor_RemoveTextureEntry");
             objRef.RemoveButton.IsEnabled = true;
-            objRef.DetailsButton.ToolTip = "Open texture entry";
+            objRef.DetailsButton.ToolTip = LocalizationSource.GetString("Editor_OpenTextureEntry");
             objRef.ObjectText.PreviewKeyDown += ObjectText_PreviewKeyDown;
         }
         private void ObjectText_PreviewKeyDown(object sender, KeyEventArgs e)

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -19,6 +19,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using UndertaleModLib.Models;
 using static UndertaleModLib.Models.UndertaleRoom;
+using UndertaleModTool.Localization;
 
 namespace UndertaleModTool
 {
@@ -128,7 +129,7 @@ namespace UndertaleModTool
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             UndertaleRoom room = value as UndertaleRoom;
-            return room is not null ? $"{room.Name.Content}: {room.Width}x{room.Height}" : "null";
+            return room is not null ? string.Format(LocalizationSource.GetString("Msg_RoomCaptionFormat"), room.Name.Content, room.Width, room.Height) : "null";
         }
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {

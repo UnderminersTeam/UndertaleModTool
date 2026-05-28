@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Interop;
+using UndertaleModTool.Localization;
 
 namespace UndertaleModTool
 {
@@ -20,8 +21,9 @@ namespace UndertaleModTool
         /// <param name="title">A <see cref="string"/> that specifies the title bar caption to display.</param>
         /// <returns><see cref="MessageBoxResult.OK"/> or <see cref="MessageBoxResult.None"/> if
         /// the <see cref="MessageBox"/> was cancelled.</returns>
-        public static MessageBoxResult ShowMessage(this Window window, string messageBoxText, string title = "UndertaleModTool")
+        public static MessageBoxResult ShowMessage(this Window window, string messageBoxText, string title = null)
         {
+            title ??= LocalizationSource.GetString("Common_UndertaleModTool");
             return ShowCore(window, messageBoxText, title, MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
@@ -34,8 +36,9 @@ namespace UndertaleModTool
         /// <param name="title">A <see cref="string"/> that specifies the title bar caption to display.</param>
         /// <returns><see cref="MessageBoxResult.Yes"/> or <see cref="MessageBoxResult.No"/> depending on the users' answer.
         /// <see cref="MessageBoxResult.None"/> if the <see cref="MessageBox"/> was cancelled.</returns>
-        public static MessageBoxResult ShowQuestion(this Window window, string messageBoxText, MessageBoxImage icon = MessageBoxImage.Question, string title = "UndertaleModTool")
+        public static MessageBoxResult ShowQuestion(this Window window, string messageBoxText, MessageBoxImage icon = MessageBoxImage.Question, string title = null)
         {
+            title ??= LocalizationSource.GetString("Common_UndertaleModTool");
             return ShowCore(window, messageBoxText, title, MessageBoxButton.YesNo, icon);
         }
 
@@ -47,8 +50,9 @@ namespace UndertaleModTool
         /// <param name="icon">The <see cref="MessageBoxImage"/> to display.</param>
         /// <param name="title">A <see cref="string"/> that specifies the title bar caption to display.</param>
         /// <returns><see cref="MessageBoxResult.Yes"/>, <see cref="MessageBoxResult.No"/> or <see cref="MessageBoxResult.Cancel"/> depending on the users' answer.</returns>
-        public static MessageBoxResult ShowQuestionWithCancel(this Window window, string messageBoxText, MessageBoxImage icon = MessageBoxImage.Question, string title = "UndertaleModTool")
+        public static MessageBoxResult ShowQuestionWithCancel(this Window window, string messageBoxText, MessageBoxImage icon = MessageBoxImage.Question, string title = null)
         {
+            title ??= LocalizationSource.GetString("Common_UndertaleModTool");
             return ShowCore(window, messageBoxText, title, MessageBoxButton.YesNoCancel, icon);
         }
 
@@ -60,8 +64,9 @@ namespace UndertaleModTool
         /// <param name="title">A <see cref="string"/> that specifies the title bar caption to display.</param>
         /// <returns><see cref="MessageBoxResult.OK"/> or <see cref="MessageBoxResult.None"/> if
         /// the <see cref="MessageBox"/> was cancelled.</returns>
-        public static MessageBoxResult ShowWarning(this Window window, string messageBoxText, string title = "Warning")
+        public static MessageBoxResult ShowWarning(this Window window, string messageBoxText, string title = null)
         {
+            title ??= LocalizationSource.GetString("Common_Warning");
             return ShowCore(window, messageBoxText, title, MessageBoxButton.OK, MessageBoxImage.Warning);
         }
 
@@ -73,8 +78,9 @@ namespace UndertaleModTool
         /// <param name="title">A <see cref="string"/> that specifies the title bar caption to display.</param>
         /// <returns><see cref="MessageBoxResult.OK"/> or <see cref="MessageBoxResult.None"/> if
         /// the <see cref="MessageBox"/> was cancelled.</returns>
-        public static MessageBoxResult ShowError(this Window window, string messageBoxText, string title = "Error")
+        public static MessageBoxResult ShowError(this Window window, string messageBoxText, string title = null)
         {
+            title ??= LocalizationSource.GetString("Common_Error");
             return ShowCore(window, messageBoxText, title, MessageBoxButton.OK, MessageBoxImage.Error);
         }
 

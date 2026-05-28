@@ -1,4 +1,4 @@
-﻿#pragma warning disable CA1416 // Validate platform compatibility
+#pragma warning disable CA1416 // Validate platform compatibility
 
 using System;
 using System.Collections;
@@ -16,6 +16,7 @@ using System.Windows.Input;
 using UndertaleModLib;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
+using UndertaleModTool.Localization;
 
 namespace UndertaleModTool.Windows
 {
@@ -75,13 +76,13 @@ namespace UndertaleModTool.Windows
 
             if (mainWindow.Data == null)
             {
-                this.ShowError("No data.win loaded.");
+                this.ShowError(LocalizationSource.GetString("Msg_NoDataWinLoaded"));
                 return;
             }
 
             if (mainWindow.Data.IsYYC())
             {
-                this.ShowError("Can't search code in YYC game, there's no code to search.");
+                this.ShowError(LocalizationSource.GetString("Msg_CantSearchYYC"));
                 return;
             }
 
@@ -92,7 +93,7 @@ namespace UndertaleModTool.Windows
 
             if (isSearchInProgress)
             {
-                this.ShowError("Can't search while another search is in progress.");
+                this.ShowError(LocalizationSource.GetString("Msg_CantSearchWhileInProgress"));
                 return;
             }
 
@@ -124,7 +125,7 @@ namespace UndertaleModTool.Windows
                 }
                 catch (ArgumentException e)
                 {
-                    this.ShowError($"Invalid Regex: {e.Message}");
+                    this.ShowError(string.Format(LocalizationSource.GetString("Msg_InvalidRegex"), e.Message));
                     return;
                 }
             }
@@ -148,7 +149,7 @@ namespace UndertaleModTool.Windows
                         }
                         catch (ArgumentException e)
                         {
-                            this.ShowError($"Invalid name Regex: {e.Message}");
+                            this.ShowError(string.Format(LocalizationSource.GetString("Msg_InvalidNameRegex"), e.Message));
                             filterByName = false;
                         }
                     }
@@ -164,7 +165,7 @@ namespace UndertaleModTool.Windows
 
             if (codeEntriesToSearch.Count == 0)
             {
-                this.ShowMessage("There are no code entries that match the name filter.");
+                this.ShowMessage(LocalizationSource.GetString("Msg_NoCodeEntriesMatchFilter"));
                 return;
             }
 
@@ -173,7 +174,7 @@ namespace UndertaleModTool.Windows
 
             isSearchInProgress = true;
 
-            loaderDialog = new("Searching...", null);
+            loaderDialog = new(LocalizationSource.GetString("Dialog_Searching"), null);
             loaderDialog.Owner = this;
             loaderDialog.PreventClose = true;
             loaderDialog.Show();
@@ -192,14 +193,14 @@ namespace UndertaleModTool.Windows
                 decompileContext = new GlobalDecompileContext(mainWindow.Data);
             }
 
-            loaderDialog.SavedStatusText = "Code entries";
-            loaderDialog.Update(null, "Code entries", 0, codeEntriesToSearch.Count);
+            loaderDialog.SavedStatusText = LocalizationSource.GetString("Msg_CodeEntries");
+            loaderDialog.Update(null, LocalizationSource.GetString("Msg_CodeEntries"), 0, codeEntriesToSearch.Count);
 
             await Task.Run(() => Parallel.ForEach(codeEntriesToSearch, SearchInUndertaleCode));
             await Task.Run(SortResults);
 
             loaderDialog.Maximum = null;
-            loaderDialog.Update("Generating result list...");
+            loaderDialog.Update(LocalizationSource.GetString("Msg_GeneratingResultList"));
 
             editorTab = isInAssembly ? UndertaleCodeEditor.CodeEditorTab.Disassembly : UndertaleCodeEditor.CodeEditorTab.Decompiled;
 
@@ -347,10 +348,10 @@ namespace UndertaleModTool.Windows
                 }
             }
 
-            string str = $"{resultCount} result{GetWordEnding(resultCount, true)} found in {resultsSorted.Length} code entr{GetWordEnding(resultsSorted.Length, false)}.";
+            string str = string.Format(LocalizationSource.GetString("Msg_SearchResultsSummary"), resultCount, GetWordEnding(resultCount, true), resultsSorted.Length, GetWordEnding(resultsSorted.Length, false));
             if (failedSorted.Length > 0)
             {
-                str += $" {failedSorted.Length} code entr{GetWordEnding(failedSorted.Length, false)} with an error.";
+                str += " " + string.Format(LocalizationSource.GetString("Msg_SearchResultsErrorCount"), failedSorted.Length, GetWordEnding(failedSorted.Length, false));
             }
             StatusBarTextBlock.Text = str;
         }
@@ -359,7 +360,7 @@ namespace UndertaleModTool.Windows
         {
             if (isSearchInProgress)
             {
-                this.ShowError("Can't open results while a search is in progress.");
+                this.ShowError(LocalizationSource.GetString("Msg_CantOpenResultsWhileInProgress"));
                 return;
             }
 
@@ -396,8 +397,7 @@ namespace UndertaleModTool.Windows
             }
             catch (Exception ex)
             {
-                this.ShowError("Can't copy the item name to clipboard due to this error:\n" +
-                               ex.Message + ".\nYou probably should try again.");
+                this.ShowError(string.Format(LocalizationSource.GetString("Msg_CantCopyToClipboard"), ex.Message));
             }
         }
 

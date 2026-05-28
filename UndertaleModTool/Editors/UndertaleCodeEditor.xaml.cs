@@ -1,4 +1,4 @@
-﻿using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
 using ICSharpCode.AvalonEdit.Folding;
@@ -37,6 +37,7 @@ using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 using UndertaleModLib.Project;
+using UndertaleModTool.Localization;
 using Input = System.Windows.Input;
 
 namespace UndertaleModTool
@@ -570,7 +571,7 @@ namespace UndertaleModTool
             if (code.ParentEntry != null)
             {
                 DisassemblyEditor.IsReadOnly = true;
-                text = "; This code entry is a reference to an anonymous function within " + code.ParentEntry.Name.Content + ", view it there.";
+                text = "; " + string.Format(LocalizationSource.GetString("Msg_CodeEntryReference"), code.ParentEntry.Name.Content);
                 DisassemblyChanged = false;
             }
             else
@@ -645,11 +646,11 @@ namespace UndertaleModTool
                     }
                     catch (ArgumentException)
                     {
-                        mainWindow.ShowError("There is a duplicate key in textdata_en, being " + m.Groups[1].Value + ". This may cause errors in the comment display of text.");
+                        mainWindow.ShowError(string.Format(LocalizationSource.GetString("Msg_DuplicateKeyInTextdata"), m.Groups[1].Value));
                     }
                     catch
                     {
-                        mainWindow.ShowError("Unknown error in textdata_en. This may cause errors in the comment display of text.");
+                        mainWindow.ShowError(LocalizationSource.GetString("Msg_UnknownErrorInTextdata"));
                     }
                 }
                 else
@@ -670,11 +671,11 @@ namespace UndertaleModTool
                         }
                         catch (ArgumentException)
                         {
-                            mainWindow.ShowError("There is a duplicate key in textdata_en, being " + m.Groups[1].Value + ". This may cause errors in the comment display of text.");
+                            mainWindow.ShowError(string.Format(LocalizationSource.GetString("Msg_DuplicateKeyInTextdata"), m.Groups[1].Value));
                         }
                         catch
                         {
-                            mainWindow.ShowError("Unknown error in textdata_en. This may cause errors in the comment display of text.");
+                            mainWindow.ShowError(LocalizationSource.GetString("Msg_UnknownErrorInTextdata"));
                         }
                     }
                 }
@@ -693,7 +694,7 @@ namespace UndertaleModTool
             catch (Exception e)
             {
                 gettextJSON = new Dictionary<string, string>();
-                return "Failed to parse language file: " + e.Message;
+                return string.Format(LocalizationSource.GetString("Msg_FailedToParseLangFile"), e.Message);
             }
             return null;
         }
@@ -731,7 +732,7 @@ namespace UndertaleModTool
 
             if (code.ParentEntry != null)
             {
-                DecompiledEditor.Text = "// This code entry is a reference to an anonymous function within " + code.ParentEntry.Name.Content + ", view it there.";
+                DecompiledEditor.Text = "// " + string.Format(LocalizationSource.GetString("Msg_CodeEntryReference"), code.ParentEntry.Name.Content);
                 DecompiledChanged = false;
                 CurrentDecompiled = code;
                 existingDialog?.TryClose();
@@ -742,11 +743,11 @@ namespace UndertaleModTool
                 if (existingDialog != null)
                 {
                     dialog = existingDialog;
-                    dialog.Message = "Decompiling, please wait... This can take a while on complex scripts.";
+                    dialog.Message = LocalizationSource.GetString("Msg_DecompilingPleaseWait");
                 }
                 else
                 {
-                    dialog = new LoaderDialog("Decompiling", "Decompiling, please wait... This can take a while on complex scripts.");
+                    dialog = new LoaderDialog(LocalizationSource.GetString("Dialog_Decompileing"), LocalizationSource.GetString("Msg_DecompilingPleaseWait"));
                     dialog.Owner = Window.GetWindow(this);
                     try
                     {
@@ -982,7 +983,7 @@ namespace UndertaleModTool
             }
 
             // Create compiling dialog
-            LoaderDialog dialog = new("Compiling", "Compiling, please wait...")
+            LoaderDialog dialog = new(LocalizationSource.GetString("Dialog_Compiling"), LocalizationSource.GetString("Msg_CompilingPleaseWait"))
             {
                 Owner = Window.GetWindow(this)
             };
@@ -1023,14 +1024,14 @@ namespace UndertaleModTool
             if (rootException is not null)
             {
                 dialog.TryClose();
-                mainWindow.ShowError(Truncate(rootException, 512), "Compiler error");
+                mainWindow.ShowError(Truncate(rootException, 512), LocalizationSource.GetString("Dialog_CompilerError"));
                 return;
             }
 
             if (!compileResult.Successful)
             {
                 dialog.TryClose();
-                mainWindow.ShowError(Truncate(compileResult.PrintAllErrors(false), 512), "Compiler error");
+                mainWindow.ShowError(Truncate(compileResult.PrintAllErrors(false), 512), LocalizationSource.GetString("Dialog_CompilerError"));
                 return;
             }
 
@@ -1108,7 +1109,7 @@ namespace UndertaleModTool
             }
             catch (Exception ex)
             {
-                mainWindow.ShowError(ex.ToString(), "Assembler error");
+                mainWindow.ShowError(ex.ToString(), LocalizationSource.GetString("Dialog_AssemblerError"));
                 return;
             }
 
@@ -1127,10 +1128,7 @@ namespace UndertaleModTool
             if (mainWindow.Project is ProjectContext project && project.TryGetCodeSource(code, out _))
             {
                 // The user really shouldn't be editing disassembly - warn them about this in detail
-                mainWindow.ShowWarning("Editing disassembly while in an open project (even through scripts) can cause " +
-                                       "desyncs with source code in the project.\n\n" +
-                                       "The source code will not change unless you directly modify it, " +
-                                       "or if you remove the code asset from the project entirely.");
+                mainWindow.ShowWarning(LocalizationSource.GetString("Msg_EditingDisassemblyProjectWarning"));
             }
 
             if (!DisassemblyEditor.IsReadOnly)
@@ -1291,7 +1289,7 @@ namespace UndertaleModTool
                         if (id > 0x00050000)
                         {
                             MenuItemDark item = new();
-                            item.Header = "0x" + id.ToString("X6") + " (color)";
+                            item.Header = "0x" + id.ToString("X6") + " " + LocalizationSource.GetString("Editor_Color");
                             item.Click += (sender2, ev2) =>
                             {
                                 if (!((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift))
@@ -1308,7 +1306,7 @@ namespace UndertaleModTool
                         if (myKey != null)
                         {
                             MenuItemDark item = new();
-                            item.Header = myKey.Replace("_", "__") + " (constant)";
+                            item.Header = myKey.Replace("_", "__") + " " + LocalizationSource.GetString("Editor_Constant");
                             item.Click += (sender2, ev2) =>
                             {
                                 if (!((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift))
@@ -1320,7 +1318,7 @@ namespace UndertaleModTool
                             };
                             contextMenu.Items.Add(item);
                         }
-                        contextMenu.Items.Add(new MenuItemDark() { Header = id + " (number)", IsEnabled = false });
+                        contextMenu.Items.Add(new MenuItemDark() { Header = id + " " + LocalizationSource.GetString("Editor_Number"), IsEnabled = false });
 
                         contextMenu.IsOpen = true;
                     }
@@ -1356,7 +1354,7 @@ namespace UndertaleModTool
 
                 var menuItem = new MenuItemDark()
                 {
-                    Header = "Open in new tab"
+                    Header = LocalizationSource.GetString("Menu_OpenInNewTab")
                 };
                 menuItem.Click += (sender, _) =>
                 {
