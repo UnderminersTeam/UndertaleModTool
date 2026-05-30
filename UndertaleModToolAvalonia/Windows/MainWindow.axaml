@@ -15,9 +15,9 @@
         <NativeMenu>
             <NativeMenuItem Header="_File">
                 <NativeMenu>
-                    <NativeMenuItem Header="_New" Command="{Binding FileNew}" Gesture="Ctrl+N"/>
-                    <NativeMenuItem Header="_Open" Command="{Binding FileOpen}" Gesture="Ctrl+O"/>
-                    <NativeMenuItem Header="_Save" Command="{Binding FileSave}" Gesture="Ctrl+S"/>
+                    <NativeMenuItem Header="_New" Command="{Binding FileNew}" Gesture="{OnPlatform 'Ctrl+N', macOS='Meta+N'}"/>
+                    <NativeMenuItem Header="_Open" Command="{Binding FileOpen}" Gesture="{OnPlatform 'Ctrl+O', macOS='Meta+O'}"/>
+                    <NativeMenuItem Header="_Save" Command="{Binding FileSave}" Gesture="{OnPlatform 'Ctrl+S', macOS='Meta+S'}"/>
                     <NativeMenuItem Header="_Close" Command="{Binding FileClose}"/>
                     <NativeMenuItemSeparator Header="-" />
                     <NativeMenuItem Header="_Run with runner" Command="{Binding FileRun}"/>
@@ -32,7 +32,7 @@
             </NativeMenuItem>
             <NativeMenuItem Header="_Tools">
                 <NativeMenu>
-                    <NativeMenuItem Header="_Search in code" Command="{Binding ToolsSearchInCode}" Gesture="Ctrl+Shift+F"/>
+                    <NativeMenuItem Header="_Search in code" Command="{Binding ToolsSearchInCode}" Gesture="{OnPlatform 'Ctrl+Shift+F', macOS='Meta+Shift+F'}"/>
                     <NativeMenuItem Header="Find unreferenced _assets" IsEnabled="False"/>
                 </NativeMenu>
             </NativeMenuItem>
@@ -60,15 +60,15 @@
     </NativeMenu.Menu>
 
     <Window.KeyBindings>
-        <KeyBinding Gesture="Ctrl+N" Command="{Binding FileNew}" />
-        <KeyBinding Gesture="Ctrl+O" Command="{Binding FileOpen}" />
-        <KeyBinding Gesture="Ctrl+S" Command="{Binding FileSave}" />
-        <KeyBinding Gesture="Ctrl+Shift+F" Command="{Binding ToolsSearchInCode}" />
+        <KeyBinding Gesture="{OnPlatform 'Ctrl+N', macOS='Meta+N'}" Command="{Binding FileNew}" />
+        <KeyBinding Gesture="{OnPlatform 'Ctrl+O', macOS='Meta+O'}" Command="{Binding FileOpen}" />
+        <KeyBinding Gesture="{OnPlatform 'Ctrl+S', macOS='Meta+S'}" Command="{Binding FileSave}" />
+        <KeyBinding Gesture="{OnPlatform 'Ctrl+Shift+F', macOS='Meta+Shift+F'}" Command="{Binding ToolsSearchInCode}" />
         <KeyBinding Gesture="F1" Command="{Binding HelpAbout}" />
-        <KeyBinding Gesture="Ctrl+W" Command="{Binding TabCloseSelected}" />
-        <KeyBinding Gesture="Ctrl+Shift+W" Command="{Binding TabCloseAll}" />
-        <KeyBinding Gesture="Ctrl+Shift+Tab" Command="{Binding TabSetToPrevious}" />
-        <KeyBinding Gesture="Ctrl+Tab" Command="{Binding TabSetToNext}" />
+        <KeyBinding Gesture="{OnPlatform 'Ctrl+W', macOS='Meta+W'}" Command="{Binding TabCloseSelected}" />
+        <KeyBinding Gesture="{OnPlatform 'Ctrl+Shift+W', macOS='Meta+Shift+W'}" Command="{Binding TabCloseAll}" />
+        <KeyBinding Gesture="{OnPlatform 'Ctrl+Shift+Tab', macOS='Meta+Shift+Tab'}" Command="{Binding TabSetToPrevious}" />
+        <KeyBinding Gesture="{OnPlatform 'Ctrl+Tab', macOS='Meta+Tab'}" Command="{Binding TabSetToNext}" />
     </Window.KeyBindings>
 
     <l:MainView />

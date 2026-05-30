@@ -17,7 +17,7 @@
                 <Label>Parent</Label>
                 <l:UndertaleResourceReferenceView Reference="{Binding Code.ParentEntry}" ReferenceType="undertalem:UndertaleCode" />
             </Grid>
-            <Button Grid.Column="1" Command="{Binding CompileAndDecompileCurrent}" ToolTip.Tip="Ctrl+K">Compile and decompile</Button>
+            <Button Grid.Column="1" Command="{Binding CompileAndDecompileCurrent}" ToolTip.Tip="{OnPlatform 'Ctrl+K', macOS='Meta+K'}">Compile and decompile</Button>
         </Grid>
         
         <TabControl Grid.Row="1" IsVisible="{Binding Code.ParentEntry, Converter={x:Static ObjectConverters.IsNull}}"
@@ -33,7 +33,7 @@
                                              FontFamily="{DynamicResource AvaloniaEditFontFamily}"
                                              FontSize="{DynamicResource AvaloniaEditFontSize}">
                         <AvaloniaEdit:TextEditor.KeyBindings>
-                            <KeyBinding Gesture="Ctrl+K" Command="{Binding CompileAndDecompileGML}" />
+                            <KeyBinding Gesture="{OnPlatform 'Ctrl+K', macOS='Meta+K'}" Command="{Binding CompileAndDecompileGML}" />
                         </AvaloniaEdit:TextEditor.KeyBindings>
                     </AvaloniaEdit:TextEditor>
                 </ThemeVariantScope>
@@ -49,7 +49,7 @@
                                              FontFamily="{DynamicResource AvaloniaEditFontFamily}"
                                              FontSize="{DynamicResource AvaloniaEditFontSize}">
                         <AvaloniaEdit:TextEditor.KeyBindings>
-                            <KeyBinding Gesture="Ctrl+K" Command="{Binding CompileAndDecompileASM}" />
+                            <KeyBinding Gesture="{OnPlatform 'Ctrl+K', macOS='Meta+K'}" Command="{Binding CompileAndDecompileASM}" />
                         </AvaloniaEdit:TextEditor.KeyBindings>
                     </AvaloniaEdit:TextEditor>
                 </ThemeVariantScope>
