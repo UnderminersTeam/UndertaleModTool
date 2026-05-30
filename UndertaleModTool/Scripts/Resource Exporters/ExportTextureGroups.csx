@@ -15,14 +15,20 @@ if (Data.TextureGroupInfo is null)
     ScriptError("Texture group info is not present in the opened game.");
     return;
 }
+var builder = CreateScriptOptionsBuilder()
+    .AddDirectory("folder", "Output Folder:")
+    .AddBool("padding", "Use padding");
+var result = ShowScriptOptionsDialog("Export Texture Groups", builder);
+if (result is null) return;
 
-string mainOutputFolder = PromptChooseDirectory();
-if (mainOutputFolder is null)
+string mainOutputFolder = result["folder"] as string;
+if (!Directory.Exists(mainOutputFolder))
 {
+    ScriptError("The specified output folder does not exist.");
     return;
 }
 
-bool padding = ScriptQuestion("Use padding?");
+bool padding = result["padding"] as bool? == true;
 int processTgin = 0;
 
 TextureWorker worker = null;

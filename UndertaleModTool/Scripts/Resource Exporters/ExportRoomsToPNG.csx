@@ -14,6 +14,7 @@ using System.Runtime;
 using UndertaleModLib;
 using UndertaleModLib.Util;
 using UndertaleModLib.Models;
+using UndertaleModLib.Scripting;
 
 
 EnsureDataLoaded();
@@ -31,15 +32,33 @@ if (dataEditorChild is null)
 UndertaleRoomRenderer roomRenderer;
 int roomCount = Data.Rooms.Count;
 
-string exportedTexturesFolder = PromptChooseDirectory();
-if (exportedTexturesFolder == null)
-    throw new ScriptCancelledException("The export folder was not set, stopping script.");
+var builder = CreateScriptOptionsBuilder()
+    .AddDirectory("folder", "Output Folder:")
+    .AddText("patterns", "Names (one per line, leave empty for all):", multiline: true)
+    .AddRadio("filterMode", "Filter mode:", "Exact", "Regex", "Wildcard")
+    .AddBool("grid", "Draw room grid")
+    .AddBool("memoryEconomy", "Use the memory economy mode (uses less RAM, but slower)");
 
-bool displayGrid = ScriptQuestion("Draw room grid?");
+var result = ShowScriptOptionsDialog("Export Rooms To PNG", builder);
+if (result is null) return;
 
-if (mainWindow.IsGMS2 == Visibility.Visible)
-    if (!ScriptQuestion("Use the memory economy mode (uses less RAM, but slower)?"))
-        TileLayerTemplateSelector.ForcedMode = 1; // render tile layers as whole images
+string exportedTexturesFolder = result["folder"] as string;
+
+if (!Directory.Exists(exportedTexturesFolder))
+{
+    ScriptError("The specified output folder does not exist.");
+    return;
+}
+
+string rawPatterns = result["patterns"] as string;
+bool exportAll = string.IsNullOrWhiteSpace(rawPatterns);
+string[] patterns = rawPatterns.Split("\n", StringSplitOptions.RemoveEmptyEntries);
+NameFilterMode filterMode = Enum.Parse<NameFilterMode>(result["filterMode"] as string);
+
+bool displayGrid = result["grid"] as bool? == true;
+
+if (mainWindow.IsGMS2 == Visibility.Visible && result["memoryEconomy"] as bool? != true)
+    TileLayerTemplateSelector.ForcedMode = 1;
 
 DirectoryInfo dir = new DirectoryInfo(exportedTexturesFolder);
 
@@ -53,7 +72,7 @@ await DumpRooms();
 await StopProgressBarUpdater();
 HideProgressBar();
 
-GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce; // force full garbage collection
+GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
 GC.Collect();
 
 ScriptMessage("Exported successfully.");
@@ -66,6 +85,20 @@ async Task DumpRooms()
             break;
 
         UndertaleRoom room = Data.Rooms[i];
+
+        if (!exportAll)
+        {
+            bool match = false;
+            foreach (string pattern in patterns)
+            {
+                if (NameFilter.IsMatch(room.Name.Content, pattern, filterMode))
+                {
+                    match = true;
+                    break;
+                }
+            }
+            if (!match) { IncrementProgress(); continue; }
+        }
 
         mainWindow.CurrentTab.CurrentObject = room; 
 
