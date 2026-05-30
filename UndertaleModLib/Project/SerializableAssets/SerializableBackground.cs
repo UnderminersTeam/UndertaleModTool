@@ -210,8 +210,10 @@ internal sealed class SerializableBackground : ISerializableTextureProjectAsset
         try
         {
             // Add image to packer
+            bool allowCrop = !projectContext.Data.IsGameMaker2();
             _textureImage = texturePacker.AddImage(TextureWorker.ReadBGRAImageFromFile(Path.Join(directory, filename)), 
-                                                   TextureGroupPacker.BorderFlags.Enabled | TextureGroupPacker.BorderFlags.ExtraBorder);
+                                                   TextureGroupPacker.BorderFlags.Enabled | TextureGroupPacker.BorderFlags.ExtraBorder,
+                                                   allowCrop);
         }
         catch (Exception e)
         {
