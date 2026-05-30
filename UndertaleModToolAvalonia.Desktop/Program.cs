@@ -37,5 +37,6 @@ class Program
             .UsePlatformDetect()
             // NOTE: Software rendering on Linux to avoid crashes, I don't know why that's happening.
             .With(new X11PlatformOptions() { RenderingMode = [X11RenderingMode.Software] })
+            .With(new SkiaOptions() { MaxGpuResourceSizeBytes = 512 * 1024 * 1024 })
             .LogToTrace();
 }
