@@ -6,7 +6,7 @@ namespace UndertaleModToolAvalonia;
 public partial class UndertaleFunctionViewModel : IUndertaleResourceViewModel
 {
     public UndertaleResource Resource => Function;
-    public UndertaleFunction Function { get; set; }
+    public UndertaleFunction Function { get; }
 
     public UndertaleFunctionViewModel(UndertaleFunction function)
     {

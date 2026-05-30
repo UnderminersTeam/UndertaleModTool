@@ -6,7 +6,7 @@ namespace UndertaleModToolAvalonia;
 public partial class UndertaleCodeLocalsViewModel : IUndertaleResourceViewModel
 {
     public UndertaleResource Resource => CodeLocals;
-    public UndertaleCodeLocals CodeLocals { get; set; }
+    public UndertaleCodeLocals CodeLocals { get; }
 
     public UndertaleCodeLocalsViewModel(UndertaleCodeLocals codeLocals)
     {

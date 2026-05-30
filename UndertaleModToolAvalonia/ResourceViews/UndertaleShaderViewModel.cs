@@ -12,13 +12,13 @@ public partial class UndertaleShaderViewModel : IUndertaleResourceViewModel
 {
     public MainViewModel MainVM;
     public UndertaleResource Resource => Shader;
-    public UndertaleShader Shader { get; set; }
+    public UndertaleShader Shader { get; }
 
-    public UndertaleShaderViewModel(UndertaleShader shader, IServiceProvider? serviceProvider = null)
+    public UndertaleShaderViewModel(UndertaleShader shader, IServiceProvider serviceProvider)
     {
-        Shader = shader;
+        MainVM = serviceProvider.GetRequiredService<MainViewModel>();
 
-        MainVM = (serviceProvider ?? App.Services).GetRequiredService<MainViewModel>();
+        Shader = shader;
     }
 
     public static UndertaleShader.VertexShaderAttribute CreateVertexShaderAttribute() => new();

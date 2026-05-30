@@ -7,7 +7,7 @@ namespace UndertaleModToolAvalonia;
 public partial class UndertaleAnimationCurveViewModel : IUndertaleResourceViewModel
 {
     public UndertaleResource Resource => AnimationCurve;
-    public UndertaleAnimationCurve AnimationCurve { get; set; }
+    public UndertaleAnimationCurve AnimationCurve { get; }
 
     [Notify]
     private UndertaleAnimationCurve.Channel? _ChannelSelected;

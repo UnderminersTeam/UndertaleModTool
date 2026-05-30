@@ -37,6 +37,11 @@ public partial class TabItemViewModel
         Content.OnAttached();
     }
 
+    public void OnClose()
+    {
+        Content.OnDetached();
+    }
+
     public void GoTo(ITabContent content)
     {
         if (content == Content)

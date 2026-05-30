@@ -13,16 +13,17 @@ public partial class UndertaleSpriteViewModel : IUndertaleResourceViewModel
 {
     public MainViewModel MainVM;
     public UndertaleResource Resource => Sprite;
-    public UndertaleSprite Sprite { get; set; }
+    public UndertaleSprite Sprite { get; }
 
     [Notify]
     private UndertaleSprite.TextureEntry? _TexturesSelected;
     [Notify]
     private UndertaleSprite.MaskEntry? _CollisionMasksSelected;
 
-    public UndertaleSpriteViewModel(UndertaleSprite sprite, IServiceProvider? serviceProvider = null)
+    public UndertaleSpriteViewModel(UndertaleSprite sprite, IServiceProvider serviceProvider)
     {
-        MainVM = (serviceProvider ?? App.Services).GetRequiredService<MainViewModel>();
+        MainVM = serviceProvider.GetRequiredService<MainViewModel>();
+
         Sprite = sprite;
 
         if (Sprite.Textures.Count > 0)

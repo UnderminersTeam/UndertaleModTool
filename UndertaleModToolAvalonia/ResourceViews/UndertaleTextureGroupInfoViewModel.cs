@@ -6,7 +6,7 @@ namespace UndertaleModToolAvalonia;
 public class UndertaleTextureGroupInfoViewModel : IUndertaleResourceViewModel
 {
     public UndertaleResource Resource => TextureGroupInfo;
-    public UndertaleTextureGroupInfo TextureGroupInfo { get; set; }
+    public UndertaleTextureGroupInfo TextureGroupInfo { get; }
 
     public UndertaleTextureGroupInfoViewModel(UndertaleTextureGroupInfo textureGroupInfo)
     {

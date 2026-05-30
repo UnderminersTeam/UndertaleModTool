@@ -6,7 +6,7 @@ namespace UndertaleModToolAvalonia;
 public partial class UndertaleBackgroundViewModel : IUndertaleResourceViewModel
 {
     public UndertaleResource Resource => Background;
-    public UndertaleBackground Background { get; set; }
+    public UndertaleBackground Background { get; }
 
     public UndertaleBackgroundViewModel(UndertaleBackground background)
     {

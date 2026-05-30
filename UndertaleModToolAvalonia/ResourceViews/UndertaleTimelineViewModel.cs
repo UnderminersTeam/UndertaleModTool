@@ -6,7 +6,7 @@ namespace UndertaleModToolAvalonia;
 public class UndertaleTimelineViewModel : IUndertaleResourceViewModel
 {
     public UndertaleResource Resource => Timeline;
-    public UndertaleTimeline Timeline { get; set; }
+    public UndertaleTimeline Timeline { get; }
 
     public UndertaleTimelineViewModel(UndertaleTimeline timeline)
     {

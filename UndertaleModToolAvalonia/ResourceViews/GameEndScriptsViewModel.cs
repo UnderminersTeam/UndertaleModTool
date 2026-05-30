@@ -5,7 +5,7 @@ namespace UndertaleModToolAvalonia;
 
 public class GameEndScriptsViewModel : ITabContent
 {
-    public ObservableCollection<UndertaleGlobalInit> GameEndScripts { get; set; }
+    public ObservableCollection<UndertaleGlobalInit> GameEndScripts { get; }
 
     public GameEndScriptsViewModel(ObservableCollection<UndertaleGlobalInit> gameEndScripts)
     {

@@ -6,7 +6,7 @@ namespace UndertaleModToolAvalonia;
 public partial class UndertaleParticleSystemEmitterViewModel : IUndertaleResourceViewModel
 {
     public UndertaleResource Resource => ParticleSystemEmitter;
-    public UndertaleParticleSystemEmitter ParticleSystemEmitter { get; set; }
+    public UndertaleParticleSystemEmitter ParticleSystemEmitter { get; }
 
     public UndertaleParticleSystemEmitterViewModel(UndertaleParticleSystemEmitter particleSystemEmitter)
     {

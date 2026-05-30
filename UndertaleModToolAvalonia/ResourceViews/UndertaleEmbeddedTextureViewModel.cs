@@ -13,11 +13,11 @@ public partial class UndertaleEmbeddedTextureViewModel : IUndertaleResourceViewM
 {
     public MainViewModel MainVM;
     public UndertaleResource Resource => EmbeddedTexture;
-    public UndertaleEmbeddedTexture EmbeddedTexture { get; set; }
+    public UndertaleEmbeddedTexture EmbeddedTexture { get; }
 
-    public UndertaleEmbeddedTextureViewModel(UndertaleEmbeddedTexture embeddedTexture, IServiceProvider? serviceProvider = null)
+    public UndertaleEmbeddedTextureViewModel(UndertaleEmbeddedTexture embeddedTexture, IServiceProvider serviceProvider)
     {
-        MainVM = (serviceProvider ?? App.Services).GetRequiredService<MainViewModel>();
+        MainVM = serviceProvider.GetRequiredService<MainViewModel>();
 
         EmbeddedTexture = embeddedTexture;
     }

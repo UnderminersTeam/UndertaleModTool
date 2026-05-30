@@ -11,11 +11,11 @@ public partial class UndertaleTexturePageItemViewModel : IUndertaleResourceViewM
 {
     public MainViewModel MainVM;
     public UndertaleResource Resource => TexturePageItem;
-    public UndertaleTexturePageItem TexturePageItem { get; set; }
+    public UndertaleTexturePageItem TexturePageItem { get; }
 
-    public UndertaleTexturePageItemViewModel(UndertaleTexturePageItem texturePageItem, IServiceProvider? serviceProvider = null)
+    public UndertaleTexturePageItemViewModel(UndertaleTexturePageItem texturePageItem, IServiceProvider serviceProvider)
     {
-        MainVM = (serviceProvider ?? App.Services).GetRequiredService<MainViewModel>();
+        MainVM = serviceProvider.GetRequiredService<MainViewModel>();
 
         TexturePageItem = texturePageItem;
     }

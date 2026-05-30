@@ -103,9 +103,9 @@ public partial class MainViewModel
     // Internal clipboard
     public object? InternalClipboard = null;
 
-    public MainViewModel(IServiceProvider? serviceProvider = null)
+    public MainViewModel(IServiceProvider serviceProvider)
     {
-        ServiceProvider = serviceProvider ?? App.Services;
+        ServiceProvider = serviceProvider;
 
         AudioPlayer.Init(f => Dispatcher.UIThread.Post(f));
 
@@ -491,12 +491,7 @@ public partial class MainViewModel
         Data = null;
         DataPath = null;
 
-        foreach (TabItemViewModel tab in Tabs)
-        {
-            tab.Content.OnDetached();
-        }
-
-        Tabs.Clear();
+        TabCloseAll();
 
         ClearProject();
 
@@ -661,7 +656,7 @@ public partial class MainViewModel
 
     public async void FileSettings()
     {
-        await View!.SettingsDialog();
+        await View!.SettingsDialog(ServiceProvider);
     }
 
     public void FileExit()
@@ -674,7 +669,7 @@ public partial class MainViewModel
 
     public void ToolsSearchInCode()
     {
-        View!.SearchInCodeOpen();
+        View!.SearchInCodeOpen(ServiceProvider);
     }
 
     public async void ScriptsRunOtherScript()
@@ -984,25 +979,25 @@ public partial class MainViewModel
             "GlobalInitScripts" => new GlobalInitScriptsViewModel((Data.GlobalInitScripts as ObservableCollection<UndertaleGlobalInit>)!),
             "GameEndScripts" => new GameEndScriptsViewModel((Data.GameEndScripts as ObservableCollection<UndertaleGlobalInit>)!),
             UndertaleAudioGroup r => new UndertaleAudioGroupViewModel(r),
-            UndertaleSound r => new UndertaleSoundViewModel(r),
-            UndertaleSprite r => new UndertaleSpriteViewModel(r),
+            UndertaleSound r => new UndertaleSoundViewModel(r, ServiceProvider),
+            UndertaleSprite r => new UndertaleSpriteViewModel(r, ServiceProvider),
             UndertaleBackground r => new UndertaleBackgroundViewModel(r),
             UndertalePath r => new UndertalePathViewModel(r),
             UndertaleScript r => new UndertaleScriptViewModel(r),
-            UndertaleShader r => new UndertaleShaderViewModel(r),
+            UndertaleShader r => new UndertaleShaderViewModel(r, ServiceProvider),
             UndertaleFont r => new UndertaleFontViewModel(r),
             UndertaleTimeline r => new UndertaleTimelineViewModel(r),
-            UndertaleGameObject r => new UndertaleGameObjectViewModel(r),
-            UndertaleRoom r => new UndertaleRoomViewModel(r),
-            UndertaleExtension r => new UndertaleExtensionViewModel(r),
-            UndertaleTexturePageItem r => new UndertaleTexturePageItemViewModel(r),
-            UndertaleCode r => new UndertaleCodeViewModel(r),
+            UndertaleGameObject r => new UndertaleGameObjectViewModel(r, ServiceProvider),
+            UndertaleRoom r => new UndertaleRoomViewModel(r, ServiceProvider),
+            UndertaleExtension r => new UndertaleExtensionViewModel(r, ServiceProvider),
+            UndertaleTexturePageItem r => new UndertaleTexturePageItemViewModel(r, ServiceProvider),
+            UndertaleCode r => new UndertaleCodeViewModel(r, ServiceProvider),
             UndertaleVariable r => new UndertaleVariableViewModel(r),
             UndertaleFunction r => new UndertaleFunctionViewModel(r),
             UndertaleCodeLocals r => new UndertaleCodeLocalsViewModel(r),
             UndertaleString r => new UndertaleStringViewModel(r),
-            UndertaleEmbeddedTexture r => new UndertaleEmbeddedTextureViewModel(r),
-            UndertaleEmbeddedAudio r => new UndertaleEmbeddedAudioViewModel(r),
+            UndertaleEmbeddedTexture r => new UndertaleEmbeddedTextureViewModel(r, ServiceProvider),
+            UndertaleEmbeddedAudio r => new UndertaleEmbeddedAudioViewModel(r, ServiceProvider),
             UndertaleTextureGroupInfo r => new UndertaleTextureGroupInfoViewModel(r),
             UndertaleEmbeddedImage r => new UndertaleEmbeddedImageViewModel(r),
             UndertaleAnimationCurve r => new UndertaleAnimationCurveViewModel(r),
@@ -1035,7 +1030,7 @@ public partial class MainViewModel
         var selected = TabSelected;
         var index = TabSelectedIndex;
 
-        tab.Content.OnDetached();
+        tab.OnClose();
 
         Tabs.Remove(tab);
 

@@ -6,7 +6,7 @@ namespace UndertaleModToolAvalonia;
 public partial class UndertaleAudioGroupViewModel : IUndertaleResourceViewModel
 {
     public UndertaleResource Resource => AudioGroup;
-    public UndertaleAudioGroup AudioGroup { get; set; }
+    public UndertaleAudioGroup AudioGroup { get; }
 
     public UndertaleAudioGroupViewModel(UndertaleAudioGroup audioGroup)
     {

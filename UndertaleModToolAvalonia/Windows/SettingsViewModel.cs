@@ -7,8 +7,8 @@ public class SettingsViewModel
 {
     public MainViewModel MainVM { get; }
 
-    public SettingsViewModel(IServiceProvider? serviceProvider = null)
+    public SettingsViewModel(IServiceProvider serviceProvider)
     {
-        MainVM = (serviceProvider ?? App.Services).GetRequiredService<MainViewModel>();
+        MainVM = serviceProvider.GetRequiredService<MainViewModel>();
     }
 }

@@ -5,6 +5,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.LogicalTree;
 using Avalonia.Platform.Storage;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace UndertaleModToolAvalonia;
 
@@ -56,20 +57,20 @@ public interface IView
         return loaderWindow;
     }
 
-    public async Task SettingsDialog()
+    public async Task SettingsDialog(IServiceProvider serviceProvider)
     {
         Window window = View.FindLogicalAncestorOfType<Window>() ?? throw new InvalidOperationException();
         await new SettingsWindow()
         {
-            DataContext = new SettingsViewModel(),
+            DataContext = new SettingsViewModel(serviceProvider),
         }.ShowDialog(window);
     }
 
-    public void SearchInCodeOpen()
+    public void SearchInCodeOpen(IServiceProvider serviceProvider)
     {
         new SearchInCodeWindow()
         {
-            DataContext = new SearchInCodeViewModel(),
+            DataContext = new SearchInCodeViewModel(serviceProvider),
         }.Show();
     }
 

@@ -6,7 +6,7 @@ namespace UndertaleModToolAvalonia;
 public partial class UndertaleEmbeddedImageViewModel : IUndertaleResourceViewModel
 {
     public UndertaleResource Resource => EmbeddedImage;
-    public UndertaleEmbeddedImage EmbeddedImage { get; set; }
+    public UndertaleEmbeddedImage EmbeddedImage { get; }
 
     public UndertaleEmbeddedImageViewModel(UndertaleEmbeddedImage embeddedImage)
     {

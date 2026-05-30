@@ -9,7 +9,7 @@ namespace UndertaleModToolAvalonia;
 public partial class UndertaleFontViewModel : IUndertaleResourceViewModel
 {
     public UndertaleResource Resource => Font;
-    public UndertaleFont Font { get; set; }
+    public UndertaleFont Font { get; }
 
     [Notify]
     private UndertaleFont.Glyph? _GlyphsSelected;

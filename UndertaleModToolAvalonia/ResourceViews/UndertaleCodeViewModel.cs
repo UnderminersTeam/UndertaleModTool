@@ -25,7 +25,7 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
 
     public MainViewModel MainVM;
     public UndertaleResource Resource => Code;
-    public UndertaleCode Code { get; set; }
+    public UndertaleCode Code { get; }
 
     [Notify]
     private Tab _SelectedTab;
@@ -46,9 +46,9 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
     ILoaderWindow? loaderWindow;
     IInputElement? lastFocusedElement;
 
-    public UndertaleCodeViewModel(UndertaleCode code, IServiceProvider? serviceProvider = null)
+    public UndertaleCodeViewModel(UndertaleCode code, IServiceProvider serviceProvider)
     {
-        MainVM = (serviceProvider ?? App.Services).GetRequiredService<MainViewModel>();
+        MainVM = serviceProvider.GetRequiredService<MainViewModel>();
 
         Code = code;
 

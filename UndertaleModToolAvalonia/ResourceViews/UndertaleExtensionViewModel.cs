@@ -10,16 +10,16 @@ public partial class UndertaleExtensionViewModel : IUndertaleResourceViewModel
 {
     public MainViewModel MainVM;
     public UndertaleResource Resource => Extension;
-    public UndertaleExtension Extension { get; set; }
+    public UndertaleExtension Extension { get; }
 
     [Notify]
     private UndertaleExtensionFile? _FilesSelected;
     [Notify]
     private UndertaleExtensionFunction? _FunctionsSelected;
 
-    public UndertaleExtensionViewModel(UndertaleExtension extension, IServiceProvider? serviceProvider = null)
+    public UndertaleExtensionViewModel(UndertaleExtension extension, IServiceProvider serviceProvider)
     {
-        MainVM = (serviceProvider ?? App.Services).GetRequiredService<MainViewModel>();
+        MainVM = serviceProvider.GetRequiredService<MainViewModel>();
 
         Extension = extension;
     }

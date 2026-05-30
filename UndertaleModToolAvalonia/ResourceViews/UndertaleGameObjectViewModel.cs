@@ -11,11 +11,11 @@ public partial class UndertaleGameObjectViewModel : IUndertaleResourceViewModel
 {
     public MainViewModel MainVM;
     public UndertaleResource Resource => GameObject;
-    public UndertaleGameObject GameObject { get; set; }
+    public UndertaleGameObject GameObject { get; }
 
-    public UndertaleGameObjectViewModel(UndertaleGameObject gameObject, IServiceProvider? serviceProvider = null)
+    public UndertaleGameObjectViewModel(UndertaleGameObject gameObject, IServiceProvider serviceProvider)
     {
-        MainVM = (serviceProvider ?? App.Services).GetRequiredService<MainViewModel>();
+        MainVM = serviceProvider.GetRequiredService<MainViewModel>();
 
         GameObject = gameObject;
     }

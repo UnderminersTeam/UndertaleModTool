@@ -6,7 +6,7 @@ namespace UndertaleModToolAvalonia;
 public partial class UndertalePathViewModel : IUndertaleResourceViewModel
 {
     public UndertaleResource Resource => Path;
-    public UndertalePath Path { get; set; }
+    public UndertalePath Path { get; }
 
     public UndertalePathViewModel(UndertalePath path)
     {

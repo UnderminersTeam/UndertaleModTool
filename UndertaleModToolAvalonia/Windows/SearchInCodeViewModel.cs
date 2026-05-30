@@ -51,9 +51,9 @@ public partial class SearchInCodeViewModel
     int currentCodeEntriesCount = 0;
     bool postToLoader = true;
 
-    public SearchInCodeViewModel(IServiceProvider? serviceProvider = null)
+    public SearchInCodeViewModel(IServiceProvider serviceProvider)
     {
-        MainVM = (serviceProvider ?? App.Services).GetRequiredService<MainViewModel>();
+        MainVM = serviceProvider.GetRequiredService<MainViewModel>();
     }
 
     public async void Search()

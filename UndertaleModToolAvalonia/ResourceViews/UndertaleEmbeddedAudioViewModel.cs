@@ -12,13 +12,13 @@ public partial class UndertaleEmbeddedAudioViewModel : IUndertaleResourceViewMod
 {
     public MainViewModel MainVM;
     public UndertaleResource Resource => EmbeddedAudio;
-    public UndertaleEmbeddedAudio EmbeddedAudio { get; set; }
+    public UndertaleEmbeddedAudio EmbeddedAudio { get; }
 
     AudioPlayer? audioPlayer = null;
 
-    public UndertaleEmbeddedAudioViewModel(UndertaleEmbeddedAudio embeddedAudio, IServiceProvider? serviceProvider = null)
+    public UndertaleEmbeddedAudioViewModel(UndertaleEmbeddedAudio embeddedAudio, IServiceProvider serviceProvider)
     {
-        MainVM = (serviceProvider ?? App.Services).GetRequiredService<MainViewModel>();
+        MainVM = serviceProvider.GetRequiredService<MainViewModel>();
 
         EmbeddedAudio = embeddedAudio;
     }

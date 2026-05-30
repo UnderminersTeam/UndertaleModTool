@@ -18,9 +18,9 @@ public partial class UndertaleSoundViewModel : IUndertaleResourceViewModel
 
     AudioPlayer? audioPlayer = null;
 
-    public UndertaleSoundViewModel(UndertaleSound sound, IServiceProvider? serviceProvider = null)
+    public UndertaleSoundViewModel(UndertaleSound sound, IServiceProvider serviceProvider)
     {
-        MainVM = (serviceProvider ?? App.Services).GetRequiredService<MainViewModel>();
+        MainVM = serviceProvider.GetRequiredService<MainViewModel>();
 
         Sound = sound;
 

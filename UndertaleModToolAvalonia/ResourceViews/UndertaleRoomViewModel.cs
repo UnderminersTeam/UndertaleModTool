@@ -23,7 +23,7 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
 
     public MainViewModel MainVM;
     public UndertaleResource Resource => Room;
-    public UndertaleRoom Room { get; set; }
+    public UndertaleRoom Room { get; }
 
     public ObservableCollection<RoomTreeItem> RoomTreeItems { get; set; } = [];
 
@@ -56,9 +56,9 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
     [Notify]
     private uint _TileSetColumns = 0;
 
-    public UndertaleRoomViewModel(UndertaleRoom room, IServiceProvider? serviceProvider = null)
+    public UndertaleRoomViewModel(UndertaleRoom room, IServiceProvider serviceProvider)
     {
-        MainVM = (serviceProvider ?? App.Services).GetRequiredService<MainViewModel>();
+        MainVM = serviceProvider.GetRequiredService<MainViewModel>();
 
         Room = room;
 
