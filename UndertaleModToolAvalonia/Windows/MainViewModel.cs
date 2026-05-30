@@ -40,6 +40,7 @@ public partial class MainViewModel
     // Window
     public string Title => $"UndertaleModToolAvalonia - v" +
         (Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "?.?.?.?") +
+        $"{(Project?.Name is not null ? " - " + Project.Name : "")}" +
         $"{(Data?.GeneralInfo is not null ? " - " + Data.GeneralInfo.ToString() : "")}" +
         $"{(DataPath is not null ? " [" + DataPath + "]" : "")}";
 
@@ -58,7 +59,8 @@ public partial class MainViewModel
     private (uint Major, uint Minor, uint Release, uint Build) _DataVersion;
 
     // Project
-    public ProjectContext? Project = null;
+    [Notify]
+    private ProjectContext? _Project;
 
     // Tree data grid
     public partial class TreeDataGridItem
