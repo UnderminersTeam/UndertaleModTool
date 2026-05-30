@@ -2542,6 +2542,18 @@ namespace UndertaleModTool
             return dlg.InputText;
         }
 
+        public Dictionary<string, object> ShowScriptOptionsDialog(string title, ScriptOptionsBuilder builder)
+        {
+            ScriptOptionsDialog dlg = new ScriptOptionsDialog(title, builder);
+            dlg.Owner = this;
+
+            bool? result = dlg.ShowDialog();
+            if (result != true)
+                return null;
+
+            return dlg.GetResults();
+        }
+
         private void MenuItem_GitHub_Click(object sender, RoutedEventArgs e)
         {
             OpenBrowser("https://github.com/UnderminersTeam/UndertaleModTool");
