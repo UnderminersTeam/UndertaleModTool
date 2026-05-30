@@ -12,6 +12,7 @@ var builder = CreateScriptOptionsBuilder()
     .AddDirectory("folder", "Output Folder:")
     .AddText("patterns", "Names (one per line, leave empty for all):", multiline: true)
     .AddRadio("filterMode", "Filter mode:", "Exact", "Regex", "Wildcard")
+    .AddBool("caseSensitive", "Case-sensitive", defaultValue: true)
     .AddBool("external", "Export external audio files as well? (Will copy to a separate folder.)");
 
 if ((Data.AudioGroups?.Count ?? 0) > 0)
@@ -32,6 +33,7 @@ string rawPatterns = result["patterns"] as string;
 bool exportAll = string.IsNullOrWhiteSpace(rawPatterns);
 string[] patterns = rawPatterns.Split("\n", StringSplitOptions.RemoveEmptyEntries);
 NameFilterMode filterMode = Enum.Parse<NameFilterMode>(result["filterMode"] as string);
+bool caseSensitive = result["caseSensitive"] as bool? == true;
 
 bool copyExternalAudio = result["external"] as bool? == true;
 bool groupedExport = (Data.AudioGroups?.Count ?? 0) > 0 && result["grouped"] as bool? == true;
@@ -141,7 +143,7 @@ void DumpSound(UndertaleSound sound)
         bool match = false;
         foreach (string pattern in patterns)
         {
-            if (NameFilter.IsMatch(sound.Name.Content, pattern, filterMode))
+            if (NameFilter.IsMatch(sound.Name.Content, pattern, filterMode, caseSensitive))
             {
                 match = true;
                 break;

@@ -20,6 +20,7 @@ var builder = CreateScriptOptionsBuilder()
     .AddDirectory("folder", "Output Folder:")
     .AddText("patterns", "Names (one per line, leave empty for all):", multiline: true)
     .AddRadio("filterMode", "Filter mode:", "Exact", "Regex", "Wildcard")
+    .AddBool("caseSensitive", "Case-sensitive", defaultValue: true)
     .AddBool("exportAssembly", "Export assembly (.asm) instead of decompiled code (.gml)?");
 
 var result = ShowScriptOptionsDialog("Export Code", builder);
@@ -36,6 +37,7 @@ string rawPatterns = result["patterns"] as string;
 bool exportAll = string.IsNullOrWhiteSpace(rawPatterns);
 string[] patterns = rawPatterns.Split("\n", StringSplitOptions.RemoveEmptyEntries);
 NameFilterMode filterMode = Enum.Parse<NameFilterMode>(result["filterMode"] as string);
+bool caseSensitive = result["caseSensitive"] as bool? == true;
 
 GlobalDecompileContext globalDecompileContext = new(Data);
 Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = Data.ToolInfo.DecompilerSettings;
@@ -68,28 +70,28 @@ else
         foreach (UndertaleGameObject obj in Data.GameObjects)
         {
             if (obj is null) continue;
-            if (NameFilter.IsMatch(obj.Name.Content, name, filterMode))
+            if (NameFilter.IsMatch(obj.Name.Content, name, filterMode, caseSensitive))
                 gameObjectCandidates.Add(obj.Name.Content);
         }
 
         foreach (UndertaleScript scr in Data.Scripts)
         {
             if (scr is null || scr.Code == null) continue;
-            if (NameFilter.IsMatch(scr.Name.Content, name, filterMode))
+            if (NameFilter.IsMatch(scr.Name.Content, name, filterMode, caseSensitive))
                 codeToDump.Add(scr.Code.Name.Content);
         }
 
         foreach (UndertaleGlobalInit globalInit in Data.GlobalInitScripts)
         {
             if (globalInit is null || globalInit.Code == null) continue;
-            if (NameFilter.IsMatch(globalInit.Code.Name.Content, name, filterMode))
+            if (NameFilter.IsMatch(globalInit.Code.Name.Content, name, filterMode, caseSensitive))
                 codeToDump.Add(globalInit.Code.Name.Content);
         }
 
         foreach (UndertaleCode code in Data.Code)
         {
             if (code is null) continue;
-            if (NameFilter.IsMatch(code.Name.Content, name, filterMode))
+            if (NameFilter.IsMatch(code.Name.Content, name, filterMode, caseSensitive))
                 codeToDump.Add(code.Name.Content);
         }
     }

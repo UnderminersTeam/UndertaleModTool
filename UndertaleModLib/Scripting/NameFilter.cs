@@ -12,13 +12,19 @@ public enum NameFilterMode
 
 public static class NameFilter
 {
-    public static bool IsMatch(string name, string pattern, NameFilterMode mode)
+    public static bool IsMatch(string name, string pattern, NameFilterMode mode, bool caseSensitive = false)
     {
         if (name is null || pattern is null)
             return false;
 
+        if (!caseSensitive && mode != NameFilterMode.Regex)
+        {
+            name = name.ToLowerInvariant();
+            pattern = pattern.ToLowerInvariant();
+        }
+
         if      (mode == NameFilterMode.Exact)      return name == pattern;
-        else if (mode == NameFilterMode.Regex)      return Regex.IsMatch(name, pattern);
+        else if (mode == NameFilterMode.Regex)      return Regex.IsMatch(name, pattern, caseSensitive ? RegexOptions.None : RegexOptions.IgnoreCase);
         else if (mode == NameFilterMode.Wildcard)   return WildcardMatch(name, pattern);
         else                                        return false;
     }

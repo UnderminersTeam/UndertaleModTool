@@ -25,6 +25,7 @@ var builder = CreateScriptOptionsBuilder()
     .AddDirectory("folder", "Output Folder:")
     .AddText("patterns", "Names (one per line, leave empty for all):", multiline: true)
     .AddRadio("filterMode", "Filter mode:", "Exact", "Regex", "Wildcard")
+    .AddBool("caseSensitive", "Case-sensitive", defaultValue: true)
     .AddBool("padded", "Export sprites with padding?")
     .AddBool("useSubDirectories", "Export sprites into subdirectories?")
     .AddBool("asGif", "Export as GIF");
@@ -48,6 +49,7 @@ bool exportAll = string.IsNullOrWhiteSpace(rawPatterns);
 string[] patterns = rawPatterns.Split("\n", StringSplitOptions.RemoveEmptyEntries);
 
 NameFilterMode filterMode = Enum.Parse<NameFilterMode>(result["filterMode"] as string);
+bool caseSensitive = result["caseSensitive"] as bool? == true;
 
 bool padded = result["padded"] as bool? == true;
 bool useSubDirectories = result["useSubDirectories"] as bool? == true;
@@ -62,7 +64,7 @@ foreach (var sprite in Data.Sprites)
         bool match = false;
         foreach (string pattern in patterns)
         {
-            if (NameFilter.IsMatch(sprite.Name.Content, pattern, filterMode))
+            if (NameFilter.IsMatch(sprite.Name.Content, pattern, filterMode, caseSensitive))
             {
                 match = true;
                 break;

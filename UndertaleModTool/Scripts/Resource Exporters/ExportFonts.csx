@@ -12,7 +12,8 @@ EnsureDataLoaded();
 var builder = CreateScriptOptionsBuilder()
     .AddDirectory("folder", "Output Folder:")
     .AddText("patterns", "Names (one per line, leave empty for all):", multiline: true)
-    .AddRadio("filterMode", "Filter mode:", "Exact", "Regex", "Wildcard");
+    .AddRadio("filterMode", "Filter mode:", "Exact", "Regex", "Wildcard")
+    .AddBool("caseSensitive", "Case-sensitive", defaultValue: true);
 
 var result = ShowScriptOptionsDialog("Export Fonts", builder);
 if (result is null) return;
@@ -27,6 +28,7 @@ string rawPatterns = result["patterns"] as string;
 bool exportAll = string.IsNullOrWhiteSpace(rawPatterns);
 string[] patterns = rawPatterns.Split("\n", StringSplitOptions.RemoveEmptyEntries);
 NameFilterMode filterMode = Enum.Parse<NameFilterMode>(result["filterMode"] as string);
+bool caseSensitive = result["caseSensitive"] as bool? == true;
 
 SetProgressBar(null, "Fonts", 0, Data.Fonts.Count);
 StartProgressBarUpdater();
@@ -58,7 +60,7 @@ void DumpFont(UndertaleFont font)
         bool match = false;
         foreach (string pattern in patterns)
         {
-            if (NameFilter.IsMatch(font.Name.Content, pattern, filterMode))
+            if (NameFilter.IsMatch(font.Name.Content, pattern, filterMode, caseSensitive))
             {
                 match = true;
                 break;

@@ -36,6 +36,7 @@ var builder = CreateScriptOptionsBuilder()
     .AddDirectory("folder", "Output Folder:")
     .AddText("patterns", "Names (one per line, leave empty for all):", multiline: true)
     .AddRadio("filterMode", "Filter mode:", "Exact", "Regex", "Wildcard")
+    .AddBool("caseSensitive", "Case-sensitive", defaultValue: true)
     .AddBool("grid", "Draw room grid")
     .AddBool("memoryEconomy", "Use the memory economy mode (uses less RAM, but slower)");
 
@@ -52,8 +53,9 @@ if (!Directory.Exists(exportedTexturesFolder))
 
 string rawPatterns = result["patterns"] as string;
 bool exportAll = string.IsNullOrWhiteSpace(rawPatterns);
-string[] patterns = rawPatterns.Split("\n", StringSplitOptions.RemoveEmptyEntries);
+string[] patterns = rawPatterns.Split("\n");
 NameFilterMode filterMode = Enum.Parse<NameFilterMode>(result["filterMode"] as string);
+bool caseSensitive = result["caseSensitive"] as bool? == true;
 
 bool displayGrid = result["grid"] as bool? == true;
 
@@ -91,7 +93,7 @@ async Task DumpRooms()
             bool match = false;
             foreach (string pattern in patterns)
             {
-                if (NameFilter.IsMatch(room.Name.Content, pattern, filterMode))
+                if (NameFilter.IsMatch(room.Name.Content, pattern, filterMode, caseSensitive))
                 {
                     match = true;
                     break;
