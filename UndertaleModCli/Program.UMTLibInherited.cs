@@ -851,7 +851,7 @@ public partial class Program : IScriptInterface
                 ScriptOptionType.Bool => ScriptQuestion(option.Label),
                 ScriptOptionType.Text => SimpleTextInput(option.Label, "", option.DefaultValue as string ?? "", option.IsMultiline),
                 ScriptOptionType.Radio => PromptRadioOption(option),
-                ScriptOptionType.Directory => SimpleTextInput(option.Label, "", option.DefaultValue as string ?? "", false),
+                ScriptOptionType.Directory => PromptChooseDirectory(),
                 _ => null
             };
         }

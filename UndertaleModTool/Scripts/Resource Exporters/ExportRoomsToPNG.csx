@@ -53,7 +53,7 @@ if (!Directory.Exists(exportedTexturesFolder))
 
 string rawPatterns = result["patterns"] as string;
 bool exportAll = string.IsNullOrWhiteSpace(rawPatterns);
-string[] patterns = rawPatterns.Split("\n");
+string[] patterns = rawPatterns.Split("\n", StringSplitOptions.RemoveEmptyEntries);
 NameFilterMode filterMode = Enum.Parse<NameFilterMode>(result["filterMode"] as string);
 bool caseSensitive = result["caseSensitive"] as bool? == true;
 
