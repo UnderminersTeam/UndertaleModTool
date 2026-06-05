@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -4417,7 +4417,7 @@ UndertaleModTool的32位（x86）版本已过时。</value>
     <value>({0} 个错误)</value>
   </data>
   <data name="Msg_SearchResultsSummary" xml:space="preserve">
-    <value>在 {1} 个代码条目中找到 {0} 个结果。</value>
+    <value>在 {0} 个代码条目中找到 {2} 个结果。</value>
   </data>
   <data name="Msg_TilesetWrongParameters" xml:space="preserve">
     <value>"{0}"图块层的图块集参数错误（图块大小、输出边框等）。

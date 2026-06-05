@@ -4415,7 +4415,8 @@ It can corrupt the data file that you'll save.</value>
     <value>({0} errors)</value>
   </data>
   <data name="Msg_SearchResultsSummary" xml:space="preserve">
-    <value>Found {0} results in {1} code entries.</value>
+    <value>Found {2} result{1} in {0} code entries.</value>
+    <comment>The {1} is used for 's' suffix</comment>
   </data>
   <data name="Msg_TilesetWrongParameters" xml:space="preserve">
     <value>Tileset of "{0}" tile layer has wrong parameters (tile size, output border, etc.).
