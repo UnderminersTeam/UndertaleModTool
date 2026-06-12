@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
@@ -19,6 +21,8 @@ namespace UndertaleModToolAvalonia;
 
 public partial class MainView : UserControl, IView
 {
+    ProjectAssetsWindow? projectAssetsWindow = null;
+
     public MainView()
     {
         InitializeComponent();
@@ -87,6 +91,48 @@ public partial class MainView : UserControl, IView
 
         MainTreeDataGrid.AddHandler(TreeDataGrid.PointerReleasedEvent, MainTreeDataGrid_PointerReleased_HandledEventsToo, handledEventsToo: true);
         CommandTextBox.AddHandler(TextBox.KeyDownEvent, CommandTextBox_KeyDown_Tunnel, RoutingStrategies.Tunnel);
+    }
+
+    public async Task OpenSettingsDialog(IServiceProvider serviceProvider)
+    {
+        Window window = this.FindLogicalAncestorOfType<Window>() ?? throw new InvalidOperationException();
+        await new SettingsWindow()
+        {
+            DataContext = new SettingsViewModel(serviceProvider),
+        }.ShowDialog(window);
+    }
+
+    public void OpenSearchInCode(IServiceProvider serviceProvider)
+    {
+        new SearchInCodeWindow()
+        {
+            DataContext = new SearchInCodeViewModel(serviceProvider),
+        }.Show();
+    }
+
+    public void OpenProjectAssets(IServiceProvider serviceProvider)
+    {
+        Window window = this.FindLogicalAncestorOfType<Window>() ?? throw new InvalidOperationException();
+
+        if (projectAssetsWindow is not null)
+        {
+            projectAssetsWindow.Focus();
+        }
+        else
+        {
+            projectAssetsWindow = new ProjectAssetsWindow(serviceProvider);
+            projectAssetsWindow.Closed += (_, _) =>
+            {
+                projectAssetsWindow = null;
+            };
+            projectAssetsWindow.Show(window);
+        }
+    }
+
+    public void CloseProjectAssets()
+    {
+        projectAssetsWindow?.Close();
+        projectAssetsWindow = null;
     }
 
     private void FilterTextBox_TextChanged(object? sender, TextChangedEventArgs e)

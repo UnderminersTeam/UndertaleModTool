@@ -57,23 +57,6 @@ public interface IView
         return loaderWindow;
     }
 
-    public async Task SettingsDialog(IServiceProvider serviceProvider)
-    {
-        Window window = View.FindLogicalAncestorOfType<Window>() ?? throw new InvalidOperationException();
-        await new SettingsWindow()
-        {
-            DataContext = new SettingsViewModel(serviceProvider),
-        }.ShowDialog(window);
-    }
-
-    public void SearchInCodeOpen(IServiceProvider serviceProvider)
-    {
-        new SearchInCodeWindow()
-        {
-            DataContext = new SearchInCodeViewModel(serviceProvider),
-        }.Show();
-    }
-
     public IInputElement? GetFocusedElement()
     {
         TopLevel topLevel = TopLevel.GetTopLevel(View)!;

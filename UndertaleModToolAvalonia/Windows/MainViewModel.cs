@@ -315,7 +315,6 @@ public partial class MainViewModel
 
             TreeDataGridData.Add(dataItem);
 
-            // HACK: Dirty! But I don't wanna make a whole interface for that
             if (View is MainView mainView)
                 mainView.ExpandItemOnTree(dataItem);
         }
@@ -658,7 +657,8 @@ public partial class MainViewModel
 
     public async void FileSettings()
     {
-        await View!.SettingsDialog(ServiceProvider);
+        if (View is MainView mainView)
+            await mainView.OpenSettingsDialog(ServiceProvider);
     }
 
     public void FileExit()
@@ -671,7 +671,8 @@ public partial class MainViewModel
 
     public void ToolsSearchInCode()
     {
-        View!.SearchInCodeOpen(ServiceProvider);
+        if (View is MainView mainView)
+            mainView.OpenSearchInCode(ServiceProvider);
     }
 
     public async void ScriptsRunOtherScript()
@@ -701,6 +702,9 @@ public partial class MainViewModel
     void ClearProject()
     {
         Project = null;
+
+        if (View is MainView mainView)
+            mainView.CloseProjectAssets();
     }
 
     void SetProject(ProjectContext projectContext)
@@ -855,7 +859,8 @@ public partial class MainViewModel
         if (Project is null || Data is null || DataPath is null)
             return;
 
-        // TODO: Window
+        if (View is MainView mainView)
+            mainView.OpenProjectAssets(ServiceProvider);
     }
 
     public async void ProjectClose()
