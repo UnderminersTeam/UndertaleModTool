@@ -1,0 +1,26 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:l="clr-namespace:UndertaleModToolAvalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="UndertaleModToolAvalonia.EditableDataGrid">
+    <ContentControl DataContext="{Binding $parent[l:EditableDataGrid]}">
+        <Grid ColumnDefinitions="1*" RowDefinitions="1*,Auto" MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
+            <DataGrid Grid.Row="0" x:Name="DataGridControl" SelectionMode="Single" ItemsSource="{Binding ItemsSource}"
+                      HeadersVisibility="{Binding HeadersVisibility}" CanUserResizeColumns="True"/>
+            <StackPanel Grid.Row="1" Orientation="Horizontal" IsVisible="{Binding ItemsSource, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <StackPanel.Styles>
+                    <Style Selector="Button,RepeatButton">
+                        <Setter Property="Width" Value="40" />
+                        <Setter Property="HorizontalContentAlignment" Value="Center" />
+                    </Style>
+                </StackPanel.Styles>
+                <Button x:Name="AddButton" Command="{Binding Add}" IsVisible="False">+</Button>
+                <Button x:Name="RemoveButton" Command="{Binding Remove}" IsVisible="False" IsEnabled="False">-</Button>
+                <RepeatButton x:Name="MoveUpButton" Command="{Binding MoveUp}" IsEnabled="False">↑</RepeatButton>
+                <RepeatButton x:Name="MoveDownButton" Command="{Binding MoveDown}" IsEnabled="False">↓</RepeatButton>
+            </StackPanel>
+        </Grid>
+    </ContentControl>
+</UserControl>

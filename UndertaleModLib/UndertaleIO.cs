@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -23,6 +24,7 @@ namespace UndertaleModLib
         int SerializeById(UndertaleWriter writer);
     }
 
+    [PropertyChanged.AddINotifyPropertyChangedInterface]
     public class UndertaleResourceById<T, ChunkT> : UndertaleResourceRef, IStaticChildObjectsSize, IDisposable where T : UndertaleResource, new() where ChunkT : UndertaleListChunk<T>
     {
         /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />

@@ -1114,6 +1114,26 @@ public class UndertaleRoom : UndertaleNamedResource, IProjectAsset, INotifyPrope
         /// </remarks>
         public int YOffset => Y + SpriteYOffset;
 
+        public GameObject Clone()
+        {
+            return new()
+            {
+                X = this.X,
+                Y = this.Y,
+                ObjectDefinition = this.ObjectDefinition,
+                InstanceID = this.InstanceID,
+                CreationCode = this.CreationCode,
+                ScaleX = this.ScaleX,
+                ScaleY = this.ScaleY,
+                Color = this.Color,
+                Rotation = this.Rotation,
+                PreCreateCode = this.PreCreateCode,
+                ImageSpeed = this.ImageSpeed,
+                ImageIndex = this.ImageIndex,
+                Nonexistent = this.Nonexistent,
+            };
+        }
+
         /// <inheritdoc />
         public virtual void Serialize(UndertaleWriter writer)
         {
@@ -2109,6 +2129,12 @@ public class UndertaleRoom : UndertaleNamedResource, IProjectAsset, INotifyPrope
             public UndertalePointerList<ParticleSystemInstance> ParticleSystems { get; set; }
             public UndertalePointerList<TextItemInstance> TextItems { get; set; }
 
+            /// <summary>
+            /// List of the lists of types of assets.
+            /// UMT only.
+            /// </summary>
+            public List<object> AllAssets { get; set; } = new List<object>();
+
             /// <inheritdoc />
 #pragma warning disable CS0067 // TODO: remove this suppression once Fody is no longer in use
             public event PropertyChangedEventHandler PropertyChanged;
@@ -2176,6 +2202,8 @@ public class UndertaleRoom : UndertaleNamedResource, IProjectAsset, INotifyPrope
                     if (reader.undertaleData.IsVersionAtLeast(2024, 6))
                         reader.ReadUndertaleObject(TextItems);
                 }
+
+                InitializeAllAssets();
             }
 
             /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
@@ -2228,6 +2256,23 @@ public class UndertaleRoom : UndertaleNamedResource, IProjectAsset, INotifyPrope
                 }
 
                 return count;
+            }
+
+            public void InitializeAllAssets()
+            {
+                AllAssets.Clear();
+                if (LegacyTiles != null)
+                    AllAssets.Add(LegacyTiles);
+                if (Sprites != null)
+                    AllAssets.Add(Sprites);
+                if (Sequences != null)
+                    AllAssets.Add(Sequences);
+                if (NineSlices != null)
+                    AllAssets.Add(NineSlices);
+                if (ParticleSystems != null)
+                    AllAssets.Add(ParticleSystems);
+                if (TextItems != null)
+                    AllAssets.Add(TextItems);
             }
 
             /// <inheritdoc/>
