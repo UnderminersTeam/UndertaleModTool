@@ -4,20 +4,52 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using UndertaleModLib.Util;
+using UndertaleModLib.Scripting;
 
 EnsureDataLoaded();
 
-string exportFolder = PromptChooseDirectory();
-if (exportFolder is null)
+var builder = CreateScriptOptionsBuilder()
+    .AddDirectory("folder", "Output Folder:")
+    .AddText("patterns", "Names (one per line, leave empty for all):", multiline: true)
+    .AddRadio("filterMode", "Filter mode:", "Exact", "Regex", "Wildcard")
+    .AddBool("caseSensitive", "Case-sensitive", defaultValue: true);
+
+var result = ShowScriptOptionsDialog("Export Shaders", builder);
+if (result is null) return;
+
+string exportFolder = result["folder"] as string;
+
+if (!Directory.Exists(exportFolder))
 {
+    ScriptError("The specified output folder does not exist.");
     return;
 }
+
+string rawPatterns = result["patterns"] as string;
+bool exportAll = string.IsNullOrWhiteSpace(rawPatterns);
+string[] patterns = rawPatterns.Split("\n", StringSplitOptions.RemoveEmptyEntries);
+NameFilterMode filterMode = Enum.Parse<NameFilterMode>(result["filterMode"] as string);
+bool caseSensitive = result["caseSensitive"] as bool? == true;
 
 foreach (UndertaleShader shader in Data.Shaders)
 {
     if (shader is null)
     {
         continue;
+    }
+
+    if (!exportAll)
+    {
+        bool match = false;
+        foreach (string pattern in patterns)
+        {
+            if (NameFilter.IsMatch(shader.Name.Content, pattern, filterMode, caseSensitive))
+            {
+                match = true;
+                break;
+            }
+        }
+        if (!match) continue;
     }
 
     string exportBase = Paths.JoinVerifyWithinDirectory(exportFolder, shader.Name.Content);
@@ -54,4 +86,3 @@ foreach (UndertaleShader shader in Data.Shaders)
     }
     File.WriteAllText(Paths.JoinVerifyWithinDirectory(exportBase, "VertexShaderAttributes.txt"), vertexSb.ToString());
 }
-

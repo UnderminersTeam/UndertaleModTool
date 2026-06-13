@@ -1,0 +1,27 @@
+<Window x:Class="UndertaleModTool.ScriptOptionsDialog"
+        IsVisibleChanged="Window_IsVisibleChanged"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:UndertaleModTool"
+        mc:Ignorable="d"
+        Title="{Binding MessageTitle}" MinHeight="200" MinWidth="400" Width="450" SizeToContent="Height" WindowStartupLocation="CenterOwner">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" MaxHeight="450">
+            <StackPanel x:Name="OptionsPanel" Margin="0,0,0,10"/>
+        </ScrollViewer>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <local:ButtonDark Grid.Column="0" Margin="3,3" Content="Cancel" Click="CancelButton_Click"/>
+            <local:ButtonDark Grid.Column="1" Margin="3,3" Content="OK" Click="OkButton_Click"/>
+        </Grid>
+    </Grid>
+</Window>

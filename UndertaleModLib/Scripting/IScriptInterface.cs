@@ -465,4 +465,18 @@ public interface IScriptInterface
     /// <param name="filter">The filters used to specify the file types in the dialog.</param>
     /// <returns>The file path specified by the user for saving.</returns>
     string PromptSaveFile(string defaultExt, string filter);
+
+    /// <summary>
+    /// Creates a new <see cref="ScriptOptionsBuilder"/> for constructing a script options dialog.
+    /// </summary>
+    /// <returns>A new <see cref="ScriptOptionsBuilder"/> instance.</returns>
+    ScriptOptionsBuilder CreateScriptOptionsBuilder() => new ScriptOptionsBuilder();
+
+    /// <summary>
+    /// Shows a dialog with user-configurable options. Returns the values keyed by option Id, or <see langword="null"/> if cancelled.
+    /// </summary>
+    /// <param name="title">The title of the dialog window.</param>
+    /// <param name="builder">The options builder defining the controls to show.</param>
+    /// <returns>A dictionary mapping option Ids to their values, or <see langword="null"/> if cancelled.</returns>
+    Dictionary<string, object> ShowScriptOptionsDialog(string title, ScriptOptionsBuilder builder);
 }

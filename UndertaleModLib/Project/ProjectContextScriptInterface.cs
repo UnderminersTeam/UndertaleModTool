@@ -281,4 +281,16 @@ partial class ProjectContext : IScriptInterface
     {
         throw new NotImplementedException();
     }
+
+    /// <inheritdoc/>
+    public ScriptOptionsBuilder CreateScriptOptionsBuilder()
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <inheritdoc/>
+    public Dictionary<string, object> ShowScriptOptionsDialog(string title, ScriptOptionsBuilder builder)
+    {
+        throw new NotImplementedException();   
+    }
 }
