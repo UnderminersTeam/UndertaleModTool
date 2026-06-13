@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace UndertaleModLib.Models;
 
@@ -117,7 +117,37 @@ public class UndertaleString : UndertaleResource, ISearchable, IDisposable, Unde
     /// <returns>A string which features the <b>text</b> <c>\n</c>, <c>\r</c>, <c>"</c> and <c>\</c> being properly unescaped.</returns>
     public static string UnescapeText(string text)
     {
-        // TODO: optimize this? seems like a very whacky thing to do... (could use a stringbuilder or something)
-        return text.Replace("\\r", "\r").Replace("\\n", "\n").Replace("\\\"", "\"").Replace("\\\\", "\\");
+        var result = new System.Text.StringBuilder(text.Length);
+        for (int i = 0; i < text.Length; i++)
+        {
+            char ch = text[i];
+            if (ch != '\\' || i + 1 >= text.Length)
+            {
+                result.Append(ch);
+                continue;
+            }
+
+            char next = text[++i];
+            switch (next)
+            {
+                case 'r':
+                    result.Append('\r');
+                    break;
+                case 'n':
+                    result.Append('\n');
+                    break;
+                case '"':
+                    result.Append('"');
+                    break;
+                case '\\':
+                    result.Append('\\');
+                    break;
+                default:
+                    result.Append('\\');
+                    result.Append(next);
+                    break;
+            }
+        }
+        return result.ToString();
     }
 }
