@@ -116,6 +116,8 @@ void ImportShader(UndertaleShader existingShader, string existingImportDir = nul
             });
         }
     }
+
+    Project?.MarkAssetForExport(existingShader);
 }
 
 void AddShader(string shaderName)

@@ -270,8 +270,10 @@ internal sealed class SerializableSprite : ISerializableTextureProjectAsset
     public void Serialize(ProjectContext projectContext, string destinationFile)
     {
         // Write main JSON
-        using FileStream fs = new(destinationFile, FileMode.Create);
-        JsonSerializer.Serialize<ISerializableProjectAsset>(fs, this, ProjectContext.JsonOptions);
+        using (FileStream fs = new(destinationFile, FileMode.Create))
+        {
+            JsonSerializer.Serialize<ISerializableProjectAsset>(fs, this, ProjectContext.JsonOptions);
+        }
 
         // Write images and masks as PNGs
         string directory = Path.GetDirectoryName(destinationFile);
@@ -392,7 +394,7 @@ internal sealed class SerializableSprite : ISerializableTextureProjectAsset
         // Get JSON filename (of main asset file)
         if (!projectContext.AssetDataNamesToPaths.TryGetValue(new(DataName, AssetType), out string jsonFilename))
         {
-            throw new ProjectException("Failed to get background asset path");
+            throw new ProjectException("Failed to get sprite asset path");
         }
 
         // TODO: support loading other file types as well
