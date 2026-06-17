@@ -1,4 +1,8 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis;
+using System;
+using UndertaleModLib.Project;
+using UndertaleModLib.Project.SerializableAssets;
+using static UndertaleModLib.Models.UndertaleSprite;
 
 namespace UndertaleModLib.Models;
 
@@ -6,7 +10,7 @@ namespace UndertaleModLib.Models;
 /// A shader entry for a data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleShader : UndertaleNamedResource, IDisposable
+public class UndertaleShader : UndertaleNamedResource, IProjectAsset, IDisposable
 {
     /// <summary>
     /// The vertex shader attributes a shader can have.
@@ -577,6 +581,37 @@ public class UndertaleShader : UndertaleNamedResource, IDisposable
             GC.SuppressFinalize(this);
 
             Data = null;
+        }
+    }
+
+    /// <inheritdoc/>
+    ISerializableProjectAsset IProjectAsset.GenerateSerializableProjectAsset(ProjectContext projectContext)
+    {
+        SerializableShader serializable = new();
+        serializable.PopulateFromData(projectContext, this);
+        return serializable;
+    }
+
+    /// <inheritdoc/>
+    public string ProjectName => Name?.Content ?? "<unknown name>";
+
+    /// <inheritdoc/>
+    public SerializableAssetType ProjectAssetType => SerializableAssetType.Shader;
+
+    /// <inheritdoc/>
+    public bool ProjectExportable
+    {
+        get
+        {
+            if (Name?.Content is null)
+            {
+                return false;
+            }
+            if (VertexShaderAttributes is null)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }

@@ -123,10 +123,15 @@ try
                         var spriteParts = sprFrameRegex.Match(stripped);
                         spriteName = spriteParts.Groups[1].Value;
                         Int32.TryParse(spriteParts.Groups[2].Value, out frame);
+
+                        if (string.IsNullOrWhiteSpace(spriteName))
+                        {
+                            throw new Exception();
+                        }
                     }
                     catch (Exception e)
                     {
-                        ScriptMessage($"Error: Image {stripped} has an invalid name. Skipping...");
+                        ScriptWarning($"Image {stripped} has an invalid name. Skipping...");
                         continue;
                     }
 
@@ -783,6 +788,10 @@ Pressing ""No"" will cause the program to ignore these images.");
                 continue;
             }
             
+            if (frameIndexes is not [0, ..])
+            {
+                throw new ScriptException(spriteName + " is missing an index for frame 0.\nMake sure it is named with \"_0\" at the end accordingly.");
+            }
             for (int i = 0; i < frameIndexes.Length - 1; i++)
             {
                 int num = frameIndexes[i];
