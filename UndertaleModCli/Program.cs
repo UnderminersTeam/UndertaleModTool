@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Scripting;
+using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 using Newtonsoft.Json;
 using System;
@@ -109,7 +109,7 @@ public partial class Program : IScriptInterface
     public static int Main(string[] args)
     {
         // Give a friendly message when not running from an actual console, on Windows... (and when no arguments are passed in)
-        if (OperatingSystem.IsWindows() && args.Length == 0 && Console.GetCursorPosition() == (0, 0))
+        if (OperatingSystem.IsWindows() && args.Length == 0 && IsAtInitialConsoleCursorPosition())
         {
             Console.WriteLine("UndertaleModCli is meant to be executed from a command line terminal/console.\nDid you mean to download the GUI version of UndertaleModTool instead?\n\n(Press any key to dismiss this message.)");
             Console.ReadKey();
@@ -205,6 +205,9 @@ public partial class Program : IScriptInterface
         Option<bool> dumpStringsOption = new("-s", "--strings") { Description = "Whether to dump all strings" };
         Option<bool> dumpTexturesOption = new("-t", "--textures") { Description = "Whether to dump all embedded textures" };
         Option<bool> dumpSpritesOption = new("--sprites") { Description = "Whether to dump all sprites" };
+        Option<bool> dumpSoundsOption = new("--sounds") { Description = "Whether to dump all sounds" };
+        Option<bool> dumpCopyExternalAudioOption = new("--copy-external-audio") { Description = "Copy external audio files when dumping sounds" };
+        Option<bool> dumpGroupSoundsOption = new("--group-sounds-by-audio-group") { Description = "Group dumped sounds by audio group" };
         Command dumpCommand = new("dump", "Dump certain properties about the game data file")
         {
             dataFileArgument,
@@ -213,7 +216,10 @@ public partial class Program : IScriptInterface
             dumpCodeOption,
             dumpStringsOption,
             dumpTexturesOption,
-            dumpSpritesOption
+            dumpSpritesOption,
+            dumpSoundsOption,
+            dumpCopyExternalAudioOption,
+            dumpGroupSoundsOption
         };
         dumpCommand.SetAction(parseResult =>
         {
@@ -225,7 +231,10 @@ public partial class Program : IScriptInterface
                 Code = parseResult.GetValue(dumpCodeOption),
                 Strings = parseResult.GetValue(dumpStringsOption),
                 Textures = parseResult.GetValue(dumpTexturesOption),
-                Sprites = parseResult.GetValue(dumpSpritesOption)
+                Sprites = parseResult.GetValue(dumpSpritesOption),
+                Sounds = parseResult.GetValue(dumpSoundsOption),
+                CopyExternalAudio = parseResult.GetValue(dumpCopyExternalAudioOption),
+                GroupSoundsByAudioGroup = parseResult.GetValue(dumpGroupSoundsOption)
             });
         });
 
@@ -306,6 +315,36 @@ public partial class Program : IScriptInterface
         return parseResult.Invoke();
     }
 
+    private static bool IsAtInitialConsoleCursorPosition()
+    {
+        try
+        {
+            return Console.GetCursorPosition() == (0, 0);
+        }
+        catch (IOException)
+        {
+            return false;
+        }
+    }
+
+    internal static string ReserveUniqueSoundDestinationPath(
+        string directory,
+        string soundName,
+        string extension,
+        ISet<string> reservedDestinationPaths)
+    {
+        string destinationPath = Paths.JoinVerifyWithinDirectory(directory, soundName + extension);
+        if (reservedDestinationPaths.Add(destinationPath))
+            return destinationPath;
+
+        for (int suffix = 1; ; suffix++)
+        {
+            destinationPath = Paths.JoinVerifyWithinDirectory(directory, $"{soundName}_{suffix}{extension}");
+            if (reservedDestinationPaths.Add(destinationPath))
+                return destinationPath;
+        }
+    }
+
     public Program(FileInfo datafile, FileInfo[] scripts, FileInfo output, bool verbose = false, bool interactive = false)
     {
         this.Verbose = verbose;
@@ -334,6 +373,8 @@ public partial class Program : IScriptInterface
 
         Console.WriteLine($"Trying to load file: '{datafile.FullName}'");
         this.Verbose = verbose;
+        this.FilePath = datafile.FullName;
+        this.ExePath = Environment.CurrentDirectory;
         this.Data = ReadDataFile(datafile, verbose ? WarningHandler : null, verbose ? MessageHandler : null);
         this.Output = output ?? new DirectoryInfo(datafile.DirectoryName);
 
@@ -489,15 +530,15 @@ public partial class Program : IScriptInterface
             return EXIT_FAILURE;
         }
 
-        if (program.Data.IsYYC())
+        bool requestedCodeDump = options.Code?.Length > 0;
+        if (program.Data.IsYYC() && requestedCodeDump)
         {
             Console.WriteLine("The game was made with YYC (YoYo Compiler), which means that the code was compiled into the executable. " +
-                              "There is thus no code to dump. Exiting.");
-            return EXIT_SUCCESS;
+                              "There is thus no code to dump.");
         }
 
         // If user provided code to dump, dump code
-        if ((options.Code?.Length > 0) && (program.Data.Code?.Count > 0))
+        if (requestedCodeDump && !program.Data.IsYYC() && (program.Data.Code?.Count > 0))
         {
             // If user wanted to dump everything, do that, otherwise only dump what user provided
             string[] codeArray;
@@ -521,6 +562,10 @@ public partial class Program : IScriptInterface
         // If user wanted to dump sprites, dump all of them
         if (options.Sprites)
             program.DumpAllSprites().Wait();
+
+        // If user wanted to dump sounds, dump all of them
+        if (options.Sounds)
+            program.DumpAllSounds(options.CopyExternalAudio, options.GroupSoundsByAudioGroup);
 
         return EXIT_SUCCESS;
     }
@@ -970,6 +1015,173 @@ public partial class Program : IScriptInterface
                 }
                 // IncrementProgressParallel();
             });
+        }
+    }
+
+    /// <summary>
+    /// Dumps all sounds in a data file.
+    /// </summary>
+    private void DumpAllSounds(bool copyExternalAudio, bool groupByAudioGroup)
+    {
+        const string DefaultAudioGroupName = "audiogroup_default";
+        byte[] emptyWavFileBytes = Convert.FromBase64String("UklGRiQAAABXQVZFZm10IBAAAAABAAIAQB8AAAB9AAAEABAAZGF0YQAAAAA=");
+        string baseDirectory = Path.Join(Output.FullName, "Sounds");
+        string dataDirectory = Path.GetDirectoryName(FilePath);
+        int builtinSoundGroupId = Data.GetBuiltinSoundGroupID();
+        Dictionary<string, IList<UndertaleEmbeddedAudio>> loadedAudioGroups = new();
+        List<(string SoundName, string DestinationPath, byte[] Data, string SourcePath)> dumpJobs = new();
+        Dictionary<string, string> audioGroupDirectories = new(StringComparer.OrdinalIgnoreCase);
+        Dictionary<string, string> externalDirectories = new(StringComparer.OrdinalIgnoreCase);
+        HashSet<string> createdDirectories = new(StringComparer.OrdinalIgnoreCase);
+        HashSet<string> reservedDestinationPaths = new(StringComparer.OrdinalIgnoreCase);
+
+        EnsureDirectory(baseDirectory);
+
+        foreach (UndertaleSound sound in Data.Sounds)
+        {
+            if (sound is null)
+                continue;
+
+            DumpSound(sound);
+        }
+
+        int maxParallelism = Math.Clamp(Environment.ProcessorCount, 1, 8);
+        Parallel.ForEach(dumpJobs, new ParallelOptions { MaxDegreeOfParallelism = maxParallelism }, job =>
+        {
+            if (Verbose)
+                Console.WriteLine($"Dumping {job.SoundName}");
+
+            if (job.Data is not null)
+                File.WriteAllBytes(job.DestinationPath, job.Data);
+            else
+                File.Copy(job.SourcePath, job.DestinationPath, true);
+        });
+
+        void DumpSound(UndertaleSound sound)
+        {
+            string soundName = sound.Name.Content;
+            string audioGroupName = GetAudioGroupName(sound);
+            string soundDirectory = groupByAudioGroup
+                ? GetAudioGroupDirectory(audioGroupName)
+                : baseDirectory;
+
+            bool flagCompressed = sound.Flags.HasFlag(UndertaleSound.AudioEntryFlags.IsCompressed);
+            bool flagEmbedded = sound.Flags.HasFlag(UndertaleSound.AudioEntryFlags.IsEmbedded);
+            bool isEmbedded = true;
+            string audioExtension = ".ogg";
+
+            if (flagEmbedded && !flagCompressed)
+            {
+                audioExtension = ".wav";
+            }
+            else if (!flagCompressed && !flagEmbedded)
+            {
+                isEmbedded = false;
+            }
+
+            if (!isEmbedded)
+            {
+                if (copyExternalAudio)
+                    CopyExternalSound(sound, soundName, audioExtension, audioGroupName);
+                return;
+            }
+
+            byte[] soundData = GetSoundData(sound);
+            string destinationPath = ReserveUniqueSoundDestinationPath(soundDirectory, soundName, audioExtension, reservedDestinationPaths);
+            dumpJobs.Add((soundName, destinationPath, soundData, null));
+        }
+
+        string GetAudioGroupName(UndertaleSound sound) =>
+            sound.AudioGroup?.Name?.Content ?? DefaultAudioGroupName;
+
+        void CopyExternalSound(UndertaleSound sound, string soundName, string audioExtension, string audioGroupName)
+        {
+            string externalFilename = sound.File.Content;
+            if (!externalFilename.Contains('.'))
+                externalFilename += ".ogg";
+
+            string sourcePath = Paths.JoinVerifyWithinDirectory(dataDirectory, externalFilename);
+            string externalDirectory = GetExternalDirectory(audioGroupName);
+
+            string destinationPath = ReserveUniqueSoundDestinationPath(externalDirectory, soundName, audioExtension, reservedDestinationPaths);
+            dumpJobs.Add((soundName, destinationPath, null, sourcePath));
+        }
+
+        byte[] GetSoundData(UndertaleSound sound)
+        {
+            if (sound.AudioFile is not null)
+                return sound.AudioFile.Data;
+
+            if (sound.GroupID > builtinSoundGroupId)
+            {
+                IList<UndertaleEmbeddedAudio> audioGroup = GetAudioGroupData(sound);
+                if (audioGroup is not null)
+                    return audioGroup[sound.AudioID].Data;
+            }
+
+            return emptyWavFileBytes;
+        }
+
+        string GetAudioGroupDirectory(string audioGroupName)
+        {
+            if (audioGroupDirectories.TryGetValue(audioGroupName, out string directory))
+                return directory;
+
+            directory = Paths.JoinVerifyWithinDirectory(baseDirectory, audioGroupName);
+            EnsureDirectory(directory);
+            audioGroupDirectories[audioGroupName] = directory;
+            return directory;
+        }
+
+        string GetExternalDirectory(string audioGroupName)
+        {
+            string key = groupByAudioGroup ? audioGroupName : string.Empty;
+            if (externalDirectories.TryGetValue(key, out string directory))
+                return directory;
+
+            directory = groupByAudioGroup
+                ? Paths.JoinVerifyWithinDirectory(GetAudioGroupDirectory(audioGroupName), "external")
+                : Paths.JoinVerifyWithinDirectory(baseDirectory, "external");
+            EnsureDirectory(directory);
+            externalDirectories[key] = directory;
+            return directory;
+        }
+
+        IList<UndertaleEmbeddedAudio> GetAudioGroupData(UndertaleSound sound)
+        {
+            string audioGroupName = GetAudioGroupName(sound);
+            if (loadedAudioGroups.TryGetValue(audioGroupName, out IList<UndertaleEmbeddedAudio> cachedAudioGroup))
+                return cachedAudioGroup;
+
+            string relativeAudioGroupPath = sound.AudioGroup is UndertaleAudioGroup { Path.Content: string customRelativePath }
+                ? customRelativePath
+                : $"audiogroup{sound.GroupID}.dat";
+            string groupFilePath = Paths.JoinVerifyWithinDirectory(dataDirectory, relativeAudioGroupPath);
+            if (!File.Exists(groupFilePath))
+                return null;
+
+            try
+            {
+                UndertaleData data;
+                using (FileStream stream = new(groupFilePath, FileMode.Open, FileAccess.Read))
+                {
+                    data = UndertaleIO.Read(stream, (warning, _) => Console.Error.WriteLine($"WARNING: {warning}"));
+                }
+
+                loadedAudioGroups[audioGroupName] = data.EmbeddedAudio;
+                return data.EmbeddedAudio;
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine($"An error occurred while trying to load {audioGroupName}: {e.Message}");
+                return null;
+            }
+        }
+
+        void EnsureDirectory(string directory)
+        {
+            if (createdDirectories.Add(directory))
+                Directory.CreateDirectory(directory);
         }
     }
 

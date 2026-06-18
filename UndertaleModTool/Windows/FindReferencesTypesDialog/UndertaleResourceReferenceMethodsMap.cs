@@ -1,11 +1,14 @@
-﻿using System;
+#nullable disable
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+#if !DISABLE_XAML_GENERATED_MAIN
 using System.Windows;
+#endif
 using UndertaleModLib;
 using UndertaleModLib.Models;
 using static UndertaleModLib.Models.UndertaleSequence;
@@ -26,7 +29,7 @@ namespace UndertaleModTool.Windows
                 return base.Contains(item);
 
             return !isYYC || !UndertaleResourceReferenceMap.CodeTypes.Contains(item);
-        } 
+        }
     }
 
     public class PredicateForVersion
@@ -40,7 +43,9 @@ namespace UndertaleModTool.Windows
     public static class UndertaleResourceReferenceMethodsMap
     {
         private static UndertaleData data;
+#if !DISABLE_XAML_GENERATED_MAIN
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+#endif
         private static Dictionary<UndertaleCode, HashSet<UndertaleString>> stringReferences;
         private static Dictionary<UndertaleCode, HashSet<UndertaleFunction>> funcReferences;
         private static Dictionary<UndertaleCode, HashSet<UndertaleVariable>> variReferences;
@@ -1317,7 +1322,7 @@ namespace UndertaleModTool.Windows
                                                                                      .Select(x => x & 0x0FFFFFFF);
                                             if (allTileIDs.Contains(tileId))
                                                 yield return new object[] { layer, room };
-                                                    
+
                                         }
                                     }
                                 }
@@ -1451,7 +1456,7 @@ namespace UndertaleModTool.Windows
 
                     foreach (var entry in result)
                         outDict.Add(entry.Key, new(entry.Value));
-                }  
+                }
             }
 
             if (outDict.Count == 0)
@@ -1507,14 +1512,18 @@ namespace UndertaleModTool.Windows
                     variReferences[code] = variables;
             }
 
+#if !DISABLE_XAML_GENERATED_MAIN
             mainWindow.IsEnabled = false;
+#endif
             try
             {
+#if !DISABLE_XAML_GENERATED_MAIN
                 mainWindow.InitializeProgressDialog("Searching in progress...", "Please wait...");
                 mainWindow.SetProgressBar(null, "Assets", 0, assets.Count);
                 mainWindow.StartProgressBarUpdater();
+#endif
 
-                List<Dictionary<string, List<object>>> dicts = new();
+                ConcurrentBag<Dictionary<string, List<object>>> dicts = new();
 
                 if (assets.Count > 0) // A Partitioner can't be created on an empty list.
                 {
@@ -1543,7 +1552,9 @@ namespace UndertaleModTool.Windows
                                     }
                                 }
 
+#if !DISABLE_XAML_GENERATED_MAIN
                                 mainWindow.IncrementProgressParallel();
+#endif
                             }
 
                             dicts.Add(resultDict);
@@ -1585,10 +1596,12 @@ namespace UndertaleModTool.Windows
             }
             finally
             {
+#if !DISABLE_XAML_GENERATED_MAIN
                 await mainWindow.StopProgressBarUpdater();
                 mainWindow.HideProgressBar();
 
                 mainWindow.IsEnabled = true;
+#endif
                 stringReferences = null;
                 funcReferences = null;
                 variReferences = null;

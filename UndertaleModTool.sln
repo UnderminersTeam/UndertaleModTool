@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32014.148
@@ -16,6 +16,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UndertaleModLibTests", "UndertaleModLibTests\UndertaleModLibTests.csproj", "{AAE3D4CA-0B6C-4928-AE86-066F5251F70A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Underanalyzer", "Underanalyzer\Underanalyzer\Underanalyzer.csproj", "{A171D18F-274E-427A-AFB3-D7A161F5B9CF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UndertaleModTool.WinUI", "UndertaleModTool.WinUI\UndertaleModTool.WinUI.csproj", "{255A143D-F0CF-4EB3-A75E-F2F7455403A9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,6 +83,14 @@ Global
 		{A171D18F-274E-427A-AFB3-D7A161F5B9CF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A171D18F-274E-427A-AFB3-D7A161F5B9CF}.Release|x64.ActiveCfg = Release|Any CPU
 		{A171D18F-274E-427A-AFB3-D7A161F5B9CF}.Release|x64.Build.0 = Release|Any CPU
+		{255A143D-F0CF-4EB3-A75E-F2F7455403A9}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{255A143D-F0CF-4EB3-A75E-F2F7455403A9}.Debug|Any CPU.Build.0 = Debug|x64
+		{255A143D-F0CF-4EB3-A75E-F2F7455403A9}.Debug|x64.ActiveCfg = Debug|x64
+		{255A143D-F0CF-4EB3-A75E-F2F7455403A9}.Debug|x64.Build.0 = Debug|x64
+		{255A143D-F0CF-4EB3-A75E-F2F7455403A9}.Release|Any CPU.ActiveCfg = Release|x64
+		{255A143D-F0CF-4EB3-A75E-F2F7455403A9}.Release|Any CPU.Build.0 = Release|x64
+		{255A143D-F0CF-4EB3-A75E-F2F7455403A9}.Release|x64.ActiveCfg = Release|x64
+		{255A143D-F0CF-4EB3-A75E-F2F7455403A9}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

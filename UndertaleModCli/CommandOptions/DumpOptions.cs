@@ -41,4 +41,19 @@ public class DumpOptions
 	/// Determines if all sprites should get dumped
 	/// </summary>
 	public bool Sprites { get; set; }
+
+	/// <summary>
+	/// Determines if all sounds should get dumped
+	/// </summary>
+	public bool Sounds { get; set; }
+
+	/// <summary>
+	/// Determines if external audio files should be copied when dumping sounds
+	/// </summary>
+	public bool CopyExternalAudio { get; set; }
+
+	/// <summary>
+	/// Determines if sounds should be grouped by audio group
+	/// </summary>
+	public bool GroupSoundsByAudioGroup { get; set; }
 }

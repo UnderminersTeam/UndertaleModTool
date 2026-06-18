@@ -1,4 +1,5 @@
-﻿using System;
+#nullable disable
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -414,7 +415,7 @@ namespace UndertaleModTool.Windows
             { typeof(UndertaleParticleSystem), "Particle systems" },
             { typeof(UndertaleParticleSystemEmitter), "Particle system emitters" }
         };
-        
+
         public static readonly HashSet<Type> CodeTypes = new()
         {
             typeof(UndertaleCode),
