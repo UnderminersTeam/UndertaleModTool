@@ -37,7 +37,7 @@ jobs:
         dotnet-version: 8.0.x
     - name: Publish ${{ matrix.os }} GUI
       run: |
-        dotnet publish UndertaleModToolAvalonia.Desktop -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=${{ matrix.singlefile }} --output Publish/${{ matrix.os }}
+        dotnet publish UndertaleModToolAvalonia -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=${{ matrix.singlefile }} --output Publish/${{ matrix.os }}
     - name: Copy external files
       run: |
         cp ./README.md ./Publish/${{ matrix.os }}

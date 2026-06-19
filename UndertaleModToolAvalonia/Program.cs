@@ -3,7 +3,7 @@ using System.IO;
 using Avalonia;
 using SDL3;
 
-namespace UndertaleModToolAvalonia.Desktop;
+namespace UndertaleModToolAvalonia;
 
 class Program
 {
