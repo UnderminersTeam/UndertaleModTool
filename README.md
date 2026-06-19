@@ -69,14 +69,9 @@ For more information on them, consult the [SCRIPTS.md](https://github.com/Underm
 
 # Contributing
 
-All contributions are welcome! If you find a bug, a data file that does not load etc., please report it on the [issues page](https://github.com/UnderminersTeam/UndertaleModTool/issues). Pull requests are welcome too! Here is a current list of stuff that needs to be worked on:
+If you find a bug, a data file that does not load etc., please report it on the [issues page](https://github.com/UnderminersTeam/UndertaleModTool/issues).
 
-* Upgrading profile system to a better, more source-control friendly project system.
-* Continuing to improve support for a wider variety of GameMaker versions (especially recent ones).
-* Further GML compiler and decompiler work, mainly over on [Underanalyzer](https://github.com/UnderminersTeam/Underanalyzer).
-* Making structural changes to clean up the library (an incremental effort).
-* Eventually, making the GUI cross-platform if possible, and improving it in general.
-* General usability improvements, bugfixes, and so on.
+For more details on contributions, the project's AI policy (tl;dr: no), and what needs to be worked on, see the [CONTRIBUTING.md](https://github.com/UnderminersTeam/UndertaleModTool/blob/master/CONTRIBUTING.md) file.
 
 # Compilation Instructions
 
