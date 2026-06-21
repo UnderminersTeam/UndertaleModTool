@@ -270,7 +270,7 @@ public class UndertaleSprite : UndertaleNamedResource, IProjectAsset, PrePaddedO
         }
 
         uint len = (uint)((width + 7) / 8 * height);
-        return new MaskEntry(new byte[len], width, height, ColMaskType.Precise);
+        return new MaskEntry(new byte[len], width, height);
     }
 
     /// <summary>
@@ -343,41 +343,41 @@ public class UndertaleSprite : UndertaleNamedResource, IProjectAsset, PrePaddedO
     }
 
     // this is referenced from dogscepter
-    public ColMaskType ResolveMaskType(byte[] maskData, UndertaleSprite sprite, UndertaleData data)
+    private ColMaskType ResolveColMaskType(MaskEntry maskEntry, UndertaleData data)
     {
         // automatically assume spine
-        if (sprite.SSpriteType == SpriteType.Spine)
+        if (SSpriteType == SpriteType.Spine)
         {
             return ColMaskType.Spine;
         }
 
-        if (sprite.SepMasks != SepMaskType.Precise)
+        if (SepMasks != SepMaskType.Precise)
         {
-            return sprite.SepMasks switch
+            return SepMasks switch
             {
                 SepMaskType.AxisAlignedRect => ColMaskType.Rectangle,
                 SepMaskType.RotatedRect => ColMaskType.RotatedRectangle
             };
         }
         
-        if (sprite.SepMasks == SepMaskType.Precise)
+        if (SepMasks == SepMaskType.Precise)
         {
-            float centerX = (sprite.MarginLeft + sprite.MarginRight) / 2;
-            float centerY = (sprite.MarginTop + sprite.MarginBottom) / 2;
-            float radiusX = centerX - sprite.MarginLeft + 0.5f;
-            float radiusY = centerY - sprite.MarginTop + 0.5f;
+            float centerX = (MarginLeft + MarginRight) / 2;
+            float centerY = (MarginTop + MarginBottom) / 2;
+            float radiusX = centerX - MarginLeft + 0.5f;
+            float radiusY = centerY - MarginTop + 0.5f;
 
             if (radiusX <= 0 || radiusY <= 0)
             {
                 return ColMaskType.Precise;
             }
             
-            int boundLeft = Math.Clamp(sprite.MarginLeft, 0, (int)sprite.Width);
-            int boundRight = Math.Clamp(sprite.MarginRight, 0, (int)sprite.Width - 1);
-            int boundTop = Math.Clamp(sprite.MarginTop, 0, (int)sprite.Height);
-            int boundBottom = Math.Clamp(sprite.MarginBottom, 0, (int)sprite.Height - 1);
+            int boundLeft = Math.Clamp(MarginLeft, 0, (int)Width);
+            int boundRight = Math.Clamp(MarginRight, 0, (int)Width - 1);
+            int boundTop = Math.Clamp(MarginTop, 0, (int)Height);
+            int boundBottom = Math.Clamp(MarginBottom, 0, (int)Height - 1);
             
-            (int maskWidth, int maskHeight) = sprite.CalculateMaskDimensions(data);
+            (int maskWidth, int maskHeight) = CalculateMaskDimensions(data);
             int stride = (maskWidth + 7) / 8 * 8;
             
             bool isDiamond = true, isEllipse = true, foundAny = false;
@@ -392,8 +392,8 @@ public class UndertaleSprite : UndertaleNamedResource, IProjectAsset, PrePaddedO
                     // this is to compensate for the collision mask changes
                     if (data.IsVersionAtLeast(2024, 6))
                     {
-                        maskX -= sprite.MarginLeft;
-                        maskY -= sprite.MarginTop;
+                        maskX -= MarginLeft;
+                        maskY -= MarginTop;
                     }
                     
                     if (maskX < 0 || maskX >= maskWidth || maskY < 0 || maskY >= maskHeight)
@@ -402,7 +402,7 @@ public class UndertaleSprite : UndertaleNamedResource, IProjectAsset, PrePaddedO
                     }
                     
                     int bitIndex = maskX + (maskY * stride);
-                    byte b = maskData[bitIndex / 8];
+                    byte b = maskEntry.Data[bitIndex / 8];
                     // taken from GetReverse() in dogscepter
                     bool bitSet = (b & (1 << (7 - bitIndex % 8))) != 0;
                     
@@ -424,6 +424,14 @@ public class UndertaleSprite : UndertaleNamedResource, IProjectAsset, PrePaddedO
             if (isEllipse) return ColMaskType.Ellipse;
         }
         return ColMaskType.Precise; // just default to precise
+    }
+
+    public void ResolveCollisionMaskTypes(UndertaleData data)
+    {
+        foreach (MaskEntry entry in CollisionMasks)
+        {
+            entry.AssumedColMaskType = ResolveColMaskType(entry, data);
+        }
     }
     
     [PropertyChanged.AddINotifyPropertyChangedInterface]
@@ -463,8 +471,7 @@ public class UndertaleSprite : UndertaleNamedResource, IProjectAsset, PrePaddedO
         /// <summary>
         /// The type of collision mask used, UTMT only.
         /// </summary>
-        public ColMaskType AssumedColMaskType { get; set; }
-
+        public ColMaskType? AssumedColMaskType { get; set; }
         /// <summary>
         /// Width of this sprite mask. UTMT only.
         /// </summary>
@@ -478,12 +485,11 @@ public class UndertaleSprite : UndertaleNamedResource, IProjectAsset, PrePaddedO
         {
         }
         
-        public MaskEntry(byte[] data, int width, int height, ColMaskType assumedColMasktype)
+        public MaskEntry(byte[] data, int width, int height)
         {
             this.Data = data;
             this.Width = width;
             this.Height = height;
-            this.AssumedColMaskType = assumedColMasktype;
         }
         
         /// <inheritdoc/>
@@ -1084,7 +1090,7 @@ public class UndertaleSprite : UndertaleNamedResource, IProjectAsset, PrePaddedO
         for (uint i = 0; i < maskCount; i++)
         {
             byte[] maskData = reader.ReadBytes((int)len);
-            newMasks.Add(new MaskEntry(maskData, width, height, ResolveMaskType(maskData, this, reader.undertaleData)));
+            newMasks.Add(new MaskEntry(maskData, width, height));
             total += len;
         }
 
