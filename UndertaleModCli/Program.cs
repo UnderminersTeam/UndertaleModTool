@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.Scripting;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.IO;
@@ -203,6 +204,7 @@ public partial class Program : IScriptInterface
         };
         Option<bool> dumpStringsOption = new("-s", "--strings") { Description = "Whether to dump all strings" };
         Option<bool> dumpTexturesOption = new("-t", "--textures") { Description = "Whether to dump all embedded textures" };
+        Option<bool> dumpSpritesOption = new("--sprites") { Description = "Whether to dump all sprites" };
         Command dumpCommand = new("dump", "Dump certain properties about the game data file")
         {
             dataFileArgument,
@@ -210,7 +212,8 @@ public partial class Program : IScriptInterface
             dumpOutputOption,
             dumpCodeOption,
             dumpStringsOption,
-            dumpTexturesOption
+            dumpTexturesOption,
+            dumpSpritesOption
         };
         dumpCommand.SetAction(parseResult =>
         {
@@ -221,7 +224,8 @@ public partial class Program : IScriptInterface
                 Output = parseResult.GetValue(dumpOutputOption),
                 Code = parseResult.GetValue(dumpCodeOption),
                 Strings = parseResult.GetValue(dumpStringsOption),
-                Textures = parseResult.GetValue(dumpTexturesOption)
+                Textures = parseResult.GetValue(dumpTexturesOption),
+                Sprites = parseResult.GetValue(dumpSpritesOption)
             });
         });
 
@@ -513,6 +517,10 @@ public partial class Program : IScriptInterface
         // If user wanted to dump embedded textures, dump all of them
         if (options.Textures)
             program.DumpAllTextures();
+
+        // If user wanted to dump sprites, dump all of them
+        if (options.Sprites)
+            program.DumpAllSprites().Wait();
 
         return EXIT_SUCCESS;
     }
@@ -885,6 +893,83 @@ public partial class Program : IScriptInterface
             }
             using FileStream fs = new(dest, FileMode.Create);
             texture.TextureData.Image.SavePng(fs);
+        }
+    }
+
+    /// <summary>
+    /// Helper class for exporting texture page items, e.g. for dumping sprites.
+    /// </summary>
+    private class TextureToExport
+    {
+        public UndertaleTexturePageItem PageItem { get; set; }
+        public UndertaleEmbeddedTexture Page => PageItem.TexturePage;
+        public string FileExportLocation { get; set; }
+
+        public TextureToExport(UndertaleTexturePageItem pageItem, string fileExportLocation) => (PageItem, FileExportLocation) = (pageItem, fileExportLocation);
+    }
+
+    /// <summary>
+    /// Dumps all sprites in a data file.
+    /// </summary>
+    private async Task DumpAllSprites()
+    {
+        string directory = Path.Join(Output.FullName, "Sprites");
+
+        Directory.CreateDirectory(directory);
+
+        // As of writing, this code is copied over from the ExportAllSprites.csx script
+
+        // TODO: make this configurable, but this is a reasonable default
+        bool padded = true;
+
+        ConcurrentDictionary<string, ConcurrentBag<TextureToExport>> texturesToExport = new();
+
+        Console.WriteLine("Fetching sprite textures...");
+        await Task.Run(() => Parallel.ForEach(Data.Sprites, spr =>
+        {
+            FetchTexturesFromSprite(spr);
+        }));
+
+        Console.WriteLine("Exporting sprite textures...");
+        await Task.Run(() => ExportTextures());
+
+        void FetchTexturesFromSprite(UndertaleSprite sprite)
+        {
+            if (sprite is not { SSpriteType: UndertaleSprite.SpriteType.Normal, Textures.Count: > 0 })
+            {
+                // IncrementProgressParallel();
+                return;
+            }
+
+            for (int i = 0; i < sprite.Textures.Count; i++)
+            {
+                if (sprite.Textures[i]?.Texture is not null)
+                {
+                    UndertaleTexturePageItem pageItem = sprite.Textures[i].Texture;
+
+                    var bag = texturesToExport.GetOrAdd(pageItem.TexturePage.Name.Content, _ => new ConcurrentBag<TextureToExport>());
+                    bag.Add(new TextureToExport(pageItem, Paths.JoinVerifyWithinDirectory(directory, $"{sprite.Name.Content}_{i}.png")));
+                }
+            }
+            // IncrementProgressParallel();
+        }
+
+        void ExportTextures()
+        {
+            int totalCores = Environment.ProcessorCount;
+            int outerLimit = Math.Max(1, totalCores / 4);
+            Parallel.ForEach(texturesToExport, new ParallelOptions { MaxDegreeOfParallelism = outerLimit }, kvp =>
+            {
+                using TextureWorker localWorker = new();
+
+                foreach (TextureToExport tte in kvp.Value)
+                {
+                    if (Verbose)
+                        Console.WriteLine($"Dumping {tte.PageItem.Name}");
+                    localWorker.ExportAsPNG(tte.PageItem, tte.FileExportLocation, null, padded);
+                }
+                // IncrementProgressParallel();
+            });
         }
     }
 

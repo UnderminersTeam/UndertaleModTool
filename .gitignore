@@ -333,3 +333,6 @@ Test/Test - Backup.csproj
 UndertaleModLib/UndertaleModLib - Backup.csproj
 UndertaleModTests/UndertaleModTests - Backup.csproj
 UndertaleModLib/gitversion.txt
+
+# macOS makes these files
+*.DS_Store
