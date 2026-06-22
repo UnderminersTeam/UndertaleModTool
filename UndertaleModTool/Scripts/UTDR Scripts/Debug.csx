@@ -13,53 +13,26 @@ string displayName = Data.GeneralInfo.DisplayName.Content;
 if (internalName == "NXTALE" || internalName.StartsWith("UNDERTALE"))
 {
     // UNDERTALE
-    if (Data.Scripts.ByName("SCR_GAMESTART", true)?.Code is UndertaleCode SCR_GAMESTART)
-    {
-        importGroup.QueueFindReplace(SCR_GAMESTART, "global.debug = ", $"global.debug = {(enable ? "1" : "0")}; //");
-        importGroup.Import();
-        ChangeSelection(SCR_GAMESTART);
-    }
-    else
-    {
-        ScriptError("Failed to find SCR_GAMESTART.");
-        return;
-    }
+    UndertaleCode scr_gamestart = Data.Scripts.ByName("SCR_GAMESTART", true).Code;
+    importGroup.QueueFindReplace(scr_gamestart, "global.debug = ", $"global.debug = {(enable ? "1" : "0")}; //");
+    importGroup.Import();
+    ChangeSelection(scr_gamestart);
 }
 else if (!Data.IsVersionAtLeast(2, 3) && (displayName == "SURVEY_PROGRAM" || displayName == "DELTARUNE Chapter 1"))
 {
     // DELTARUNE Chapter 1, before 1&2 demo
-    if (Data.Scripts.ByName("scr_debug")?.Code is UndertaleCode scr_debug)
-    {
-        importGroup.QueueReplace(scr_debug, $"global.debug = {(enable ? "1" : "0")}; return global.debug;");
-        importGroup.Import();
-        ChangeSelection(scr_debug);
-    }
-    else
-    {
-        ScriptError("Failed to find scr_debug.");
-        return;
-    }
+    UndertaleCode scr_debug = Data.Scripts.ByName("scr_debug").Code;
+    importGroup.QueueReplace(scr_debug, $"global.debug = {(enable ? "1" : "0")}; return global.debug;");
+    importGroup.Import();
+    ChangeSelection(scr_debug);
 }
 else if (displayName == "DELTARUNE Chapter 1&2")
 {
     // DELATRUNE (1&2 demo prior to LTS)
-    if (Data.Scripts.ByName("SCR_GAMESTART", true)?.Code is not UndertaleCode SCR_GAMESTART)
-    {
-        ScriptError("Failed to find SCR_GAMESTART.");
-        return;
-    }
-    if (Data.Code.ByName("gml_Object_obj_debugcontroller_ch1_Create_0") is not UndertaleCode debugControllerCode)
-    {
-        ScriptError("Failed to find obj_debugcontroller_ch1 create event.");
-        return;
-    }
-    if (Data.Code.ByName("gml_Object_obj_debugProfiler_Create_0") is not UndertaleCode debugProfilerCode)
-    {
-        ScriptError("Failed to find obj_debugProfiler create event.");
-        return;
-    }
-
-    importGroup.QueueFindReplace(SCR_GAMESTART, "global.debug = ", $"global.debug = {(enable ? "1" : "0")}; //");
+    UndertaleCode scr_gamestart = Data.Scripts.ByName("SCR_GAMESTART", true).Code;
+    UndertaleCode debugControllerCode = Data.Code.ByName("gml_Object_obj_debugcontroller_ch1_Create_0");
+    UndertaleCode debugProfilerCode = Data.Code.ByName("gml_Object_obj_debugProfiler_Create_0");
+    importGroup.QueueFindReplace(scr_gamestart, "global.debug = ", $"global.debug = {(enable ? "1" : "0")}; //");
     importGroup.QueueFindReplace(debugControllerCode, "debug = ", $"debug = {(enable ? "true" : "false")}; //");
     if (debugProfilerCode.Instructions.Count == 0 && enable)
     {
@@ -71,33 +44,24 @@ else if (displayName == "DELTARUNE Chapter 1&2")
         importGroup.QueueReplace(debugProfilerCode, "");
     }
     importGroup.Import();
-    ChangeSelection(SCR_GAMESTART);
+    ChangeSelection(scr_gamestart);
 }
-else if (displayName.ToUpper().Contains("DELTARUNE"))
+else if (displayName.ToUpperInvariant().Contains("DELTARUNE"))
 {
     if (Data.GameObjects.ByName("obj_event_manager") is null)
     {
         // DELTARUNE (1&2 LTS demo)
         if (displayName == "DELTARUNE Chapter 1")
         {
-            if (Data.Code.ByName("gml_Object_obj_debugcontroller_Create_0") is not UndertaleCode debugControllerCode)
-            {
-                ScriptError("Failed to find obj_debugcontroller create event.");
-                return;
-            }
-
+            UndertaleCode debugControllerCode = Data.Code.ByName("gml_Object_obj_debugcontroller_Create_0");
             importGroup.QueueFindReplace(debugControllerCode, "debug = ", $"debug = {(enable ? "true" : "false")}; //");
             importGroup.Import();
             ChangeSelection(debugControllerCode);
         }
         else if (displayName == "DELTARUNE Chapter 2")
         {
-            if (Data.Scripts.ByName("scr_debug")?.Code is not UndertaleCode scr_debug)
-            {
-                ScriptError("Failed to find scr_debug.");
-                return;
-            }
 
+            UndertaleCode scr_debug = Data.Scripts.ByName("scr_debug").Code;
             importGroup.QueueReplace(scr_debug, $"function scr_debug() {{ return {(enable ? "1" : "0")}; }}");
             importGroup.Import();
             ChangeSelection(scr_debug);
@@ -111,12 +75,7 @@ else if (displayName.ToUpper().Contains("DELTARUNE"))
     else
     {
         // DELTARUNE (full release, handles all chapters)
-        if (Data.Code.ByName("gml_Object_obj_initializer2_Create_0") is not UndertaleCode initializerCode)
-        {
-            ScriptError("Failed to find obj_initializer2 create event.");
-            return;
-        }
-
+        UndertaleCode initializerCode = Data.Code.ByName("gml_Object_obj_initializer2_Create_0");
         if (enable && displayName == "DELTARUNE Chapter 3")
         {
             // Chapter 3 needs extra globals defined for debug to function correctly
@@ -137,8 +96,8 @@ else if (displayName.ToUpper().Contains("DELTARUNE"))
             importGroup.QueueFindReplace(initializerCode, "global.debug = ", $"global.debug = {(enable ? "1" : "0")}; //");
         }
 
-        if (Data.Code.ByName("gml_GlobalScript_scr_flag_get") is UndertaleCode flagGetCode &&
-            Data.Code.ByName("gml_Script_scr_flag_name_get") is not null)
+        if (Data.Code.TryByName("gml_GlobalScript_scr_flag_get") is UndertaleCode flagGetCode &&
+            Data.Code.TryByName("gml_Script_scr_flag_name_get") is not null)
         {
             // Fix for chapters not including flag names
             importGroup.QueueFindReplace(flagGetCode,

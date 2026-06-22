@@ -85,7 +85,7 @@ foreach (var path in Directory.EnumerateFiles(bordersPath))
 // Create texture fragments and assign them to existing (but empty) backgrounds
 Action<string, UndertaleEmbeddedTexture, ushort, ushort, ushort, ushort> AssignBorderBackground = (name, tex, x, y, width, height) => 
 {
-    var bg = Data.Backgrounds.ByName(name);
+    var bg = Data.Backgrounds.TryByName(name);
     if (bg is null) 
     {
         // The anime border does not exist on PC yet ;)

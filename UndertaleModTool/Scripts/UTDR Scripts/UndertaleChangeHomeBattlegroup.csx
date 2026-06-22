@@ -20,12 +20,6 @@ else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter
 
 
 UndertaleCode code = Data.Code.ByName("gml_Object_obj_mainchara_KeyPress_36");
-if (code == null)
-{
-    ScriptError("Cannot apply, \"gml_Object_obj_mainchara_KeyPress_36\" does not exist!");
-    return;
-}
-
 GlobalDecompileContext globalDecompileContext = new(Data);
 Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = new Underanalyzer.Decompiler.DecompileSettings();
 UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)

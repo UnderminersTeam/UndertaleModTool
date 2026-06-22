@@ -6,9 +6,8 @@ EnsureDataLoaded();
 ScriptMessage("Adds a Gaster Blaster (+ generator) that isn't tied to Sans.\nOnly useful for modders.\nCreated by BenjaminUrquhart for Cairns.");
 
 // Blaster
-var obj_safeblaster = Data.GameObjects.ByName("obj_safeblaster");
-
-if (obj_safeblaster == null)
+var obj_safeblaster = Data.GameObjects.TryByName("obj_safeblaster");
+if (obj_safeblaster is null)
 {
     obj_safeblaster = new UndertaleGameObject()
     {
@@ -211,9 +210,8 @@ importGroup.QueueReplace(obj_safeblaster.EventHandlerFor(EventType.Destroy, Data
 
 
 // Generator
-var obj_safebl_gen = Data.GameObjects.ByName("obj_safebl_gen");
-
-if (obj_safebl_gen == null)
+var obj_safebl_gen = Data.GameObjects.TryByName("obj_safebl_gen");
+if (obj_safebl_gen is null)
 {
     obj_safebl_gen = new UndertaleGameObject()
     {

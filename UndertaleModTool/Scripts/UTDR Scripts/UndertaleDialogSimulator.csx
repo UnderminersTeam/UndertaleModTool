@@ -47,15 +47,13 @@ bool isDeltarune = false;
 if (Data.GeneralInfo.Name.ToString() == "\"DELTARUNE\"")
     isDeltarune = true;
 
-string newRoomName = "room_dialoguer";    
-var roomCheck = Data.Rooms.ByName(newRoomName);
-if (roomCheck != null)
+string newRoomName = "room_dialoguer";
+if (Data.Rooms.TryByName(newRoomName) is not null)
 {
     ScriptError(newRoomName + " already exists.");
     return;
 }
-var objCheck = Data.GameObjects.ByName("obj_dialog_sim");
-if (objCheck != null)
+if (Data.GameObjects.TryByName("obj_dialog_sim") is not null)
 {
     ScriptError("Object 'obj_dialog_sim' already exists.");
     return;
@@ -164,10 +162,10 @@ public void HandleAddingNewRoom()
     newRoom.Width = (uint)(isDeltarune ? 640 : 320);
     newRoom.Height = (uint)(isDeltarune ? 480 : 240);
 
-    if (Data.GameObjects.ByName("obj_mainchara") != null && (!isDeltarune))
-        newRoom.Views[0].ObjectId = Data.GameObjects.ByName("obj_mainchara");
+    if (Data.GameObjects.TryByName("obj_mainchara") is UndertaleGameObject obj_mainchara && !isDeltarune)
+        newRoom.Views[0].ObjectId = obj_mainchara;
     UndertaleRoom.Layer newInstancesLayer = new UndertaleRoom.Layer();
-    if (!(GMS1_mode))
+    if (!GMS1_mode)
     {
         newInstancesLayer.LayerName = Data.Strings.MakeString(newRoomName + "_GameObjects_Layer");
         newInstancesLayer.LayerId = last_layer_id++;
@@ -180,12 +178,12 @@ public void HandleAddingNewRoom()
         newRoom.SetupRoom();
     }
 
-    if (Data.GameObjects.ByName("obj_mainchara") != null)
+    if (Data.GameObjects.TryByName("obj_mainchara") is UndertaleGameObject obj_mainchara)
     {
         UndertaleRoom.GameObject newPlayerObj = new UndertaleRoom.GameObject();
         newPlayerObj.X = 160;
         newPlayerObj.Y = 120;
-        newPlayerObj.ObjectDefinition = Data.GameObjects.ByName("obj_mainchara");
+        newPlayerObj.ObjectDefinition = obj_mainchara;
         newPlayerObj.InstanceID = Data.GeneralInfo.LastObj++;
         UndertaleRoom.GameObject obj = newPlayerObj;
         newRoom.GameObjects.Add(obj);
@@ -196,12 +194,12 @@ public void HandleAddingNewRoom()
         }
     }
 
-    if (Data.GameObjects.ByName("obj_overworldcontroller") != null)
+    if (Data.GameObjects.TryByName("obj_overworldcontroller") is UndertaleGameObject obj_overworldcontroller)
     {
         UndertaleRoom.GameObject newControllerObj = new UndertaleRoom.GameObject();
         newControllerObj.X = 0;
         newControllerObj.Y = 0;
-        newControllerObj.ObjectDefinition = Data.GameObjects.ByName("obj_overworldcontroller");
+        newControllerObj.ObjectDefinition = obj_overworldcontroller;
         newControllerObj.InstanceID = Data.GeneralInfo.LastObj++;
         UndertaleRoom.GameObject obj = newControllerObj;
         newRoom.GameObjects.Add(obj);
@@ -212,12 +210,12 @@ public void HandleAddingNewRoom()
         }
     }
 
-    if (Data.GameObjects.ByName("obj_dialog_sim") != null)
+    if (Data.GameObjects.TryByName("obj_dialog_sim") is UndertaleGameObject obj_dialog_sim)
     {
         UndertaleRoom.GameObject newPlayerObj = new UndertaleRoom.GameObject();
         newPlayerObj.X = 160;
         newPlayerObj.Y = 120;
-        newPlayerObj.ObjectDefinition = Data.GameObjects.ByName("obj_dialog_sim");
+        newPlayerObj.ObjectDefinition = obj_dialog_sim;
         newPlayerObj.InstanceID = Data.GeneralInfo.LastObj++;
         UndertaleRoom.GameObject obj = newPlayerObj;
         newRoom.GameObjects.Add(obj);
@@ -228,12 +226,12 @@ public void HandleAddingNewRoom()
         }
     }
 
-    if (Data.GameObjects.ByName("obj_darkcontroller") != null && !GMS1_mode)
+    if (Data.GameObjects.TryByName("obj_darkcontroller") is UndertaleGameObject obj_darkcontroller && !GMS1_mode)
     {
         UndertaleRoom.GameObject newControllerObj = new UndertaleRoom.GameObject();
         newControllerObj.X = 0;
         newControllerObj.Y = 0;
-        newControllerObj.ObjectDefinition = Data.GameObjects.ByName("obj_darkcontroller");
+        newControllerObj.ObjectDefinition = obj_darkcontroller;
         newControllerObj.InstanceID = Data.GeneralInfo.LastObj++;
         UndertaleRoom.GameObject obj = newControllerObj;
         newRoom.GameObjects.Add(obj);
