@@ -495,7 +495,7 @@ public partial class Program : IScriptInterface
     }
 
     /// <inheritdoc/>
-    public string GetDisassemblyText(string codeName  GetDisassemblyText(Data.Code.ByName(codeName));
+    public string GetDisassemblyText(string codeName) => GetDisassemblyText(Data.Code.ByName(codeName));
 
     /// <inheritdoc/>
     public string GetDisassemblyText(UndertaleCode code)
