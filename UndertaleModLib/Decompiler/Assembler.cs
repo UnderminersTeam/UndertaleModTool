@@ -260,7 +260,7 @@ public static partial class Assembler
                             line = line["[function]".Length..];
                             instr.ValueFunction = data.Functions.ByName(line);
                         }
-                        else if (data.Functions.ByName(line) is UndertaleFunction f)
+                        else if (data.Functions.TryByName(line) is UndertaleFunction f)
                         {
                             // Function reference (old-style syntax)
                             instr.ValueFunction = f;
@@ -321,9 +321,7 @@ public static partial class Assembler
 
                 // Find function being referenced
                 string funcName = match.Groups[1].Value;
-                UndertaleFunction func = data.Functions.ByName(funcName) ?? 
-                    throw new Exception($"Could not find function with name \"{funcName}\"");
-                instr.ValueFunction = func;
+                instr.ValueFunction = data.Functions.ByName(funcName);
 
                 // Parse argument count
                 instr.ArgumentsCount = ushort.Parse(match.Groups[2].Value);
@@ -349,9 +347,7 @@ public static partial class Assembler
                         else
                         {
                             // Or alternatively parse function!
-                            UndertaleFunction extFunc = data.Functions.ByName(line) ?? 
-                                throw new Exception($"Could not find function specified by extended pushref instruction: \"{line}\"");
-                            instr.ValueFunction = extFunc;
+                            instr.ValueFunction = data.Functions.ByName(line);
                         }
                     }
                 }
@@ -380,7 +376,7 @@ public static partial class Assembler
     private static int ParseResourceName(string line, UndertaleData data)
     {
         // TODO: have the option of building lookup maps instead of performing this linear search...
-        int id = data.IndexOfByName(line);
+        int id = data.IndexByName(line);
         if (id < 0)
         {
             throw new FormatException($"Unable to parse \"{line}\" as a number or resource name");
@@ -425,8 +421,7 @@ public static partial class Assembler
                 line = line[2..].Trim();
                 int space = line.IndexOf(' ', StringComparison.InvariantCulture);
                 string codeName = line[..space];
-                UndertaleCode code = data.Code.ByName(codeName) ?? 
-                    throw new Exception($"Failed to find code entry with name \"{codeName}\"");
+                UndertaleCode code = data.Code.ByName(codeName);
 
                 // Parse additional info (local/argument count), using a regular expression
                 string info = line[(space + 1)..];

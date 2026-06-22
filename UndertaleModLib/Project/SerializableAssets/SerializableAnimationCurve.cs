@@ -115,7 +115,7 @@ internal sealed class SerializableAnimationCurve : ISerializableProjectAsset
     /// <inheritdoc/>
     public void PreImport(ProjectContext projectContext)
     {
-        if (projectContext.Data.AnimationCurves.ByName(DataName) is UndertaleAnimationCurve existing)
+        if (projectContext.Data.AnimationCurves.TryByName(DataName) is UndertaleAnimationCurve existing)
         {
             // Animation curve found
             _dataAsset = existing;

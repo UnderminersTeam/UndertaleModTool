@@ -86,7 +86,7 @@ internal sealed class SerializablePath : ISerializableProjectAsset
     /// <inheritdoc/>
     public void PreImport(ProjectContext projectContext)
     {
-        if (projectContext.Data.Paths.ByName(DataName) is UndertalePath existing)
+        if (projectContext.Data.Paths.TryByName(DataName) is UndertalePath existing)
         {
             // Path found
             _dataAsset = existing;

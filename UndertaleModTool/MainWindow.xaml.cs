@@ -3105,7 +3105,7 @@ result in loss of work.");
         public void UpdateObjectLabel(object obj)
         {
             // Try to get index
-            int foundIndex = obj is UndertaleResource res ? Data.IndexOf(res, false) : -1;
+            int foundIndex = obj is UndertaleResource res ? Data.TryIndexOf(res) : -1;
 
 			// Determine ID
 			string idString;

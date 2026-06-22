@@ -479,7 +479,7 @@ internal sealed class SerializableSequence : ISerializableProjectAsset
     /// <inheritdoc/>
     public void PreImport(ProjectContext projectContext)
     {
-        if (projectContext.Data.Sequences.ByName(DataName) is UndertaleSequence existing)
+        if (projectContext.Data.Sequences.TryByName(DataName) is UndertaleSequence existing)
         {
             // Sequence found
             _dataAsset = existing;

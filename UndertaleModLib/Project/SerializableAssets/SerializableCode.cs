@@ -75,7 +75,7 @@ internal sealed class SerializableCode : ISerializableProjectAsset
     /// <inheritdoc/>
     public void PreImport(ProjectContext projectContext)
     {
-        if (projectContext.Data.Code.ByName(DataName) is UndertaleCode existing)
+        if (projectContext.Data.Code.TryByName(DataName) is UndertaleCode existing)
         {
             // Code found
             _dataAsset = existing;
