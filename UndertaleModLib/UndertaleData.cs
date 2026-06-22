@@ -45,7 +45,7 @@ namespace UndertaleModLib
                 // Prevent recursion
                 if (resourceTypeName == "Item")
                     return;
-                
+
                 var property = GetType().GetProperty(resourceTypeName);
                 if (property is null)
                     throw new MissingMemberException($"\"UndertaleData\" doesn't contain a property named \"{resourceTypeName}\".");
@@ -60,6 +60,7 @@ namespace UndertaleModLib
         /// <param name="resourceType">The resource type to get.</param>
         /// <exception cref="NotSupportedException"> if the type is not an <see cref="UndertaleNamedResource"/>.</exception>
         /// <exception cref="MissingMemberException"> if the data file does not contain a property of that type.</exception>
+        // this thing should get nuked lowkey
         public IList this[Type resourceType]
         {
             get
@@ -71,8 +72,10 @@ namespace UndertaleModLib
                 if (!typeof(UndertaleResource).IsAssignableFrom(resourceType))
                     throw new NotSupportedException($"\"{resourceType.FullName}\" is not an UndertaleResource.");
 
-                var property = GetType().GetProperties().Where(x => x.PropertyType.Name == "IList`1")
-                                                        .FirstOrDefault(x => x.PropertyType.GetGenericArguments()[0] == resourceType);
+                var property = GetType()
+                    .GetProperties()
+                    .Where(x => x.PropertyType.Name == "IList`1")
+                    .FirstOrDefault(x => x.PropertyType.GetGenericArguments()[0] == resourceType);
                 if (property is null)
                     throw new MissingMemberException($"\"UndertaleData\" doesn't contain a resource list of type \"{resourceType.FullName}\".");
 
@@ -83,8 +86,10 @@ namespace UndertaleModLib
                 if (!typeof(UndertaleResource).IsAssignableFrom(resourceType))
                     throw new NotSupportedException($"\"{resourceType.FullName}\" is not an UndertaleResource.");
 
-                var property = GetType().GetProperties().Where(x => x.PropertyType.Name == "IList`1")
-                                                        .FirstOrDefault(x => x.PropertyType.GetGenericArguments()[0] == resourceType);
+                var property = GetType()
+                    .GetProperties()
+                    .Where(x => x.PropertyType.Name == "IList`1")
+                    .FirstOrDefault(x => x.PropertyType.GetGenericArguments()[0] == resourceType);
                 if (property is null)
                     throw new MissingMemberException($"\"UndertaleData\" doesn't contain a resource list of type \"{resourceType.FullName}\".");
 
@@ -181,8 +186,6 @@ namespace UndertaleModLib
         /// The rooms of the data file.
         /// </summary>
         public IList<UndertaleRoom> Rooms => FORM.ROOM?.List;
-        //[Obsolete("Unused")]
-        // DataFile
 
         /// <summary>
         /// The texture page items from the data file.
@@ -302,7 +305,6 @@ namespace UndertaleModLib
         /// </summary>
         public IList<UndertaleParticleSystemEmitter> ParticleSystemEmitters => FORM.PSEM?.List;
 
-
         /// <summary>
         /// Whether this is an unsupported bytecode version.
         /// </summary>
@@ -366,137 +368,166 @@ namespace UndertaleModLib
         /// </summary>
         public UndertaleData()
         {
-            AllListProperties = GetType().GetProperties()
-                                .Where(x => x.PropertyType.IsGenericType
-                                            && x.PropertyType.GetGenericTypeDefinition() == typeof(IList<>))
-                                .ToArray();
+            AllListProperties = GetType()
+                .GetProperties()
+                .Where(x =>
+                    x.PropertyType.IsGenericType
+                    && x.PropertyType.GetGenericTypeDefinition() == typeof(IList<>)
+                )
+                .ToArray();
         }
 
         /// <summary>
-        /// Get a resource from the data file by name.
+        /// Tries to find any named resource/asset in the data file.
         /// </summary>
         /// <remarks>
-        /// This does a linear search, and will thus be slow if used many times. It's recommended to build lookup maps if many searches are required.
+        /// This does a linear search, and will thus be slow if used many times.
+        /// It's recommended to build lookup maps if many searches are required.
         /// </remarks>
         /// <param name="name">The name of the desired resource.</param>
         /// <param name="ignoreCase">Whether to ignore casing while searching.</param>
-        /// <returns>The <see cref="UndertaleNamedResource"/>.</returns>
+        /// <returns>The found <see cref="UndertaleNamedResource"/> or <see langword="null"/>.</returns>
+        public UndertaleNamedResource TryByName(string name, bool ignoreCase = false)
+        {
+            return Sounds?.TryByName(name, ignoreCase)
+                ?? Sprites?.TryByName(name, ignoreCase)
+                ?? Backgrounds?.TryByName(name, ignoreCase)
+                ?? Paths?.TryByName(name, ignoreCase)
+                ?? Scripts?.TryByName(name, ignoreCase)
+                ?? Fonts?.TryByName(name, ignoreCase)
+                ?? GameObjects?.TryByName(name, ignoreCase)
+                ?? Rooms?.TryByName(name, ignoreCase)
+                ?? Extensions?.TryByName(name, ignoreCase)
+                ?? Shaders?.TryByName(name, ignoreCase)
+                ?? Timelines?.TryByName(name, ignoreCase)
+                ?? AnimationCurves?.TryByName(name, ignoreCase)
+                ?? Sequences?.TryByName(name, ignoreCase)
+                ?? AudioGroups?.TryByName(name, ignoreCase)
+                ?? (UndertaleNamedResource)null;
+        }
+
+        /// <summary>
+        /// Finds any named resource/asset in the data file.
+        /// </summary>
+        /// <remarks>
+        /// This does a linear search, and will thus be slow if used many times.
+        /// It's recommended to build lookup maps if many searches are required.
+        /// </remarks>
+        /// <param name="name">The name of the desired resource.</param>
+        /// <param name="ignoreCase">Whether to ignore casing while searching.</param>
+        /// <returns>The found <see cref="UndertaleNamedResource"/>.</returns>
+        /// <exception cref="InvalidOperationException">if there is no resource with the given name.</exception>
         public UndertaleNamedResource ByName(string name, bool ignoreCase = false)
         {
-            return 
-                Sounds.ByName(name, ignoreCase) ??
-                Sprites.ByName(name, ignoreCase) ??
-                Backgrounds.ByName(name, ignoreCase) ??
-                Paths.ByName(name, ignoreCase) ??
-                Scripts.ByName(name, ignoreCase) ??
-                Fonts.ByName(name, ignoreCase) ??
-                GameObjects.ByName(name, ignoreCase) ??
-                Rooms.ByName(name, ignoreCase) ??
-                Extensions.ByName(name, ignoreCase) ??
-                Shaders.ByName(name, ignoreCase) ??
-                Timelines.ByName(name, ignoreCase) ??
-                AnimationCurves?.ByName(name, ignoreCase) ??
-                Sequences?.ByName(name, ignoreCase) ??
-                AudioGroups?.ByName(name, ignoreCase) ??
-                (UndertaleNamedResource)null;
+            UndertaleNamedResource found = TryByName(name, ignoreCase);
+            if (found is null)
+                throw new InvalidOperationException($"Could not find resource with name {name}");
+            return found;
         }
 
         /// <summary>
         /// Returns the zero-based index of the first occurrence of the specified <see cref="UndertaleResource"/>.
         /// </summary>
         /// <remarks>
-        /// This does a linear search, and will thus be slow if used many times. It's recommended to build lookup maps if many searches are required.
+        /// This does a linear search, and will thus be slow if used many times.
+        /// It's recommended to build lookup maps if many searches are required.
         /// </remarks>
         /// <param name="obj">The object to get the index of.</param>
-        /// <param name="panicIfInvalid">Whether to throw if <paramref name="obj"/> is not a valid object.</param>
-        /// <returns>The zero-based index position of the <paramref name="obj"/> parameter if it is found, or -1 if it is not found.</returns>
-        /// <exception cref="InvalidOperationException"><paramref name="panicIfInvalid"/> is <see langword="true"/>
-        /// and <paramref name="obj"/> could not be found.</exception>
-        public int IndexOf(UndertaleResource obj, bool panicIfInvalid = true)
+        /// <returns>The zero-based index position of the <paramref name="obj"/> parameter, or -1 if the resource is not registered.</returns>
+        public int TryIndexOf(UndertaleResource obj)
         {
             Type objType = obj.GetType();
-            PropertyInfo objListPropInfo = AllListProperties.FirstOrDefault(x => x.PropertyType.GetGenericArguments()[0] == objType);
+            PropertyInfo objListPropInfo = AllListProperties.FirstOrDefault(x =>
+                x.PropertyType.GetGenericArguments()[0] == objType
+            );
             if (objListPropInfo is not null)
             {
                 if (objListPropInfo.GetValue(this) is IList list)
                     return list.IndexOf(obj);
             }
-
-            if (panicIfInvalid)
-                throw new InvalidOperationException();
             return -1;
         }
 
+        /// <summary>
+        /// Returns the zero-based index of the first occurrence of the specified <see cref="UndertaleResource"/>.
+        /// </summary>
+        /// <remarks>
+        /// This does a linear search, and will thus be slow if used many times.
+        /// It's recommended to build lookup maps if many searches are required.
+        /// </remarks>
+        /// <param name="obj">The object to get the index of.</param>
+        /// <returns>The zero-based index position of the <paramref name="obj"/>.</returns>
+        /// <exception cref="InvalidOperationException">if the resource is not registered.</exception>
+        public int IndexOf(UndertaleResource obj)
+        {
+            int found = TryIndexOf(obj);
+            if (found < 0)
+                throw new InvalidOperationException($"Resource {obj} is not registered in the data file");
+            return found;
+        }
 
         /// <summary>
         /// Returns the zero-based index of the first occurrence of the specified <see cref="UndertaleNamedResource"/>.
         /// </summary>
         /// <remarks>
-        /// This does a linear search, and will thus be slow if used many times. It's recommended to build lookup maps if many searches are required.
+        /// This does a linear search, and will thus be slow if used many times.
+        /// It's recommended to build lookup maps if many searches are required.
         /// </remarks>
         /// <param name="name">The name of the desired resource.</param>
         /// <param name="ignoreCase">Whether to ignore casing while searching.</param>
         /// <returns>The zero-based index position of the <see cref="UndertaleNamedResource"/> if it is found, or -1 if it is not found.</returns>
-        public int IndexOfByName(string name, bool ignoreCase = false)
+        public int TryIndexByName(string name, bool ignoreCase = false)
         {
-            int res = Sounds.IndexOfName(name, ignoreCase);
-            if (res >= 0) return res;
-            res = Sprites.IndexOfName(name, ignoreCase);
-            if (res >= 0) return res;
-            res = Backgrounds.IndexOfName(name, ignoreCase);
-            if (res >= 0) return res;
-            res = Paths.IndexOfName(name, ignoreCase);
-            if (res >= 0) return res;
-            res = Scripts.IndexOfName(name, ignoreCase);
-            if (res >= 0) return res;
-            res = Fonts.IndexOfName(name, ignoreCase);
-            if (res >= 0) return res;
-            res = GameObjects.IndexOfName(name, ignoreCase);
-            if (res >= 0) return res;
-            res = Rooms.IndexOfName(name, ignoreCase);
-            if (res >= 0) return res;
-            res = Extensions.IndexOfName(name, ignoreCase);
-            if (res >= 0) return res;
-            res = Shaders.IndexOfName(name, ignoreCase);
-            if (res >= 0) return res;
-            res = Timelines.IndexOfName(name, ignoreCase);
-            if (res >= 0) return res;
-
-            if (AnimationCurves is not null)
-            {
-                res = AnimationCurves.IndexOfName(name, ignoreCase);
-                if (res >= 0) return res;
-            }
-            if (Sequences is not null)
-            {
-                res = Sequences.IndexOfName(name, ignoreCase);
-                if (res >= 0) return res;
-            }
-            if (AudioGroups is not null)
-            {
-                res = AudioGroups.IndexOfName(name, ignoreCase);
-                if (res >= 0) return res;
-            }
-
+            int res = -1;
+            res = Sounds.TryIndexByName(name, ignoreCase); if (res >= 0) return res;
+            res = Sprites.TryIndexByName(name, ignoreCase); if (res >= 0) return res;
+            res = Backgrounds.TryIndexByName(name, ignoreCase); if (res >= 0) return res;
+            res = Paths.TryIndexByName(name, ignoreCase); if (res >= 0) return res;
+            res = Scripts.TryIndexByName(name, ignoreCase); if (res >= 0) return res;
+            res = Fonts.TryIndexByName(name, ignoreCase); if (res >= 0) return res;
+            res = GameObjects.TryIndexByName(name, ignoreCase); if (res >= 0) return res;
+            res = Rooms.TryIndexByName(name, ignoreCase); if (res >= 0) return res;
+            res = Extensions.TryIndexByName(name, ignoreCase); if (res >= 0) return res;
+            res = Shaders.TryIndexByName(name, ignoreCase); if (res >= 0) return res;
+            res = Timelines.TryIndexByName(name, ignoreCase); if (res >= 0) return res;
+            res = AnimationCurves?.TryIndexByName(name, ignoreCase) ?? -1; if (res >= 0) return res;
+            res = Sequences?.TryIndexByName(name, ignoreCase) ?? -1; if (res >= 0) return res;
+            res = AudioGroups?.TryIndexByName(name, ignoreCase) ?? -1; if (res >= 0) return res;
             return -1;
+        }
+
+        /// <summary>
+        /// Returns the zero-based index of the first occurrence of the specified <see cref="UndertaleNamedResource"/>.
+        /// </summary>
+        /// <remarks>
+        /// This does a linear search, and will thus be slow if used many times.
+        /// It's recommended to build lookup maps if many searches are required.
+        /// </remarks>
+        /// <param name="name">The name of the desired resource.</param>
+        /// <param name="ignoreCase">Whether to ignore casing while searching.</param>
+        /// <returns>The zero-based index position of the <see cref="UndertaleNamedResource"/>.</returns>
+        /// <exception cref="InvalidOperationException">if there is no resource with the given name.</exception>
+        public int IndexByName(string name, bool ignoreCase = false)
+        {
+            int found = TryIndexByName(name, ignoreCase);
+            if (found < 0)
+                throw new InvalidOperationException($"Could not find index of resource with name {name}");
+            return found;
         }
 
         /// <summary>
         /// Reports whether the data file was built by GameMaker Studio 2.
         /// </summary>
         /// <returns><see langword="true"/> if yes, <see langword="false"/> if not.</returns>
-        public bool IsGameMaker2()
-        {
-            return IsVersionAtLeast(2);
-        }
-
+        public bool IsGameMaker2() => IsVersionAtLeast(2);
 
         // Old Versions: https://store.yoyogames.com/downloads/gm-studio/release-notes-studio-old.html
         // https://web.archive.org/web/20150304025626/https://store.yoyogames.com/downloads/gm-studio/release-notes-studio.html
         // Early Access: https://web.archive.org/web/20181002232646/http://store.yoyogames.com:80/downloads/gm-studio-ea/release-notes-studio.html
         private bool TestGMS1Version(uint stableBuild, uint betaBuild, bool allowGMS2 = false)
         {
-            return (allowGMS2 || !IsGameMaker2()) && (IsVersionAtLeast(1, 0, 0, stableBuild) || (IsVersionAtLeast(1, 0, 0, betaBuild) && !IsVersionAtLeast(1, 0, 0, 1000)));
+            if (allowGMS2 && IsGameMaker2()) return true;
+            return IsVersionAtLeast(1, 0, 0, stableBuild) || (IsVersionAtLeast(1, 0, 0, betaBuild) && !IsVersionAtLeast(1, 0, 0, 1000));
         }
 
         /// <summary>
@@ -518,19 +549,19 @@ namespace UndertaleModLib
             GeneralInfo.Build = build;
 
             if (isLTS is not null)
-            {
                 SetLTS((bool)isLTS);
-            }
         }
 
         /// <summary>
-        /// Sets the branch type in GeneralInfo to the appropriate LTS or non-LTS version based on 
+        /// Sets the branch type in GeneralInfo to the appropriate LTS or non-LTS version based on
         /// </summary>
         /// <param name="isLTS">If included, alter the data branch between LTS and non-LTS.</param>
         public void SetLTS(bool isLTS)
         {
             // Insert additional logic as needed for new branches using IsVersionAtLeast
-            GeneralInfo.Branch = isLTS ? UndertaleGeneralInfo.BranchType.LTS2022_0 : UndertaleGeneralInfo.BranchType.Post2022_0;
+            GeneralInfo.Branch = isLTS
+                ? UndertaleGeneralInfo.BranchType.LTS2022_0
+                : UndertaleGeneralInfo.BranchType.Post2022_0;
         }
 
         /// <summary>
@@ -670,6 +701,7 @@ namespace UndertaleModLib
             data.FORM.Chunks["AUDO"] = new UndertaleChunkAUDO();
             foreach (UndertaleChunk chunk in data.FORM.Chunks.Values)
                 data.FORM.ChunksTypeDict[chunk.GetType()] = chunk;
+
             data.FORM.GEN8.Object = new UndertaleGeneralInfo();
             data.FORM.OPTN.Object = new UndertaleOptions();
             data.FORM.LANG.Object = new UndertaleLanguage();
@@ -677,12 +709,12 @@ namespace UndertaleModLib
             data.GeneralInfo.Config = data.Strings.MakeString("Default");
             data.GeneralInfo.Name = data.Strings.MakeString("NewGame");
             data.GeneralInfo.DisplayName = data.Strings.MakeString("New UndertaleModTool Game");
-            data.GeneralInfo.GameID = (uint)new Random().Next();
-            data.GeneralInfo.Timestamp = (uint)new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
-            data.Options.Constants.Add(new UndertaleOptions.Constant() { Name = data.Strings.MakeString("@@SleepMargin"), Value = data.Strings.MakeString(1.ToString()) });
-            data.Options.Constants.Add(new UndertaleOptions.Constant() { Name = data.Strings.MakeString("@@DrawColour"), Value = data.Strings.MakeString(0xFFFFFFFF.ToString()) });
-            data.Rooms.Add(new UndertaleRoom() { Name = data.Strings.MakeString("room0"), Caption = data.Strings.MakeString("") });
-            data.BuiltinList = new BuiltinList(data);
+            data.GeneralInfo.GameID = (uint) new Random().Next();
+            data.GeneralInfo.Timestamp = (uint) new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+            data.Options.Constants.Add(new() { Name = data.Strings.MakeString("@@SleepMargin"), Value = data.Strings.MakeString(1.ToString()) });
+            data.Options.Constants.Add(new() { Name = data.Strings.MakeString("@@DrawColour"), Value = data.Strings.MakeString(0xFFFFFFFF.ToString()) } );
+            data.Rooms.Add(new() { Name = data.Strings.MakeString("room0"), Caption = data.Strings.MakeString("") });
+            data.BuiltinList = new(data);
             Decompiler.GameSpecificResolver.Initialize(data);
             return data;
         }
@@ -694,8 +726,9 @@ namespace UndertaleModLib
 
             Type disposableType = typeof(IDisposable);
             PropertyInfo[] dataProperties = GetType().GetProperties();
-            var dataDisposableProps = dataProperties.Except(AllListProperties)
-                                                    .Where(x => disposableType.IsAssignableFrom(x.PropertyType));
+            var dataDisposableProps = dataProperties
+                .Except(AllListProperties)
+                .Where(x => disposableType.IsAssignableFrom(x.PropertyType));
 
             // Dispose disposable properties
             foreach (PropertyInfo disposableProp in dataDisposableProps)
@@ -747,7 +780,7 @@ namespace UndertaleModLib
         public IDecompileSettings DecompilerSettings = new DecompileSettings();
 
         /// <summary>
-        /// Function that returns the prefix to be used when 
+        /// Function that returns the prefix to be used when
         /// resolving instance ID references in the compiler and decompiler.
         /// </summary>
         public Func<string> InstanceIdPrefix = () => "inst_";

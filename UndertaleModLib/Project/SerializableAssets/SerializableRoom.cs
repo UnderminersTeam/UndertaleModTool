@@ -913,7 +913,7 @@ internal sealed class SerializableRoom : ISerializableProjectAsset
     /// <inheritdoc/>
     public void PreImport(ProjectContext projectContext)
     {
-        if (projectContext.Data.Rooms.ByName(DataName) is UndertaleRoom existing)
+        if (projectContext.Data.Rooms.TryByName(DataName) is UndertaleRoom existing)
         {
             // Room found
             _dataAsset = existing;

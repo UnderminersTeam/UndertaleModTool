@@ -17,6 +17,7 @@
         <NeutralLanguage>en</NeutralLanguage>
         <ResourceLanguages>en</ResourceLanguages>
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+        <EnableWindowsTargeting>true</EnableWindowsTargeting>
         <!-- Suppress all missing XML comment warnings -->
         <NoWarn>1591</NoWarn>
         <ApplicationManifest>app.manifest</ApplicationManifest>

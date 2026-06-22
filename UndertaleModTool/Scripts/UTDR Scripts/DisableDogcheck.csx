@@ -25,7 +25,7 @@ UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
 };
 
 // Removes the invoking of the dog check script and the actual check itself from "gml_Script_scr_load".
-UndertaleCode scr_load = Data.Scripts.ByName("scr_load", true)?.Code;
+UndertaleCode scr_load = Data.Scripts.ByName("scr_load", true).Code;
 if (Data.GeneralInfo.Name.Content == "NXTALE" || Data.GeneralInfo.Name.Content.StartsWith("UNDERTALE")) 
 {
     importGroup.QueueFindReplace(scr_load, 

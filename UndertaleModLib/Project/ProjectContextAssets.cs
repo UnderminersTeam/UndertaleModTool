@@ -251,7 +251,7 @@ partial class ProjectContext
             return null;
         }
 
-        return Data.Sprites.ByName(spriteNameOrNull) ??
+        return Data.Sprites.TryByName(spriteNameOrNull) ??
             throw new ProjectException($"Failed to find sprite \"{spriteNameOrNull}\" for \"{forAsset.DataName}\"");
     }
 
@@ -266,7 +266,7 @@ partial class ProjectContext
             return null;
         }
 
-        return Data.Backgrounds.ByName(backgroundNameOrNull) ??
+        return Data.Backgrounds.TryByName(backgroundNameOrNull) ??
             throw new ProjectException($"Failed to find background \"{backgroundNameOrNull}\" for \"{forAsset.DataName}\"");
     }
 
@@ -281,7 +281,7 @@ partial class ProjectContext
             return null;
         }
 
-        return Data.Fonts.ByName(fontNameOrNull) ??
+        return Data.Fonts.TryByName(fontNameOrNull) ??
             throw new ProjectException($"Failed to find font \"{fontNameOrNull}\" for \"{forAsset.DataName}\"");
     }
 
@@ -296,7 +296,7 @@ partial class ProjectContext
             throw new ProjectException($"No font name specified in property of \"{forAsset.DataName}\"");
         }
 
-        int index = Data.Fonts.IndexOfName(fontNameOrNull);
+        int index = Data.Fonts.TryIndexByName(fontNameOrNull);
         if (index < 0)
         {
             // Fallback option: parse integer and use that
@@ -322,7 +322,7 @@ partial class ProjectContext
             return null;
         }
 
-        return Data.GameObjects.ByName(gameObjectNameOrNull) ??
+        return Data.GameObjects.TryByName(gameObjectNameOrNull) ??
             throw new ProjectException($"Failed to find object \"{gameObjectNameOrNull}\" for \"{forAsset.DataName}\"");
     }
 
@@ -337,7 +337,7 @@ partial class ProjectContext
             throw new ProjectException($"No object name specified in property of \"{forAsset.DataName}\"");
         }
 
-        int index = Data.GameObjects.IndexOfName(gameObjectNameOrNull);
+        int index = Data.GameObjects.TryIndexByName(gameObjectNameOrNull);
         if (index < 0)
         {
             // Fallback option: parse integer and use that
@@ -363,7 +363,7 @@ partial class ProjectContext
             return null;
         }
 
-        return Data.Code.ByName(codeEntryNameOrNull) ??
+        return Data.Code.TryByName(codeEntryNameOrNull) ??
             throw new ProjectException($"Failed to find code entry \"{codeEntryNameOrNull}\" for \"{forAsset.DataName}\"");
     }
 
@@ -378,7 +378,7 @@ partial class ProjectContext
             return null;
         }
 
-        return Data.Sequences.ByName(sequenceNameOrNull) ??
+        return Data.Sequences.TryByName(sequenceNameOrNull) ??
             throw new ProjectException($"Failed to find sequence \"{sequenceNameOrNull}\" for \"{forAsset.DataName}\"");
     }
 
@@ -393,7 +393,7 @@ partial class ProjectContext
             return null;
         }
 
-        return Data.ParticleSystems.ByName(particleSystemNameOrNull) ??
+        return Data.ParticleSystems.TryByName(particleSystemNameOrNull) ??
             throw new ProjectException($"Failed to find particle system \"{particleSystemNameOrNull}\" for \"{forAsset.DataName}\"");
     }
 
@@ -408,7 +408,7 @@ partial class ProjectContext
             return null;
         }
 
-        return Data.Sounds.ByName(soundNameOrNull) ??
+        return Data.Sounds.TryByName(soundNameOrNull) ??
             throw new ProjectException($"Failed to find sound \"{soundNameOrNull}\" for \"{forAsset.DataName}\"");
     }
 
@@ -423,7 +423,9 @@ partial class ProjectContext
             return null;
         }
 
-        return Data.AnimationCurves.ByName(animCurveNameOrNull) ??
+        // TODO: All of these TryByName calls can be cleaned up with the new throwing ByName, but that will lose the `forAsset.DataName`.
+        // Either remove this comment and keep or replace these with ByName without ??
+        return Data.AnimationCurves.TryByName(animCurveNameOrNull) ??
             throw new ProjectException($"Failed to find animation curve \"{animCurveNameOrNull}\" for \"{forAsset.DataName}\"");
     }
 

@@ -19,10 +19,9 @@ if (!name.StartsWith("undertale") && name != "nxtale") {
     return;
 }
 
-var selector = Data.GameObjects.ByName("obj_battlegroup_input");
-
-if(selector == null) {
-    selector = new UndertaleGameObject() { Name = Data.Strings.MakeString("obj_battlegroup_input") };
+UndertaleGameObject selector = Data.GameObjects.TryByName("obj_battlegroup_input");
+if (selector is null) {
+    selector = new() { Name = Data.Strings.MakeString("obj_battlegroup_input") };
     Data.GameObjects.Add(selector);
 }
 

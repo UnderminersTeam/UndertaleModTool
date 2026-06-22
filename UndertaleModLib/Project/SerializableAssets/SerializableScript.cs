@@ -54,7 +54,7 @@ internal sealed class SerializableScript : ISerializableProjectAsset
     /// <inheritdoc/>
     public void PreImport(ProjectContext projectContext)
     {
-        if (projectContext.Data.Scripts.ByName(DataName) is UndertaleScript existing)
+        if (projectContext.Data.Scripts.TryByName(DataName) is UndertaleScript existing)
         {
             // Script found
             _dataAsset = existing;

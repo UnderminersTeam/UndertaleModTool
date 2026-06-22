@@ -141,7 +141,7 @@ internal sealed class SerializableBackground : ISerializableTextureProjectAsset
     /// <inheritdoc/>
     public void PreImport(ProjectContext projectContext)
     {
-        if (projectContext.Data.Backgrounds.ByName(DataName) is UndertaleBackground existing)
+        if (projectContext.Data.Backgrounds.TryByName(DataName) is UndertaleBackground existing)
         {
             // Background found
             _dataAsset = existing;

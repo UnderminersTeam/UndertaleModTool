@@ -19,7 +19,7 @@ UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
     MainThreadAction = MainThreadAction
 };
 
-bool isXbox = Data.Rooms.ByName("room_xbox_engagement") is not null;
+bool isXbox = Data.Rooms.TryByName("room_xbox_engagement") is not null;
 
 if (isXbox)
 {

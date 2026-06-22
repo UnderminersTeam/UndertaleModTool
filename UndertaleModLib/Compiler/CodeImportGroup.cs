@@ -188,7 +188,7 @@ public sealed class CodeImportGroup
             return false;
         }
         ReadOnlySpan<char> otherObjectName = codeEntryName.AsSpan(collisionSeparatorIndex + EventCollisionSeparator.Length);
-        int otherObjectIndex = Data.GameObjects.IndexOfName(otherObjectName);
+        int otherObjectIndex = Data.GameObjects.TryIndexByName(otherObjectName);
         if (otherObjectIndex < 0)
         {
             return false;
@@ -205,7 +205,7 @@ public sealed class CodeImportGroup
     private UndertaleCode FindOrCreateCodeEntry(string codeEntryName)
     {
         // Try to find existing
-        if (Data.Code.ByName(codeEntryName) is UndertaleCode existing)
+        if (Data.Code.TryByName(codeEntryName) is UndertaleCode existing)
         {
             if (existing.ParentEntry is not null)
             {
@@ -239,7 +239,12 @@ public sealed class CodeImportGroup
             MainThreadAction(() =>
             {
                 ReadOnlySpan<char> scriptName = codeEntryName.AsSpan(EventScriptPrefix.Length);
-                if (Data.Scripts.ByName(scriptName) is not UndertaleScript existingScript)
+                if (Data.Scripts.TryByName(scriptName) is UndertaleScript existingScript)
+                {
+                    // Attach to existing script asset (in case of corruption)
+                    existingScript.Code = newEntry;
+                }
+                else
                 {
                     // Create script, as one doesn't already exist
                     Data.Scripts.Add(new()
@@ -247,11 +252,6 @@ public sealed class CodeImportGroup
                         Name = Data.Strings.MakeString(scriptName.ToString()),
                         Code = newEntry
                     });
-                }
-                else
-                {
-                    // Attach to existing script asset (in case of corruption)
-                    existingScript.Code = newEntry;
                 }
             });
         }
@@ -293,7 +293,7 @@ public sealed class CodeImportGroup
             if (containsCollisionSeparator && TryParseCollisionEvent(codeEntryName, collisionSeparatorIndex, out ReadOnlySpan<char> collisionObjectName, out uint collisionSubtype))
             {
                 // Create new object if necessary.
-                UndertaleGameObject collisionObj = Data.GameObjects.ByName(collisionObjectName);
+                UndertaleGameObject collisionObj = Data.GameObjects.TryByName(collisionObjectName);
                 if (collisionObj is null)
                 {
                     string collisionObjectNameStr = collisionObjectName.ToString();
@@ -355,7 +355,7 @@ public sealed class CodeImportGroup
 
             // Create new object if necessary.
             ReadOnlySpan<char> objectName = codeEntryName.AsSpan(new Range(EventObjectPrefix.Length, secondLastUnderscore));
-            UndertaleGameObject obj = Data.GameObjects.ByName(objectName);
+            UndertaleGameObject obj = Data.GameObjects.TryByName(objectName);
             if (obj is null)
             {
                 string objectNameStr = objectName.ToString();

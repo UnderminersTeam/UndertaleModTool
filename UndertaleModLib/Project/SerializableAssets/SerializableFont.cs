@@ -200,7 +200,7 @@ internal sealed class SerializableFont : ISerializableTextureProjectAsset
     /// <inheritdoc/>
     public void PreImport(ProjectContext projectContext)
     {
-        if (projectContext.Data.Fonts.ByName(DataName) is UndertaleFont existing)
+        if (projectContext.Data.Fonts.TryByName(DataName) is UndertaleFont existing)
         {
             // Font found
             _dataAsset = existing;

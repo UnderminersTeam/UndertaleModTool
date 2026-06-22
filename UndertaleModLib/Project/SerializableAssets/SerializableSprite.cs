@@ -294,7 +294,7 @@ internal sealed class SerializableSprite : ISerializableTextureProjectAsset
     /// <inheritdoc/>
     public void PreImport(ProjectContext projectContext)
     {
-        if (projectContext.Data.Sprites.ByName(DataName) is UndertaleSprite existing)
+        if (projectContext.Data.Sprites.TryByName(DataName) is UndertaleSprite existing)
         {
             // Sprite found
             _dataAsset = existing;

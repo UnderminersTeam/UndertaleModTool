@@ -5,7 +5,7 @@
 
 EnsureDataLoaded();
 
-var obj = Data.GameObjects.ByName("obj_roomselector");
+var obj = Data.GameObjects.TryByName("obj_roomselector");
 if (obj is null) 
 {
     obj = new UndertaleGameObject() { Name = Data.Strings.MakeString("obj_roomselector"), Persistent = true };

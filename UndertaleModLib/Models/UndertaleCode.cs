@@ -1229,7 +1229,7 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
             return null;
         }
         string variableName = data.Strings[stringId].Content;
-        return data.Variables.ByName(variableName) ?? new UndertaleVariable() { Name = new UndertaleString(variableName) };
+        return data.Variables.TryByName(variableName) ?? new UndertaleVariable() { Name = new UndertaleString(variableName) };
     }
 
     IGMFunction IGMInstruction.TryFindFunction(IGameContext context)
@@ -1261,7 +1261,7 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
             return null;
         }
         string functionName = data.Strings[stringId].Content;
-        return data.Functions.ByName(functionName) ?? new UndertaleFunction() { Name = new UndertaleString(functionName) };
+        return data.Functions.TryByName(functionName) ?? new UndertaleFunction() { Name = new UndertaleString(functionName) };
     }
     
     /// <summary>

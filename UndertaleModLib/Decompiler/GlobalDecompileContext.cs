@@ -141,7 +141,7 @@ public class GlobalDecompileContext : IGameContext
         {
             if (script?.Name?.Content is string name && !name.StartsWith(subFunctionPrefix, StringComparison.Ordinal) &&
                 !data.GlobalFunctions.FunctionNameExists(name) &&
-                data.Functions.ByName(name) is UndertaleFunction function)
+                data.Functions.TryByName(name) is UndertaleFunction function)
             {
                 // Regular script asset (pre and post 2.3)
                 data.GlobalFunctions.DefineFunction(name, function);
@@ -151,7 +151,7 @@ public class GlobalDecompileContext : IGameContext
                 // If code name starts with "gml_Script_", and there's no parent code entry,
                 // then this is probably a GML-defined extension function.
                 if (code.Name?.Content is string codeName && codeName.StartsWith(subFunctionPrefix, StringComparison.Ordinal) &&
-                    data.Functions.ByName(codeName) is UndertaleFunction extFunction)
+                    data.Functions.TryByName(codeName) is UndertaleFunction extFunction)
                 {
                     data.GlobalFunctions.DefineFunction(codeName[subFunctionPrefix.Length..], extFunction);
                 }
@@ -172,7 +172,7 @@ public class GlobalDecompileContext : IGameContext
                     foreach (UndertaleExtensionFunction extensionFunc in extensionFile.Functions)
                     {
                         string functionName = extensionFunc.Name.Content;
-                        if (data.Functions.ByName(functionName) is UndertaleFunction foundFunction)
+                        if (data.Functions.TryByName(functionName) is UndertaleFunction foundFunction)
                         {
                             data.GlobalFunctions.DefineFunction(functionName, foundFunction);
                         }

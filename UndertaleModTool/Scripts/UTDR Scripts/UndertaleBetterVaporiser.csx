@@ -152,13 +152,6 @@ else // Undertale Switch/Probs other consoles (GMS2)
 //
 
 var obj_whtpxlgrav = Data.GameObjects.ByName("obj_whtpxlgrav");
-
-if (obj_whtpxlgrav == null)
-{
-    ScriptError("This script only works with Undertale!", "Not Undertale");
-    return;
-}
-
 importGroup.QueueReplace(obj_whtpxlgrav.EventHandlerFor(EventType.Create, Data), @"
 image_speed = 0
 delay = 0

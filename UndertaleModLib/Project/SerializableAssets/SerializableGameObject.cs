@@ -215,7 +215,7 @@ internal sealed class SerializableGameObject : ISerializableProjectAsset
     /// <inheritdoc/>
     public void PreImport(ProjectContext projectContext)
     {
-        if (projectContext.Data.GameObjects.ByName(DataName) is UndertaleGameObject existing)
+        if (projectContext.Data.GameObjects.TryByName(DataName) is UndertaleGameObject existing)
         {
             // Object found
             _dataAsset = existing;

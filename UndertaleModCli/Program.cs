@@ -821,14 +821,6 @@ public partial class Program : IScriptInterface
     private void DumpCodeEntry(string codeEntry)
     {
         UndertaleCode code = Data.Code.ByName(codeEntry);
-
-
-        if (code == null)
-        {
-            Console.Error.WriteLine($"Data file does not contain a code entry named {codeEntry}!");
-            return;
-        }
-
         string directory = Path.Join(Output.FullName, "CodeEntries");
 
         Directory.CreateDirectory(directory);
@@ -1021,7 +1013,7 @@ public partial class Program : IScriptInterface
                     if (Data.IsVersionAtLeast(2, 3))
                     {
                         // GameMaker 2.3+ uses the object name for the collision subtype
-                        int objectIndex = Data.GameObjects.IndexOfName(collisionSubtype);
+                        int objectIndex = Data.GameObjects.TryIndexByName(collisionSubtype);
                         if (objectIndex >= 0)
                         {
                             // Object already exists; use its ID as a subtype
@@ -1078,7 +1070,7 @@ public partial class Program : IScriptInterface
             if (manualLink)
             {
                 // Create new object if necessary
-                UndertaleGameObject obj = Data.GameObjects.ByName(objectName);
+                UndertaleGameObject obj = Data.GameObjects.TryByName(objectName);
                 if (obj is null)
                 {
                     obj = new()
@@ -1122,16 +1114,8 @@ public partial class Program : IScriptInterface
     private void ReplaceTextureWithFile(string textureEntry, FileInfo fileToReplace)
     {
         UndertaleEmbeddedTexture texture = Data.EmbeddedTextures.ByName(textureEntry);
-
-        if (texture == null)
-        {
-            Console.Error.WriteLine($"Data file does not contain an embedded texture named {textureEntry}!");
-            return;
-        }
-
         if (Verbose)
             Console.WriteLine("Replacing " + textureEntry);
-
         texture.TextureData.Image = GMImage.FromPng(File.ReadAllBytes(fileToReplace.FullName));
     }
 

@@ -484,9 +484,9 @@ public partial class Program : IScriptInterface
         GlobalDecompileContext decompileContext = context is null ? new(Data) : context;
         try
         {
-            return code != null
-                ? new DecompileContext(decompileContext, code, settings ?? Data.ToolInfo.DecompilerSettings).DecompileToString()
-                : "";
+            settings ??= Data.ToolInfo.DecompilerSettings;
+            DecompileContext ctx = new DecompileContext(decompileContext, code, settings);
+            return ctx.DecompileToString();
         }
         catch (Exception e)
         {
@@ -495,10 +495,7 @@ public partial class Program : IScriptInterface
     }
 
     /// <inheritdoc/>
-    public string GetDisassemblyText(string codeName)
-    {
-        return GetDisassemblyText(Data.Code.ByName(codeName));
-    }
+    public string GetDisassemblyText(string codeName) => GetDisassemblyText(Data.Code.ByName(codeName));
 
     /// <inheritdoc/>
     public string GetDisassemblyText(UndertaleCode code)
@@ -508,7 +505,7 @@ public partial class Program : IScriptInterface
 
         try
         {
-            return code != null ? code.Disassemble(Data.Variables, Data.CodeLocals?.For(code), Data.CodeLocals is null) : "";
+            return code.Disassemble(Data.Variables, Data.CodeLocals?.For(code), Data.CodeLocals is null);
         }
         catch (Exception e)
         {

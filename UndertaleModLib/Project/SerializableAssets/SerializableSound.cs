@@ -160,7 +160,7 @@ internal sealed class SerializableSound : ISerializableProjectAsset
     /// <inheritdoc/>
     public void PreImport(ProjectContext projectContext)
     {
-        if (projectContext.Data.Sounds.ByName(DataName) is UndertaleSound existing)
+        if (projectContext.Data.Sounds.TryByName(DataName) is UndertaleSound existing)
         {
             // Sound found
             _dataAsset = existing;

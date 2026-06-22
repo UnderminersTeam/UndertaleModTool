@@ -121,7 +121,7 @@ internal sealed class SerializableShader : ISerializableProjectAsset
     /// <inheritdoc/>
     public void PreImport(ProjectContext projectContext)
     {
-        if (projectContext.Data.Shaders.ByName(DataName) is UndertaleShader existing)
+        if (projectContext.Data.Shaders.TryByName(DataName) is UndertaleShader existing)
         {
             // Shader found
             _dataAsset = existing;
