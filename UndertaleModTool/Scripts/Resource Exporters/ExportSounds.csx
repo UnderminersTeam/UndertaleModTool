@@ -4,22 +4,39 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using UndertaleModLib.Util;
+using UndertaleModLib.Scripting;
 
 EnsureDataLoaded();
 
-string exportedSoundsDir = PromptChooseDirectory();
-if (exportedSoundsDir is null)
+var builder = CreateScriptOptionsBuilder()
+    .AddDirectory("folder", "Output Folder:")
+    .AddText("patterns", "Names (one per line, leave empty for all):", multiline: true)
+    .AddRadio("filterMode", "Filter mode:", "Exact", "Regex", "Wildcard")
+    .AddBool("caseSensitive", "Case-sensitive", defaultValue: true)
+    .AddBool("external", "Export external audio files as well? (Will copy to a separate folder.)");
+
+if ((Data.AudioGroups?.Count ?? 0) > 0)
+    builder.AddBool("grouped", "Group sounds by audio group");
+
+var result = ShowScriptOptionsDialog("Export Sounds", builder);
+if (result is null) return;
+
+string exportedSoundsDir = result["folder"] as string;
+
+if (!Directory.Exists(exportedSoundsDir))
 {
+    ScriptError("The specified output folder does not exist.");
     return;
 }
 
-// Prompt for export settings.
-bool copyExternalAudio = ScriptQuestion("Export external audio files as well? (Will copy to a separate folder.)");
-bool groupedExport = false;
-if ((Data.AudioGroups?.Count ?? 0) > 0)
-{
-    groupedExport = ScriptQuestion("Group sounds by audio group?");
-}
+string rawPatterns = result["patterns"] as string;
+bool exportAll = string.IsNullOrWhiteSpace(rawPatterns);
+string[] patterns = rawPatterns.Split("\n", StringSplitOptions.RemoveEmptyEntries);
+NameFilterMode filterMode = Enum.Parse<NameFilterMode>(result["filterMode"] as string);
+bool caseSensitive = result["caseSensitive"] as bool? == true;
+
+bool copyExternalAudio = result["external"] as bool? == true;
+bool groupedExport = (Data.AudioGroups?.Count ?? 0) > 0 && result["grouped"] as bool? == true;
 
 byte[] EMPTY_WAV_FILE_BYTES = System.Convert.FromBase64String("UklGRiQAAABXQVZFZm10IBAAAAABAAIAQB8AAAB9AAAEABAAZGF0YQAAAAA=");
 string DEFAULT_AUDIOGROUP_NAME = "audiogroup_default";
@@ -28,7 +45,7 @@ int maxCount = Data.Sounds.Count;
 SetProgressBar(null, "Sounds", 0, maxCount);
 StartProgressBarUpdater();
 
-await Task.Run(DumpSounds); // This runs synchronously, because it has to load audio groups.
+await Task.Run(DumpSounds);
 
 await StopProgressBarUpdater();
 HideProgressBar();
@@ -46,14 +63,12 @@ IList<UndertaleEmbeddedAudio> GetAudioGroupData(UndertaleSound sound)
 {
     loadedAudioGroups ??= new();
 
-    // Try getting cached audio group by name.
     string audioGroupName = sound.AudioGroup is not null ? sound.AudioGroup.Name.Content : DEFAULT_AUDIOGROUP_NAME;
     if (loadedAudioGroups.ContainsKey(audioGroupName))
     {
         return loadedAudioGroups[audioGroupName];
     }
 
-    // Not cached, so try locating audiogroup file.
     string relativeAudioGroupPath;
     if (sound.AudioGroup is UndertaleAudioGroup { Path.Content: string customRelativePath })
     {
@@ -66,11 +81,9 @@ IList<UndertaleEmbeddedAudio> GetAudioGroupData(UndertaleSound sound)
     string groupFilePath = Paths.JoinVerifyWithinDirectory(Path.GetDirectoryName(FilePath), relativeAudioGroupPath);
     if (!File.Exists(groupFilePath))
     {
-        // Doesn't exist... don't try loading.
         return null;
     }
 
-    // Load data file.
     try
     {
         UndertaleData data = null;
@@ -91,13 +104,11 @@ IList<UndertaleEmbeddedAudio> GetAudioGroupData(UndertaleSound sound)
 
 byte[] GetSoundData(UndertaleSound sound)
 {
-    // Try to get audio directly, if embedded in main file.
     if (sound.AudioFile is not null)
     {
         return sound.AudioFile.Data;
     }
 
-    // Try to get audio from its audiogroup.
     if (sound.GroupID > Data.GetBuiltinSoundGroupID())
     {
         IList<UndertaleEmbeddedAudio> audioGroup = GetAudioGroupData(sound);
@@ -107,7 +118,6 @@ byte[] GetSoundData(UndertaleSound sound)
         }
     }
 
-    // All attempts to get data failed; just use empty WAV data.
     return EMPTY_WAV_FILE_BYTES;
 }
 
@@ -128,7 +138,20 @@ void DumpSounds()
 
 void DumpSound(UndertaleSound sound)
 {
-    // Determine output audio file path.
+    if (!exportAll)
+    {
+        bool match = false;
+        foreach (string pattern in patterns)
+        {
+            if (NameFilter.IsMatch(sound.Name.Content, pattern, filterMode, caseSensitive))
+            {
+                match = true;
+                break;
+            }
+        }
+        if (!match) { IncProgressLocal(); return; }
+    }
+
     string soundName = sound.Name.Content;
     string soundFilePath;
     if (groupedExport)
@@ -141,39 +164,32 @@ void DumpSound(UndertaleSound sound)
         soundFilePath = Paths.JoinVerifyWithinDirectory(exportedSoundsDir, soundName);
     }
 
-    // Determine output file type.
     bool flagCompressed = sound.Flags.HasFlag(UndertaleSound.AudioEntryFlags.IsCompressed);
     bool flagEmbedded = sound.Flags.HasFlag(UndertaleSound.AudioEntryFlags.IsEmbedded);
     string audioExt = ".ogg";
     bool isEmbedded = true;
     if (flagEmbedded && !flagCompressed)
     {
-        // IsEmbedded, Regular: WAV, embedded.
         audioExt = ".wav";
     }
     else if (flagCompressed && !flagEmbedded)
     {
-        // IsCompressed, Regular: OGG, embedded.
         audioExt = ".ogg";
     }
     else if (flagCompressed && flagEmbedded)
     {
-        // IsEmbedded, IsCompressed, Regular: OGG, embedded.
         audioExt = ".ogg";
     }
     else if (!flagCompressed && !flagEmbedded)
     {
-        // Regular: OGG, external.
         isEmbedded = false;
         audioExt = ".ogg";
 
-        // Only copy external audio if enabled.
         if (copyExternalAudio)
         {
             string externalFilename = sound.File.Content;
             if (!externalFilename.Contains('.'))
             {
-                // Add file extension if none already exists (assume OGG).
                 externalFilename += ".ogg";
             }
             string sourcePath = Paths.JoinVerifyWithinDirectory(Path.GetDirectoryName(FilePath), externalFilename);
@@ -198,4 +214,3 @@ void DumpSound(UndertaleSound sound)
 
     IncProgressLocal();
 }
-

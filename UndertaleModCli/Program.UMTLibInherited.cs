@@ -836,6 +836,52 @@ public partial class Program : IScriptInterface
             return "Invalid";
     }
 
+    public Dictionary<string, object> ShowScriptOptionsDialog(string title, ScriptOptionsBuilder builder)
+    {
+        Dictionary<string, object> results = new();
+
+        Console.WriteLine("----------------------OPTIONS---------------------");
+        Console.WriteLine(title);
+        Console.WriteLine("--------------------------------------------------");
+
+        foreach (ScriptOption option in builder.Options)
+        {
+            results[option.Id] = option.Type switch
+            {
+                ScriptOptionType.Bool => ScriptQuestion(option.Label),
+                ScriptOptionType.Text => SimpleTextInput(option.Label, "", option.DefaultValue as string ?? "", option.IsMultiline),
+                ScriptOptionType.Radio => PromptRadioOption(option),
+                ScriptOptionType.Directory => PromptChooseDirectory(),
+                _ => null
+            };
+        }
+
+        return results;
+    }
+
+    private static object PromptRadioOption(ScriptOption option)
+    {
+        Console.WriteLine(option.Label);
+        string[] choices = option.Choices;
+        string defaultChoice = option.DefaultValue as string;
+
+        for (int i = 0; i < choices.Length; i++)
+        {
+            Console.WriteLine($"  [{i + 1}] {choices[i]}");
+        }
+
+        Console.Write($"Choose [1-{choices.Length}] (Default: {defaultChoice}): ");
+
+        string input = Console.ReadLine();
+        if (string.IsNullOrWhiteSpace(input))
+            return defaultChoice;
+
+        if (int.TryParse(input, out int idx) && idx >= 1 && idx <= choices.Length)
+            return choices[idx - 1];
+
+        return defaultChoice;
+    }
+
     #endregion
 
 }

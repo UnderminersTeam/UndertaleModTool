@@ -9,25 +9,26 @@ These are scripts designed to extract/dump assets from a game, whether for analy
 
 Most of these scripts will prompt you to select a folder/directory to export files, *directly*, to. Take care not to overwrite data on accident.
 
-- `ExportAllAssembly.csx`: Exports GML assembly.
-- `ExportAllCode.csx`: Exports decompiled GML code.
+Many scripts support filtering by name, using exact match, wildcard, or regular expression. When using multiple names, put each name on a new line. Leaving the field empty will export all assets of that type.
+Filter modes:
+- Exact: Only exports assets with names that exactly match the input.
+- Wildcard: `*` - any number of any characters, `?` - any single character.
+> Example: `*_battle` will export all assets with names ending in `_battle`, and `*kris*` will export all assets with "kris" anywhere in the name.
+- Regex: Regular expressions.
+
+- `ExportCode.csx`: Exports decompiled GML code or GML assembly. Supports exporting all code or filtering by name. Also handles object event code.
 - `ExportAllEmbeddedTextures.csx`: Exports all texture pages as PNG files.
-- `ExportAllFonts.csx`: Exports PNGs and glyph information of all fonts.
-- `ExportAllMasks.csx`: Exports sprite collision masks as black-and-white PNGs.
-- `ExportAllRoomsToPNG.csx`: Exports previews of all rooms as PNG files.
+- `ExportAllStrings.csx`: Exports all strings to a text file or JSON. Optionally skips strings with newlines (which cannot be reimported).
+- `ExportAllTextures.csx`: Exports PNGs of texture page items referenced by sprites, fonts, and backgrounds (tilesets). Selectively choose which categories to export.
+- `ExportFonts.csx`: Exports PNGs and glyph CSV data of fonts. Supports name filtering.
+- `ExportMasks.csx`: Exports sprite collision masks as black-and-white PNGs. Supports name filtering.
+- `ExportRoomsToPNG.csx`: Exports previews of rooms as PNG files. Supports name filtering, room grid, and memory economy mode.
 	* (Note: This is currently only supported on the Windows GUI.)
-- `ExportAllShaders.csx`: Exports shader metadata, source code, and compiled (binary) code.
-- `ExportAllSounds.csx`: Exports sounds as WAV/OGG files.
-- `ExportAllSprites.csx`: Exports sprites as PNG files. Optionally includes padding, which is when a sprite frame doesn't use its full extents.
-- `ExportAllTextures.csx`: Exports PNGs of all texture page items referenced by sprites, fonts, and backgrounds (tilesets).
-- `ExportAllTexturesGrouped.csx`: Same as the above script, except this one creates sub-directories for each asset.
-- `ExportAllTilesets.csx`: Exports tilesets (or backgrounds) as PNG files.
-- `ExportAllStrings.csx`: Exports all strings to a text file. Optionally includes strings with newlines (which cannot be reimported).
-- `ExportAllStringsJSON.csx`: Exports all strings to a JSON text file. Always includes strings with newlines.
-- `ExportSpecificCode.csx`: Exports specific code entries, given the names of objects, scripts, or code entries directly.
-- `ExportSpecificSprites.csx`: Exports specific sprites, given their names. Optionally includes padding.
-- `ExportSpritesAsGIF.csx`: Exports sprites to animated GIF files. Will always preserve padding.
+- `ExportShaders.csx`: Exports shader metadata, source code, and compiled (binary) code. Supports name filtering.
+- `ExportSounds.csx`: Exports sounds as WAV/OGG files. Supports name filtering, external audio copying, and grouping by audio group.
+- `ExportSprites.csx`: Exports sprites as PNG or animated GIF files. Supports name filtering, padding, and subdirectory grouping.
 - `ExportTextureGroups.csx`: Exports PNGs of all texture page items referenced by sprites, fonts, and tilesets. Grouped into directories by texture groups, and exports full texture pages as well. Optionally includes padding.
+- `ExportTilesets.csx`: Exports tilesets (or backgrounds) as PNG files. Supports name filtering.
 
 ## Resource Importers
 
