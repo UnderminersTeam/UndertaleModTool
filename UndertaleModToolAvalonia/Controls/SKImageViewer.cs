@@ -232,6 +232,7 @@ public class SKImageViewer : Control
 
                 SKImage image = SKImage.FromPixelCopy(new SKImageInfo(maskEntry.Width, maskEntry.Height, SKColorType.Gray8), pixels);
                 canvas.DrawImage(image, 0, 0);
+                image.Dispose();
             }
         }
     }

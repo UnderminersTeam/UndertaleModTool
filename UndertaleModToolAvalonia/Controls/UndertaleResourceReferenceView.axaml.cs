@@ -6,6 +6,7 @@ using Avalonia.Input;
 using Avalonia.LogicalTree;
 using Avalonia.VisualTree;
 using Avalonia.Xaml.Interactions.DragAndDrop;
+using Microsoft.Extensions.DependencyInjection;
 using UndertaleModLib;
 
 namespace UndertaleModToolAvalonia;
@@ -45,6 +46,8 @@ public partial class UndertaleResourceReferenceView : UserControl
         get { return GetValue(AddFuncArgumentProperty); }
         set { SetValue(AddFuncArgumentProperty, value); }
     }
+
+    readonly MainViewModel mainVM = App.Services.GetRequiredService<MainViewModel>();
 
     public UndertaleResourceReferenceView()
     {
@@ -87,14 +90,12 @@ public partial class UndertaleResourceReferenceView : UserControl
 
     public void Open()
     {
-        MainViewModel mainView = (this.FindLogicalAncestorOfType<MainView>()!.DataContext as MainViewModel)!;
-        mainView.TabOpen(Reference);
+        mainVM.TabOpen(Reference);
     }
 
     public void OpenInNewTab()
     {
-        MainViewModel mainView = (this.FindLogicalAncestorOfType<MainView>()!.DataContext as MainViewModel)!;
-        mainView.TabOpen(Reference, inNewTab: true);
+        mainVM.TabOpen(Reference, inNewTab: true);
     }
 
     public void Remove()

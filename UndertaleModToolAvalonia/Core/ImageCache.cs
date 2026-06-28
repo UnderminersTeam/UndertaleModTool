@@ -31,8 +31,6 @@ public class ImageCache
         byte[] data = gmImage.ConvertToRawBgra().GetData();
         GCHandle gcHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
 
-        SKBitmap bitmap = new();
-
         SKImageInfo info = new(gmImage.Width, gmImage.Height, SKColorType.Bgra8888, SKAlphaType.Unpremul);
         SKPixmap pixmap = new(info, gcHandle.AddrOfPinnedObject(), info.RowBytes);
         SKImage? image = SKImage.FromPixels(pixmap, delegate
