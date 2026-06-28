@@ -335,21 +335,24 @@ public class UndertaleRoomEditor : Control
 
     void ItemMoveOnMoved(List<RoomItem> roomItems)
     {
-        RoomItem? roomItem = GetSelectedRoomItem(roomItems);
-        if (roomItem is not null && roomItem.Selectable is not null)
+        if (!vm!.IsLocked)
         {
-            double x = pointerPositionInRoom.X - itemMoveOffset.X;
-            double y = pointerPositionInRoom.Y - itemMoveOffset.Y;
-
-            if (vm!.IsGridEnabled)
+            RoomItem? roomItem = GetSelectedRoomItem(roomItems);
+            if (roomItem is not null && roomItem.Selectable is not null)
             {
-                x = (Math.Floor(pointerPositionInRoom.X / vm.GridWidth) * vm.GridWidth)
-                    - (Math.Floor(itemMoveOffset.X / vm.GridWidth) * vm.GridWidth);
-                y = (Math.Floor(pointerPositionInRoom.Y / vm.GridHeight) * vm.GridHeight)
-                    - (Math.Floor(itemMoveOffset.Y / vm.GridHeight) * vm.GridHeight);
-            }
+                double x = pointerPositionInRoom.X - itemMoveOffset.X;
+                double y = pointerPositionInRoom.Y - itemMoveOffset.Y;
 
-            roomItem.Selectable.SetProperties(new((int)x, (int)y));
+                if (vm!.IsGridEnabled)
+                {
+                    x = (Math.Floor(pointerPositionInRoom.X / vm.GridWidth) * vm.GridWidth)
+                        - (Math.Floor(itemMoveOffset.X / vm.GridWidth) * vm.GridWidth);
+                    y = (Math.Floor(pointerPositionInRoom.Y / vm.GridHeight) * vm.GridHeight)
+                        - (Math.Floor(itemMoveOffset.Y / vm.GridHeight) * vm.GridHeight);
+                }
+
+                roomItem.Selectable.SetProperties(new((int)x, (int)y));
+            }
         }
     }
 
@@ -409,10 +412,13 @@ public class UndertaleRoomEditor : Control
 
     void SetLayerTileAtPointer(UndertaleRoom.Layer tilesLayer, uint tileData)
     {
-        if (GetLayerTileIndexesAtPointer(tilesLayer, out (int x, int y) point))
+        if (!vm!.IsLocked)
         {
-            if ((tileData & UndertaleRoomViewModel.TILE_ID) < tilesLayer.TilesData.Background.GMS2TileCount)
-                tilesLayer.TilesData.TileData[point.y][point.x] = tileData;
+            if (GetLayerTileIndexesAtPointer(tilesLayer, out (int x, int y) point))
+            {
+                if ((tileData & UndertaleRoomViewModel.TILE_ID) < tilesLayer.TilesData.Background.GMS2TileCount)
+                    tilesLayer.TilesData.TileData[point.y][point.x] = tileData;
+            }
         }
     }
 

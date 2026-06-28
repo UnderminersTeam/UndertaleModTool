@@ -40,6 +40,9 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
     private string _StatusText = "";
 
     [Notify]
+    private bool _IsLocked = false;
+
+    [Notify]
     private bool _IsSelectAnyLayerEnabled = false;
 
     [Notify]
