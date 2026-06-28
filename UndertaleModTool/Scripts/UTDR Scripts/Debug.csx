@@ -132,6 +132,21 @@ else if (displayName.ToUpper().Contains("DELTARUNE"))
                 importGroup.QueueFindReplace(initializerCode, "global.debug = ", "global.debug = 1; //");
             }
         }
+        else if (enable && displayName == "DELTARUNE Chapter 5")
+        {
+            // Chapter 5 references rooms that don't exist which causes crashes in debug mode
+            if (Data.Code.ByName("gml_GlobalScript_scr_save") is UndertaleCode saveCode)
+            {
+                importGroup.QueueFindReplace(saveCode, "room == rm_blank", "room == room_empty");
+            }
+
+            if (Data.Code.ByName("gml_GlobalScript_scr_get_room_by_id") is UndertaleCode roomByIdCode)
+            {
+                importGroup.QueueFindReplace(roomByIdCode, "scr_room(rm_blank, 50094)", "scr_room(room_empty, 50094)");
+            }
+
+            importGroup.QueueFindReplace(initializerCode, "global.debug = ", "global.debug = 1; //");
+        }
         else
         {
             importGroup.QueueFindReplace(initializerCode, "global.debug = ", $"global.debug = {(enable ? "1" : "0")}; //");
