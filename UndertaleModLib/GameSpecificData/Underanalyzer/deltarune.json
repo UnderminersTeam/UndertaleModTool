@@ -1067,7 +1067,19 @@
       "gml_Script_sunkus_kb_check_released": [ "Constant.VirtualKey" ],
       "gml_Script_sunkus_kb_check_direct": [ "Constant.VirtualKey" ],
       "gml_Script_sunkus_kb_clear": [ "Constant.VirtualKey" ],
-      "gml_Script_sunkus_kb_check_pressed_with_repeat": [ "Constant.VirtualKey" ]
+      "gml_Script_sunkus_kb_check_pressed_with_repeat": [ "Constant.VirtualKey" ],
+      "scr_84_add_menu_item": [
+        null,
+        {
+          "MacroType": "Union",
+          "Macros": [
+            { "MacroType": "Match", "ConditionalValue": "[room]", "ConditionalType": "String" },
+            { "MacroType": "Match", "ConditionalValue": "[roomdark]", "ConditionalType": "String" }
+          ]
+        },
+        "Asset.Room",
+        null
+      ]
     },
     "FunctionReturn": {
       "scr_getbuttonsprite": {
