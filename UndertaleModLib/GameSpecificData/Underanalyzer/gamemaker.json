@@ -126,7 +126,9 @@
         "mb_none": 0,
         "mb_left": 1,
         "mb_right": 2,
-        "mb_middle": 3
+        "mb_middle": 3,
+        "mb_side1": 4,
+        "mb_side2": 5
       },
       "Constant.GamepadButton": {
         "gp_face1": 32769,

@@ -3420,6 +3420,12 @@ public class BuiltinList : IBuiltins
         Constants["mb_left"] = 1.0;
         Constants["mb_right"] = 2.0;
         Constants["mb_middle"] = 3.0;
+        if (gms2_3)
+        {
+            // Note: These two constants were actually added in 2.3.3, but version detection is not reliable for that.
+            Constants["mb_side1"] = 4.0;
+            Constants["mb_side2"] = 5.0;
+        }
         Constants["vk_nokey"] = 0.0;
         Constants["vk_anykey"] = 1.0;
         Constants["vk_enter"] = 13.0;
