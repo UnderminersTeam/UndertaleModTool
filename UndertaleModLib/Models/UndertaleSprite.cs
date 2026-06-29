@@ -428,7 +428,7 @@ public class UndertaleSprite : UndertaleNamedResource, IProjectAsset, PrePaddedO
                     byte[] encodedJson = EncodeSpineBlob(Encoding.UTF8.GetBytes(SpineJSON));
                     byte[] encodedAtlas = EncodeSpineBlob(Encoding.UTF8.GetBytes(SpineAtlas));
 
-                    if (writer.undertaleData.IsVersionAtLeast(2023, 1))
+                    if (writer.undertaleData.IsNonLTSVersionAtLeast(2023, 1))
                         writer.WriteUndertaleObject(Textures);
 
                     // the header.
@@ -655,7 +655,7 @@ public class UndertaleSprite : UndertaleNamedResource, IProjectAsset, PrePaddedO
                 {
                     reader.Align(4);
 
-                    if (reader.undertaleData.IsVersionAtLeast(2023, 1))
+                    if (reader.undertaleData.IsNonLTSVersionAtLeast(2023, 1))
                     {
                         Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
                         SpineHasTextureData = false;
@@ -842,7 +842,7 @@ public class UndertaleSprite : UndertaleNamedResource, IProjectAsset, PrePaddedO
                 {
                     reader.Align(4);
 
-                    if (reader.undertaleData.IsVersionAtLeast(2023, 1))
+                    if (reader.undertaleData.IsNonLTSVersionAtLeast(2023, 1))
                         count += 1 + UndertaleSimpleList<TextureEntry>.UnserializeChildObjectCount(reader);
 
                     int spineVersion = reader.ReadInt32();
@@ -1111,7 +1111,7 @@ public class UndertaleSpineTextureEntry : UndertaleObject, IDisposable
     {
         writer.Write(PageWidth);
         writer.Write(PageHeight);
-        if (writer.undertaleData.IsVersionAtLeast(2023, 1))
+        if (writer.undertaleData.IsNonLTSVersionAtLeast(2023, 1))
         {
             writer.Write(TextureEntryLength);
         }
@@ -1127,7 +1127,7 @@ public class UndertaleSpineTextureEntry : UndertaleObject, IDisposable
     {
         PageWidth = reader.ReadInt32();
         PageHeight = reader.ReadInt32();
-        if (reader.undertaleData.IsVersionAtLeast(2023, 1))
+        if (reader.undertaleData.IsNonLTSVersionAtLeast(2023, 1))
             TextureEntryLength = reader.ReadInt32();
         else
             TexBlob = reader.ReadBytes(reader.ReadInt32());
@@ -1137,7 +1137,7 @@ public class UndertaleSpineTextureEntry : UndertaleObject, IDisposable
     public static uint UnserializeChildObjectCount(UndertaleReader reader)
     {
         reader.Position += 8;                        // Size
-        if (reader.undertaleData.IsVersionAtLeast(2023, 1))
+        if (reader.undertaleData.IsNonLTSVersionAtLeast(2023, 1))
         {
             reader.Position += 4; // "TextureEntryLength"
         }
