@@ -2,6 +2,7 @@
         xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
     <Color name="Comment" foreground="#5B995B" />
     <Color name="String" foreground="Yellow" />
+    <Color name="TemplateStringField" foreground="#C0C0C0" />
     <Color name="Identifier" foreground="#B2B1FF" />
     <Color name="AltIdentifier" foreground="#FFF899" />
     <Color name="Function" foreground="#B2B1FF" />
@@ -27,6 +28,17 @@
             <RuleSet>
                 <!-- nested span for escape sequences -->
                 <Span begin="\\" end="." />
+            </RuleSet>
+        </Span>
+
+        <Span color="String">
+            <Begin>\$"</Begin>
+            <End>"</End>
+            <RuleSet>
+                <!-- nested span for escape sequences -->
+                <Span begin="\\" end="." />
+                <!-- use main ruleset for template string fields -->
+				<Span begin="{" end="}" color="TemplateStringField" ruleSet="" />
             </RuleSet>
         </Span>
 
@@ -99,12 +111,12 @@
 
         <!-- Function calls -->
         <Rule color="Function">
-            [_a-zA-Z][_a-zA-Z0-9]*(?=\()
+            [_a-zA-Z@][_a-zA-Z0-9@]*(?=\()
         </Rule>
 
         <!-- Normal identifiers -->
         <Rule color="Identifier">
-            [_a-zA-Z][_a-zA-Z0-9]*
+            [_a-zA-Z@][_a-zA-Z0-9@]*
         </Rule>
     </RuleSet>
 </SyntaxDefinition>

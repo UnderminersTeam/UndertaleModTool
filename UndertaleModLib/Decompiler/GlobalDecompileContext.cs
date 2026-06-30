@@ -52,6 +52,7 @@ public class GlobalDecompileContext : IGameContext
     public bool UsingNewArrayOwners => Data?.IsVersionAtLeast(2, 3, 2) ?? false;
     public bool UsingOptimizedFunctionDeclarations => Data?.IsVersionAtLeast(2024, 14) ?? false;
     public bool UsingNewChainedFunctionArgumentOrder => Data?.IsVersionAtLeast(2024, 14, 4) ?? false;
+    public bool UsingTemplateStrings => Data?.IsVersionAtLeast(2024, 14) ?? false;
     public GameSpecificRegistry GameSpecificRegistry => Data?.GameSpecificRegistry;
     public IBuiltins Builtins { get; private set; } = null;
     public ICodeBuilder CodeBuilder { get; private set; } = null;

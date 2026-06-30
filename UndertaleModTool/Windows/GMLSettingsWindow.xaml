@@ -168,6 +168,9 @@
                     <CheckBox Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Margin="3" Content="Scope local variable declarations" 
                               ToolTip="If enabled, local variable declarations will be placed according to their scopes, which are detected based on usage in the code." 
                               IsChecked="{Binding DecompilerSettings.CleanupLocalVarDeclarations}"/>
+                    <CheckBox Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" Margin="3" Content="Template strings" 
+                              ToolTip="If enabled, the decompiler will make an attempt to rewrite calls to @@string@@ as template strings." 
+                              IsChecked="{Binding DecompilerSettings.CleanupTemplateStrings}"/>
                 </Grid>
             </Grid>
             <Separator Margin="10,0,10,0"/>
