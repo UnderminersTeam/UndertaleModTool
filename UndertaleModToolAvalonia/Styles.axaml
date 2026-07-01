@@ -254,4 +254,10 @@
             <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundListLowBrush}" />
         </Style>
     </Style>
+
+    <Style Selector="Window.FindReferencesWindow">
+        <Style Selector="^ > Grid">
+            <Setter Property="Margin" Value="8" />
+        </Style>
+    </Style>
 </Styles>

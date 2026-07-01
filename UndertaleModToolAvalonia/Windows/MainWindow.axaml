@@ -33,7 +33,7 @@
             <NativeMenuItem Header="_Tools">
                 <NativeMenu>
                     <NativeMenuItem Header="_Search in code" Command="{Binding ToolsSearchInCode}" Gesture="{OnPlatform 'Ctrl+Shift+F', macOS='Meta+Shift+F'}"/>
-                    <NativeMenuItem Header="Find unreferenced _assets" IsEnabled="False"/>
+                    <NativeMenuItem Header="Find references" Command="{Binding ToolsFindReferences}"/>
                 </NativeMenu>
             </NativeMenuItem>
             <NativeMenuItem Header="_Scripts">

@@ -110,6 +110,15 @@ public partial class MainView : UserControl, IView
         }.Show();
     }
 
+    public void OpenFindReferences(IServiceProvider serviceProvider)
+    {
+        Window window = this.FindLogicalAncestorOfType<Window>() ?? throw new InvalidOperationException();
+        new FindReferencesWindow()
+        {
+            DataContext = new FindReferencesViewModel(serviceProvider),
+        }.Show(window);
+    }
+
     public void OpenProjectAssets(IServiceProvider serviceProvider)
     {
         Window window = this.FindLogicalAncestorOfType<Window>() ?? throw new InvalidOperationException();
@@ -239,7 +248,7 @@ public partial class MainView : UserControl, IView
 
     private void MainTreeDataGrid_KeyDown(object? sender, KeyEventArgs e)
     {
-        if (e.PhysicalKey == PhysicalKey.Enter)
+        if (e.Key == Key.Enter)
         {
             OpenItemFromTreeDataGridControl(e.Source);
         }

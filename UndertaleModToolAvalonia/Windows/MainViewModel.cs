@@ -675,6 +675,12 @@ public partial class MainViewModel
             mainView.OpenSearchInCode(ServiceProvider);
     }
 
+    public void ToolsFindReferences()
+    {
+        if (View is MainView mainView)
+            mainView.OpenFindReferences(ServiceProvider);
+    }
+
     public async void ScriptsRunOtherScript()
     {
         var files = await View!.OpenFileDialog(new FilePickerOpenOptions()
@@ -800,6 +806,8 @@ public partial class MainViewModel
             FileTypeFilter = FilePickerFileTypes.JSON,
         });
         string? projectFilePath = projectFileList.ElementAtOrDefault(0)?.TryGetLocalPath();
+        if (projectFilePath is null)
+            return;
 
         // Destination data file
         string? destinationDataPath = await AskProjectDestinationDataFile();
