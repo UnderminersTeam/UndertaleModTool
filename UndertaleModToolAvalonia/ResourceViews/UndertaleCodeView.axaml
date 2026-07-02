@@ -17,7 +17,11 @@
                 <Label>Parent</Label>
                 <l:UndertaleResourceReferenceView Reference="{Binding Code.ParentEntry}" ReferenceType="undertalem:UndertaleCode" />
             </Grid>
-            <Button Grid.Column="1" Command="{Binding CompileAndDecompileCurrent}" ToolTip.Tip="{OnPlatform 'Ctrl+K', macOS='Meta+K'}">Compile and decompile</Button>
+            <StackPanel Grid.Column="1" Orientation="Vertical" Classes="HorizontalCenterChildren">
+                <Button Command="{Binding CompileAndDecompileCurrent}" ToolTip.Tip="{OnPlatform 'Ctrl+K', macOS='Meta+K'}">Compile and decompile</Button>
+                <TextBlock IsVisible="{Binding AnyOutdated}" Foreground="{DynamicResource SystemControlErrorTextForegroundBrush}">Not compiled</TextBlock>
+                <TextBlock IsVisible="{Binding !AnyOutdated}">Compiled</TextBlock>
+            </StackPanel>
         </Grid>
         
         <TabControl Grid.Row="1" IsVisible="{Binding Code.ParentEntry, Converter={x:Static ObjectConverters.IsNull}}"

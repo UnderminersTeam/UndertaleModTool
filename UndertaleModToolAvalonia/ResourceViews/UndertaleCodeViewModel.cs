@@ -31,14 +31,17 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
     private Tab _SelectedTab;
     [Notify]
     private (Tab Tab, int Line)? _LastGoToLocation = null;
+    [Notify]
+    private bool _GMLOutdated = true;
+    [Notify]
+    private bool _ASMOutdated = true;
+
+    public bool AnyOutdated => GMLOutdated || ASMOutdated;
 
     public TextDocument GMLTextDocument { get; set; } = new TextDocument();
     public TextDocument ASMTextDocument { get; set; } = new TextDocument();
 
     public bool IsCodeProcessing = false;
-
-    public bool GMLOutdated = true;
-    public bool ASMOutdated = true;
 
     public bool GMLFocused = false;
     public bool ASMFocused = false;
