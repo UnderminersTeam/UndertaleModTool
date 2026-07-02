@@ -1,0 +1,30 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:l="clr-namespace:UndertaleModToolAvalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="UndertaleModToolAvalonia.UndertaleStringReferenceView">
+    <ContentControl DataContext="{Binding $parent[l:UndertaleStringReferenceView]}">
+        <Grid ColumnDefinitions="*,Auto,Auto">
+            <!-- TODO: Make this look/work better -->
+            <TextBox Grid.Column="0" Name="TextBox"
+                     Text="{Binding Reference.Content, UpdateSourceTrigger=Explicit, TargetNullValue=''}"
+                     IsReadOnly="{Binding Reference, Converter={x:Static ObjectConverters.IsNull}}"
+                     AcceptsReturn="True"
+                     TextWrapping="Wrap"
+                     KeyDown="TextBox_KeyDown"
+                     PointerReleased="TextBox_PointerReleased"
+                     LostFocus="TextBox_LostFocus">
+                <TextBox.Resources>
+                    <l:UndertaleStringDropHandler x:Key="UndertaleStringDropHandler"/>
+                </TextBox.Resources>
+                <Interaction.Behaviors>
+                    <ContextDropBehavior Handler="{StaticResource UndertaleStringDropHandler}"/>
+                </Interaction.Behaviors>
+            </TextBox>
+            <Button Grid.Column="1" Command="{Binding Open}">…</Button>
+            <Button Grid.Column="2" Command="{Binding OpenInNewTab}">⬈</Button>
+        </Grid>
+    </ContentControl>
+</UserControl>
