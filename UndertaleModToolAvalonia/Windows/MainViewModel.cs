@@ -39,7 +39,7 @@ public partial class MainViewModel
 
     // Window
     public string Title => $"UndertaleModToolAvalonia - v" +
-        (Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "?.?.?.?") +
+        (App.VersionString) +
         $"{(Project?.Name is not null ? " - " + Project.Name : "")}" +
         $"{(Data?.GeneralInfo is not null ? " - " + Data.GeneralInfo.ToString() : "")}" +
         $"{(DataPath is not null ? " [" + DataPath + "]" : "")}";
@@ -886,7 +886,7 @@ public partial class MainViewModel
 
     public async void HelpAbout()
     {
-        await View!.MessageDialog($"UndertaleModTool v{Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "?.?.?.?"} " +
+        await View!.MessageDialog($"UndertaleModTool v{App.VersionString} " +
             $"by the Underminers team\nLicensed under the GNU General Public License Version 3.", title: "About");
     }
 

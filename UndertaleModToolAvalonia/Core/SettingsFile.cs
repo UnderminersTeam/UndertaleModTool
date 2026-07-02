@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Reflection;
 using System.Text.Json;
 using Avalonia.Markup.Xaml;
 using Avalonia.Styling;
@@ -44,7 +43,7 @@ public partial class SettingsFile
                 {
                     // Check for upgrades here.
                     settings.MainVM = mainVM;
-                    settings.Version = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "?.?.?.?";
+                    settings.Version = App.VersionString;
                 }
             }
             catch (Exception e)
@@ -100,7 +99,7 @@ public partial class SettingsFile
         }
     }
 
-    public string Version { get; set; } = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "?.?.?.?";
+    public string Version { get; set; } = App.VersionString;
 
     public enum ThemeValue
     {

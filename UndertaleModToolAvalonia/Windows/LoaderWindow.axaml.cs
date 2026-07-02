@@ -19,7 +19,7 @@ public interface ILoaderWindow
 
 public partial class LoaderWindow : Window, ILoaderWindow
 {
-    public string TitleText { get; set; } = "UndertaleModToolAvalonia";
+    public string TitleText { get; set; } = "UndertaleModToolAvalonia v" + App.VersionString;
 
     int value;
     string? message;

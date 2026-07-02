@@ -26,7 +26,8 @@ class Program
             File.WriteAllText(Path.Join(localAppData, "CrashLog.txt"), e.ToString());
 
             // TODO: Figure out a way to actually stop the UI and other threads.
-            SDL.ShowSimpleMessageBox(SDL3.SDL.MessageBoxFlags.Error, "UndertaleModToolAvalonia", $"{e}", 0);
+            SDL.ShowSimpleMessageBox(SDL3.SDL.MessageBoxFlags.Error,
+                "UndertaleModToolAvalonia " + App.VersionString, $"{e}", 0);
             throw;
         }
     }

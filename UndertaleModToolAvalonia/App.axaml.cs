@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
@@ -9,6 +10,7 @@ namespace UndertaleModToolAvalonia;
 
 public partial class App : Application
 {
+    public static string VersionString = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "?.?.?.?";
     public static IServiceProvider Services = null!;
     public static IStyle? CurrentCustomStyles = null;
 

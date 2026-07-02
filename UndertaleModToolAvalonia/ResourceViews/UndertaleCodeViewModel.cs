@@ -75,7 +75,7 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
             catch (Underanalyzer.Decompiler.DecompilerException e)
             {
                 loaderWindow?.EnsureShown();
-                await MainVM.View!.MessageDialog(e.ToString(), title: "GML decompilation error");
+                await MainVM.View!.MessageDialog(e.ToString(), title: "GML decompilation error - UndertaleModTooAvalonia v" + App.VersionString);
                 return false;
             }
         }
@@ -102,7 +102,9 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
         {
             loaderWindow?.EnsureShown();
             MessageWindow.Result undoChanges = await MainVM.View!.MessageDialog(result.PrintAllErrors(codeEntryNames: false)
-                + "\n\nUndo changes?", title: "GML compilation error", MessageWindow.Buttons.YesNo);
+                + "\n\nUndo changes?",
+                title: "GML compilation error - UndertaleModTooAvalonia v" + App.VersionString,
+                buttons: MessageWindow.Buttons.YesNo);
             if (undoChanges == MessageWindow.Result.Yes)
             {
                 await DecompileToGML();
@@ -134,7 +136,7 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
         catch (Exception e)
         {
             loaderWindow?.EnsureShown();
-            await MainVM.View!.MessageDialog(e.ToString(), title: "ASM decompilation error");
+            await MainVM.View!.MessageDialog(e.ToString(), title: "ASM decompilation error - UndertaleModTooAvalonia v" + App.VersionString);
             return false;
         }
 
@@ -168,7 +170,9 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
         {
             loaderWindow?.EnsureShown();
             MessageWindow.Result undoChanges = await MainVM.View!.MessageDialog(e.ToString()
-                + "\n\nUndo changes?", title: "ASM compilation error", MessageWindow.Buttons.YesNo);
+                + "\n\nUndo changes?",
+                title: "ASM compilation error - UndertaleModTooAvalonia v" + App.VersionString,
+                buttons: MessageWindow.Buttons.YesNo);
             if (undoChanges == MessageWindow.Result.Yes)
             {
                 await DecompileToASM();

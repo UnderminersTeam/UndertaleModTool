@@ -7,7 +7,7 @@ namespace UndertaleModToolAvalonia;
 public partial class MessageWindow : Window
 {
     public string Message { get; set; } = "Message.";
-    public string TitleText { get; set; } = "UndertaleModToolAvalonia";
+    public string TitleText { get; set; } = "UndertaleModToolAvalonia v" + App.VersionString;
     public bool HasOKButton { get; set; } = false;
     public bool HasYesButton { get; set; } = false;
     public bool HasNoButton { get; set; } = false;
