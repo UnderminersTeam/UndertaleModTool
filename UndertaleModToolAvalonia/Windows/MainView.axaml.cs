@@ -110,12 +110,12 @@ public partial class MainView : UserControl, IView
         }.Show();
     }
 
-    public void OpenFindReferences(IServiceProvider serviceProvider)
+    public void OpenFindReferences(IServiceProvider serviceProvider, UndertaleResource? resource = null)
     {
         Window window = this.FindLogicalAncestorOfType<Window>() ?? throw new InvalidOperationException();
         new FindReferencesWindow()
         {
-            DataContext = new FindReferencesViewModel(serviceProvider),
+            DataContext = new FindReferencesViewModel(serviceProvider, resource),
         }.Show(window);
     }
 
@@ -349,6 +349,18 @@ public partial class MainView : UserControl, IView
                     TopLevel topLevel = TopLevel.GetTopLevel(this)!;
                     await topLevel.Clipboard!.SetTextAsync(name);
                 }
+            }
+        }
+    }
+
+    public async void ContextMenu_FindReferences_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is MainViewModel vm)
+        {
+            MainViewModel.TreeDataGridItem? item = GetItemFromTreeDataGridControl(e.Source);
+            if (item is not null && item.Value is UndertaleResource resource && vm.Data is not null )
+            {
+                OpenFindReferences(vm.ServiceProvider, resource);
             }
         }
     }

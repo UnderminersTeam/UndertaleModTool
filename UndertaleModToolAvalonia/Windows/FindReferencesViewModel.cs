@@ -18,9 +18,10 @@ public partial class FindReferencesViewModel
     [Notify]
     private ObservableCollection<FindReferencesResult> _Results = [];
 
-    public FindReferencesViewModel(IServiceProvider serviceProvider)
+    public FindReferencesViewModel(IServiceProvider serviceProvider, UndertaleResource? resource = null)
     {
         MainVM = serviceProvider.GetRequiredService<MainViewModel>();
+        Resource = resource;
     }
 
     public async void FindReferences()

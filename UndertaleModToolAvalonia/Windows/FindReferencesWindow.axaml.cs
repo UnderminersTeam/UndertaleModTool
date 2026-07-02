@@ -17,6 +17,19 @@ public partial class FindReferencesWindow : Window
         ResultsDataGrid.AddHandler(DataGrid.KeyDownEvent, DataGrid_KeyDown_Tunnel, RoutingStrategies.Tunnel);
     }
 
+    protected override void OnLoaded(RoutedEventArgs e)
+    {
+        base.OnLoaded(e);
+
+        if (DataContext is FindReferencesViewModel vm)
+        {
+            if (vm.Resource is not null)
+            {
+                vm.FindReferences();
+            }
+        }
+    }
+
     void OpenResultFromSource(object? source, bool inNewTab = false)
     {
         if (DataContext is FindReferencesViewModel vm)
