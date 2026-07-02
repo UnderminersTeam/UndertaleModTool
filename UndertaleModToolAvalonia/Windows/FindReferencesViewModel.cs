@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.ObjectModel;
 using System.Reflection;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using PropertyChanged.SourceGenerator;
 using UndertaleModLib;
@@ -11,12 +12,19 @@ namespace UndertaleModToolAvalonia;
 
 public partial class FindReferencesViewModel
 {
+    public IView? View;
+
     public MainViewModel MainVM { get; }
+
+    [Notify]
+    private bool _IsEnabled = true;
 
     [Notify]
     private UndertaleResource? _Resource;
     [Notify]
     private ObservableCollection<FindReferencesResult> _Results = [];
+
+    ILoaderWindow? loaderWindow;
 
     public FindReferencesViewModel(IServiceProvider serviceProvider, UndertaleResource? resource = null)
     {
@@ -33,93 +41,111 @@ public partial class FindReferencesViewModel
         if (Resource is null)
             return;
 
-        UndertaleData data = MainVM.Data;
-        Assembly currentAssembly = typeof(UndertaleData).Assembly;
+        // Set up loader window
+        loaderWindow = View!.LoaderOpen();
+        loaderWindow.SetText("Finding references...");
 
-        ObservableCollection<FindReferencesResult> results = [];
-        Stack propStack = new();
+        IsEnabled = false;
+        MainVM.IsEnabled = false;
 
-        // TODO: This is really bad, remove
-        void RecurseProperties(object obj, UndertaleObject? topObject = null, string propChain = "")
+        Results = await Task.Run(() =>
         {
-            Type objType = obj.GetType();
+            UndertaleResource? resource = Resource;
 
-            if (propStack.Contains(obj))
-                return;
+            UndertaleData data = MainVM.Data;
+            Assembly currentAssembly = typeof(UndertaleData).Assembly;
 
-            propStack.Push(obj);
+            ObservableCollection<FindReferencesResult> results = [];
+            Stack propStack = new();
 
-            if (obj is UndertaleObject objResource && objResource is UndertaleResource or UndertaleGeneralInfo or UndertaleOptions or UndertaleLanguage or UndertaleGlobalInit)
+            // TODO: This is really bad, remove
+            void RecurseProperties(object obj, UndertaleObject? topObject = null, string propChain = "")
             {
-                // Update top resource
-                if (topObject is null)
+                Type objType = obj.GetType();
+
+                if (propStack.Contains(obj))
+                    return;
+
+                propStack.Push(obj);
+
+                if (obj is UndertaleObject objResource && objResource is UndertaleResource or UndertaleGeneralInfo or UndertaleOptions or UndertaleLanguage or UndertaleGlobalInit)
                 {
-                    topObject = objResource;
-                    propChain = "";
-                }
-            }
-
-            // Check if value is the correct one
-            if (obj == Resource)
-            {
-                if (topObject is not null)
-                    results.Add(new(topObject, propChain));
-            }
-
-            // If it's a resource, and not the current top object, stop right there,
-            // there's no point in looping anymore since those should already be dealt with in the first pass
-            if (obj is UndertaleResource && obj != topObject)
-            {
-                propStack.Pop();
-                return;
-            }
-
-            // If it's a list, loop its values
-            if (obj is IList objList)
-            {
-                foreach (object? item in objList)
-                {
-                    if (item is not null)
+                    // Update top resource
+                    if (topObject is null)
                     {
-                        var t = item.GetType();
-                        if (t.IsPrimitive || t == typeof(string) || t.IsEnum)
-                            break;
-
-                        // Add []
-                        RecurseProperties(item, topObject, $"{propChain}[{item}]");
+                        topObject = objResource;
+                        propChain = "";
                     }
                 }
-            }
-            // If not, then loop its properties
-            // Must be in the same assembly, to avoid complications
-            else if (objType.Assembly == currentAssembly)
-            {
-                PropertyInfo[] props = objType.GetProperties(BindingFlags.Instance | BindingFlags.Public);
-                foreach (PropertyInfo prop in props)
+
+                // Check if value is the correct one
+                if (obj == resource)
                 {
-                    // Ignore properties that require indexes
-                    if (prop.GetIndexParameters().Length != 0)
-                        continue;
-
-                    object? propValue = prop.GetValue(obj);
-                    if (propValue is null)
-                        continue;
-
-                    var t = prop.PropertyType;
-                    if (t.IsPrimitive || t == typeof(string) || t.IsEnum)
-                        continue;
-
-                    // Add . if not empty
-                    RecurseProperties(propValue, topObject, $"{(propChain != "" ? propChain + "." : "")}{prop.Name}");
+                    if (topObject is not null)
+                        results.Add(new(topObject, propChain));
                 }
+
+                // If it's a resource, and not the current top object, stop right there,
+                // there's no point in looping anymore since those should already be dealt with in the first pass
+                if (obj is UndertaleResource && obj != topObject)
+                {
+                    propStack.Pop();
+                    return;
+                }
+
+                // If it's a list, loop its values
+                if (obj is IList objList)
+                {
+                    foreach (object? item in objList)
+                    {
+                        if (item is not null)
+                        {
+                            var t = item.GetType();
+                            if (t.IsPrimitive || t == typeof(string) || t.IsEnum)
+                                break;
+
+                            // Add []
+                            RecurseProperties(item, topObject, $"{propChain}[{item}]");
+                        }
+                    }
+                }
+                // If not, then loop its properties
+                // Must be in the same assembly, to avoid complications
+                else if (objType.Assembly == currentAssembly)
+                {
+                    PropertyInfo[] props = objType.GetProperties(BindingFlags.Instance | BindingFlags.Public);
+                    foreach (PropertyInfo prop in props)
+                    {
+                        // Ignore properties that require indexes
+                        if (prop.GetIndexParameters().Length != 0)
+                            continue;
+
+                        object? propValue = prop.GetValue(obj);
+                        if (propValue is null)
+                            continue;
+
+                        var t = prop.PropertyType;
+                        if (t.IsPrimitive || t == typeof(string) || t.IsEnum)
+                            continue;
+
+                        // Add . if not empty
+                        RecurseProperties(propValue, topObject, $"{(propChain != "" ? propChain + "." : "")}{prop.Name}");
+                    }
+                }
+
+                propStack.Pop();
             }
 
-            propStack.Pop();
-        }
+            RecurseProperties(data);
 
-        RecurseProperties(data);
+            return results;
+        });
 
-        Results = results;
+        // Close loader window
+        loaderWindow.Close();
+
+        IsEnabled = true;
+        MainVM.IsEnabled = true;
     }
 
     public void OpenResult(FindReferencesResult result, bool inNewTab = false)

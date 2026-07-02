@@ -8,6 +8,7 @@
         x:Class="UndertaleModToolAvalonia.FindReferencesWindow"
         x:DataType="l:FindReferencesViewModel"
         Title="Find references"
+        IsEnabled="{Binding IsEnabled}"
         Width="800"
         Height="400"
         WindowStartupLocation="CenterOwner"

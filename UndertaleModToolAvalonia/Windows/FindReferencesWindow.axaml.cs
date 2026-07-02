@@ -8,11 +8,19 @@ using PropertyChanged.SourceGenerator;
 
 namespace UndertaleModToolAvalonia;
 
-public partial class FindReferencesWindow : Window
+public partial class FindReferencesWindow : Window, IView
 {
     public FindReferencesWindow()
     {
         InitializeComponent();
+
+        DataContextChanged += (_, _) =>
+        {
+            if (DataContext is FindReferencesViewModel vm)
+            {
+                vm.View = this;
+            }
+        };
 
         ResultsDataGrid.AddHandler(DataGrid.KeyDownEvent, DataGrid_KeyDown_Tunnel, RoutingStrategies.Tunnel);
     }
