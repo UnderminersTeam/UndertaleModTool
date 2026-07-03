@@ -188,6 +188,37 @@ public sealed partial class ProjectContext
         };
     }
 
+    public static void LoadProjectLocalOptions(string mainFilePath, out string loadFilePath, out string saveFilePath)
+    {
+        string mainDirectory = Path.GetFullPath(Path.GetDirectoryName(mainFilePath));
+        string localFilePath = Path.Join(mainDirectory, "project-local.json");
+
+        ProjectLocalOptions localOptions;
+
+        if (File.Exists(localFilePath))
+        {
+            try
+            {
+                using (FileStream fs = new(localFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    localOptions = JsonSerializer.Deserialize<ProjectLocalOptions>(fs, JsonOptions);
+                }
+
+                loadFilePath = localOptions.DataFilePath.Source;
+                saveFilePath = localOptions.DataFilePath.Destination;
+            }
+            catch (Exception e)
+            {
+                throw new ProjectException($"Failed to load project local options at \"{Path.GetFileName(localFilePath)}\": {e.Message}", e);
+            }
+        }
+        else
+        {
+            loadFilePath = null;
+            saveFilePath = null;
+        }
+    }
+
     /// <summary>
     /// Initializes a project context for a new project based on its main file path, and a name to give to it.
     /// </summary>
@@ -235,8 +266,21 @@ public sealed partial class ProjectContext
         {
             Name = newProjectName
         };
-        using FileStream fs = new(mainFilePath, FileMode.CreateNew);
-        JsonSerializer.Serialize(fs, _mainOptions, JsonOptions);
+        using (FileStream fs = new(mainFilePath, FileMode.CreateNew))
+        {
+            JsonSerializer.Serialize(fs, _mainOptions, JsonOptions);
+        }
+
+        // Create new local options and save it
+        string localFilePath = Path.Join(MainDirectory, "project-local.json");
+        ProjectLocalOptions localOptions = new()
+        {
+            DataFilePath = new(LoadDataPath, SaveDataPath)
+        };
+        using (FileStream fs = new(localFilePath, FileMode.CreateNew))
+        {
+            JsonSerializer.Serialize(fs, localOptions, JsonOptions);
+        }
     }
 
     /// <summary>
