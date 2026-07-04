@@ -6,12 +6,19 @@ using Avalonia.Threading;
 
 namespace UndertaleModToolAvalonia;
 
+public abstract class ObservableCollectionView
+{
+    public abstract void SetFilter(Predicate<object?>? _filterPredicate);
+}
+
 /// <summary>
 /// This class allows you to filter and transform an input observable collection, providing an output observable collection, which will be kept in sync with the input.
 /// </summary>
 /// <typeparam name="TInput">Type of item in input collection.</typeparam>
 /// <typeparam name="TOutput">Type of item in output collection.</typeparam>
-public class ObservableCollectionView<TInput, TOutput>
+public class ObservableCollectionView<TInput, TOutput> : ObservableCollectionView
+    where TInput : class?
+    where TOutput : class?
 {
     public class CustomObservableCollection<T> : Collection<T>, INotifyCollectionChanged
     {
@@ -132,6 +139,8 @@ public class ObservableCollectionView<TInput, TOutput>
         filterPredicate = _filterPredicate;
         Filter();
     }
+
+    public override void SetFilter(Predicate<object?>? _filterPredicate) => SetFilter((Predicate<TInput>?)_filterPredicate);
 
     private void OnInputCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {

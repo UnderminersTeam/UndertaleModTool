@@ -6,7 +6,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -81,6 +80,8 @@ public partial class MainViewModel
 
     public event Action<string>? FilterTextChanged;
 
+    private List<ObservableCollectionView> observableCollectionViewList = [];
+
     // Tabs
     public ObservableCollection<TabItemViewModel> Tabs { get; set; }
 
@@ -117,6 +118,8 @@ public partial class MainViewModel
                 "Open a data.win file to get started, then double click on the items on the left to view them."),
                 isSelected: true),
         ];
+
+        FilterTextChanged += UpdateListFilterText;
     }
 
     public void Initialize()
@@ -196,33 +199,10 @@ public partial class MainViewModel
 
         TreeDataGridData.Clear();
 
-        if (FilterTextChanged is not null)
-            foreach (Delegate item in FilterTextChanged.GetInvocationList())
-            {
-                FilterTextChanged -= (Action<string>)item;
-            }
+        observableCollectionViewList.Clear();
 
         if (Data is not null)
         {
-            IList<TreeDataGridItem>? MakeChildren<T>(IList<T>? list) where T : notnull
-            {
-                if (list is not null)
-                {
-                    ObservableCollectionView<T, TreeDataGridItem> view = new(list,
-                        transform: x => new TreeDataGridItem() { Text = "", Value = x });
-
-                    FilterTextChanged += filterText =>
-                    {
-                        view.SetFilter(item => AssetNameContainsText(item, filterText));
-                    };
-
-                    view.SetFilter(item => AssetNameContainsText(item, FilterText));
-
-                    return view.Output;
-                }
-                return null;
-            }
-
             var dataItem = new TreeDataGridItem()
             {
                 Value = Data,
@@ -239,84 +219,107 @@ public partial class MainViewModel
 
             if (Data.AudioGroups is not null)
                 dataItem.Children.Add(new() {Tag = "list", Value = "AudioGroups", Text = "Audio groups",
-                Children = MakeChildren(Data.AudioGroups)});
+                Children = CreateListObservableCollectionView(Data.AudioGroups)});
             if (Data.Sounds is not null)
                 dataItem.Children.Add(new() {Tag = "list", Value = "Sounds", Text = "Sounds",
-                Children = MakeChildren(Data.Sounds)});
+                Children = CreateListObservableCollectionView(Data.Sounds)});
             if (Data.Sprites is not null)
                 dataItem.Children.Add(new() {Tag = "list", Value = "Sprites", Text = "Sprites",
-                Children = MakeChildren(Data.Sprites)});
+                Children = CreateListObservableCollectionView(Data.Sprites)});
             if (Data.Backgrounds is not null)
                 dataItem.Children.Add(new() {Tag = "list", Value = "Backgrounds", Text = "Backgrounds & Tile sets",
-                Children = MakeChildren(Data.Backgrounds)});
+                Children = CreateListObservableCollectionView(Data.Backgrounds)});
             if (Data.Paths is not null)
                 dataItem.Children.Add(new() {Tag = "list", Value = "Paths", Text = "Paths",
-                Children = MakeChildren(Data.Paths)});
+                Children = CreateListObservableCollectionView(Data.Paths)});
             if (Data.Scripts is not null)
                 dataItem.Children.Add(new() {Tag = "list", Value = "Scripts", Text = "Scripts",
-                Children = MakeChildren(Data.Scripts)});
+                Children = CreateListObservableCollectionView(Data.Scripts)});
             if (Data.Shaders is not null)
                 dataItem.Children.Add(new() {Tag = "list", Value = "Shaders", Text = "Shaders",
-                Children = MakeChildren(Data.Shaders)});
+                Children = CreateListObservableCollectionView(Data.Shaders)});
             if (Data.Fonts is not null)
                 dataItem.Children.Add(new() {Tag = "list", Value = "Fonts", Text = "Fonts",
-                Children = MakeChildren(Data.Fonts)});
+                Children = CreateListObservableCollectionView(Data.Fonts)});
             if (Data.Timelines is not null)
                 dataItem.Children.Add(new() {Tag = "list", Value = "Timelines", Text = "Timelines",
-                Children = MakeChildren(Data.Timelines)});
+                Children = CreateListObservableCollectionView(Data.Timelines)});
             if (Data.GameObjects is not null)
                 dataItem.Children.Add(new() {Tag = "list", Value = "GameObjects", Text = "Game objects",
-                Children = MakeChildren(Data.GameObjects)});
+                Children = CreateListObservableCollectionView(Data.GameObjects)});
             if (Data.Rooms is not null)
                 dataItem.Children.Add(new() {Tag = "list", Value = "Rooms", Text = "Rooms",
-                Children = MakeChildren(Data.Rooms)});
+                Children = CreateListObservableCollectionView(Data.Rooms)});
             if (Data.Extensions is not null)
                 dataItem.Children.Add(new() {Tag = "list", Value = "Extensions", Text = "Extensions",
-                Children = MakeChildren(Data.Extensions)});
+                Children = CreateListObservableCollectionView(Data.Extensions)});
             if (Data.TexturePageItems is not null)
                 dataItem.Children.Add(new() {Tag = "list", Value = "TexturePageItems", Text = "Texture page items",
-                Children = MakeChildren(Data.TexturePageItems)});
+                Children = CreateListObservableCollectionView(Data.TexturePageItems)});
             if (Data.Code is not null)
                 dataItem.Children.Add(new() {Tag = "list", Value = "Code", Text = "Code",
-                Children = MakeChildren(Data.Code)});
+                Children = CreateListObservableCollectionView(Data.Code)});
             if (Data.Variables is not null)
                 dataItem.Children.Add(new() {Tag = "list", Value = "Variables", Text = "Variables",
-                Children = MakeChildren(Data.Variables)});
+                Children = CreateListObservableCollectionView(Data.Variables)});
             if (Data.Functions is not null)
                 dataItem.Children.Add(new() {Tag = "list", Value = "Functions", Text = "Functions",
-                Children = MakeChildren(Data.Functions)});
+                Children = CreateListObservableCollectionView(Data.Functions)});
             if (Data.CodeLocals is not null)
                 dataItem.Children.Add(new() {Tag = "list", Value = "CodeLocals", Text = "Code locals",
-                Children = MakeChildren(Data.CodeLocals)});
+                Children = CreateListObservableCollectionView(Data.CodeLocals)});
             if (Data.Strings is not null)
                 dataItem.Children.Add(new() {Tag = "list", Value = "Strings", Text = "Strings",
-                Children = MakeChildren(Data.Strings)});
+                Children = CreateListObservableCollectionView(Data.Strings)});
             if (Data.EmbeddedTextures is not null)
                 dataItem.Children.Add(new() {Tag = "list", Value = "EmbeddedTextures", Text = "Embedded textures",
-                Children = MakeChildren(Data.EmbeddedTextures)});
+                Children = CreateListObservableCollectionView(Data.EmbeddedTextures)});
             if (Data.EmbeddedAudio is not null)
                 dataItem.Children.Add(new() {Tag = "list", Value = "EmbeddedAudio", Text = "Embedded audio",
-                Children = MakeChildren(Data.EmbeddedAudio)});
+                Children = CreateListObservableCollectionView(Data.EmbeddedAudio)});
             if (Data.TextureGroupInfo is not null)
                 dataItem.Children.Add(new() {Tag = "list", Value = "TextureGroupInformation", Text = "Texture group information",
-                Children = MakeChildren(Data.TextureGroupInfo)});
+                Children = CreateListObservableCollectionView(Data.TextureGroupInfo)});
             if (Data.EmbeddedImages is not null)
                 dataItem.Children.Add(new() {Tag = "list", Value = "EmbeddedImages", Text = "Embedded images",
-                Children = MakeChildren(Data.EmbeddedImages)});
+                Children = CreateListObservableCollectionView(Data.EmbeddedImages)});
             if (Data.AnimationCurves is not null)
                 dataItem.Children.Add(new() {Tag = "list", Value = "AnimationCurves", Text = "Animation curves",
-                Children = MakeChildren(Data.AnimationCurves)});
+                Children = CreateListObservableCollectionView(Data.AnimationCurves)});
             if (Data.ParticleSystems is not null)
                 dataItem.Children.Add(new() {Tag = "list", Value = "ParticleSystems", Text = "Particle systems",
-                Children = MakeChildren(Data.ParticleSystems)});
+                Children = CreateListObservableCollectionView(Data.ParticleSystems)});
             if (Data.ParticleSystemEmitters is not null)
                 dataItem.Children.Add(new() {Tag = "list", Value = "ParticleSystemEmitters", Text = "Particle system emitters",
-                Children = MakeChildren(Data.ParticleSystemEmitters)});
+                Children = CreateListObservableCollectionView(Data.ParticleSystemEmitters)});
 
             TreeDataGridData.Add(dataItem);
 
             if (View is MainView mainView)
                 mainView.ExpandItemOnTree(dataItem);
+        }
+    }
+
+    IList<TreeDataGridItem>? CreateListObservableCollectionView<T>(IList<T?>? list) where T : class?
+    {
+        if (list is not null)
+        {
+            ObservableCollectionView<T?, TreeDataGridItem> view = new(list,
+                transform: x => new TreeDataGridItem() { Text = "", Value = x },
+                filter: item => AssetNameContainsText(item, FilterText));
+
+            observableCollectionViewList.Add(view);
+
+            return view.Output;
+        }
+        return null;
+    }
+
+    void UpdateListFilterText(string filterText)
+    {
+        foreach (ObservableCollectionView view in observableCollectionViewList)
+        {
+            view.SetFilter(item => AssetNameContainsText(item, filterText));
         }
     }
 
