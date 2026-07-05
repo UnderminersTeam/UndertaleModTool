@@ -53,8 +53,8 @@ public partial class LoaderWindow : Window, ILoaderWindow
         {
             Dispatcher.UIThread.Post(() =>
             {
-                if (!hasClosed)
-                    Show(owner);
+                if (!hasClosed && !IsVisible)
+                    ShowDialog(owner);
             });
         });
     }
@@ -62,7 +62,7 @@ public partial class LoaderWindow : Window, ILoaderWindow
     public void EnsureShown()
     {
         if (showOwner is not null)
-            Show(showOwner);
+            ShowDialog(showOwner);
     }
 
     public void UpdateText()

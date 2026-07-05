@@ -39,7 +39,7 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
     private readonly NameGenerator gmlNameGenerator;
     private readonly NameGenerator asmNameGenerator;
 
-    public (int, int) LastCaretOffsets;
+    public (TextLocation, TextLocation) LastCaretLocations;
 
     public UndertaleCodeView()
     {
@@ -93,6 +93,9 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
                 }
 
                 UpdateHighlightingCache();
+
+                vm.GMLOutdated = false;
+                vm.ASMOutdated = false;
             }
         };
 
@@ -288,27 +291,33 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
         UpdateHighlightingCache();
     }
 
-    private void GMLTextEditor_LostFocus(object? sender, RoutedEventArgs e)
+    private void GMLTextEditor_LostFocus(object? sender, FocusChangedEventArgs e)
     {
+        if (e.NavigationMethod == NavigationMethod.Unspecified)
+            return;
+
         if (DataContext is not UndertaleCodeViewModel vm)
             return;
 
         if (vm.GMLFocused && vm.MainVM.Settings!.AutomaticallyCompileAndDecompileCodeOnLostFocus)
         {
-            vm.CompileAndDecompileGML(onlyIfOutdated: true);
             vm.GMLFocused = false;
+            vm.CompileAndDecompileGML(onlyIfOutdated: true);
         }
     }
 
-    private void ASMTextEditor_LostFocus(object? sender, RoutedEventArgs e)
+    private void ASMTextEditor_LostFocus(object? sender, FocusChangedEventArgs e)
     {
+        if (e.NavigationMethod == NavigationMethod.Unspecified)
+            return;
+
         if (DataContext is not UndertaleCodeViewModel vm)
             return;
 
         if (vm.ASMFocused && vm.MainVM.Settings!.AutomaticallyCompileAndDecompileCodeOnLostFocus)
         {
-            vm.CompileAndDecompileASM(onlyIfOutdated: true);
             vm.ASMFocused = false;
+            vm.CompileAndDecompileASM(onlyIfOutdated: true);
         }
     }
 
@@ -810,15 +819,15 @@ public interface IUndertaleCodeView
 {
     private UndertaleCodeView View => (UndertaleCodeView)this;
 
-    public void SaveCaretOffsets()
+    public void SaveCaretPosition()
     {
-        View.LastCaretOffsets = (View.GMLTextEditor.CaretOffset, View.ASMTextEditor.CaretOffset);
+        View.LastCaretLocations = (View.GMLTextEditor.TextArea.Caret.Location, View.ASMTextEditor.TextArea.Caret.Location);
     }
 
-    public void RestoreCaretOffsets()
+    public void RestoreCaretPosition()
     {
-        View.GMLTextEditor.CaretOffset = Math.Clamp(View.LastCaretOffsets.Item1, 0, View.GMLTextEditor.Text.Length);
-        View.ASMTextEditor.CaretOffset = Math.Clamp(View.LastCaretOffsets.Item2, 0, View.ASMTextEditor.Text.Length);
+        View.GMLTextEditor.TextArea.Caret.Location = View.LastCaretLocations.Item1;
+        View.ASMTextEditor.TextArea.Caret.Location = View.LastCaretLocations.Item2;
     }
 
     public void ProcessLastGoToLocation();

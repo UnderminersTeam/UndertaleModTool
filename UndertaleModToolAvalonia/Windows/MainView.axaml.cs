@@ -104,10 +104,11 @@ public partial class MainView : UserControl, IView
 
     public void OpenSearchInCode(IServiceProvider serviceProvider)
     {
+        Window window = this.FindLogicalAncestorOfType<Window>() ?? throw new InvalidOperationException();
         new SearchInCodeWindow()
         {
             DataContext = new SearchInCodeViewModel(serviceProvider),
-        }.Show();
+        }.Show(window);
     }
 
     public void OpenFindReferences(IServiceProvider serviceProvider, UndertaleResource? resource = null)

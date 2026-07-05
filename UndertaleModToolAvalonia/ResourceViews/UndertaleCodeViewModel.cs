@@ -32,9 +32,9 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
     [Notify]
     private (Tab Tab, int Line)? _LastGoToLocation = null;
     [Notify]
-    private bool _GMLOutdated = true;
+    private bool _GMLOutdated = false;
     [Notify]
-    private bool _ASMOutdated = true;
+    private bool _ASMOutdated = false;
 
     public bool AnyOutdated => GMLOutdated || ASMOutdated;
 
@@ -198,9 +198,8 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
 
         IsCodeProcessing = true;
 
-        View?.SaveCaretOffsets();
+        View?.SaveCaretPosition();
         lastFocusedElement = MainVM.View.GetFocusedElement();
-        MainVM.IsEnabled = false;
     }
 
     void CodeProcessEnd()
@@ -210,9 +209,8 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
 
         IsCodeProcessing = false;
 
-        MainVM.IsEnabled = true;
         lastFocusedElement?.Focus();
-        View?.RestoreCaretOffsets();
+        View?.RestoreCaretPosition();
     }
 
     public async void DecompileAll()
