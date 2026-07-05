@@ -20,7 +20,6 @@ using UndertaleModLib.Models;
 using UndertaleModLib.Project;
 using UndertaleModLib.Scripting;
 using UndertaleModLib.Util;
-using static UndertaleModLib.UndertaleReader;
 
 namespace UndertaleModCli;
 
@@ -266,8 +265,8 @@ public partial class Program : IScriptInterface
         {
             Description = "Path to the UndertaleModTool project.json file"
         };
-        Option<FileInfo> projectBuildSourceOption = new("-s", "--source") { Description = "Source data file", Required = true };
-        Option<FileInfo> projectBuildDestinationOption = new("-d", "--destination") { Description = "Destination data file", Required = true };
+        Option<FileInfo> projectBuildSourceOption = new("-s", "--source") { Description = "Source data file" };
+        Option<FileInfo> projectBuildDestinationOption = new("-d", "--destination") { Description = "Destination data file" };
 
         Command projectBuildCommand = new("build", "Build a project")
         {
@@ -334,13 +333,12 @@ public partial class Program : IScriptInterface
     {
         if (datafile == null) throw new ArgumentNullException(nameof(datafile));
 
-        Console.WriteLine($"Trying to load file: '{datafile.FullName}'");
+        if (verbose)
+            Console.WriteLine($"Trying to load file: '{datafile.FullName}'");
+
         this.Verbose = verbose;
         this.Data = ReadDataFile(datafile, verbose ? WarningHandler : null, verbose ? MessageHandler : null);
         this.Output = output ?? new DirectoryInfo(datafile.DirectoryName);
-
-        if (this.Verbose)
-            Console.WriteLine("Output directory has been set to " + this.Output.FullName);
     }
 
     /// <summary>
@@ -446,7 +444,7 @@ public partial class Program : IScriptInterface
 
         // If parameter to save file was given, save the data file
         if (options.Output != null)
-            program.SaveDataFile(options.Output.FullName);
+            program.SaveDataFile(options.Output.FullName, options.Verbose ? MessageHandler : DummyHandler);
 
         return EXIT_SUCCESS;
     }
@@ -628,7 +626,7 @@ public partial class Program : IScriptInterface
 
         // If parameter to save file was given, save the data file
         if (options.Output != null)
-            program.SaveDataFile(options.Output.FullName);
+            program.SaveDataFile(options.Output.FullName, options.Verbose ? MessageHandler : DummyHandler);
 
         return EXIT_SUCCESS;
     }
@@ -638,8 +636,6 @@ public partial class Program : IScriptInterface
         try
         {
             ArgumentNullException.ThrowIfNull(options.ProjectFile);
-            ArgumentNullException.ThrowIfNull(options.Source);
-            ArgumentNullException.ThrowIfNull(options.Destination);
         }
         catch (Exception e)
         {
@@ -647,33 +643,45 @@ public partial class Program : IScriptInterface
             return EXIT_FAILURE;
         }
 
-        // Load source
-        Program program;
-        try
-        {
-            program = new Program(options.Source, options.Verbose);
-        }
-        catch (FileNotFoundException e)
-        {
-            Console.Error.WriteLine(e.Message);
-            return EXIT_FAILURE;
-        }
-
-        program.FilePath = options.Destination.FullName;
-
-        // Load project
         ProjectContext newProjectContext;
         try
         {
-            if (program.Verbose)
+            if (options.Verbose)
                 Console.WriteLine($"Loading project file '{options.ProjectFile.FullName}'");
 
-            newProjectContext = ProjectContext.CreateWithDataFilePaths(options.Source.FullName, options.Destination.FullName, options.ProjectFile.FullName);
+            newProjectContext = ProjectContext.CreateWithLocalOptions(options.ProjectFile.FullName);
 
-            if (program.Verbose)
-                Console.WriteLine($"Importing project into source data file");
+            string loadFilePath = newProjectContext.LoadDataPath;
+            string saveFilePath = newProjectContext.SaveDataPath;
+
+            if (options.Source is not null)
+                loadFilePath = options.Source.FullName;
+            if (options.Destination is not null)
+                saveFilePath = options.Destination.FullName;
+
+            if (loadFilePath is null || saveFilePath is null)
+            {
+                Console.Error.WriteLine($"Source and destination not found in local options and not set in arguments.");
+                return EXIT_FAILURE;
+            }
+
+            if (options.Verbose)
+                Console.WriteLine($"Source: {loadFilePath}\nDestination: {saveFilePath}");
+
+            Program program;
+            program = new Program(new(loadFilePath), options.Verbose);
+            program.FilePath = saveFilePath;
+
+            newProjectContext.SetDataFilePaths(loadFilePath, saveFilePath);
 
             newProjectContext.Import(program.Data);
+
+            program.Project = newProjectContext;
+
+            if (options.Verbose)
+                Console.WriteLine($"Saving to destination data file");
+
+            program.SaveDataFile(saveFilePath, options.Verbose ? MessageHandler : DummyHandler);
         }
         catch (ProjectException e)
         {
@@ -682,17 +690,9 @@ public partial class Program : IScriptInterface
         }
         catch (Exception e)
         {
-            Console.Error.WriteLine($"Error occurred when loading project:\n{e}");
+            Console.Error.WriteLine(e.Message);
             return EXIT_FAILURE;
         }
-
-        program.Project = newProjectContext;
-
-        // Save destination data file
-        if (program.Verbose)
-            Console.WriteLine($"Saving to destination data file");
-
-        program.SaveDataFile(options.Destination.FullName);
 
         return EXIT_SUCCESS;
     }
@@ -753,7 +753,7 @@ public partial class Program : IScriptInterface
                 case ConsoleKey.NumPad3:
                 case ConsoleKey.D3:
                     {
-                        SaveDataFile(FilePath);
+                        SaveDataFile(FilePath, this.Verbose ? MessageHandler : DummyHandler);
                         break;
                     }
 
@@ -763,7 +763,7 @@ public partial class Program : IScriptInterface
                     {
                         Console.Write("Where to save? ");
                         string path = RemoveQuotes(Console.ReadLine());
-                        SaveDataFile(path);
+                        SaveDataFile(path, this.Verbose ? MessageHandler : DummyHandler);
                         break;
                     }
 
@@ -1239,8 +1239,9 @@ public partial class Program : IScriptInterface
     /// Saves the currently loaded <see cref="Data"/> to an output path.
     /// </summary>
     /// <param name="outputPath">The path where to save the data.</param>
+    /// <param name="messageHandler">Handler for messages</param>
     /// <exception cref="IOException">If saving fails</exception>
-    private void SaveDataFile(string outputPath)
+    private void SaveDataFile(string outputPath, UndertaleWriter.MessageHandlerDelegate messageHandler = null)
     {
         if (Verbose)
             Console.WriteLine($"Saving new data file to '{outputPath}'");
@@ -1249,7 +1250,7 @@ public partial class Program : IScriptInterface
             // Save data.win to temp file
             using (FileStream fs = new(outputPath + "temp", FileMode.Create, FileAccess.Write))
             {
-                UndertaleIO.Write(fs, Data, MessageHandler);
+                UndertaleIO.Write(fs, Data, messageHandler);
             }
 
             // If we're executing this, the saving was successful. So we can replace the new temp file
@@ -1276,7 +1277,7 @@ public partial class Program : IScriptInterface
     /// <param name="messageHandler">Handler for messages</param>
     /// <returns></returns>
     /// <exception cref="FileNotFoundException">If the data file cannot be found</exception>
-    private static UndertaleData ReadDataFile(FileInfo datafile, WarningHandlerDelegate warningHandler = null, MessageHandlerDelegate messageHandler = null)
+    private static UndertaleData ReadDataFile(FileInfo datafile, UndertaleReader.WarningHandlerDelegate warningHandler = null, UndertaleReader.MessageHandlerDelegate messageHandler = null)
     {
         try
         {
