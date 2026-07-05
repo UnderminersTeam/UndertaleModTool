@@ -3947,14 +3947,13 @@ result in loss of work.");
                 return;
             }
 
-            // Check project-local.json
+            // Set up project
             string mainFilePath = openProjectDialog.FileName;
-            string loadFilePath = null;
-            string saveFilePath = null;
 
+            ProjectContext newProjectContext = null;
             try
             {
-                ProjectContext.LoadProjectLocalOptions(mainFilePath, out loadFilePath, out saveFilePath);
+                newProjectContext = ProjectContext.CreateWithLocalOptions(mainFilePath);
             }
             catch (ProjectException ex)
             {
@@ -3962,13 +3961,22 @@ result in loss of work.");
                 return;
             }
 
+            string loadFilePath = newProjectContext.LoadDataPath;
+            string saveFilePath = newProjectContext.SaveDataPath;
+
             string dataFilePathToLoad = loadFilePath;
 
-            // If necessary, ask for a source data file
+            // If there's no source data file defined
             if (loadFilePath is null)
             {
-                if (Data is null || FilePath is null)
+                if (Data is not null && FilePath is not null)
                 {
+                    // Use currently loaded data file as source data file
+                    loadFilePath = FilePath;
+                }
+                else
+                {
+                    // If there's no loaded data file, ask for a source data file
                     OpenFileDialog sourceDialog = new()
                     {
                         DefaultExt = "win",
@@ -3983,7 +3991,7 @@ result in loss of work.");
                 }
             }
 
-            // If necessary, ask for a destination data file
+            // If there's no destination data file defined
             if (saveFilePath is null)
             {
                 saveFilePath = ChooseProjectSaveFile(dataFilePathToLoad ?? FilePath);
@@ -4011,14 +4019,15 @@ result in loss of work.");
             // Change main file path to the save data file path
             FilePath = saveFilePath;
 
+            // Set project data file paths
+            newProjectContext.SetDataFilePaths(loadFilePath, saveFilePath);
+
             // Attempt loading project from the specific JSON
-            ProjectContext newProjectContext = null;
             IsEnabled = false;
             await Task.Run(() =>
             {
                 try
                 {
-                    newProjectContext = ProjectContext.CreateWithDataFilePaths(loadFilePath, saveFilePath, mainFilePath);
                     newProjectContext.Import(Data, null, (f) => Dispatcher.Invoke(f));
                 }
                 catch (ProjectException ex)
