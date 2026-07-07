@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using SkiaSharp;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
@@ -22,23 +21,13 @@ public class ImageCache
 
     public SKImage GetImageFromGMImage(GMImage gmImage)
     {
-        // Faster shortcut
-        if (gmImage.Format == GMImage.ImageFormat.Png)
-        {
-            return SKImage.FromEncodedData(gmImage.GetData());
-        }
-
         byte[] data = gmImage.ConvertToRawBgra().GetData();
-        GCHandle gcHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
-
         SKImageInfo info = new(gmImage.Width, gmImage.Height, SKColorType.Bgra8888, SKAlphaType.Unpremul);
-        SKPixmap pixmap = new(info, gcHandle.AddrOfPinnedObject(), info.RowBytes);
-        SKImage? image = SKImage.FromPixels(pixmap, delegate
-        { gcHandle.Free(); });
+
+        SKImage? image = SKImage.FromPixelCopy(info, data);
 
         if (image is null)
         {
-            gcHandle.Free();
             throw new Exception("Could not create image");
         }
 
