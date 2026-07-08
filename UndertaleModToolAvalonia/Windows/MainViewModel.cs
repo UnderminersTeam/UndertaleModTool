@@ -57,6 +57,8 @@ public partial class MainViewModel
     [Notify]
     private (uint Major, uint Minor, uint Release, uint Build) _DataVersion;
 
+    private IStorageFolder? lastDataLocation;
+
     // Project
     [Notify]
     private ProjectContext? _Project;
@@ -180,6 +182,7 @@ public partial class MainViewModel
         if (await LoadData(stream))
         {
             DataPath = file.TryGetLocalPath();
+            lastDataLocation = await file.GetParentAsync();
         }
     }
 
@@ -547,6 +550,7 @@ public partial class MainViewModel
         {
             Title = "Open data file",
             FileTypeFilter = FilePickerFileTypes.Data,
+            SuggestedStartLocation = lastDataLocation,
         });
 
         if (files.Count != 1)
@@ -559,6 +563,7 @@ public partial class MainViewModel
         if (await LoadData(stream))
         {
             DataPath = files[0].TryGetLocalPath();
+            lastDataLocation = await files[0].GetParentAsync();
         }
     }
 
@@ -595,7 +600,8 @@ public partial class MainViewModel
         {
             Title = "Save data file",
             FileTypeChoices = FilePickerFileTypes.Data,
-            DefaultExtension = ".win",
+            SuggestedFileName = Path.GetFileName(DataPath),
+            SuggestedStartLocation = lastDataLocation,
         });
 
         if (file is null)
@@ -606,6 +612,7 @@ public partial class MainViewModel
         if (await SaveData(stream))
         {
             DataPath = file.TryGetLocalPath();
+            lastDataLocation = await file.GetParentAsync();
             return true;
         }
 
