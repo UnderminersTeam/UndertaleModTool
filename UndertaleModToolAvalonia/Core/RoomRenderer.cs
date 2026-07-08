@@ -17,6 +17,13 @@ public class RoomRenderer
     {
         public interface IRenderCommand;
 
+        public readonly record struct NinePatchData(int Left, int Top, int Right, int Bottom,
+            UndertaleSprite.NineSlice.TileMode TileModeCenter,
+            UndertaleSprite.NineSlice.TileMode TileModeLeft,
+            UndertaleSprite.NineSlice.TileMode TileModeTop,
+            UndertaleSprite.NineSlice.TileMode TileModeRight,
+            UndertaleSprite.NineSlice.TileMode TileModeBottom);
+
         public readonly record struct BackgroundColorRenderCommand(uint RoomWidth, uint RoomHeight, uint Color)
             : IRenderCommand;
         public readonly record struct BackgroundRenderCommand(SKImage Image,
@@ -32,7 +39,8 @@ public class RoomRenderer
         public readonly record struct GameObjectRenderCommand(SKImage Image,
             ushort SourceX, ushort SourceY, ushort SourceWidth, ushort SourceHeight,
             ushort TargetX, ushort TargetY, ushort TargetWidth, ushort TargetHeight,
-            int X, int Y, float ScaleX, float ScaleY, uint Color, float Rotation, int OriginX, int OriginY)
+            int X, int Y, float ScaleX, float ScaleY, uint Color, float Rotation, int OriginX, int OriginY,
+            NinePatchData? NinePatch)
             : IRenderCommand;
         public readonly record struct SpriteRenderCommand(SKImage Image,
             ushort SourceX, ushort SourceY, ushort SourceWidth, ushort SourceHeight,
@@ -218,7 +226,8 @@ public class RoomRenderer
                     Color: roomGameObject.Color,
                     Rotation: -roomGameObject.Rotation,
                     OriginX: roomGameObject.ObjectDefinition!.Sprite.OriginX,
-                    OriginY: roomGameObject.ObjectDefinition!.Sprite.OriginY
+                    OriginY: roomGameObject.ObjectDefinition!.Sprite.OriginY,
+                    NinePatch: GetNinePatchData(roomGameObject.ObjectDefinition?.Sprite!)
                 ));
             }
         }
@@ -340,6 +349,19 @@ public class RoomRenderer
                 OutputBorderY: layer.TilesData.Background!.GMS2OutputBorderY
             ));
         }
+
+        static NinePatchData? GetNinePatchData(UndertaleSprite sprite)
+        {
+            if (sprite.V3NineSlice is null)
+                return null;
+
+            return new(sprite.V3NineSlice.Left, sprite.V3NineSlice.Top, (int)sprite.Width - sprite.V3NineSlice.Right, (int)sprite.Height - sprite.V3NineSlice.Bottom,
+                sprite.V3NineSlice.TileModes[0],
+                sprite.V3NineSlice.TileModes[1],
+                sprite.V3NineSlice.TileModes[2],
+                sprite.V3NineSlice.TileModes[3],
+                sprite.V3NineSlice.TileModes[4]);
+        }
     }
 
     SKCanvas Canvas = null!;
@@ -447,12 +469,38 @@ public class RoomRenderer
         Canvas.Save();
         Canvas.Translate(c.X, c.Y);
         Canvas.RotateDegrees(c.Rotation);
-        Canvas.Scale(c.ScaleX, c.ScaleY);
 
-        Canvas.DrawImage(c.Image, SKRect.Create(-c.OriginX + c.TargetX, -c.OriginY + c.TargetY, c.TargetWidth, c.TargetHeight), new SKPaint()
+        // TODO: Don't use DrawImageNinePatch, draw it manually so tile modes can be used.
+        // Also, add nine patches to sprites below
+
+        SKPaint paint = new()
         {
             ColorFilter = SKColorFilter.CreateBlendMode(UndertaleColor.ToColor(c.Color).ToSKColor(), SKBlendMode.Modulate),
-        });
+        };
+
+        if (c.NinePatch is NinePatchData ninePatch)
+        {
+            SKRect destination = SKRect.Create(
+                    (-c.OriginX + c.TargetX) * c.ScaleX,
+                    (-c.OriginY + c.TargetY) * c.ScaleY,
+                    (c.TargetWidth) * c.ScaleX,
+                    (c.TargetHeight) * c.ScaleY);
+
+            SKRectI center = new SKRectI(ninePatch.Left, ninePatch.Top, ninePatch.Right, ninePatch.Bottom);
+
+            Canvas.DrawImageNinePatch(c.Image, center, destination, paint);
+        }
+        else
+        {
+            SKRect destination = SKRect.Create(
+                -c.OriginX + c.TargetX,
+                -c.OriginY + c.TargetY,
+                c.TargetWidth,
+                c.TargetHeight);
+
+            Canvas.Scale(c.ScaleX, c.ScaleY);
+            Canvas.DrawImage(c.Image, destination, paint);
+        }
 
         Canvas.Restore();
     }
