@@ -43,7 +43,7 @@ public partial class SearchInCodeViewModel
 
     GlobalDecompileContext? globalDecompileContext;
 
-    ConcurrentDictionary<UndertaleCode, List<(int, string)>> resultsByCodeDict = new();
+    ConcurrentDictionary<UndertaleCode, List<(int, int, string)>> resultsByCodeDict = new();
     int resultCount = 0;
     int failedCount = 0;
 
@@ -118,9 +118,9 @@ public partial class SearchInCodeViewModel
             foreach (var result in sortedResultsByCodeDict)
             {
                 UndertaleCode code = result.Key;
-                foreach (var (lineNumber, lineText) in result.Value)
+                foreach (var (lineNumber, columnNumber, lineText) in result.Value)
                 {
-                    sortedResultsList.Add(new(code, lineNumber, lineText));
+                    sortedResultsList.Add(new(code, lineNumber, columnNumber, lineText));
                 }
             }
         });
@@ -232,6 +232,8 @@ public partial class SearchInCodeViewModel
                     }
                 }
 
+                int columnNumber = index - lineStartIndex;
+
                 // Start at match.Index so it's only one line in case the search was multiline
                 int lineEndIndex = codeText.IndexOf('\n', index);
                 lineEndIndex = lineEndIndex == -1 ? codeText.Length : lineEndIndex;
@@ -243,7 +245,7 @@ public partial class SearchInCodeViewModel
                     resultsByCodeDict[code] = [];
                     nameWritten = true;
                 }
-                resultsByCodeDict[code].Add((lineNumber + 1, lineText));
+                resultsByCodeDict[code].Add((lineNumber + 1, columnNumber + 1, lineText));
 
                 Interlocked.Increment(ref resultCount);
             }
@@ -257,7 +259,7 @@ public partial class SearchInCodeViewModel
         var tab = MainVM.TabOpen(searchResult.Code, inNewTab);
         if (tab is not null && tab.Content is UndertaleCodeViewModel vm)
         {
-            vm.GoToLocation(!IsInAssembly ? UndertaleCodeViewModel.Tab.GML : UndertaleCodeViewModel.Tab.ASM, searchResult.LineNumber);
+            vm.GoToLocation(!IsInAssembly ? UndertaleCodeViewModel.Tab.GML : UndertaleCodeViewModel.Tab.ASM, searchResult.LineNumber, searchResult.ColumnNumber);
         }
     }
 
@@ -268,13 +270,15 @@ public partial class SearchInCodeViewModel
 
         public UndertaleCode Code;
         public int LineNumber;
+        public int ColumnNumber;
 
-        public SearchResult(UndertaleCode code, int lineNumber, string text)
+        public SearchResult(UndertaleCode code, int lineNumber, int columnNumber, string text)
         {
             Code = code;
             LineNumber = lineNumber;
+            ColumnNumber = columnNumber;
 
-            Location = code.Name.Content + ":" + lineNumber;
+            Location = code.Name.Content + ":" + lineNumber + "," + columnNumber;
             Text = text.Trim();
         }
     }

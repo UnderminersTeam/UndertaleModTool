@@ -5,7 +5,6 @@ using System.Reflection;
 using System.Xml;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Avalonia.Media;
 using Avalonia.Media.TextFormatting;
@@ -246,20 +245,19 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
         if (DataContext is not UndertaleCodeViewModel vm)
             return;
 
-        if (vm.LastGoToLocation is not (UndertaleCodeViewModel.Tab tab, int line) location)
+        if (vm.LastGoToLocation is not (UndertaleCodeViewModel.Tab tab, int line, int column) location)
             return;
 
         vm.SelectedTab = location.Tab;
 
         TextEditor textEditor = (location.Tab == UndertaleCodeViewModel.Tab.GML) ? GMLTextEditor : ASMTextEditor;
 
-        textEditor.TextArea.Caret.Column = 0;
-        textEditor.TextArea.Caret.Line = location.Line;
-        textEditor.Focus();
+        textEditor.TextArea.Caret.Location = new(location.Line, location.Column);
+        textEditor.TextArea.Focus();
 
         void OnLayoutUpdated(object? _, EventArgs __)
         {
-            textEditor.ScrollToLine(location.Line);
+            textEditor.ScrollTo(location.Line, location.Column);
             textEditor.LayoutUpdated -= OnLayoutUpdated;
         }
 

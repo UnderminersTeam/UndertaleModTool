@@ -30,7 +30,7 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
     [Notify]
     private Tab _SelectedTab;
     [Notify]
-    private (Tab Tab, int Line)? _LastGoToLocation = null;
+    private (Tab Tab, int Line, int Column)? _LastGoToLocation = null;
     [Notify]
     private bool _GMLOutdated = false;
     [Notify]
@@ -187,9 +187,9 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
         return true;
     }
 
-    public void GoToLocation(Tab tab, int lineNumber)
+    public void GoToLocation(Tab tab, int lineNumber, int columnNumber)
     {
-        LastGoToLocation = (tab, lineNumber);
+        LastGoToLocation = (tab, lineNumber, columnNumber);
     }
 
     void CodeProcessStart()

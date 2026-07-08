@@ -10,6 +10,7 @@
         IsEnabled="{Binding IsEnabled}"
         Width="800"
         Height="400"
+        WindowStartupLocation="CenterOwner"
         Classes="SearchInCodeWindow">
     <Grid RowDefinitions="Auto,1*,Auto">
         <StackPanel Grid.Row="0">
