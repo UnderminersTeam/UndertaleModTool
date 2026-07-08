@@ -5,6 +5,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
+using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Rendering.SceneGraph;
 using Avalonia.Skia;
@@ -93,6 +94,8 @@ public class SKImageViewer : Control
 
     readonly CustomDrawOperation customDrawOperation;
 
+    double scaling = 1;
+
     public SKImageViewer()
     {
         ClipToBounds = true;
@@ -112,11 +115,11 @@ public class SKImageViewer : Control
     Size GetSize()
     {
         if (Image is UndertaleTexturePageItem texturePageItem)
-            return new Size(texturePageItem.BoundingWidth, texturePageItem.BoundingHeight);
+            return new Size(texturePageItem.BoundingWidth, texturePageItem.BoundingHeight) * scaling;
         else if (Image is GMImage gmImage)
-            return new Size(gmImage.Width, gmImage.Height);
+            return new Size(gmImage.Width, gmImage.Height) * scaling;
         else if (Image is UndertaleSprite.MaskEntry maskEntry)
-            return new Size(maskEntry.Width, maskEntry.Height);
+            return new Size(maskEntry.Width, maskEntry.Height) * scaling;
 
         return new Size(0, 0);
     }
@@ -126,11 +129,32 @@ public class SKImageViewer : Control
         return GetSize();
     }
 
+    protected override void OnPointerWheelChanged(PointerWheelEventArgs e)
+    {
+        if (e.KeyModifiers.HasFlag(KeyModifiers.Control))
+        {
+            var pointerPosition = e.GetPosition(this);
+
+            if (e.Delta.Y > 0)
+            {
+                scaling *= 2;
+            }
+            else if (e.Delta.Y < 0)
+            {
+                scaling /= 2;
+            }
+
+            Invalidate();
+            e.Handled = true;
+        }
+    }
+
     public override void Render(DrawingContext context)
     {
         Size size = GetSize();
         customDrawOperation.Bounds = new Rect(0, 0, size.Width, size.Height);
         customDrawOperation.Image = Image;
+        customDrawOperation.Scaling = scaling;
 
         context.Custom(customDrawOperation);
     }
@@ -140,6 +164,7 @@ public class SKImageViewer : Control
         public Rect Bounds { get; set; }
 
         public object? Image;
+        public double Scaling = 1;
 
         readonly MainViewModel mainVM = App.Services.GetRequiredService<MainViewModel>();
 
@@ -163,7 +188,6 @@ public class SKImageViewer : Control
 
                 using var lease = leaseFeature.Lease();
                 SKCanvas canvas = lease.SkCanvas;
-                canvas.Save();
 
                 // Checkered background
                 int gridSize = 8;
@@ -178,6 +202,9 @@ public class SKImageViewer : Control
                         if ((x + y) % 2 != 0)
                             canvas.DrawRect(SKRect.Create(x * gridSize, y * gridSize, gridSize, gridSize), gridColor2);
                     }
+
+                canvas.Save();
+                canvas.Scale((float)Scaling);
 
                 // Image
                 RenderImage(canvas);
