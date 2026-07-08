@@ -19,6 +19,8 @@ jobs:
             rid: linux-x64
           - os: macOS-latest
             rid: osx-x64
+          - os: macOS-latest
+            rid: osx-arm64
           - os: windows-latest
             rid: win-x64
 
@@ -37,16 +39,16 @@ jobs:
     - name: Build
       run: dotnet build UndertaleModCli --no-restore
     - name: Publish ${{ matrix.os }} CLI
-      run: dotnet publish UndertaleModCli -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=false --output CLI-${{ matrix.os }}
+      run: dotnet publish UndertaleModCli -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=false --output CLI-${{ matrix.os }}${{ matrix.rid == 'osx-arm64' && '-arm64' || '' }}
     - name: Copy external files
       run: |
-        cp ./README.md ./CLI-${{ matrix.os }}/
-        cp ./SCRIPTS.md ./CLI-${{ matrix.os }}/
-        cp ./LICENSE.txt ./CLI-${{ matrix.os }}/
-        cp -r ./UndertaleModTool/Scripts/ ./CLI-${{ matrix.os }}/Scripts/
-        rm ./CLI-${{ matrix.os }}/Underanalyzer.pdb
+        cp ./README.md ./CLI-${{ matrix.os }}${{ matrix.rid == 'osx-arm64' && '-arm64' || '' }}/
+        cp ./SCRIPTS.md ./CLI-${{ matrix.os }}${{ matrix.rid == 'osx-arm64' && '-arm64' || '' }}/
+        cp ./LICENSE.txt ./CLI-${{ matrix.os }}${{ matrix.rid == 'osx-arm64' && '-arm64' || '' }}/
+        cp -r ./UndertaleModTool/Scripts/ ./CLI-${{ matrix.os }}${{ matrix.rid == 'osx-arm64' && '-arm64' || '' }}/Scripts/
+        rm ./CLI-${{ matrix.os }}${{ matrix.rid == 'osx-arm64' && '-arm64' || '' }}/Underanalyzer.pdb
     - name: Upload ${{ matrix.os }} CLI
       uses: actions/upload-artifact@v7
       with:
-        name: CLI-${{ matrix.os }}-isBundled-${{ matrix.bundled }}
-        path: CLI-${{ matrix.os }}
+        name: CLI-${{ matrix.os }}${{ matrix.rid == 'osx-arm64' && '-arm64' || '' }}-isBundled-${{ matrix.bundled }}
+        path: CLI-${{ matrix.os }}${{ matrix.rid == 'osx-arm64' && '-arm64' || '' }}
