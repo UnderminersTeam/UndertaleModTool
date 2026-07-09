@@ -163,7 +163,7 @@ if (!deltamode)
 else
 {
     Dictionary<string, string> translations = new Dictionary<string, string>();
-    foreach (string line in File.ReadAllLines(Path.Combine(Path.GetDirectoryName(FilePath), "lang/lang_en.json")))
+    foreach (string line in File.ReadAllLines(Path.Join(Path.GetDirectoryName(FilePath), "lang/lang_en.json")))
     {
         // Yeah. No JSON support in scripts. Deal with it.
         string[] a = line.Split(new char[] { ':' }, 2);

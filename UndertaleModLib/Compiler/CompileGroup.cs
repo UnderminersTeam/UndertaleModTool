@@ -28,6 +28,10 @@ public sealed class CompileGroup
     /// <summary>
     /// This action will be called when main-thread operations should occur, and can be changed.
     /// </summary>
+    /// <remarks>
+    /// When the action is called, supplied action argument *must* be executed synchronously.
+    /// That is, the action must return only after the argument callback has completed execution.
+    /// </remarks>
     public Action<Action> MainThreadAction { get; set; } = static (f) => f();
 
     /// <summary>
@@ -581,6 +585,11 @@ public sealed class CompileGroup
                     {
                         // Named function; trivial
                         shortName = functionEntry.FunctionName;
+                        if (shortName.StartsWith("gml_Script_"))
+                        {
+                            // Prefabs cause problematic linking behavior unless we strip this prefix
+                            shortName = shortName["gml_Script_".Length..];
+                        }
                         shortNameNoNumbers = shortName;
                     }
                     else if (functionEntry.Kind == FunctionEntryKind.StructInstantiation)

@@ -8,7 +8,10 @@ all Undertale versions.");
 
 if (Data.GeneralInfo.Name.Content == "NXTALE" || Data.GeneralInfo.Name.Content.StartsWith("UNDERTALE")) 
 {
-    UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+    UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
+    {
+        MainThreadAction = MainThreadAction
+    };
     importGroup.QueueAppend(Data.Code.ByName("gml_Object_obj_time_Step_1"), @"
     if (global.debug == 0)
     {

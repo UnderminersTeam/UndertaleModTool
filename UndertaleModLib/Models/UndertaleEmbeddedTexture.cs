@@ -255,9 +255,9 @@ public class UndertaleEmbeddedTexture : UndertaleNamedResource, IDisposable
                 return _placeholderTexture;
 
             // Try to find file on disk
-            string path = Path.Combine(_2022_9_GameDirectory, TextureInfo.Directory.Content,
-                                       TextureInfo.Name.Content + "_" + IndexInGroup + TextureInfo.Extension.Content);
-            if (!File.Exists(path))
+            string path = Path.Join(_2022_9_GameDirectory, TextureInfo.Directory.Content,
+                                    TextureInfo.Name.Content + "_" + IndexInGroup + TextureInfo.Extension.Content);
+            if (!Paths.IsWithinDirectory(_2022_9_GameDirectory, path) || !File.Exists(path))
                 return _placeholderTexture;
 
             // Load file!

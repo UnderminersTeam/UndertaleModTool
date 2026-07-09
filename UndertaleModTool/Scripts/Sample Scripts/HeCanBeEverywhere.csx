@@ -20,6 +20,7 @@ Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = new Underanalyz
 UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data, globalDecompileContext, decompilerSettings)
 {
     ThrowOnNoOpFindReplace = true
+    // MainThreadAction not required due to no async operations being used here
 };
 
 // spr_joker_main has an offset, so we need to make our own one

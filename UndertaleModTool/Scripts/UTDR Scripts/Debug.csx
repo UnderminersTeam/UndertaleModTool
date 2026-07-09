@@ -4,7 +4,8 @@ bool enable = ScriptQuestion("Enable debug mode?\n\n(No = disable debug mode, if
 
 UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
 {
-    ThrowOnNoOpFindReplace = true
+    ThrowOnNoOpFindReplace = true,
+    MainThreadAction = MainThreadAction
 };
 
 string internalName = Data.GeneralInfo.Name.Content;
@@ -130,6 +131,14 @@ else if (displayName.ToUpper().Contains("DELTARUNE"))
             {
                 importGroup.QueueFindReplace(initializerCode, "global.debug = ", "global.debug = 1; //");
             }
+        }
+        else if (enable && displayName == "DELTARUNE Chapter 5")
+        {
+            // Chapter 5 references rooms that don't exist which causes crashes in debug mode
+            importGroup.QueueFindReplace("gml_GlobalScript_scr_save", "room == rm_blank", "room == room_empty");
+            importGroup.QueueFindReplace("gml_GlobalScript_scr_get_room_by_id", "scr_room(rm_blank, 50094)", "scr_room(room_empty, 50094)");
+
+            importGroup.QueueFindReplace(initializerCode, "global.debug = ", "global.debug = 1; //");
         }
         else
         {

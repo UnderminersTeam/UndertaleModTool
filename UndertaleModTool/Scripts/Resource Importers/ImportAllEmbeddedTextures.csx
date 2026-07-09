@@ -11,7 +11,7 @@ EnsureDataLoaded();
 string embeddedTexturesPath = PromptChooseDirectory();
 if (embeddedTexturesPath is null)
 {
-    throw new ScriptException("The import folder was not set.");
+    throw new ScriptCancelledException("The import folder was not set.");
 }
 
 string subPath = embeddedTexturesPath;
@@ -26,7 +26,7 @@ foreach (UndertaleEmbeddedTexture target in Data.EmbeddedTextures)
     string filename = $"{i}.png";
     try
     {
-        target.TextureData.Image = GMImage.FromPng(File.ReadAllBytes(Path.Combine(subPath, filename)))
+        target.TextureData.Image = GMImage.FromPng(File.ReadAllBytes(Paths.JoinVerifyWithinDirectory(subPath, filename)))
                                           .ConvertToFormat(target.TextureData.Image.Format);
     }
     catch (Exception ex) 

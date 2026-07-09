@@ -10,7 +10,7 @@ EnsureDataLoaded();
 string stringsPath = PromptLoadFile("", "TXT files (*.txt)|*.txt|All files (*.*)|*.*");
 if (string.IsNullOrWhiteSpace(stringsPath))
 {
-    throw new ScriptException("The import file was not set.");
+    throw new ScriptCancelledException("The import file was not set.");
 }
 
 int file_length = 0;

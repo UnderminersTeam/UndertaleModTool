@@ -45,7 +45,7 @@ using (worker = new())
             if (tgin.Tilesets != null)
                 sum += tgin.Tilesets.Count;
             UpdateProgressBar(null, $"Processing \"{tgin.Name.Content}\" (TGIN Group {processTgin++})", progress, sum);
-            string outputFolder = Path.Combine(mainOutputFolder, tgin.Name.Content); // TODO: replace invalid characters?
+            string outputFolder = Paths.JoinVerifyWithinDirectory(mainOutputFolder, tgin.Name.Content); // TODO: replace invalid characters?
             Directory.CreateDirectory(outputFolder);
             if (tgin.TexturePages != null)
             {
@@ -87,11 +87,11 @@ ScriptMessage("All graphics texture groups successfully exported.");
 
 void DumpEmbeddedTexturePage(string outputFolder, UndertaleEmbeddedTexture Emb)
 {
-    string exportedTexturesFolder = Path.Combine(outputFolder, "EmbeddedTextures");
+    string exportedTexturesFolder = Path.Join(outputFolder, "EmbeddedTextures");
     Directory.CreateDirectory(exportedTexturesFolder);
     try
     {
-        using (FileStream fs = new(Path.Combine(exportedTexturesFolder, $"{Data.EmbeddedTextures.IndexOf(Emb)}.png"), FileMode.Create))
+        using (FileStream fs = new(Paths.JoinVerifyWithinDirectory(exportedTexturesFolder, $"{Data.EmbeddedTextures.IndexOf(Emb)}.png"), FileMode.Create))
             Emb.TextureData.Image.SavePng(fs);
     }
     catch (Exception ex) 
@@ -105,10 +105,10 @@ void DumpSprite(string outputFolder, UndertaleSprite spr)
     {
         if (spr.Textures[i]?.Texture != null)
         {
-            string exportedTexturesFolder = Path.Combine(outputFolder, "Sprites");
+            string exportedTexturesFolder = Path.Join(outputFolder, "Sprites");
             Directory.CreateDirectory(exportedTexturesFolder);
             UndertaleTexturePageItem tex = spr.Textures[i].Texture;
-            worker.ExportAsPNG(tex, Path.Combine(exportedTexturesFolder, $"{spr.Name.Content}_{i}.png"), null, padding);
+            worker.ExportAsPNG(tex, Paths.JoinVerifyWithinDirectory(exportedTexturesFolder, $"{spr.Name.Content}_{i}.png"), null, padding);
         }
     }
 }
@@ -116,19 +116,19 @@ void DumpFont(string outputFolder, UndertaleFont fnt)
 {
     if (fnt.Texture != null)
     {
-        string exportedTexturesFolder = Path.Combine(outputFolder, "Fonts");
+        string exportedTexturesFolder = Path.Join(outputFolder, "Fonts");
         Directory.CreateDirectory(exportedTexturesFolder);
         UndertaleTexturePageItem tex = fnt.Texture;
-        worker.ExportAsPNG(tex, Path.Combine(exportedTexturesFolder, $"{fnt.Name.Content}.png"));
+        worker.ExportAsPNG(tex, Paths.JoinVerifyWithinDirectory(exportedTexturesFolder, $"{fnt.Name.Content}.png"));
     }
 }
 void DumpTileset(string outputFolder, UndertaleBackground Tile)
 {
     if (Tile.Texture != null)
     {
-        string exportedTexturesFolder = Path.Combine(outputFolder, "Tilesets");
+        string exportedTexturesFolder = Path.Join(outputFolder, "Tilesets");
         Directory.CreateDirectory(exportedTexturesFolder);
         UndertaleTexturePageItem tex = Tile.Texture;
-        worker.ExportAsPNG(tex, Path.Combine(exportedTexturesFolder, $"{Tile.Name.Content}.png"));
+        worker.ExportAsPNG(tex, Paths.JoinVerifyWithinDirectory(exportedTexturesFolder, $"{Tile.Name.Content}.png"));
     }
 }

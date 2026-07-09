@@ -8,11 +8,6 @@ namespace UndertaleModLib.Models;
 public enum UndertaleExtensionKind : uint
 {
     /// <summary>
-    /// TODO: unknown, needs more research.
-    /// </summary>
-    [Obsolete("Likely unused")]
-    Unknown0 = 0,
-    /// <summary>
     /// A DLL extension.
     /// </summary>
     Dll = 1,
