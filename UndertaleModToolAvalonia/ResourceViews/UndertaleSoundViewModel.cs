@@ -1,9 +1,11 @@
 using System;
 using System.ComponentModel;
+using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using PropertyChanged.SourceGenerator;
 using UndertaleModLib;
 using UndertaleModLib.Models;
+using UndertaleModLib.Util;
 
 namespace UndertaleModToolAvalonia;
 
@@ -15,6 +17,8 @@ public partial class UndertaleSoundViewModel : IUndertaleResourceViewModel
 
     [Notify]
     private bool _IsBuiltinAudioGroup;
+    [Notify]
+    private bool _IsExternal;
 
     AudioPlayer? audioPlayer = null;
 
@@ -24,7 +28,7 @@ public partial class UndertaleSoundViewModel : IUndertaleResourceViewModel
 
         Sound = sound;
 
-        UpdateIsBuiltinAudioGroup();
+        UpdateSoundProperties();
     }
 
     public void OnAttached()
@@ -41,8 +45,28 @@ public partial class UndertaleSoundViewModel : IUndertaleResourceViewModel
     public async void PlayAudio()
     {
         audioPlayer?.Stop();
-        if (Sound.AudioFile is not null)
-            audioPlayer = new(Sound.AudioFile.Data);
+
+        if (!IsExternal)
+        {
+            if (IsBuiltinAudioGroup)
+            {
+                if (Sound.AudioFile is not null)
+                {
+                    audioPlayer = new(Sound.AudioFile.Data);
+                }
+            }
+            else if (Sound.AudioGroup is not null)
+            {
+                if (GetAudioGroupSoundData() is byte[] data)
+                {
+                    audioPlayer = new(data);
+                }
+            }
+        }
+        else
+        {
+            // TODO: Play external sound
+        }
     }
 
     public async void StopAudio()
@@ -53,14 +77,45 @@ public partial class UndertaleSoundViewModel : IUndertaleResourceViewModel
 
     void OnSoundPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(UndertaleSound.AudioGroup))
+        if (e.PropertyName == nameof(UndertaleSound.AudioGroup)
+            || e.PropertyName == nameof(UndertaleSound.Flags))
         {
-            UpdateIsBuiltinAudioGroup();
+            UpdateSoundProperties();
         }
     }
 
-    void UpdateIsBuiltinAudioGroup()
+    void UpdateSoundProperties()
     {
-        IsBuiltinAudioGroup = Sound.AudioGroup is null || (MainVM.Data!.AudioGroups.IndexOf(Sound.AudioGroup) == MainVM.Data!.GetBuiltinSoundGroupID());
+        IsExternal = !Sound.Flags.HasFlag(UndertaleSound.AudioEntryFlags.IsEmbedded);
+        IsBuiltinAudioGroup = Sound.Flags.HasFlag(UndertaleSound.AudioEntryFlags.IsEmbedded)
+            && (Sound.AudioGroup is null || (MainVM.Data!.AudioGroups.IndexOf(Sound.AudioGroup) == MainVM.Data!.GetBuiltinSoundGroupID()));
+    }
+
+    byte[]? GetAudioGroupSoundData()
+    {
+        // TODO: Cache audio groups somewhere to not load them every time.
+        if (Sound.AudioGroup is null)
+            return null;
+
+        string relativePath = Sound.AudioGroup.Path?.Content ?? $"audiogroup{Sound.GroupID}.dat";
+
+        string path = Paths.JoinVerifyWithinDirectory(Path.GetDirectoryName(MainVM.DataPath), relativePath);
+
+        if (File.Exists(path))
+        {
+            using FileStream stream = File.OpenRead(path);
+
+            // TODO: Maybe deal with messages and warnings
+            UndertaleData audioGroupData = UndertaleIO.Read(stream);
+
+            if (Sound.AudioID >= audioGroupData.EmbeddedAudio.Count)
+                return null;
+
+            UndertaleEmbeddedAudio audioGroupEmbeddedAudio = audioGroupData.EmbeddedAudio[Sound.AudioID];
+
+            return audioGroupEmbeddedAudio.Data;
+        }
+
+        return null;
     }
 }
