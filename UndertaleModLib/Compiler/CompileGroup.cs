@@ -585,6 +585,11 @@ public sealed class CompileGroup
                     {
                         // Named function; trivial
                         shortName = functionEntry.FunctionName;
+                        if (shortName.StartsWith("gml_Script_"))
+                        {
+                            // Prefabs cause problematic linking behavior unless we strip this prefix
+                            shortName = shortName["gml_Script_".Length..];
+                        }
                         shortNameNoNumbers = shortName;
                     }
                     else if (functionEntry.Kind == FunctionEntryKind.StructInstantiation)

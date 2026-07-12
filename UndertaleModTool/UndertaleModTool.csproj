@@ -66,7 +66,7 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="log4net" Version="3.3.1" />
+        <PackageReference Include="log4net" Version="3.3.2" />
         <PackageReference Include="Microsoft-WindowsAPICodePack-Shell">
             <Version>1.1.5</Version>
         </PackageReference>
@@ -88,7 +88,7 @@
             <Version>13.0.4</Version>
         </PackageReference>
         <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.1" />
-        <PackageReference Include="PropertyChanged.Fody" Version="4.1.0" />
+        <PackageReference Include="PropertyChanged.Fody" Version="4.1.0" PrivateAssets="All" />
         <PackageReference Include="Microsoft.Windows.Compatibility" Version="10.0.9" />
     </ItemGroup>
     <Target Name="AfterResolveReferences">
