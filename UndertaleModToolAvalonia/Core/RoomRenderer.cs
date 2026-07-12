@@ -442,7 +442,7 @@ public class RoomRenderer
                 }
                 Canvas.Translate(x, y);
                 Canvas.Scale(c.ScaleX, c.ScaleY);
-                Canvas.DrawImage(c.Image, SKRect.Create(c.TargetX, c.TargetY, c.TargetWidth, c.TargetHeight), skPaint);
+                Canvas.DrawImage(c.Image, SKRect.Create(c.TargetX, c.TargetY, c.TargetWidth, c.TargetHeight), SKSamplingOptions.Default, skPaint);
                 Canvas.Restore();
             }
         }
@@ -456,7 +456,7 @@ public class RoomRenderer
 
         Canvas.Translate(c.X, c.Y);
         Canvas.Scale(c.ScaleX, c.ScaleY);
-        Canvas.DrawImage(c.Image, 0, 0);
+        Canvas.DrawImage(c.Image, 0, 0, SKSamplingOptions.Default);
         Canvas.Restore();
     }
 
@@ -499,7 +499,7 @@ public class RoomRenderer
                 c.TargetHeight);
 
             Canvas.Scale(c.ScaleX, c.ScaleY);
-            Canvas.DrawImage(c.Image, destination, paint);
+            Canvas.DrawImage(c.Image, destination, SKSamplingOptions.Default, paint);
         }
 
         Canvas.Restore();
@@ -517,7 +517,7 @@ public class RoomRenderer
         Canvas.RotateDegrees(c.Rotation);
         Canvas.Scale(c.ScaleX, c.ScaleY);
 
-        Canvas.DrawImage(c.Image, SKRect.Create(-c.OriginX + c.TargetX, -c.OriginY + c.TargetY, c.TargetWidth, c.TargetHeight), new SKPaint()
+        Canvas.DrawImage(c.Image, SKRect.Create(-c.OriginX + c.TargetX, -c.OriginY + c.TargetY, c.TargetWidth, c.TargetHeight), SKSamplingOptions.Default, new SKPaint()
         {
             ColorFilter = SKColorFilter.CreateBlendMode(UndertaleColor.ToColor(c.Color).ToSKColor(), SKBlendMode.Modulate),
         });

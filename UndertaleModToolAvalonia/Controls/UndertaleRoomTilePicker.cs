@@ -252,7 +252,7 @@ public class UndertaleRoomTilePicker : Control
 
             for (uint i = 0; i < tileCount; i++)
             {
-                canvas.DrawImage(image, SKRect.Create(sx, sy, tileW, tileH), SKRect.Create(dx, dy, tileW, tileH));
+                canvas.DrawImage(image, SKRect.Create(sx, sy, tileW, tileH), SKRect.Create(dx, dy, tileW, tileH), SKSamplingOptions.Default);
 
                 tileColumn++;
                 if (tileColumn < tileColumns)

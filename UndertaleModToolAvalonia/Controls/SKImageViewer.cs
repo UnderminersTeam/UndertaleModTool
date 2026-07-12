@@ -228,14 +228,14 @@ public class SKImageViewer : Control
 
                     if (image is not null)
                     {
-                        canvas.DrawImage(image, SKRect.Create(texturePageItem.TargetX, texturePageItem.TargetY, texturePageItem.TargetWidth, texturePageItem.TargetHeight));
+                        canvas.DrawImage(image, SKRect.Create(texturePageItem.TargetX, texturePageItem.TargetY, texturePageItem.TargetWidth, texturePageItem.TargetHeight), SKSamplingOptions.Default);
                     }
                 }
             }
             else if (Image is GMImage gmImage)
             {
                 SKImage image = mainVM.ImageCache.GetCachedImageFromGMImage(gmImage);
-                canvas.DrawImage(image, 0, 0);
+                canvas.DrawImage(image, 0, 0, SKSamplingOptions.Default);
             }
             else if (Image is UndertaleSprite.MaskEntry maskEntry)
             {
@@ -258,7 +258,7 @@ public class SKImageViewer : Control
                 }
 
                 SKImage image = SKImage.FromPixelCopy(new SKImageInfo(maskEntry.Width, maskEntry.Height, SKColorType.Gray8), pixels);
-                canvas.DrawImage(image, 0, 0);
+                canvas.DrawImage(image, 0, 0, SKSamplingOptions.Default);
                 image.Dispose();
             }
         }

@@ -1,4 +1,5 @@
-﻿using UndertaleModLib;
+﻿using System;
+using UndertaleModLib;
 using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia;
@@ -13,5 +14,5 @@ public partial class UndertaleCodeLocalsViewModel : IUndertaleResourceViewModel
         CodeLocals = codeLocals;
     }
 
-    public static UndertaleCodeLocals.LocalVar CreateLocalVar(int index) => new() { Index = (uint)index };
+    public static Func<int, object> CreateLocalVar => index => new UndertaleCodeLocals.LocalVar() { Index = (uint)index };
 }

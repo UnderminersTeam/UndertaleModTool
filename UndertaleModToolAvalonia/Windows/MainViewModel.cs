@@ -161,6 +161,8 @@ public partial class MainViewModel
         }
     }
 
+    public async void OpenDroppedFiles(object? parameter) => OpenDroppedFiles((IEnumerable<IStorageItem>?) parameter);
+
     public async void OpenDroppedFiles(IEnumerable<IStorageItem>? files)
     {
         if (files is null)
@@ -1103,6 +1105,8 @@ public partial class MainViewModel
 
         return null;
     }
+
+    public void TabClose(object? parameter) => TabClose((TabItemViewModel)parameter!);
 
     public void TabClose(TabItemViewModel tab)
     {
