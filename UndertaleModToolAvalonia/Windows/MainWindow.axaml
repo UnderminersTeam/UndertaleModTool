@@ -20,7 +20,8 @@
                     <NativeMenuItem Header="_Save" Command="{Binding FileSave}" Gesture="{OnPlatform 'Ctrl+S', macOS='Meta+S'}"/>
                     <NativeMenuItem Header="_Close" Command="{Binding FileClose}"/>
                     <NativeMenuItemSeparator Header="-" />
-                    <NativeMenuItem Header="_Run with runner" Command="{Binding FileRun}"/>
+                    <NativeMenuItem Header="_Run with data/project runner" Command="{Binding FileRun}" Gesture="F5"/>
+                    <NativeMenuItem Header="_Run with other runner" Command="{Binding FileRunWithOther}"/>
                     <NativeMenuItemSeparator Header="-" />
                     <NativeMenuItem Header="S_ettings" Command="{Binding FileSettings}"/>
                     <NativeMenuItem Header="_Exit" Command="{Binding FileExit}"/>
@@ -63,6 +64,7 @@
         <KeyBinding Gesture="{OnPlatform 'Ctrl+N', macOS='Meta+N'}" Command="{Binding FileNew}" />
         <KeyBinding Gesture="{OnPlatform 'Ctrl+O', macOS='Meta+O'}" Command="{Binding FileOpen}" />
         <KeyBinding Gesture="{OnPlatform 'Ctrl+S', macOS='Meta+S'}" Command="{Binding FileSave}" />
+        <KeyBinding Gesture="F5" Command="{Binding FileRun}" />
         <KeyBinding Gesture="{OnPlatform 'Ctrl+Shift+F', macOS='Meta+Shift+F'}" Command="{Binding ToolsSearchInCode}" />
         <KeyBinding Gesture="F1" Command="{Binding HelpAbout}" />
         <KeyBinding Gesture="{OnPlatform 'Ctrl+W', macOS='Meta+W'}" Command="{Binding TabCloseSelected}" />

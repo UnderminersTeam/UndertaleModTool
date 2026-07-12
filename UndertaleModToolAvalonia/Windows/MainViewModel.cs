@@ -16,6 +16,7 @@ using PropertyChanged.SourceGenerator;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 using UndertaleModLib.Project;
+using UndertaleModLib.Util;
 
 namespace UndertaleModToolAvalonia;
 
@@ -631,6 +632,48 @@ public partial class MainViewModel
 
     public async void FileRun()
     {
+        if (Data is null)
+            return;
+
+        string? runnerName = Data.GeneralInfo?.FileName?.Content;
+        if (runnerName is null)
+        {
+            await View!.MessageDialog($"Error: File name in general info not set.");
+            return;
+        }
+
+        string question = $"Save data file before running? {(DataPath is null
+            ? " It must be saved before running."
+            : $"If it's not saved, the data file at the last location will be used (\"{DataPath}\").")}";
+
+        if (!await AskFileSave(question))
+            return;
+
+        if (DataPath is null)
+            return;
+
+        string? runnerPath;
+
+        if (Project is not null)
+        {
+            runnerPath = Paths.TryJoinVerifyWithinDirectory(Project.SaveDirectory, $"{runnerName}.exe");
+        }
+        else
+        {
+            runnerPath = Paths.TryJoinVerifyWithinDirectory(Path.GetDirectoryName(DataPath), $"{runnerName}.exe");
+        }
+
+        if (runnerPath is null || !File.Exists(runnerPath))
+        {
+            await View!.MessageDialog($"Error: Invalid or non-existent runner.");
+            return;
+        }
+
+        StartRunnerProcess(runnerPath);
+    }
+
+    public async void FileRunWithOther()
+    {
         // NOTE: The project system would make this a lot simpler!
         if (Data is null)
             return;
@@ -661,6 +704,11 @@ public partial class MainViewModel
         if (!File.Exists(DataPath))
             return;
 
+        StartRunnerProcess(runnerPath);
+    }
+
+    void StartRunnerProcess(string runnerPath)
+    {
         // "launcher" allows game_change data files to still access files above the data path.
         Process.Start(new ProcessStartInfo(runnerPath, $"-game \"{DataPath}\" launcher") { WorkingDirectory = Path.GetDirectoryName(DataPath) });
     }
