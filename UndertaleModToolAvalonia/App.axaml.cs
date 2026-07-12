@@ -11,6 +11,8 @@ namespace UndertaleModToolAvalonia;
 public partial class App : Application
 {
     public static string VersionString = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "?.?.?.?";
+    public static string InformationalVersionString = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "<unknown>";
+
     public static IServiceProvider Services = null!;
     public static IStyle? CurrentCustomStyles = null;
 

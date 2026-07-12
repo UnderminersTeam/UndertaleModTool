@@ -897,7 +897,13 @@ public partial class MainViewModel
     public async void HelpAbout()
     {
         await View!.MessageDialog($"UndertaleModTool v{App.VersionString} " +
-            $"by the Underminers team\nLicensed under the GNU General Public License Version 3.", title: "About");
+            $"by the Underminers team" +
+            $"\nhttps://github.com/UnderminersTeam/UndertaleModTool" +
+            $"\nLicensed under the GNU General Public License Version 3." +
+            $"\n" +
+            $"\nInformational version: {App.InformationalVersionString}"
+            ,
+            title: "About");
     }
 
     public void SetFilterText(string text)
