@@ -5,7 +5,6 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.LogicalTree;
 using Avalonia.Platform.Storage;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace UndertaleModToolAvalonia;
 

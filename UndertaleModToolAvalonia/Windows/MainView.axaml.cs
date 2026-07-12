@@ -359,7 +359,7 @@ public partial class MainView : UserControl, IView
         if (DataContext is MainViewModel vm)
         {
             MainViewModel.TreeDataGridItem? item = GetItemFromTreeDataGridControl(e.Source);
-            if (item is not null && item.Value is UndertaleResource resource && vm.Data is not null )
+            if (item is not null && item.Value is UndertaleResource resource && vm.Data is not null)
             {
                 OpenFindReferences(vm.ServiceProvider, resource);
             }

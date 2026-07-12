@@ -143,24 +143,27 @@
 
             <Grid ColumnDefinitions="1*,1*">
                 <StackPanel Grid.Column="0">
-                    <CheckBox Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Content="Try/catch/finally rewriting"
+                    <CheckBox Content="Try/catch/finally rewriting"
                               ToolTip.Tip="If enabled, compiler-generated code and logic for try/catch/finally statements is rewritten to (attempt to) look like the original code."
                               IsChecked="{Binding MainVM.Settings.DecompileSettings.CleanupTry}"/>
-                    <CheckBox Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Content="Default argument values"
+                    <CheckBox Content="Default argument values"
                               ToolTip.Tip="If enabled, syntax for default named function arguments will be used. Compiler-generated if statements are transformed to do this, maintaining accuracy."
                               IsChecked="{Binding MainVM.Settings.DecompileSettings.CleanupDefaultArgumentValues}"/>
-                    <CheckBox Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Content="Scope local variable declarations"
+                    <CheckBox Content="Scope local variable declarations"
                               ToolTip.Tip="If enabled, local variable declarations will be placed according to their scopes, which are detected based on usage in the code."
                               IsChecked="{Binding MainVM.Settings.DecompileSettings.CleanupLocalVarDeclarations}"/>
                 </StackPanel>
 
                 <StackPanel Grid.Column="1">
-                    <CheckBox Grid.Row="0" Grid.Column="1" VerticalAlignment="Center" Content="Transform else into continue"
+                    <CheckBox Content="Transform else into continue"
                               ToolTip.Tip="If enabled, certain usages of &quot;else&quot; inside of a loop can be transformed into &quot;continue&quot; statements, which can make code easier to read. This only happens if accuracy can be maintained."
                               IsChecked="{Binding MainVM.Settings.DecompileSettings.CleanupElseToContinue}"/>
-                    <CheckBox Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Content="Builtin array variable syntax"
+                    <CheckBox Content="Builtin array variable syntax"
                               ToolTip.Tip="If enabled, certain builtin globals (such as &quot;view_xview&quot;), when detected to be used without an array accessor, will be printed as such, rather than using compiler-generated syntax."
                               IsChecked="{Binding MainVM.Settings.DecompileSettings.CleanupBuiltinArrayVariables}"/>
+                    <CheckBox Content="Template strings"
+                              ToolTip.Tip="If enabled, the decompiler will attempt to rewrite string()/@@string@@() as template strings."
+                              IsChecked="{Binding MainVM.Settings.DecompileSettings.CleanupTemplateStrings}"/>
                 </StackPanel>
             </Grid>
         </StackPanel>
