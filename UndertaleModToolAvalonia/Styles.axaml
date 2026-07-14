@@ -182,6 +182,10 @@
         <Setter Property="HorizontalAlignment" Value="Center" />
     </Style>
 
+    <Style Selector=":is(TextBlock).DisableForeground">
+        <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+    </Style>
+
     <Style Selector="ContentControl.TabItemContentControl TextBlock">
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="TextWrapping" Value="NoWrap" />

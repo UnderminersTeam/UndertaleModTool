@@ -97,10 +97,10 @@
                             </TreeDataTemplate>
                         
                             <DataTemplate DataType="undertalem:UndertaleRoom+Background">
-                                <TextBlock Text="{Binding BackgroundDefinition, TargetNullValue=(Background not set)}" />
+                                <TextBlock Text="{Binding BackgroundDefinition, TargetNullValue=(Background not set)}" Classes.DisableForeground="{Binding !Enabled}"/>
                             </DataTemplate>
                             <DataTemplate DataType="undertalem:UndertaleRoom+View">
-                                <TextBlock Text="View" />
+                                <TextBlock Text="View" Classes.DisableForeground="{Binding !Enabled}"/>
                             </DataTemplate>
                             <DataTemplate DataType="undertalem:UndertaleRoom+GameObject">
                                 <TextBlock Text="{Binding .}" />
@@ -108,36 +108,37 @@
                             <DataTemplate DataType="undertalem:UndertaleRoom+Tile">
                                 <TextBlock Text="{Binding .}" />
                             </DataTemplate>
+                            
                             <l:LayerTypeTemplateSelector>
                                 <l:LayerTypeTemplateSelector.PathTemplate>
                                     <TreeDataTemplate DataType="undertalem:UndertaleRoom+Layer">
-                                        <TextBlock Text="{Binding LayerName.Content}" />
+                                        <TextBlock Text="{Binding LayerName.Content}" Classes.DisableForeground="{Binding !IsVisible}"/>
                                     </TreeDataTemplate>
                                 </l:LayerTypeTemplateSelector.PathTemplate>
                                 <l:LayerTypeTemplateSelector.BackgroundTemplate>
                                     <TreeDataTemplate DataType="undertalem:UndertaleRoom+Layer">
-                                        <TextBlock Text="{Binding LayerName.Content}" />
+                                        <TextBlock Text="{Binding LayerName.Content}" Classes.DisableForeground="{Binding !IsVisible}"/>
                                     </TreeDataTemplate>
                                 </l:LayerTypeTemplateSelector.BackgroundTemplate>
                                 <l:LayerTypeTemplateSelector.InstancesTemplate>
                                     <TreeDataTemplate DataType="undertalem:UndertaleRoom+Layer" ItemsSource="{Binding InstancesData.Instances}">
-                                        <TextBlock Text="{Binding LayerName.Content}" />
+                                        <TextBlock Text="{Binding LayerName.Content}" Classes.DisableForeground="{Binding !IsVisible}"/>
                                     </TreeDataTemplate>
                                 </l:LayerTypeTemplateSelector.InstancesTemplate>
                                 <l:LayerTypeTemplateSelector.AssetsTemplate>
                                     <TreeDataTemplate DataType="undertalem:UndertaleRoom+Layer" ItemsSource="{Binding AssetsData.AllAssets}">
-                                        <TextBlock Text="{Binding LayerName.Content}" />
+                                        <TextBlock Text="{Binding LayerName.Content}" Classes.DisableForeground="{Binding !IsVisible}"/>
                                     </TreeDataTemplate>
                                 </l:LayerTypeTemplateSelector.AssetsTemplate>
                                 <l:LayerTypeTemplateSelector.TilesTemplate>
                                     <!-- TODO: Not gonna show the tiles? -->
                                     <TreeDataTemplate DataType="undertalem:UndertaleRoom+Layer">
-                                        <TextBlock Text="{Binding LayerName.Content}" />
+                                        <TextBlock Text="{Binding LayerName.Content}" Classes.DisableForeground="{Binding !IsVisible}"/>
                                     </TreeDataTemplate>
                                 </l:LayerTypeTemplateSelector.TilesTemplate>
                                 <l:LayerTypeTemplateSelector.EffectTemplate>
                                     <TreeDataTemplate DataType="undertalem:UndertaleRoom+Layer">
-                                        <TextBlock Text="{Binding LayerName.Content}" />
+                                        <TextBlock Text="{Binding LayerName.Content}" Classes.DisableForeground="{Binding !IsVisible}"/>
                                     </TreeDataTemplate>
                                 </l:LayerTypeTemplateSelector.EffectTemplate>
                             </l:LayerTypeTemplateSelector>
