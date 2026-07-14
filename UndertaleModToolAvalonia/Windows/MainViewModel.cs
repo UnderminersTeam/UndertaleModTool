@@ -737,8 +737,7 @@ public partial class MainViewModel
 
     public void ToolsFindReferences()
     {
-        if (View is MainView mainView)
-            mainView.OpenFindReferences(ServiceProvider);
+        OpenFindReferences();
     }
 
     public async void ScriptsRunOtherScript()
@@ -1046,6 +1045,12 @@ public partial class MainViewModel
 
             // TODO: Close tabs, remove histories
         }
+    }
+
+    public void OpenFindReferences(UndertaleResource? resource = null)
+    {
+        if (View is MainView mainView)
+            mainView.OpenFindReferences(ServiceProvider, resource);
     }
 
     public TabItemViewModel? TabOpen(object? item, bool inNewTab = false)
