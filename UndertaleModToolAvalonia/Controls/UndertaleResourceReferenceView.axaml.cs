@@ -59,7 +59,12 @@ public partial class UndertaleResourceReferenceView : UserControl
 
         if (change.Property == ReferenceTypeProperty)
         {
-            this.Find<TextBox>("TextBox")!.PlaceholderText = "(" + ReferenceType.Name + " reference)";
+            string name = ReferenceType.Name;
+            if (name[.."Undertale".Length] == "Undertale")
+            {
+                name = name["Undertale".Length..];
+            }
+            ReferenceTextBox.PlaceholderText = "(" + name + " reference)";
         }
     }
 

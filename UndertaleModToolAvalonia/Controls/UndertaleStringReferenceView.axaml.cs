@@ -3,9 +3,10 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.LogicalTree;
 using Avalonia.VisualTree;
 using Avalonia.Xaml.Interactions.DragAndDrop;
+using Microsoft.Extensions.DependencyInjection;
+using UndertaleModLib;
 using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia;
@@ -19,6 +20,8 @@ public partial class UndertaleStringReferenceView : UserControl
         get { return GetValue(ReferenceProperty); }
         set { SetValue(ReferenceProperty, value); }
     }
+
+    readonly MainViewModel mainVM = App.Services.GetRequiredService<MainViewModel>();
 
     public UndertaleStringReferenceView()
     {
@@ -61,16 +64,21 @@ public partial class UndertaleStringReferenceView : UserControl
         }
     }
 
+    public void Add()
+    {
+        if (mainVM.Data is null)
+            return;
+        Reference = mainVM.Data.Strings.MakeString("", createNew: true);
+    }
+
     public void Open()
     {
-        MainViewModel mainView = (this.FindLogicalAncestorOfType<MainView>()!.DataContext as MainViewModel)!;
-        mainView.TabOpen(Reference);
+        mainVM.TabOpen(Reference);
     }
 
     public void OpenInNewTab()
     {
-        MainViewModel mainView = (this.FindLogicalAncestorOfType<MainView>()!.DataContext as MainViewModel)!;
-        mainView.TabOpen(Reference, inNewTab: true);
+        mainVM.TabOpen(Reference, inNewTab: true);
     }
 
     void UpdateString(TextBox textBox)
@@ -88,7 +96,7 @@ public partial class UndertaleStringReferenceView : UserControl
 
     void UpdateTextBoxWatermark()
     {
-        this.Find<TextBox>("TextBox")!.PlaceholderText = (Reference is null) ? "(UndertaleString reference)" : "";
+        ReferenceTextBox.PlaceholderText = (Reference is null) ? "(string reference)" : "";
     }
 }
 

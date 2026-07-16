@@ -6,10 +6,11 @@
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="UndertaleModToolAvalonia.UndertaleStringReferenceView">
     <ContentControl DataContext="{Binding $parent[l:UndertaleStringReferenceView]}">
-        <Grid ColumnDefinitions="*,Auto,Auto">
+        <Grid ColumnDefinitions="*,Auto,Auto,Auto">
             <!-- TODO: Make this look/work better -->
-            <TextBox Grid.Column="0" Name="TextBox"
+            <TextBox Grid.Column="0" Name="ReferenceTextBox"
                      Text="{Binding Reference.Content, UpdateSourceTrigger=Explicit, TargetNullValue=''}"
+                     ToolTip.Tip="{Binding Reference.Content, TargetNullValue='Null string reference'}"
                      IsReadOnly="{Binding Reference, Converter={x:Static ObjectConverters.IsNull}}"
                      AcceptsReturn="True"
                      TextWrapping="Wrap"
@@ -23,8 +24,17 @@
                     <ContextDropBehavior Handler="{StaticResource UndertaleStringDropHandler}"/>
                 </Interaction.Behaviors>
             </TextBox>
-            <Button Grid.Column="1" Command="{Binding Open}">…</Button>
-            <Button Grid.Column="2" Command="{Binding OpenInNewTab}">⬈</Button>
+            
+            <Button Grid.Column="1" Command="{Binding Add}"
+                    ToolTip.Tip="Add a new string and reference it here.">+</Button>
+            
+            <Button Grid.Column="2" Command="{Binding Open}"
+                    IsEnabled="{Binding Reference, Converter={x:Static ObjectConverters.IsNotNull}}"
+                    ToolTip.Tip="Open the string resource in the current tab.">…</Button>
+            
+            <Button Grid.Column="3" Command="{Binding OpenInNewTab}"
+                    IsEnabled="{Binding Reference, Converter={x:Static ObjectConverters.IsNotNull}}"
+                    ToolTip.Tip="Open the string resource in a new tab.">⬈</Button>
         </Grid>
     </ContentControl>
 </UserControl>
