@@ -1,14 +1,16 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Linq;
 using Avalonia.Threading;
 
 namespace UndertaleModToolAvalonia;
 
 public abstract class ObservableCollectionView
 {
-    public abstract void SetFilter(Predicate<object?>? _filterPredicate);
+    public abstract void SetFilter(Predicate<object?>? filter);
+    public abstract void SetSort(Comparison<object?>? sort);
 }
 
 /// <summary>
@@ -20,10 +22,14 @@ public class ObservableCollectionView<TInput, TOutput> : ObservableCollectionVie
     where TInput : class?
     where TOutput : class?
 {
-    public class CustomObservableCollection<T> : Collection<T>, INotifyCollectionChanged
+    public class CustomObservableCollection<T> : IList, IList<T>, INotifyCollectionChanged
+        where T : class?
     {
-        public event NotifyCollectionChangedEventHandler? CollectionChanged;
+        public readonly record struct IndexValue(int Index, T Value);
 
+        readonly List<IndexValue> internalList = new();
+
+        bool isNotSendingEvents = false;
         bool isDelayingEvents = false;
         readonly List<NotifyCollectionChangedEventArgs> delayedEvents = [];
 
@@ -53,54 +59,107 @@ public class ObservableCollectionView<TInput, TOutput> : ObservableCollectionVie
             delayedEvents.Clear();
         }
 
-        public void SendReset()
+        public void StartNoEvents()
+        {
+            isNotSendingEvents = true;
+        }
+
+        public void FinishNoEvents()
+        {
+            isNotSendingEvents = false;
+            SendReset();
+        }
+
+        public IndexValue this[int index]
+        {
+            get => internalList[index];
+            set
+            {
+                IndexValue oldItem = internalList[index];
+
+                internalList[index] = value;
+                SendEvent(new(NotifyCollectionChangedAction.Replace, value.Value, oldItem.Value, index));
+            }
+        }
+
+        public void SetIndex(int index, int itemIndex)
+        {
+            internalList[index] = internalList[index] with { Index = itemIndex };
+        }
+
+        public void IncreaseAllIndexesIfGreaterOrEqualThan(int increment, int ifGreaterOrEqualThan)
+        {
+            for (int i = 0; i < internalList.Count; i++)
+            {
+                IndexValue item = internalList[i];
+                if (item.Index >= ifGreaterOrEqualThan)
+                {
+                    internalList[i] = internalList[i] with { Index = item.Index + increment };
+                }
+            }
+        }
+
+        public void AddIndexValue(IndexValue item)
+        {
+            internalList.Add(item);
+            SendEvent(new(NotifyCollectionChangedAction.Add, item.Value, internalList.Count - 1));
+        }
+
+        public void InsertIndexValue(int index, IndexValue item)
+        {
+            internalList.Insert(index, item);
+            SendEvent(new(NotifyCollectionChangedAction.Add, item.Value, index));
+        }
+
+        public void RemoveAtIndexValue(int index)
+        {
+            IndexValue item = internalList[index];
+
+            internalList.RemoveAt(index);
+            SendEvent(new(NotifyCollectionChangedAction.Remove, item.Value, index));
+        }
+
+        public void ClearIndexValue()
+        {
+            internalList.Clear();
+            SendEvent(new(NotifyCollectionChangedAction.Reset));
+        }
+
+        public void MoveIndexValue(int oldIndex, int newIndex)
+        {
+            IndexValue removedItem = internalList[oldIndex];
+            internalList.RemoveAt(oldIndex);
+            internalList.Insert(newIndex, removedItem);
+
+            SendEvent(new(NotifyCollectionChangedAction.Move, removedItem.Value, newIndex, oldIndex));
+        }
+
+        public int BinarySearchIndexValue(IndexValue item, IComparer<IndexValue> comparer)
+        {
+            return internalList.BinarySearch(item, comparer);
+        }
+
+        public void SortIndexValue(IComparer<IndexValue> comparer)
+        {
+            internalList.Sort(comparer);
+            SendEvent(new(NotifyCollectionChangedAction.Reset));
+        }
+
+        public int IndexOfIndex(int itemIndex)
+        {
+            return internalList.FindIndex(x => x.Index == itemIndex);
+        }
+
+        void SendReset()
         {
             if (CollectionChanged is not null)
                 CollectionChanged(this, new(NotifyCollectionChangedAction.Reset));
         }
 
-        protected override void ClearItems()
-        {
-            base.ClearItems();
-
-            SendEvent(new(NotifyCollectionChangedAction.Reset));
-        }
-
-        protected override void InsertItem(int index, T item)
-        {
-            base.InsertItem(index, item);
-
-            SendEvent(new(NotifyCollectionChangedAction.Add, item, index));
-        }
-
-        protected override void RemoveItem(int index)
-        {
-            T removedItem = this[index];
-            base.RemoveItem(index);
-
-            SendEvent(new(NotifyCollectionChangedAction.Remove, removedItem, index));
-        }
-
-        protected override void SetItem(int index, T item)
-        {
-            T originalItem = this[index];
-            base.SetItem(index, item);
-
-            SendEvent(new(NotifyCollectionChangedAction.Replace, item, originalItem, index));
-        }
-
-        public void Move(int oldIndex, int newIndex)
-        {
-            T removedItem = this[oldIndex];
-
-            base.RemoveItem(oldIndex);
-            base.InsertItem(newIndex, removedItem);
-
-            SendEvent(new(NotifyCollectionChangedAction.Move, removedItem, newIndex, oldIndex));
-        }
-
         void SendEvent(NotifyCollectionChangedEventArgs e)
         {
+            if (isNotSendingEvents)
+                return;
             if (isDelayingEvents)
                 delayedEvents.Add(e);
             else if (CollectionChanged is not null)
@@ -108,41 +167,108 @@ public class ObservableCollectionView<TInput, TOutput> : ObservableCollectionVie
                 Dispatcher.UIThread.Invoke(() => CollectionChanged(this, e));
             }
         }
+
+        // INotifyCollectionChanged
+        public event NotifyCollectionChangedEventHandler? CollectionChanged;
+
+        // IList
+        public int Count => internalList.Count;
+        public bool IsReadOnly => true;
+        public bool IsFixedSize => ((IList)internalList).IsFixedSize;
+        public bool IsSynchronized => false;
+        public object SyncRoot => ((IList)internalList).SyncRoot;
+
+        object? IList.this[int index]
+        {
+            get => internalList[index].Value;
+            set => throw new NotSupportedException();
+        }
+        T IList<T>.this[int index]
+        {
+            get => internalList[index].Value;
+            set => throw new NotImplementedException();
+        }
+
+        public int IndexOf(object? value) => internalList.FindIndex(x => x.Value == value);
+        public int IndexOf(T item) => IndexOf((object?)item);
+        public bool Contains(object? value) => internalList.FindIndex(x => x.Value == value) != -1;
+        public bool Contains(T item) => Contains((object?)item);
+        public void CopyTo(Array array, int index)
+        {
+            T[] newArray = [.. internalList.Select(x => x.Value)];
+            Array.Copy(newArray, 0, array, index, newArray.Length);
+        }
+        public void CopyTo(T[] array, int arrayIndex) => CopyTo((Array)array, arrayIndex);
+        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable<T>)this).GetEnumerator();
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
+        {
+            foreach (var item in internalList)
+            {
+                yield return item.Value;
+            }
+        }
+
+        int IList.Add(object? value) => throw new NotSupportedException();
+        void ICollection<T>.Add(T item) => throw new NotSupportedException();
+        void IList.Insert(int index, object? value) => throw new NotSupportedException();
+        void IList<T>.Insert(int index, T item) => throw new NotSupportedException();
+        void IList.RemoveAt(int index) => throw new NotSupportedException();
+        void IList<T>.RemoveAt(int index) => throw new NotSupportedException();
+        void IList.Remove(object? value) => throw new NotSupportedException();
+        bool ICollection<T>.Remove(T item) => throw new NotSupportedException();
+        void IList.Clear() => throw new NotSupportedException();
+        void ICollection<T>.Clear() => throw new NotSupportedException();
     }
 
     public CustomObservableCollection<TOutput> Output { get; } = [];
 
-    private readonly IList<TInput> input;
+    readonly IList<TInput> input;
+    readonly Func<TInput, TOutput>? transformFunc;
+    Predicate<TOutput>? filterPredicate;
+    Comparison<TOutput>? sortComparision;
 
-    private readonly List<int> outputIndexToInputIndexMap = [];
+    readonly Comparer<CustomObservableCollection<TOutput>.IndexValue> sortComparer;
 
-    private Predicate<TInput>? filterPredicate;
-
-    private readonly Func<TInput, TOutput>? transformFunc;
-
-    public ObservableCollectionView(IList<TInput> input, Predicate<TInput>? filter = null, Func<TInput, TOutput>? transform = null)
+    public ObservableCollectionView(IList<TInput> input, Func<TInput, TOutput>? transform = null, Predicate<TOutput>? filter = null, Comparison<TOutput>? sort = null)
     {
         this.input = input;
         this.filterPredicate = filter;
         this.transformFunc = transform;
+        this.sortComparision = sort;
 
-        if (this.input is INotifyCollectionChanged inputNotifyCollectionChanged)
+        if (input is INotifyCollectionChanged inputNotifyCollectionChanged)
             inputNotifyCollectionChanged.CollectionChanged += OnInputCollectionChanged;
         else
             throw new InvalidOperationException($"ObservableCollectionView input ({input}) does not implement INotifyCollectionChanged");
 
-        Filter();
+        sortComparer = Comparer<CustomObservableCollection<TOutput>.IndexValue>.Create((x, y) =>
+        {
+            int r = 0;
+            if (this.sortComparision is not null)
+                r = this.sortComparision(x.Value, y.Value);
+            if (r == 0)
+                r = x.Index.CompareTo(y.Index);
+            return r;
+        });
+
+        Reset();
     }
 
-    public void SetFilter(Predicate<TInput>? _filterPredicate)
+    public void SetFilter(Predicate<TOutput>? filter)
     {
-        filterPredicate = _filterPredicate;
+        filterPredicate = filter;
         Filter();
     }
+    public override void SetFilter(Predicate<object?>? _filterPredicate) => SetFilter((Predicate<TOutput>?)_filterPredicate);
 
-    public override void SetFilter(Predicate<object?>? _filterPredicate) => SetFilter((Predicate<TInput>?)_filterPredicate);
+    public void SetSort(Comparison<TOutput>? sort)
+    {
+        sortComparision = sort;
+        Sort();
+    }
+    public override void SetSort(Comparison<object?>? sort) => SetSort((Comparison<TOutput>?)sort);
 
-    private void OnInputCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    void OnInputCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         switch (e.Action)
         {
@@ -168,165 +294,127 @@ public class ObservableCollectionView<TInput, TOutput> : ObservableCollectionVie
         }
     }
 
-    private void OnInputAdd(NotifyCollectionChangedEventArgs e)
+    void OnInputAdd(NotifyCollectionChangedEventArgs e)
     {
-        TInput item = (TInput)e.NewItems![0]!;
+        if (e.NewItems!.Count != 1)
+            throw new InvalidOperationException("Modifying multiple items is not supported");
 
-        // Find where in output to insert
-        int i = outputIndexToInputIndexMap.BinarySearch(e.NewStartingIndex);
+        TInput item = (TInput)e.NewItems[0]!;
+        TOutput transformedItem = TransformItem(item);
 
-        if (i < 0)
+        if (DoesPassFilter(transformedItem))
+        {
+            // TODO: Because sorting can change, this may not have the correct index
+            // Find where in output to insert
+            int i = Output.BinarySearchIndexValue(new(e.NewStartingIndex, transformedItem), sortComparer);
+
+            if (i >= 0)
+                throw new InvalidOperationException("Trying to add input already in output");
+
             i = ~i;
 
-        if (DoesPassFilter(item))
-        {
-            Output.Insert(i, TransformItem(item));
-            outputIndexToInputIndexMap.Insert(i, e.NewStartingIndex);
-            i++;
+            Output.InsertIndexValue(i, new(e.NewStartingIndex, transformedItem));
         }
 
-        // Increase all indexes after
-        while (i < outputIndexToInputIndexMap.Count)
-        {
-            outputIndexToInputIndexMap[i]++;
-            i++;
-        }
+        // Increase all indexes greater than inserted input indexes
+        Output.IncreaseAllIndexesIfGreaterOrEqualThan(e.NewItems.Count, e.NewStartingIndex + e.NewItems.Count);
     }
 
-    private void OnInputRemove(NotifyCollectionChangedEventArgs e)
+    void OnInputRemove(NotifyCollectionChangedEventArgs e)
     {
+        if (e.OldItems!.Count != 1)
+            throw new InvalidOperationException("Modifying multiple items is not supported");
+
         // Find where in output to remove
-        int i = outputIndexToInputIndexMap.BinarySearch(e.OldStartingIndex);
-        if (i >= 0)
+        int i = Output.IndexOfIndex(e.OldStartingIndex);
+        if (i != -1)
         {
-            Output.RemoveAt(i);
-            outputIndexToInputIndexMap.RemoveAt(i);
-        }
-        else
-        {
-            // If not found, then get index after where it would be
-            i = ~i;
+            Output.RemoveAtIndexValue(i);
         }
 
-        // Decrease all indexes after
-        while (i < outputIndexToInputIndexMap.Count)
-        {
-            outputIndexToInputIndexMap[i]--;
-            i++;
-        }
+        Output.IncreaseAllIndexesIfGreaterOrEqualThan(-e.OldItems.Count, e.OldStartingIndex + e.OldItems.Count);
     }
 
-    private void OnInputReplace(NotifyCollectionChangedEventArgs e)
+    void OnInputReplace(NotifyCollectionChangedEventArgs e)
     {
-        TInput item = (TInput)e.NewItems![0]!;
-        bool passes = DoesPassFilter(item);
+        if (e.OldItems!.Count != 1 || e.NewItems!.Count != 1)
+            throw new InvalidOperationException("Modifying multiple items is not supported");
 
-        // Find where item is in output
-        int i = outputIndexToInputIndexMap.BinarySearch(e.OldStartingIndex);
-        if (i >= 0)
+        TInput item = (TInput)e.NewItems[0]!;
+        TOutput transformedItem = TransformItem(item);
+
+        bool passes = DoesPassFilter(transformedItem);
+
+        // Find where in output to remove
+        int i = Output.IndexOfIndex(e.OldStartingIndex);
+        if (i != -1)
         {
-            // If found, replace it if passes, remove it if not
-            if (passes)
-            {
-                Output[i] = TransformItem(item);
-            }
-            else
-            {
-                Output.RemoveAt(i);
-                outputIndexToInputIndexMap.RemoveAt(i);
-            }
+            Output.RemoveAtIndexValue(i);
         }
-        else
+
+        // If it passes, find where in output to insert
+        if (passes)
         {
-            // If not found, insert it if it passes
+            // TODO: Because sorting can change, this may not have the correct index
+            i = Output.BinarySearchIndexValue(new(e.OldStartingIndex, transformedItem), sortComparer);
+
+            if (i >= 0)
+                throw new InvalidOperationException("Trying to add input already in output");
+
             i = ~i;
 
-            if (passes)
-            {
-                Output.Insert(i, TransformItem(item));
-                outputIndexToInputIndexMap.Insert(i, e.OldStartingIndex);
-            }
+            Output.InsertIndexValue(i, new(e.OldStartingIndex, transformedItem));
         }
     }
 
-    private void OnInputMove(NotifyCollectionChangedEventArgs e)
+    void OnInputMove(NotifyCollectionChangedEventArgs e)
     {
         // TODO: Actually call Move().
         OnInputRemove(e);
         OnInputAdd(e);
     }
 
-    private void OnInputReset()
+    void OnInputReset()
     {
-        Output.Clear();
-        outputIndexToInputIndexMap.Clear();
-
-        Filter();
+        Reset();
     }
 
-    private void Filter()
+    void Filter()
     {
-        // TODO: This can obviously be improved by batch adding and removing everything instead of using the regular RemoveAt and Insert functions.
+        // TODO: Maybe not do this?
+        Reset();
+    }
 
-        Output.StartDelayingEvents();
+    void Sort()
+    {
+        Output.SortIndexValue(sortComparer);
+    }
 
-        // Remove all that don't pass from output.
-        for (int i = Output.Count - 1; i >= 0; i--)
-        {
-            if (!DoesPassFilter(input[outputIndexToInputIndexMap[i]]))
-            {
-                Output.RemoveAt(i);
-                outputIndexToInputIndexMap.RemoveAt(i);
-            }
-        }
+    void Reset()
+    {
+        Output.StartNoEvents();
 
-        // Insert all that pass from input to output.
-        int outputIndex = 0;
+        Output.ClearIndexValue();
+
         for (int inputIndex = 0; inputIndex < input.Count; inputIndex++)
         {
-            TInput inputItem = input[inputIndex];
+            TInput item = input[inputIndex];
+            TOutput transformedItem = TransformItem(item);
 
-            // Find next output item that matches or passes after the current input index.
-            while (outputIndex < outputIndexToInputIndexMap.Count && outputIndexToInputIndexMap[outputIndex] < inputIndex)
+            if (DoesPassFilter(transformedItem))
             {
-                outputIndex++;
-            }
-
-            if (outputIndex >= outputIndexToInputIndexMap.Count)
-            {
-                // If past end of list, then add to end if it passes.
-                if (DoesPassFilter(inputItem))
-                {
-                    TOutput transformedInputItem = TransformItem(inputItem);
-                    Output.Add(transformedInputItem);
-                    outputIndexToInputIndexMap.Add(inputIndex);
-                    outputIndex++;
-                }
-            }
-            else if (outputIndexToInputIndexMap[outputIndex] == inputIndex)
-            {
-                // If exactly on item, then we know if passes since otherwise it would've been removed before.
-                outputIndex++;
-            }
-            else if (outputIndexToInputIndexMap[outputIndex] > inputIndex)
-            {
-                // If past item, insert it before that if it passes.
-                if (DoesPassFilter(inputItem))
-                {
-                    TOutput transformedInputItem = TransformItem(inputItem);
-                    Output.Insert(outputIndex, transformedInputItem);
-                    outputIndexToInputIndexMap.Insert(outputIndex, inputIndex);
-                    outputIndex++;
-                }
+                Output.AddIndexValue(new(inputIndex, transformedItem));
             }
         }
 
-        Output.FinishDelayingEvents();
+        Output.SortIndexValue(sortComparer);
+
+        Output.FinishNoEvents();
     }
 
-    private bool DoesPassFilter(TInput item) => filterPredicate is null || filterPredicate(item);
+    bool DoesPassFilter(TOutput item) => filterPredicate is null || filterPredicate(item);
 
-    private TOutput TransformItem(TInput item)
+    TOutput TransformItem(TInput item)
     {
         if (transformFunc is not null)
             return transformFunc(item);

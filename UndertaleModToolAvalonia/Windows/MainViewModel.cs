@@ -58,7 +58,7 @@ public partial class MainViewModel
     [Notify]
     private (uint Major, uint Minor, uint Release, uint Build) _DataVersion;
 
-    private IStorageFolder? lastDataLocation;
+    IStorageFolder? lastDataLocation;
 
     // Project
     [Notify]
@@ -71,6 +71,7 @@ public partial class MainViewModel
         private string _Text = "<unset text!>";
         public object? Value { get; set; }
         public object? Tag { get; set; }
+        
         [Notify]
         private IList<TreeDataGridItem>? _Children;
     }
@@ -83,7 +84,10 @@ public partial class MainViewModel
 
     public event Action<string>? FilterTextChanged;
 
-    private List<ObservableCollectionView> observableCollectionViewList = [];
+    [Notify]
+    private bool _IsSorted = false;
+
+    List<ObservableCollectionView> observableCollectionViewList = [];
 
     // Tabs
     public ObservableCollection<TabItemViewModel> Tabs { get; set; }
@@ -312,7 +316,7 @@ public partial class MainViewModel
         {
             ObservableCollectionView<T?, TreeDataGridItem> view = new(list,
                 transform: x => new TreeDataGridItem() { Text = "", Value = x },
-                filter: item => AssetNameContainsText(item, FilterText));
+                filter: item => AssetNameContainsText(item.Value, FilterText));
 
             observableCollectionViewList.Add(view);
 
@@ -325,23 +329,53 @@ public partial class MainViewModel
     {
         foreach (ObservableCollectionView view in observableCollectionViewList)
         {
-            view.SetFilter(item => AssetNameContainsText(item, filterText));
+            view.SetFilter(item => AssetNameContainsText(((TreeDataGridItem)item!).Value, filterText));
         }
     }
 
-    private bool AssetNameContainsText<T>(T asset, string text)
+    static bool AssetNameContainsText(object? asset, string text)
     {
-        string? name = asset switch
-        {
-            UndertaleNamedResource namedResource => namedResource.Name.Content,
-            UndertaleString _string => _string.Content,
-            _ => null,
-        };
+        string? name = AssetGetName(asset);
 
         if (name is null)
             return true;
 
         return name.Contains(text, StringComparison.OrdinalIgnoreCase);
+    }
+
+    static string? AssetGetName(object? asset)
+    {
+        return asset switch
+        {
+            UndertaleNamedResource namedResource => namedResource.Name.Content,
+            UndertaleString _string => _string.Content,
+            _ => null,
+        };
+    }
+
+    // Called by [Notify]
+    public void OnIsSortedChanged()
+    {
+        Comparison<object?>? comparison = null;
+        if (IsSorted)
+        {
+            comparison = static (a, b) =>
+            {
+                string? aName = AssetGetName(((TreeDataGridItem)a!).Value);
+                string? bName = AssetGetName(((TreeDataGridItem)b!).Value);
+
+                if (aName is null && bName is null) return 0;
+                if (aName is null) return 1;
+                if (bName is null) return -1;
+
+                return aName.CompareTo(bName, StringComparison.OrdinalIgnoreCase);
+            };
+        }
+
+        foreach (ObservableCollectionView view in observableCollectionViewList)
+        {
+            view.SetSort(comparison);
+        }
     }
 
     /// <summary>Ask if user wants to save the current file before continuing.
@@ -522,7 +556,7 @@ public partial class MainViewModel
         DataVersion = Data is not null && Data.GeneralInfo is not null ? (Data.GeneralInfo.Major, Data.GeneralInfo.Minor, Data.GeneralInfo.Release, Data.GeneralInfo.Build) : default;
     }
 
-    private void DataGeneralInfoChangedHandler(object? sender, PropertyChangedEventArgs e)
+    void DataGeneralInfoChangedHandler(object? sender, PropertyChangedEventArgs e)
     {
         if (Data is not null && e.PropertyName is
             nameof(UndertaleGeneralInfo.Major) or nameof(UndertaleGeneralInfo.Minor) or
@@ -1179,13 +1213,14 @@ public partial class MainViewModel
         UpdateSelectedTabProperties();
     }
 
-    private void OnTabSelectedChanged()
+    // Called by [Notify]
+    void OnTabSelectedChanged()
     {
         UpdateSelectedTabProperties();
     }
 
     // Bottom bar
-    private void UpdateSelectedTabProperties()
+    void UpdateSelectedTabProperties()
     {
         if (Data is not null && TabSelected?.Content is IUndertaleResourceViewModel vm)
         {
@@ -1210,7 +1245,8 @@ public partial class MainViewModel
         TabCanMarkedForExport = false;
     }
 
-    private void OnTabIsMarkedForExportChanged()
+    // Called by [Notify]
+    void OnTabIsMarkedForExportChanged()
     {
         if (Project is not null
             && TabSelected?.Content is IUndertaleResourceViewModel vm
