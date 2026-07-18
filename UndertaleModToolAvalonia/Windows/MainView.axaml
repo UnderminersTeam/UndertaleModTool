@@ -37,7 +37,7 @@
                         <Button Command="{Binding TabGoForward}" IsEnabled="{Binding TabSelected.CanGoForward, FallbackValue=False}">→</Button>
                     </StackPanel>
                     <Grid ColumnDefinitions="1*,Auto">
-                        <TextBox Grid.Column="0" Name="FilterTextBox" PlaceholderText="Filter by name..." Text="{Binding FilterText}" TextChanged="FilterTextBox_TextChanged"/>
+                        <TextBox Grid.Column="0" Name="FilterTextBox" PlaceholderText="Filter by name..." Text="{Binding FilterText, Delay=300}"/>
                         <ToggleButton Grid.Column="1" IsChecked="{Binding IsSorted}">Sort</ToggleButton>
                     </Grid>
                 </StackPanel>

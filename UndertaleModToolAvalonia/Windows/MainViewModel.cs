@@ -125,8 +125,6 @@ public partial class MainViewModel
                 "Open a data.win file to get started, then double click on the items on the left to view them."),
                 isSelected: true),
         ];
-
-        FilterTextChanged += UpdateListFilterText;
     }
 
     public void Initialize()
@@ -325,11 +323,12 @@ public partial class MainViewModel
         return null;
     }
 
-    void UpdateListFilterText(string filterText)
+    // Called by [Notify]
+    public void OnFilterTextChanged()
     {
         foreach (ObservableCollectionView view in observableCollectionViewList)
         {
-            view.SetFilter(item => AssetNameContainsText(((TreeDataGridItem)item!).Value, filterText));
+            view.SetFilter(item => AssetNameContainsText(((TreeDataGridItem)item!).Value, FilterText ?? ""));
         }
     }
 
@@ -987,11 +986,6 @@ public partial class MainViewModel
             $"\nInformational version: {App.InformationalVersionString}"
             ,
             title: "About");
-    }
-
-    public void SetFilterText(string text)
-    {
-        FilterTextChanged?.Invoke(text);
     }
 
     public async void DataItemAdd(IList list)

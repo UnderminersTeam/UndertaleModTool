@@ -88,14 +88,6 @@ public partial class MainView : UserControl, IView
         projectAssetsWindow = null;
     }
 
-    private void FilterTextBox_TextChanged(object? sender, TextChangedEventArgs e)
-    {
-        if (DataContext is MainViewModel vm)
-        {
-            vm.SetFilterText(vm.FilterText ?? "");
-        }
-    }
-
     public void ExpandItemOnTree(MainViewModel.TreeDataGridItem item)
     {
         DataExplorer.ExpandItemOnTree(item);
