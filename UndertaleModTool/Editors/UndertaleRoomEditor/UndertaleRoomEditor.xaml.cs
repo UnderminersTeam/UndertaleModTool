@@ -3036,6 +3036,8 @@ namespace UndertaleModTool
 
                 if (tilesBG is null)
                     return null;
+                if (tilesBG.Texture is null)
+                    return null;
 
                 if ((loader.Convert(new object[] { tilesData }, null, "cache", null) as string) == "Error")
                     return null;
@@ -3131,7 +3133,11 @@ namespace UndertaleModTool
                 catch (Exception ex)
                 {
                     Window mainWindow = Application.Current?.MainWindow;
-                    mainWindow.ShowError($"An error occurred while generating \"Rectangles\" for tile layer {tilesData.ParentLayer.LayerName}.\n\n{ex}");
+                    try
+                    {
+                        mainWindow.Dispatcher.BeginInvoke(() => mainWindow.ShowError($"An error occurred while generating \"Rectangles\" for tile layer {tilesData.ParentLayer.LayerName}.\n\n{ex}"));
+                    }
+                    catch { }
                     return null;
                 }
             }
