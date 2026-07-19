@@ -151,8 +151,6 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
 
             if (MainVM.Data.IsVersionAtLeast(2024, 6))
                 layer.AssetsData.TextItems ??= new UndertalePointerList<TextItemInstance>();
-
-            layer.AssetsData.InitializeAllAssets();
         }
         else if (layer.LayerType == LayerType.Tiles)
         {
@@ -309,8 +307,11 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
         if (category is not null)
             return category;
 
-        foreach (var layer in Room.Layers)
+        foreach (Layer? layer in Room.Layers)
         {
+            if (layer is null)
+                continue;
+
             if (layer.LayerType == LayerType.Instances)
             {
                 if (item == layer)
@@ -325,15 +326,28 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
                 if (item == layer)
                     return layer;
 
-                foreach (IEnumerable<object> assetTypeList in layer.AssetsData.AllAssets.Cast<IEnumerable<object>>())
+                bool CheckAssetTypeList(IEnumerable<object>? assetTypeList)
                 {
+                    if (assetTypeList is null)
+                        return false;
+
                     if (item == assetTypeList)
-                        return layer;
+                        return true;
 
                     var instance = assetTypeList.FirstOrDefault(x => x == item);
                     if (instance is not null)
-                        return layer;
+                        return true;
+
+                    return false;
                 }
+
+                if (CheckAssetTypeList(layer.AssetsData.LegacyTiles)
+                    || CheckAssetTypeList(layer.AssetsData.Sprites)
+                    || CheckAssetTypeList(layer.AssetsData.Sequences)
+                    || CheckAssetTypeList(layer.AssetsData.NineSlices)
+                    || CheckAssetTypeList(layer.AssetsData.ParticleSystems)
+                    || CheckAssetTypeList(layer.AssetsData.TextItems))
+                    return layer;
             }
             else if (layer.LayerType == LayerType.Tiles)
             {

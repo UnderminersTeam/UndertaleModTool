@@ -61,6 +61,7 @@
         <ContextMenu x:Key="TextItemInstanceMenu">
             <MenuItem Header="_Remove text item instance" Click="ContextMenu_RemoveAsset_Click"/>
         </ContextMenu>
+        <l:LayerAssetsDataToAllAssetsList x:Key="LayerAssetsDataToAllAssetsList" />
         <l:EnumTypeToValuesConverter x:Key="EnumTypeToValuesConverter" />
         <l:UndertaleColorToColorConverter x:Key="UndertaleColorToColorConverter" />
         <l:VersionCompareConverter x:Key="VersionCompareConverter" />
@@ -126,7 +127,7 @@
                                     </TreeDataTemplate>
                                 </l:LayerTypeTemplateSelector.InstancesTemplate>
                                 <l:LayerTypeTemplateSelector.AssetsTemplate>
-                                    <TreeDataTemplate DataType="undertalem:UndertaleRoom+Layer" ItemsSource="{Binding AssetsData.AllAssets}">
+                                    <TreeDataTemplate DataType="undertalem:UndertaleRoom+Layer" ItemsSource="{Binding AssetsData, Converter={StaticResource LayerAssetsDataToAllAssetsList}}">
                                         <TextBlock Text="{Binding LayerName.Content}" Classes.DisableForeground="{Binding !IsVisible}"/>
                                     </TreeDataTemplate>
                                 </l:LayerTypeTemplateSelector.AssetsTemplate>
