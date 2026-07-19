@@ -4,7 +4,7 @@
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-        <Version>0.9.1.1</Version>
+        <Version>0.9.1.2</Version>
     </PropertyGroup>
 
     <PropertyGroup>
@@ -30,20 +30,20 @@
         <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.0" />
         <PackageReference Include="AvaloniaEdit.TextMate" Version="12.0.0" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="5.6.0" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.9" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.10" />
         <PackageReference Include="PropertyChanged.SourceGenerator" Version="1.1.2">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="SDL3-CS" Version="3.4.12.1" />
+        <PackageReference Include="SDL3-CS" Version="3.4.12.3" />
         <PackageReference Include="SDL3-CS.Linux" Version="3.4.12.1" />
         <PackageReference Include="SDL3-CS.Linux.Mixer" Version="3.2.4.7" />
         <PackageReference Include="SDL3-CS.MacOS" Version="3.4.12.1" />
         <PackageReference Include="SDL3-CS.MacOS.Mixer" Version="3.2.4.7" />
         <PackageReference Include="SDL3-CS.Windows" Version="3.4.12.1" />
         <PackageReference Include="SDL3-CS.Windows.Mixer" Version="3.2.4.7" />
-        <PackageReference Include="SkiaSharp" Version="4.150.0" />
-        <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="4.150.0" />
+        <PackageReference Include="SkiaSharp" Version="4.150.1" />
+        <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="4.150.1" />
         <PackageReference Include="TreeDataGrid" Version="12.0.0" />
         <PackageReference Include="Xaml.Behaviors" Version="12.0.5" />
     </ItemGroup>
