@@ -299,6 +299,9 @@ public class ObservableCollectionView<TInput, TOutput> : ObservableCollectionVie
         if (e.NewItems!.Count != 1)
             throw new InvalidOperationException("Modifying multiple items is not supported");
 
+        // Increase all indexes greater than inserted input indexes
+        Output.IncreaseAllIndexesIfGreaterOrEqualThan(e.NewItems.Count, e.NewStartingIndex);
+
         TInput item = (TInput)e.NewItems[0]!;
         TOutput transformedItem = TransformItem(item);
 
@@ -308,16 +311,11 @@ public class ObservableCollectionView<TInput, TOutput> : ObservableCollectionVie
             // Find where in output to insert
             int i = Output.BinarySearchIndexValue(new(e.NewStartingIndex, transformedItem), sortComparer);
 
-            if (i >= 0)
-                throw new InvalidOperationException("Trying to add input already in output");
-
-            i = ~i;
+            if (i < 0)
+                i = ~i;
 
             Output.InsertIndexValue(i, new(e.NewStartingIndex, transformedItem));
         }
-
-        // Increase all indexes greater than inserted input indexes
-        Output.IncreaseAllIndexesIfGreaterOrEqualThan(e.NewItems.Count, e.NewStartingIndex + e.NewItems.Count);
     }
 
     void OnInputRemove(NotifyCollectionChangedEventArgs e)
@@ -358,10 +356,8 @@ public class ObservableCollectionView<TInput, TOutput> : ObservableCollectionVie
             // TODO: Because sorting can change, this may not have the correct index
             i = Output.BinarySearchIndexValue(new(e.OldStartingIndex, transformedItem), sortComparer);
 
-            if (i >= 0)
-                throw new InvalidOperationException("Trying to add input already in output");
-
-            i = ~i;
+            if (i < 0)
+                i = ~i;
 
             Output.InsertIndexValue(i, new(e.OldStartingIndex, transformedItem));
         }
