@@ -612,9 +612,10 @@ public class RoomRenderer
 
         using SKPaint paint = new() { Shader = shader };
 
-        using SKVertices verticesCopy = SKVertices.CreateCopy(SKVertexMode.Triangles, verticesArray, texsArray, null);
+        using SKVertices? verticesCopy = SKVertices.CreateCopy(SKVertexMode.Triangles, verticesArray, texsArray, null);
 
-        Canvas.DrawVertices(verticesCopy, SKBlendMode.Modulate, paint);
+        if (verticesCopy is not null)
+            Canvas.DrawVertices(verticesCopy, SKBlendMode.Modulate, paint);
 
         Canvas.Restore();
     }
