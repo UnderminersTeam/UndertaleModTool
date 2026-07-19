@@ -42,7 +42,7 @@
                     </Grid>
                 </StackPanel>
 
-                <l:DataExplorerView Grid.Row="1" Name="DataExplorer"/>
+                <l:DataExplorerView Grid.Row="1" Name="DataExplorer" DataContext="{Binding DataExplorer}"/>
             </Grid>
             
             <GridSplitter Grid.Column="1" ResizeDirection="Columns"/>

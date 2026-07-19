@@ -819,7 +819,7 @@ public class UndertaleRoomEditor : Control
         public override bool Validate(object? sender, DragEventArgs e, object? sourceContext, object? targetContext, object? state)
         {
             if (sender is UndertaleRoomEditor editor
-                && sourceContext is MainViewModel.TreeDataGridItem item
+                && sourceContext is DataExplorerViewModel.Item item
                 && item.Value is UndertaleResource resource
                 && targetContext is UndertaleRoomViewModel vm)
             {
@@ -838,7 +838,7 @@ public class UndertaleRoomEditor : Control
         public override bool Execute(object? sender, DragEventArgs e, object? sourceContext, object? targetContext, object? state)
         {
             if (sender is UndertaleRoomEditor editor
-                && sourceContext is MainViewModel.TreeDataGridItem item
+                && sourceContext is DataExplorerViewModel.Item item
                 && item.Value is UndertaleResource resource
                 && targetContext is UndertaleRoomViewModel vm)
             {

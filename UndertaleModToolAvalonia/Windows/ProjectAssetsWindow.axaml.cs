@@ -175,7 +175,7 @@ public class ProjectAssetsWindowDataGridDropHandler : DropHandlerBase
     public override bool Validate(object? sender, DragEventArgs e, object? sourceContext, object? targetContext, object? state)
     {
         if (targetContext is ProjectAssetsWindow window && window.MainVM.Project is ProjectContext project
-            && sourceContext is MainViewModel.TreeDataGridItem item && item.Value is IProjectAsset projectAsset)
+            && sourceContext is DataExplorerViewModel.Item item && item.Value is IProjectAsset projectAsset)
         {
             return true;
         }
@@ -185,7 +185,7 @@ public class ProjectAssetsWindowDataGridDropHandler : DropHandlerBase
     public override bool Execute(object? sender, DragEventArgs e, object? sourceContext, object? targetContext, object? state)
     {
         if (targetContext is ProjectAssetsWindow window && window.MainVM.Project is ProjectContext project
-            && sourceContext is MainViewModel.TreeDataGridItem item && item.Value is IProjectAsset projectAsset)
+            && sourceContext is DataExplorerViewModel.Item item && item.Value is IProjectAsset projectAsset)
         {
             project.MarkAssetForExport(projectAsset);
             return true;

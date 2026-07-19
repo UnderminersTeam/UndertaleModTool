@@ -88,7 +88,7 @@ public partial class MainView : UserControl, IView
         projectAssetsWindow = null;
     }
 
-    public void ExpandItemOnTree(MainViewModel.TreeDataGridItem item)
+    public void ExpandItemOnTree(DataExplorerViewModel.Item item)
     {
         DataExplorer.ExpandItemOnTree(item);
     }

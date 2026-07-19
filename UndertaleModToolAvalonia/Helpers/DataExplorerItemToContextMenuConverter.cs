@@ -6,7 +6,7 @@ using UndertaleModLib;
 
 namespace UndertaleModToolAvalonia;
 
-public class TreeDataGridItemToContextMenuConverter : IValueConverter
+public class DataExplorerItemToContextMenuConverter : IValueConverter
 {
     public ContextMenu? ListMenu { get; set; }
     public ContextMenu? SingleMenu { get; set; }
@@ -14,7 +14,7 @@ public class TreeDataGridItemToContextMenuConverter : IValueConverter
 
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (value is MainViewModel.TreeDataGridItem treeItem)
+        if (value is DataExplorerViewModel.Item treeItem)
         {
             if (treeItem.Tag?.Equals("list") ?? false)
                 return ListMenu;

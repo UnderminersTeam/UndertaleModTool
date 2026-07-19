@@ -106,7 +106,7 @@ public class UndertaleStringDropHandler : DropHandlerBase
     {
         if (targetContext is UndertaleStringReferenceView vm)
         {
-            if (sourceContext is MainViewModel.TreeDataGridItem item && item.Value is UndertaleString resource)
+            if (sourceContext is DataExplorerViewModel.Item item && item.Value is UndertaleString resource)
             {
                 return true;
             }
@@ -117,7 +117,7 @@ public class UndertaleStringDropHandler : DropHandlerBase
     {
         if (targetContext is UndertaleStringReferenceView vm)
         {
-            if (sourceContext is MainViewModel.TreeDataGridItem item && item.Value is UndertaleString resource)
+            if (sourceContext is DataExplorerViewModel.Item item && item.Value is UndertaleString resource)
             {
                 vm.Reference = resource;
                 return true;

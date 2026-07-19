@@ -64,30 +64,14 @@ public partial class MainViewModel
     [Notify]
     private ProjectContext? _Project;
 
-    // Tree data grid
-    public partial class TreeDataGridItem
-    {
-        [Notify]
-        private string _Text = "<unset text!>";
-        public object? Value { get; set; }
-        public object? Tag { get; set; }
-        
-        [Notify]
-        private IList<TreeDataGridItem>? _Children;
-    }
-
-    [Notify]
-    private ObservableCollection<TreeDataGridItem> _TreeDataGridData = [];
+    // Left panel
+    public DataExplorerViewModel DataExplorer { get; set; }
 
     [Notify]
     private string _FilterText = "";
 
-    public event Action<string>? FilterTextChanged;
-
     [Notify]
     private bool _IsSorted = false;
-
-    List<ObservableCollectionView> observableCollectionViewList = [];
 
     // Tabs
     public ObservableCollection<TabItemViewModel> Tabs { get; set; }
@@ -118,6 +102,8 @@ public partial class MainViewModel
         ServiceProvider = serviceProvider;
 
         AudioPlayer.Init(f => Dispatcher.UIThread.Post(f));
+
+        DataExplorer = new(this);
 
         Tabs = [
             new TabItemViewModel(new DescriptionViewModel(
@@ -163,7 +149,7 @@ public partial class MainViewModel
         }
     }
 
-    public async void OpenDroppedFiles(object? parameter) => OpenDroppedFiles((IEnumerable<IStorageItem>?) parameter);
+    public async void OpenDroppedFiles(object? parameter) => OpenDroppedFiles((IEnumerable<IStorageItem>?)parameter);
 
     public async void OpenDroppedFiles(IEnumerable<IStorageItem>? files)
     {
@@ -205,176 +191,25 @@ public partial class MainViewModel
 
         UpdateVersion();
 
-        TreeDataGridData.Clear();
-
-        observableCollectionViewList.Clear();
+        DataExplorer.UpdateFromData();
 
         if (Data is not null)
         {
-            var dataItem = new TreeDataGridItem()
-            {
-                Value = Data,
-                Text = "Data",
-                Children = [],
-            };
-
-            if (Data.GeneralInfo is not null)
-                dataItem.Children.Add(new() { Value = "GeneralInfo", Text = "General info" });
-            if (Data.GlobalInitScripts is not null)
-                dataItem.Children.Add(new() { Value = "GlobalInitScripts", Text = "Global init scripts" });
-            if (Data.GameEndScripts is not null)
-                dataItem.Children.Add(new() { Value = "GameEndScripts", Text = "Game End scripts" });
-
-            if (Data.AudioGroups is not null)
-                dataItem.Children.Add(new() {Tag = "list", Value = "AudioGroups", Text = "Audio groups",
-                Children = CreateListObservableCollectionView(Data.AudioGroups)});
-            if (Data.Sounds is not null)
-                dataItem.Children.Add(new() {Tag = "list", Value = "Sounds", Text = "Sounds",
-                Children = CreateListObservableCollectionView(Data.Sounds)});
-            if (Data.Sprites is not null)
-                dataItem.Children.Add(new() {Tag = "list", Value = "Sprites", Text = "Sprites",
-                Children = CreateListObservableCollectionView(Data.Sprites)});
-            if (Data.Backgrounds is not null)
-                dataItem.Children.Add(new() {Tag = "list", Value = "Backgrounds", Text = "Backgrounds & Tile sets",
-                Children = CreateListObservableCollectionView(Data.Backgrounds)});
-            if (Data.Paths is not null)
-                dataItem.Children.Add(new() {Tag = "list", Value = "Paths", Text = "Paths",
-                Children = CreateListObservableCollectionView(Data.Paths)});
-            if (Data.Scripts is not null)
-                dataItem.Children.Add(new() {Tag = "list", Value = "Scripts", Text = "Scripts",
-                Children = CreateListObservableCollectionView(Data.Scripts)});
-            if (Data.Shaders is not null)
-                dataItem.Children.Add(new() {Tag = "list", Value = "Shaders", Text = "Shaders",
-                Children = CreateListObservableCollectionView(Data.Shaders)});
-            if (Data.Fonts is not null)
-                dataItem.Children.Add(new() {Tag = "list", Value = "Fonts", Text = "Fonts",
-                Children = CreateListObservableCollectionView(Data.Fonts)});
-            if (Data.Timelines is not null)
-                dataItem.Children.Add(new() {Tag = "list", Value = "Timelines", Text = "Timelines",
-                Children = CreateListObservableCollectionView(Data.Timelines)});
-            if (Data.GameObjects is not null)
-                dataItem.Children.Add(new() {Tag = "list", Value = "GameObjects", Text = "Game objects",
-                Children = CreateListObservableCollectionView(Data.GameObjects)});
-            if (Data.Rooms is not null)
-                dataItem.Children.Add(new() {Tag = "list", Value = "Rooms", Text = "Rooms",
-                Children = CreateListObservableCollectionView(Data.Rooms)});
-            if (Data.Extensions is not null)
-                dataItem.Children.Add(new() {Tag = "list", Value = "Extensions", Text = "Extensions",
-                Children = CreateListObservableCollectionView(Data.Extensions)});
-            if (Data.TexturePageItems is not null)
-                dataItem.Children.Add(new() {Tag = "list", Value = "TexturePageItems", Text = "Texture page items",
-                Children = CreateListObservableCollectionView(Data.TexturePageItems)});
-            if (Data.Code is not null)
-                dataItem.Children.Add(new() {Tag = "list", Value = "Code", Text = "Code",
-                Children = CreateListObservableCollectionView(Data.Code)});
-            if (Data.Variables is not null)
-                dataItem.Children.Add(new() {Tag = "list", Value = "Variables", Text = "Variables",
-                Children = CreateListObservableCollectionView(Data.Variables)});
-            if (Data.Functions is not null)
-                dataItem.Children.Add(new() {Tag = "list", Value = "Functions", Text = "Functions",
-                Children = CreateListObservableCollectionView(Data.Functions)});
-            if (Data.CodeLocals is not null)
-                dataItem.Children.Add(new() {Tag = "list", Value = "CodeLocals", Text = "Code locals",
-                Children = CreateListObservableCollectionView(Data.CodeLocals)});
-            if (Data.Strings is not null)
-                dataItem.Children.Add(new() {Tag = "list", Value = "Strings", Text = "Strings",
-                Children = CreateListObservableCollectionView(Data.Strings)});
-            if (Data.EmbeddedTextures is not null)
-                dataItem.Children.Add(new() {Tag = "list", Value = "EmbeddedTextures", Text = "Embedded textures",
-                Children = CreateListObservableCollectionView(Data.EmbeddedTextures)});
-            if (Data.EmbeddedAudio is not null)
-                dataItem.Children.Add(new() {Tag = "list", Value = "EmbeddedAudio", Text = "Embedded audio",
-                Children = CreateListObservableCollectionView(Data.EmbeddedAudio)});
-            if (Data.TextureGroupInfo is not null)
-                dataItem.Children.Add(new() {Tag = "list", Value = "TextureGroupInformation", Text = "Texture group information",
-                Children = CreateListObservableCollectionView(Data.TextureGroupInfo)});
-            if (Data.EmbeddedImages is not null)
-                dataItem.Children.Add(new() {Tag = "list", Value = "EmbeddedImages", Text = "Embedded images",
-                Children = CreateListObservableCollectionView(Data.EmbeddedImages)});
-            if (Data.AnimationCurves is not null)
-                dataItem.Children.Add(new() {Tag = "list", Value = "AnimationCurves", Text = "Animation curves",
-                Children = CreateListObservableCollectionView(Data.AnimationCurves)});
-            if (Data.ParticleSystems is not null)
-                dataItem.Children.Add(new() {Tag = "list", Value = "ParticleSystems", Text = "Particle systems",
-                Children = CreateListObservableCollectionView(Data.ParticleSystems)});
-            if (Data.ParticleSystemEmitters is not null)
-                dataItem.Children.Add(new() {Tag = "list", Value = "ParticleSystemEmitters", Text = "Particle system emitters",
-                Children = CreateListObservableCollectionView(Data.ParticleSystemEmitters)});
-
-            TreeDataGridData.Add(dataItem);
-
             if (View is MainView mainView)
-                mainView.ExpandItemOnTree(dataItem);
+                mainView.ExpandItemOnTree(DataExplorer.TreeDataGridData[0]);
         }
-    }
-
-    IList<TreeDataGridItem>? CreateListObservableCollectionView<T>(IList<T?>? list) where T : class?
-    {
-        if (list is not null)
-        {
-            ObservableCollectionView<T?, TreeDataGridItem> view = new(list,
-                transform: x => new TreeDataGridItem() { Text = "", Value = x },
-                filter: item => AssetNameContainsText(item.Value, FilterText));
-
-            observableCollectionViewList.Add(view);
-
-            return view.Output;
-        }
-        return null;
     }
 
     // Called by [Notify]
     public void OnFilterTextChanged()
     {
-        foreach (ObservableCollectionView view in observableCollectionViewList)
-        {
-            view.SetFilter(item => AssetNameContainsText(((TreeDataGridItem)item!).Value, FilterText ?? ""));
-        }
-    }
-
-    static bool AssetNameContainsText(object? asset, string text)
-    {
-        string? name = AssetGetName(asset);
-
-        if (name is null)
-            return true;
-
-        return name.Contains(text, StringComparison.OrdinalIgnoreCase);
-    }
-
-    static string? AssetGetName(object? asset)
-    {
-        return asset switch
-        {
-            UndertaleNamedResource namedResource => namedResource.Name.Content,
-            UndertaleString _string => _string.Content,
-            _ => null,
-        };
+        DataExplorer.SetFilter();
     }
 
     // Called by [Notify]
     public void OnIsSortedChanged()
     {
-        Comparison<object?>? comparison = null;
-        if (IsSorted)
-        {
-            comparison = static (a, b) =>
-            {
-                string? aName = AssetGetName(((TreeDataGridItem)a!).Value);
-                string? bName = AssetGetName(((TreeDataGridItem)b!).Value);
-
-                if (aName is null && bName is null) return 0;
-                if (aName is null) return 1;
-                if (bName is null) return -1;
-
-                return aName.CompareTo(bName, StringComparison.OrdinalIgnoreCase);
-            };
-        }
-
-        foreach (ObservableCollectionView view in observableCollectionViewList)
-        {
-            view.SetSort(comparison);
-        }
+        DataExplorer.SetSort();
     }
 
     /// <summary>Ask if user wants to save the current file before continuing.
@@ -531,23 +366,23 @@ public partial class MainViewModel
 
     public void CloseData()
     {
+        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            foreach (var window in desktop.Windows.ToList())
+            {
+                if (window is SearchInCodeWindow or FindReferencesWindow or ProjectAssetsWindow)
+                {
+                    window.Close();
+                }
+            }
+        }
+
         Data = null;
         DataPath = null;
 
         TabCloseAll();
 
         ClearProject();
-
-        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-        {
-            foreach (var window in desktop.Windows.ToList())
-            {
-                if (window is SearchInCodeWindow)
-                {
-                    window.Close();
-                }
-            }
-        }
     }
 
     public void UpdateVersion()
