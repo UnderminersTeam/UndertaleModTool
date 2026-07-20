@@ -1001,7 +1001,7 @@ namespace UndertaleModTool
                 if (isDisassembly)
                 {
                     selectedCode = codeEditor.DisassemblyEditor?.SelectedText;
-                    if (String.IsNullOrEmpty(selectedCode))
+                    if (string.IsNullOrEmpty(selectedCode))
                         isDisassembly = false; // Don't check "In assembly" if there is nothing selected in there.
                 }
                 else
@@ -3107,12 +3107,12 @@ result in loss of work.");
             // Try to get index
             int foundIndex = obj is UndertaleResource res ? Data.IndexOf(res, false) : -1;
 
-            // Determine ID
-            string idString;
+			// Determine ID
+			string idString;
             if (foundIndex == -2)
-            {	
+			{	
                 idString = "None";
-            }
+        	}
             else if (foundIndex == -1)
             {
                 idString = "N/A";
