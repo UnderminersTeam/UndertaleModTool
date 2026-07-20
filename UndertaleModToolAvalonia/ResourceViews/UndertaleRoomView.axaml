@@ -34,14 +34,17 @@
             <MenuItem Header="_Add effect layer" Click="ContextMenu_AddEffectLayer_Click"/>
         </ContextMenu>
         <ContextMenu x:Key="GenericLayerMenu">
+            <MenuItem Header="Toggle _visibility" Click="ContextMenu_ToggleVisibility_Click"/>
             <MenuItem Header="_Remove layer" Click="ContextMenu_RemoveLayer_Click"/>
         </ContextMenu>
         <ContextMenu x:Key="InstancesLayerMenu">
+            <MenuItem Header="Toggle _visibility" Click="ContextMenu_ToggleVisibility_Click"/>
             <MenuItem Header="_Add game object instance" Click="ContextMenu_AddGameObjectInstance_InstancesLayer_Click"/>
             <MenuItem Header="_Paste game object instance" Click="ContextMenu_Paste_Click"/>
             <MenuItem Header="_Remove layer" Click="ContextMenu_RemoveLayer_Click"/>
         </ContextMenu>
         <ContextMenu x:Key="AssetsLayerMenu">
+            <MenuItem Header="Toggle _visibility" Click="ContextMenu_ToggleVisibility_Click"/>
             <MenuItem Header="_Add legacy tile instance" Click="ContextMenu_AddLegacyTileInstance_Click"/>
             <MenuItem Header="_Add sprite instance" Click="ContextMenu_AddSpriteInstance_Click"/>
             <MenuItem Header="_Add sequence instance" Click="ContextMenu_AddSequenceInstance_Click"/>

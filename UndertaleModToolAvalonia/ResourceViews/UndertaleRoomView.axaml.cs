@@ -213,6 +213,17 @@ public partial class UndertaleRoomView : UserControl
             vm.AddLayer(UndertaleRoom.LayerType.Effect);
     }
 
+    private void ContextMenu_ToggleVisibility_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is UndertaleRoomViewModel vm
+            && sender is Control control
+            && control.FindLogicalAncestorOfType<TreeViewItem>() is TreeViewItem treeViewItem
+            && treeViewItem.DataContext is UndertaleRoom.Layer layer)
+        {
+            layer.IsVisible = !layer.IsVisible;
+        }
+    }
+
     private void ContextMenu_RemoveLayer_Click(object? sender, RoutedEventArgs e)
     {
         if (DataContext is UndertaleRoomViewModel vm
