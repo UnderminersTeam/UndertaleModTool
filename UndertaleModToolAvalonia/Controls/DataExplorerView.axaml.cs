@@ -312,10 +312,11 @@ public partial class DataExplorerView : UserControl
         {
             var source = (MainTreeDataGrid.Source as HierarchicalTreeDataGridSource<DataExplorerViewModel.Item>)!;
             source.Expand(index);
-            source.RowSelection!.Select(index);
 
             int rowIndex = MainTreeDataGrid.Rows!.ModelIndexToRowIndex(index);
             MainTreeDataGrid.RowsPresenter!.BringIntoView(rowIndex);
+
+            source.RowSelection!.Select(index);
         }
     }
 
