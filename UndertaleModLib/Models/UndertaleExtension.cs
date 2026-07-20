@@ -8,11 +8,6 @@ namespace UndertaleModLib.Models;
 public enum UndertaleExtensionKind : uint
 {
     /// <summary>
-    /// TODO: unknown, needs more research.
-    /// </summary>
-    [Obsolete("Likely unused")]
-    Unknown0 = 0,
-    /// <summary>
     /// A DLL extension.
     /// </summary>
     Dll = 1,
@@ -469,5 +464,20 @@ public class UndertaleExtension : UndertaleNamedResource, IDisposable
             count += 1 + UndertalePointerList<UndertaleExtensionFile>.UnserializeChildObjectCount(reader);
 
         return count;
+    }
+
+    public static bool ProductDataEligible(UndertaleData data)
+    {
+        uint major = data?.GeneralInfo?.Major ?? 0;
+        if (major >= 2)
+        {
+            return true;
+        }
+        uint build = data?.GeneralInfo?.Build ?? 0;
+        if (build >= 1773 || build == 1559) // NOTE: unknown if 1773 is the earliest version which contains product IDs/data
+        {
+            return true;
+        }
+        return false;
     }
 }

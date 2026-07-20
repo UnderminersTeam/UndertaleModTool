@@ -33,7 +33,7 @@ int roomCount = Data.Rooms.Count;
 
 string exportedTexturesFolder = PromptChooseDirectory();
 if (exportedTexturesFolder == null)
-    throw new ScriptException("The export folder was not set, stopping script.");
+    throw new ScriptCancelledException("The export folder was not set, stopping script.");
 
 bool displayGrid = ScriptQuestion("Draw room grid?");
 

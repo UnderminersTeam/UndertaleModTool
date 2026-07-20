@@ -60,7 +60,10 @@ ProfileModeExempt();
 
 void ClearCustomGML()
 {
-    UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+    UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
+    {
+        MainThreadAction = MainThreadAction
+    };
     importGroup.QueueReplace("gml_Object___obj_executionorder___Destroy_0", "");
     importGroup.QueueReplace("gml_Object___obj_executionorder___Create_0", "");
     importGroup.QueueReplace("gml_Object___obj_executionorder___Draw_64", "");
@@ -75,7 +78,10 @@ SetUpCustomGML();
 
 void SetUpCustomGML()
 {
-    UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+    UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
+    {
+        MainThreadAction = MainThreadAction
+    };
 
     // __obj_executionorder__
     importGroup.QueueReplace("gml_Object___obj_executionorder___Destroy_0", @"

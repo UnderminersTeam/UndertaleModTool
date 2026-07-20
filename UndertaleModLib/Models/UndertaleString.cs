@@ -117,7 +117,7 @@ public class UndertaleString : UndertaleResource, ISearchable, IDisposable, Unde
     /// <returns>A string which features the <b>text</b> <c>\n</c>, <c>\r</c>, <c>"</c> and <c>\</c> being properly unescaped.</returns>
     public static string UnescapeText(string text)
     {
-        // TODO: optimize this? seems like a very whacky thing to do... why do they have escaped text in the first place?
+        // TODO: optimize this? seems like a very whacky thing to do... (could use a stringbuilder or something)
         return text.Replace("\\r", "\r").Replace("\\n", "\n").Replace("\\\"", "\"").Replace("\\\\", "\\");
     }
 }

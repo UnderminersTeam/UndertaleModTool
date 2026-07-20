@@ -15,7 +15,8 @@ if (Data.GeneralInfo.Name.Content != "NXTALE")
 
 UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
 {
-    ThrowOnNoOpFindReplace = true
+    ThrowOnNoOpFindReplace = true,
+    MainThreadAction = MainThreadAction
 };
 
 bool isXbox = Data.Rooms.ByName("room_xbox_engagement") is not null;

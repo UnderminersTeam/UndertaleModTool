@@ -19,7 +19,10 @@ if (!Data.IsGameMaker2())
 
 var gml_Object_obj_time_Step_1 = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Step, EventSubtypeStep.BeginStep, Data);
 
-UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
+{
+    MainThreadAction = MainThreadAction
+};
 importGroup.QueueAppend(gml_Object_obj_time_Step_1, @"
 __view_set(4, 0, ((__view_get(e__VW_append.Angle, 0) + (sin((global.time / 15)) / 2)) + 1));
 __view_set(11, 0, (__view_get(e__VW_append.XPort, 0) + (cos((global.time / 10)) * 1.5)));

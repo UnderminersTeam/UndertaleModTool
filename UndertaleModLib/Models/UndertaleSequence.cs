@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using UndertaleModLib.Project;
+using UndertaleModLib.Project.SerializableAssets;
 
 namespace UndertaleModLib.Models;
 
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged, IDisposable
+public class UndertaleSequence : UndertaleNamedResource, IProjectAsset, INotifyPropertyChanged, IDisposable
 {
     /// <summary>
     /// Possible playback modes for sequences.
@@ -201,6 +203,31 @@ public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged,
         Tracks = null;
         FunctionIDs = null;
     }
+
+    /// <inheritdoc/>
+    internal ISerializableProjectAsset GenerateSerializableProjectAsset(ProjectContext projectContext)
+    {
+        SerializableSequence serializable = new();
+        serializable.PopulateFromData(projectContext, this);
+        return serializable;
+    }
+
+    /// <inheritdoc/>
+    ISerializableProjectAsset IProjectAsset.GenerateSerializableProjectAsset(ProjectContext projectContext)
+    {
+        SerializableSequence serializable = new();
+        serializable.PopulateFromData(projectContext, this);
+        return serializable;
+    }
+
+    /// <inheritdoc/>
+    public string ProjectName => Name?.Content ?? "<unknown name>";
+
+    /// <inheritdoc/>
+    public SerializableAssetType ProjectAssetType => SerializableAssetType.Sequence;
+
+    /// <inheritdoc/>
+    public bool ProjectExportable => Name?.Content is not null;
 
     /// <summary>
     /// A keyframe of data stored within a sequence track, at a given time/duration, and for some number of channels.
@@ -861,18 +888,23 @@ public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged,
         /// </summary>
         public sealed class Data : ResourceData<UndertaleSound, UndertaleChunkSOND>
         {
+            public enum SoundMode : int
+            {
+                PlayOnce = 0,
+                Looping = 1
+            }
+
             /// <summary>
-            /// Mode for the audio keyframe.
+            /// The mode of the audio keyframe.
             /// </summary>
-            // TODO: what values can this be?
-            public int Mode { get; set; }
+            public SoundMode Mode { get; set; }
 
             /// <inheritdoc />
             public override void Serialize(UndertaleWriter writer)
             {
                 base.Serialize(writer);
                 writer.Write(0);
-                writer.Write(Mode);
+                writer.Write((int)Mode);
             }
 
             /// <inheritdoc />
@@ -881,7 +913,7 @@ public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged,
                 base.Unserialize(reader);
                 if (reader.ReadUInt32() != 0)
                     throw new IOException("Expected 0 in Audio keyframe");
-                Mode = reader.ReadInt32();
+                Mode = (SoundMode)reader.ReadInt32();
             }
 
             /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
@@ -1211,15 +1243,32 @@ public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged,
     /// Keyframe store for text keyframes.
     /// </summary>
     public sealed class TextKeyframes : TrackKeyframes<TextKeyframes.Data>
-    {
+    { 
+        public enum WrapMode : int
+        {
+            Default,
+            SplitWords
+        }
+
+        public enum Origin : int
+        {
+            TopLeft,
+            TopCenter,
+            TopRight,
+            MiddleLeft,
+            MiddleCenter,
+            MiddleRight,
+            BottomLeft,
+            BottomCenter,
+            BottomRight,
+            Custom
+        }
+        
         /// <summary>
         /// Text keyframe data, containing various text display properties.
         /// </summary>
-        public sealed class Data : UndertaleObject, IStaticChildObjectsSize
+        public sealed class Data : UndertaleObject
         {
-            /// <inheritdoc cref="IStaticChildObjectsSize.ChildObjectsSize" />
-            public static readonly uint ChildObjectsSize = 16;
-
             // Backing alignment field, containing vertical and horizontal components
             private int _alignment;
 
@@ -1256,6 +1305,10 @@ public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged,
             /// </summary>
             public int FontIndex { get; set; }
 
+            public WrapMode WrapMode { get; set; }
+
+            public Origin Origin { get; set; }
+
             /// <inheritdoc />
             public void Serialize(UndertaleWriter writer)
             {
@@ -1263,6 +1316,11 @@ public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged,
                 writer.Write(Wrap);
                 writer.Write(_alignment);
                 writer.Write(FontIndex);
+                if (writer.undertaleData.IsVersionAtLeast(2024, 14))
+                {
+                    writer.Write((int)WrapMode);
+                    writer.Write((int)Origin);
+                }
             }
 
             /// <inheritdoc />
@@ -1272,6 +1330,24 @@ public class UndertaleSequence : UndertaleNamedResource, INotifyPropertyChanged,
                 Wrap = reader.ReadBoolean();
                 _alignment = reader.ReadInt32();
                 FontIndex = reader.ReadInt32();
+                if (reader.undertaleData.IsVersionAtLeast(2024, 14))
+                {
+                    WrapMode = (WrapMode)reader.ReadInt32();
+                    Origin = (Origin)reader.ReadInt32();
+                }
+            }
+
+            /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
+            public static uint UnserializeChildObjectCount(UndertaleReader reader)
+            {
+                reader.Position += 16;
+                
+                if (reader.undertaleData.IsVersionAtLeast(2024, 14))
+                {
+                    reader.Position += 8; // WrapMode, Origin
+                }
+
+                return 0;
             }
         }
     }

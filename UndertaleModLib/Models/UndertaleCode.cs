@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Text;
 using Underanalyzer;
 using UndertaleModLib.Decompiler;
+using UndertaleModLib.Project;
+using UndertaleModLib.Project.SerializableAssets;
 using UndertaleModLib.Util;
+// ReSharper disable All
 
 namespace UndertaleModLib.Models;
 
@@ -210,20 +214,21 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
 
     public enum InstanceType : short
     {
-        Undefined = 0, // actually, this is just object 0, but also occurs in places where no instance type was set
-
+        /// Note: This is just object 0, but also occurs in places where no instance type was set
+        Undefined = 0,
         Self = -1,
         Other = -2,
         All = -3,
         Noone = -4,
         Global = -5,
-        Builtin = -6, // Note: Used only in UndertaleVariable.VarID (which is not really even InstanceType)
+        /// Note: Used only in UndertaleVariable.VarID (which is not really even InstanceType)
+        Builtin = -6,
         Local = -7,
         Stacktop = -9,
         Arg = -15,
         Static = -16
 
-        // anything > 0 => GameObjectIndex
+        // anything > 0 --> GameObjectIndex (or Instance ID if VariableType.Instance)
     }
 
     public enum VariableType : byte
@@ -231,9 +236,12 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
         Array = 0x00,
         StackTop = 0x80,
         Normal = 0xA0,
-        Instance = 0xE0, // the InstanceType is an instance ID inside the room -100000
-        ArrayPushAF = 0x10, // GMS2.3+, multidimensional array with pushaf
-        ArrayPopAF = 0x90, // GMS2.3+, multidimensional array with pushaf or popaf
+        /// The InstanceType is an Instance ID inside a room, minus 100000
+        Instance = 0xE0,
+        /// GMS2.3+, multidimensional array with pushaf
+        ArrayPushAF = 0x10,
+        /// GMS2.3+, multidimensional array with pushaf or popaf
+        ArrayPopAF = 0x90,
     }
 
     public enum ComparisonType : byte
@@ -505,17 +513,15 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                     // Transform opcode as needed for bytecode 14
                     firstWord = (firstWord & 0xFFFFFF) | ((uint)ConvertNewKindToOldKind((byte)(firstWord >> 24)) << 24);
                 }
-                else
+                else if ((firstWord & 0xFFFFFF) != 0xF00000 && (firstWord & 0x800000) != 0)
                 {
                     // Additionally, after bytecode 14, transform 24-bit negative branch into a 23-bit negative branch
-                    if ((firstWord & 0xFFFFFF) != 0xF00000 && (firstWord & 0x800000) != 0)
-                    {
-                        // Unset 24-bit sign bit
-                        firstWord &= ~0x800000u;
+                    
+                    // Unset 24-bit sign bit
+                    firstWord &= ~0x800000u;
 
-                        // Set 23-bit sign bit
-                        firstWord |= 0x400000;
-                    }
+                    // Set 23-bit sign bit
+                    firstWord |= 0x400000;
                 }
                 writer.Write(firstWord);
                 break;
@@ -698,6 +704,15 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                 if ((kind is Opcode.And or Opcode.Or) && type1 == DataType.Boolean && type2 == DataType.Boolean)
                 {
                     reader.undertaleData.ShortCircuit = false;
+                }
+
+                // Check for "dup.e", which implies new code generation introduced in GM 2024.14.4
+                if (kind == Opcode.Dup && type1 == DataType.Int16)
+                {
+                    if (!reader.undertaleData.IsVersionAtLeast(2024, 14, 4))
+                    {
+                        reader.undertaleData.SetGMS2Version(2024, 14, 4);
+                    }
                 }
                 break;
             }
@@ -885,6 +900,12 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                 if (type1 == DataType.Int32)
                 {
                     reader.Position += 4;
+
+                    // Existence of this argument implies GameMaker 2023.8 or above
+                    if (!reader.undertaleData.IsVersionAtLeast(2023, 8))
+                    {
+                        reader.undertaleData.SetGMS2Version(2023, 8);
+                    }
                 }
                 break;
             }
@@ -958,7 +979,7 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
         bool unknownBreak = false;
         if (type == InstructionType.BreakInstruction)
         {
-            if (!Assembler.BreakIDToName.TryGetValue(ExtendedKind, out kind))
+            if (!Assembler.ExtendedIDToName.TryGetValue(ExtendedKind, out kind))
             {
                 kind = kind.ToLower(CultureInfo.InvariantCulture);
                 unknownBreak = true;
@@ -1104,7 +1125,6 @@ public class UndertaleInstruction : UndertaleObject, IGMInstruction
                 if (type1 == DataType.Int64)
                 {
                     sbh.Append(stringBuilder, ValueLong.ToString(null, CultureInfo.InvariantCulture));
-                    break;
                 }
                 break;
 
@@ -1427,7 +1447,7 @@ public static class UndertaleInstructionUtil
 /// A code entry in a data file.
 /// </summary>
 [PropertyChanged.AddINotifyPropertyChangedInterface]
-public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, IDisposable, IGMCode
+public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, IProjectAsset, INotifyPropertyChanged, IDisposable, IGMCode
 {
     /// <summary>
     /// The name of the code entry.
@@ -1479,6 +1499,11 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     /// Child entries of this code entry, if a root-level (parent) entry; empty if a child entry.
     /// </summary>
     public List<UndertaleCode> ChildEntries { get; set; } = new List<UndertaleCode>();
+
+    /// <inheritdoc />
+#pragma warning disable CS0067 // TODO: remove this suppression once Fody is no longer in use
+    public event PropertyChangedEventHandler PropertyChanged;
+#pragma warning restore CS0067
 
     // Bytecode address to use during (de)serialization, since bytecode can be a separate blob
     private uint _bytecodeAbsoluteAddress;
@@ -1851,7 +1876,24 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
         Name = null;
         _unsupportedBuffer = null;
     }
-    
+
+    /// <inheritdoc/>
+    ISerializableProjectAsset IProjectAsset.GenerateSerializableProjectAsset(ProjectContext projectContext)
+    {
+        SerializableCode serializable = new();
+        serializable.PopulateFromData(projectContext, this);
+        return serializable;
+    }
+
+    /// <inheritdoc/>
+    public string ProjectName => Name?.Content ?? "<unknown name>";
+
+    /// <inheritdoc/>
+    public SerializableAssetType ProjectAssetType => SerializableAssetType.Code;
+
+    /// <inheritdoc/>
+    public bool ProjectExportable => Name?.Content is not null && ParentEntry is null;
+
     // Underanalyzer implementations
     IGMString IGMCode.Name => Name;
     int IGMCode.Length => (int)Length;

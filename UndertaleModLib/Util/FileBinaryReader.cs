@@ -41,7 +41,7 @@ namespace UndertaleModLib.Util
 
         private ReadOnlySpan<byte> ReadToBuffer(int count)
         {
-            Stream.Read(buffer, 0, count);
+            Stream.ReadExactly(buffer, 0, count);
             return buffer;
         }
 
@@ -74,14 +74,14 @@ namespace UndertaleModLib.Util
             if (count > 1024)
             {
                 byte[] buf = new byte[count];
-                Stream.Read(buf, 0, count);
+                Stream.ReadExactly(buf, 0, count);
 
                 return encoding.GetString(buf);
             }
             else
             {
                 Span<byte> buf = stackalloc byte[count];
-                Stream.Read(buf);
+                Stream.ReadExactly(buf);
 
                 return encoding.GetString(buf);
             }
@@ -99,7 +99,7 @@ namespace UndertaleModLib.Util
             }
 
             byte[] val = new byte[count];
-            Stream.Read(val, 0, count);
+            Stream.ReadExactly(val, 0, count);
             return val;
         }
 
@@ -221,13 +221,13 @@ namespace UndertaleModLib.Util
             if (length > 1024)
             {
                 byte[] buf = new byte[length];
-                Stream.Read(buf, 0, length);
+                Stream.ReadExactly(buf, 0, length);
                 res = encoding.GetString(buf);
             }
             else
             {
                 Span<byte> buf = stackalloc byte[length];
-                Stream.Read(buf);
+                Stream.ReadExactly(buf);
                 res = encoding.GetString(buf);
             }
 

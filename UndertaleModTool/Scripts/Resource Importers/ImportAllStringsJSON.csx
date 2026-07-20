@@ -5,7 +5,7 @@ EnsureDataLoaded();
 string path = PromptLoadFile("", "JSON files (*.json)|*.json|TXT files (*.txt)|*.txt|All files (*.*)|*.*");
 if (string.IsNullOrWhiteSpace(path))
 {
-    throw new ScriptException("The import file was not set.");
+    throw new ScriptCancelledException("The import file was not set.");
 }
 
 string file = File.ReadAllText(path);

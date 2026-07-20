@@ -1,4 +1,4 @@
-﻿using ImageMagick;
+﻿﻿using ImageMagick;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -74,30 +74,35 @@ namespace UndertaleModLib.Util
             }
 
             // Create an image cropped from the item's part of the texture page
-            IMagickImage<byte> croppedImage = null;
+            IMagickImage<byte> image = null;
             lock (embeddedImage)
             {
-                croppedImage = embeddedImage.CloneArea(texPageItem.SourceX, texPageItem.SourceY, texPageItem.SourceWidth, texPageItem.SourceHeight);
+                image = embeddedImage.CloneArea(texPageItem.SourceX, texPageItem.SourceY, texPageItem.SourceWidth, texPageItem.SourceHeight);
             }
 
             // Resize the image, if necessary
             if (texPageItem.SourceWidth != texPageItem.TargetWidth || texPageItem.SourceHeight != texPageItem.TargetHeight)
             {
-                IMagickImage<byte> original = croppedImage;
-                croppedImage = ResizeImage(croppedImage, texPageItem.TargetWidth, texPageItem.TargetHeight);
-                original.Dispose();
+                uint resizeWidth = texPageItem.TargetWidth;
+                uint resizeHeight = texPageItem.TargetHeight;
+                if (image.Width != resizeWidth || image.Height != resizeHeight)
+                {
+                    image.InterpolativeResize(resizeWidth, resizeHeight, PixelInterpolateMethod.Bilinear);
+                }
             }
 
             // Put it in the final holder image, if necessary
-            IMagickImage<byte> returnImage = croppedImage;
             if (includePadding)
             {
-                returnImage = new MagickImage(MagickColors.Transparent, (uint)exportWidth, (uint)exportHeight);
-                returnImage.Composite(croppedImage, texPageItem.TargetX, texPageItem.TargetY, CompositeOperator.Copy);
-                croppedImage.Dispose();
+                // Based on a benchmark, Extent is faster than creating a new image and using Composite
+                image.Compose = CompositeOperator.Copy;
+                image.Extent(new MagickGeometry(-texPageItem.TargetX, -texPageItem.TargetY, (uint)exportWidth, (uint)exportHeight), MagickColors.Transparent);
             }
 
-            return returnImage;
+            // Strip the image, removing unnecessary metadata
+            image.Strip();
+
+            return image;
         }
 
         /// <summary>
@@ -117,6 +122,7 @@ namespace UndertaleModLib.Util
             MagickImage image = new(filePath, settings);
             image.Alpha(AlphaOption.Set);
             image.Format = MagickFormat.Bgra;
+            image.Depth = 8;
             image.SetCompression(CompressionMethod.NoCompression);
             return image;
         }
@@ -226,6 +232,8 @@ namespace UndertaleModLib.Util
                     pixels.SetPixel(x, y, pixelBit ? white : black);
                 }
             }
+
+            image.Strip();
 
             return image;
         }

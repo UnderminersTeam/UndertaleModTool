@@ -13,7 +13,10 @@ else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter
 
 ScriptMessage("Adds... a new room?\nJust start playing the game as usual and you'll see\nFor Undertale 1.08\nby krzys_h and Kneesnap");
 
-UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
+{
+    MainThreadAction = MainThreadAction
+};
 
 var room_ruins1 = Data.Rooms.ByName("room_ruins1");
 var room_water_dogroom = Data.Rooms.ByName("room_water_dogroom");

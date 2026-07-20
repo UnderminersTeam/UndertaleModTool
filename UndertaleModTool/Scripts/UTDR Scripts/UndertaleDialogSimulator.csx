@@ -63,7 +63,10 @@ if (objCheck != null)
 
 GlobalDecompileContext globalDecompileContext = new(Data);
 Underanalyzer.Decompiler.IDecompileSettings decompilerSettings = new Underanalyzer.Decompiler.DecompileSettings();
-UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data, globalDecompileContext, decompilerSettings);
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data, globalDecompileContext, decompilerSettings)
+{
+    MainThreadAction = MainThreadAction
+};
 
 SetUpDialogueObject();
 
@@ -132,7 +135,7 @@ public void HandleAddingNewRoom()
     newRoom.Right = (uint)1024;
     newRoom.Bottom = (uint)768;
     newRoom.Speed = (uint)(GMS1_mode ? 30 : 0);
-    newRoom.Flags = (UndertaleRoom.RoomEntryFlags.EnableViews | UndertaleRoom.RoomEntryFlags.ShowColor);
+    newRoom.Flags = (UndertaleRoom.RoomEntryFlags.EnableViews | UndertaleRoom.RoomEntryFlags.ClearViewBackground);
     if (GM2024_13_mode)
     {
         newRoom.Flags = (newRoom.Flags | UndertaleRoom.RoomEntryFlags.IsGM2024_13);
