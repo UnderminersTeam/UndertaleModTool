@@ -135,7 +135,6 @@
                                     </TreeDataTemplate>
                                 </l:LayerTypeTemplateSelector.AssetsTemplate>
                                 <l:LayerTypeTemplateSelector.TilesTemplate>
-                                    <!-- TODO: Not gonna show the tiles? -->
                                     <TreeDataTemplate DataType="undertalem:UndertaleRoom+Layer">
                                         <TextBlock Text="{Binding LayerName.Content}" Classes.DisableForeground="{Binding !IsVisible}"/>
                                     </TreeDataTemplate>
@@ -546,9 +545,9 @@
                                                     </Grid>
 
                                                     <StackPanel Orientation="Horizontal">
-                                                        <Button Command="{Binding #Root.DataContext.SelectedTileDataFlipX}">Flip X</Button>
-                                                        <Button Command="{Binding #Root.DataContext.SelectedTileDataFlipY}">Flip Y</Button>
-                                                        <Button Command="{Binding #Root.DataContext.SelectedTileDataRotateClockwise}">Rotate clockwise</Button>
+                                                        <Button Command="{Binding #Root.DataContext.SelectedTileDataFlipX}" HotKey="X">Mirror (X)</Button>
+                                                        <Button Command="{Binding #Root.DataContext.SelectedTileDataFlipY}" HotKey="Y">Flip (Y)</Button>
+                                                        <Button Command="{Binding #Root.DataContext.SelectedTileDataRotateClockwise}" HotKey="Z">Rotate (Z)</Button>
                                                     </StackPanel>
 
                                                     <l:UndertaleRoomTilePicker
