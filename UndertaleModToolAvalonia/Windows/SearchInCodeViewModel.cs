@@ -7,36 +7,41 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
-using PropertyChanged.SourceGenerator;
 using UndertaleModLib;
 using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia;
 
-public partial class SearchInCodeViewModel
+public partial class SearchInCodeViewModel : ObservableObject
 {
     // Set this when testing.
     public IView? View;
 
     public MainViewModel MainVM { get; }
 
-    [Notify]
-    private bool _IsEnabled = true;
+    [ObservableProperty]
+    public partial bool IsEnabled { get; set; } = true;
 
-    [Notify]
-    private string _SearchText = "";
-    [Notify]
-    private bool _IsCaseSensitive = false;
-    [Notify]
-    private bool _IsRegexSearch = false;
-    [Notify]
-    private bool _IsInAssembly = false;
-    [Notify]
-    private ObservableCollection<SearchResult> _Results = [];
-    [Notify]
-    private string _StatusBarText = "Ready.";
+    [ObservableProperty]
+    public partial string SearchText { get; set; } = "";
+
+    [ObservableProperty]
+    public partial bool IsCaseSensitive { get; set; } = false;
+
+    [ObservableProperty]
+    public partial bool IsRegexSearch { get; set; } = false;
+
+    [ObservableProperty]
+    public partial bool IsInAssembly { get; set; } = false;
+
+    [ObservableProperty]
+    public partial ObservableCollection<SearchResult> Results { get; set; } = [];
+
+    [ObservableProperty]
+    public partial string StatusBarText { get; set; } = "Ready.";
 
     string searchText = null!;
     Regex searchTextRegex = null!;

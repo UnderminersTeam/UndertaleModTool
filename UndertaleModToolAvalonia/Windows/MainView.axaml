@@ -16,7 +16,7 @@
     </Design.DataContext>
 
     <Interaction.Behaviors>
-        <FilesDropBehavior Command="{Binding OpenDroppedFiles}" />
+        <FilesDropBehavior Command="{Binding OpenDroppedFilesCommand}" />
     </Interaction.Behaviors>
 
     <DockPanel>
@@ -174,7 +174,7 @@
                                         </DataTemplate>
                                     </ContentControl.DataTemplates>
                                 </ContentControl>
-                                <Button Command="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).TabClose}"
+                                <Button Command="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).TabCloseCommand}"
                                         CommandParameter="{Binding .}"
                                         Classes="TransparentButton">❌</Button>
                             </StackPanel>

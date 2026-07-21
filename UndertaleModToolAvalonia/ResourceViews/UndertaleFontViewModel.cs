@@ -1,18 +1,18 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using PropertyChanged.SourceGenerator;
+using CommunityToolkit.Mvvm.ComponentModel;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia;
 
-public partial class UndertaleFontViewModel : IUndertaleResourceViewModel
+public partial class UndertaleFontViewModel : ObservableObject, IUndertaleResourceViewModel
 {
     public UndertaleResource Resource => Font;
     public UndertaleFont Font { get; }
 
-    [Notify]
-    private UndertaleFont.Glyph? _GlyphsSelected;
+    [ObservableProperty]
+    public partial UndertaleFont.Glyph? GlyphsSelected { get; set; }
 
     public UndertaleFontViewModel(UndertaleFont font)
     {

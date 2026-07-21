@@ -6,15 +6,15 @@ using System.IO;
 using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
-using PropertyChanged.SourceGenerator;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 using static UndertaleModLib.Models.UndertaleRoom;
 
 namespace UndertaleModToolAvalonia;
 
-public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
+public partial class UndertaleRoomViewModel : ObservableObject, IUndertaleResourceViewModel
 {
     public const uint TILE_ID = 0b00000000000001111111111111111111;
     public const uint TILE_FLIP_H = 0b00010000000000000000000000000000;
@@ -27,37 +27,41 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
 
     public ObservableCollection<RoomTreeItem> RoomTreeItems { get; set; } = [];
 
-    [Notify]
-    private object? _RoomTreeItemsSelectedItem;
+    [ObservableProperty]
+    public partial object? RoomTreeItemsSelectedItem { get; set; }
 
-    [Notify]
-    private object? _PropertiesContent;
+    [ObservableProperty]
+    public partial object? PropertiesContent { get; set; }
 
-    [Notify]
-    private object? _CategorySelected;
+    [ObservableProperty]
+    public partial object? CategorySelected { get; set; }
 
-    [Notify]
-    private string _StatusText = "";
+    [ObservableProperty]
+    public partial string StatusText { get; set; } = "";
 
-    [Notify]
-    private bool _IsLocked = false;
+    [ObservableProperty]
+    public partial bool IsLocked { get; set; } = false;
 
-    [Notify]
-    private bool _IsSelectAnyLayerEnabled = false;
+    [ObservableProperty]
+    public partial bool IsSelectAnyLayerEnabled { get; set; } = false;
 
-    [Notify]
-    private bool _IsGridEnabled = false;
-    [Notify]
-    private uint _GridWidth = 20;
-    [Notify]
-    private uint _GridHeight = 20;
-    [Notify]
-    private double _Zoom = 1;
+    [ObservableProperty]
+    public partial bool IsGridEnabled { get; set; } = false;
 
-    [Notify]
-    private uint _SelectedTileData = 0;
-    [Notify]
-    private uint _TileSetColumns = 0;
+    [ObservableProperty]
+    public partial uint GridWidth { get; set; } = 20;
+
+    [ObservableProperty]
+    public partial uint GridHeight { get; set; } = 20;
+
+    [ObservableProperty]
+    public partial double Zoom { get; set; } = 1;
+
+    [ObservableProperty]
+    public partial uint SelectedTileData { get; set; } = 0;
+
+    [ObservableProperty]
+    public partial uint TileSetColumns { get; set; } = 0;
 
     public UndertaleRoomViewModel(UndertaleRoom room, IServiceProvider serviceProvider)
     {
@@ -415,7 +419,7 @@ public partial class UndertaleRoomViewModel : IUndertaleResourceViewModel
         }
     }
 
-    private void OnRoomTreeItemsSelectedItemChanged()
+    partial void OnRoomTreeItemsSelectedItemChanged(object? value)
     {
         PropertiesContent = RoomTreeItemsSelectedItem switch
         {

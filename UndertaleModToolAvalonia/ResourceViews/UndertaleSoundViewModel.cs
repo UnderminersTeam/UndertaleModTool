@@ -1,24 +1,25 @@
 using System;
 using System.ComponentModel;
 using System.IO;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
-using PropertyChanged.SourceGenerator;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
 
 namespace UndertaleModToolAvalonia;
 
-public partial class UndertaleSoundViewModel : IUndertaleResourceViewModel
+public partial class UndertaleSoundViewModel : ObservableObject, IUndertaleResourceViewModel
 {
     public MainViewModel MainVM;
     public UndertaleResource Resource => Sound;
     public UndertaleSound Sound { get; }
 
-    [Notify]
-    private bool _IsBuiltinAudioGroup;
-    [Notify]
-    private bool _IsExternal;
+    [ObservableProperty]
+    public partial bool IsBuiltinAudioGroup { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsExternal { get; set; }
 
     AudioPlayer? audioPlayer = null;
 

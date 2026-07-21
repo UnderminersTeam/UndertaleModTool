@@ -3,26 +3,27 @@ using System.Collections;
 using System.Collections.ObjectModel;
 using System.Reflection;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
-using PropertyChanged.SourceGenerator;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia;
 
-public partial class FindReferencesViewModel
+public partial class FindReferencesViewModel : ObservableObject
 {
     public IView? View;
 
     public MainViewModel MainVM { get; }
 
-    [Notify]
-    private bool _IsEnabled = true;
+    [ObservableProperty]
+    public partial bool IsEnabled { get; set; } = true;
 
-    [Notify]
-    private UndertaleResource? _Resource;
-    [Notify]
-    private ObservableCollection<FindReferencesResult> _Results = [];
+    [ObservableProperty]
+    public partial UndertaleResource? Resource { get; set; }
+
+    [ObservableProperty]
+    public partial ObservableCollection<FindReferencesResult> Results { get; set; } = [];
 
     ILoaderWindow? loaderWindow;
 

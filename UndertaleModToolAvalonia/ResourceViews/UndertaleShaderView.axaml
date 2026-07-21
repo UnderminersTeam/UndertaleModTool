@@ -55,50 +55,50 @@
 
             <Label>HLSL11 vertex data</Label>
             <StackPanel Orientation="Horizontal">
-                <Button Command="{Binding ImportRawShaderData}" CommandParameter="HLSL11_VertexData">Import</Button>
-                <Button Command="{Binding ExportRawShaderData}" CommandParameter="HLSL11_VertexData">Export</Button>
+                <Button Command="{Binding ImportRawShaderDataCommand}" CommandParameter="HLSL11_VertexData">Import</Button>
+                <Button Command="{Binding ExportRawShaderDataCommand}" CommandParameter="HLSL11_VertexData">Export</Button>
             </StackPanel>
 
             <Label>HLSL11 pixel data</Label>
             <StackPanel Orientation="Horizontal">
-                <Button Command="{Binding ImportRawShaderData}" CommandParameter="HLSL11_PixelData">Import</Button>
-                <Button Command="{Binding ExportRawShaderData}" CommandParameter="HLSL11_PixelData">Export</Button>
+                <Button Command="{Binding ImportRawShaderDataCommand}" CommandParameter="HLSL11_PixelData">Import</Button>
+                <Button Command="{Binding ExportRawShaderDataCommand}" CommandParameter="HLSL11_PixelData">Export</Button>
             </StackPanel>
 
             <Label>PSSL vertex data</Label>
             <StackPanel Orientation="Horizontal">
-                <Button Command="{Binding ImportRawShaderData}" CommandParameter="PSSL_VertexData">Import</Button>
-                <Button Command="{Binding ExportRawShaderData}" CommandParameter="PSSL_VertexData">Export</Button>
+                <Button Command="{Binding ImportRawShaderDataCommand}" CommandParameter="PSSL_VertexData">Import</Button>
+                <Button Command="{Binding ExportRawShaderDataCommand}" CommandParameter="PSSL_VertexData">Export</Button>
             </StackPanel>
 
             <Label>PSSL pixel data</Label>
             <StackPanel Orientation="Horizontal">
-                <Button Command="{Binding ImportRawShaderData}" CommandParameter="PSSL_PixelData">Import</Button>
-                <Button Command="{Binding ExportRawShaderData}" CommandParameter="PSSL_PixelData">Export</Button>
+                <Button Command="{Binding ImportRawShaderDataCommand}" CommandParameter="PSSL_PixelData">Import</Button>
+                <Button Command="{Binding ExportRawShaderDataCommand}" CommandParameter="PSSL_PixelData">Export</Button>
             </StackPanel>
 
             <Label>Cg_PSVita vertex data</Label>
             <StackPanel Orientation="Horizontal">
-                <Button Command="{Binding ImportRawShaderData}" CommandParameter="Cg_PSVita_VertexData">Import</Button>
-                <Button Command="{Binding ExportRawShaderData}" CommandParameter="Cg_PSVita_VertexData">Export</Button>
+                <Button Command="{Binding ImportRawShaderDataCommand}" CommandParameter="Cg_PSVita_VertexData">Import</Button>
+                <Button Command="{Binding ExportRawShaderDataCommand}" CommandParameter="Cg_PSVita_VertexData">Export</Button>
             </StackPanel>
 
             <Label>Cg_PSVita pixel data</Label>
             <StackPanel Orientation="Horizontal">
-                <Button Command="{Binding ImportRawShaderData}" CommandParameter="Cg_PSVita_PixelData">Import</Button>
-                <Button Command="{Binding ExportRawShaderData}" CommandParameter="Cg_PSVita_PixelData">Export</Button>
+                <Button Command="{Binding ImportRawShaderDataCommand}" CommandParameter="Cg_PSVita_PixelData">Import</Button>
+                <Button Command="{Binding ExportRawShaderDataCommand}" CommandParameter="Cg_PSVita_PixelData">Export</Button>
             </StackPanel>
 
             <Label>Cg_PS3 vertex data</Label>
             <StackPanel Orientation="Horizontal">
-                <Button Command="{Binding ImportRawShaderData}" CommandParameter="Cg_PS3_VertexData">Import</Button>
-                <Button Command="{Binding ExportRawShaderData}" CommandParameter="Cg_PS3_VertexData">Export</Button>
+                <Button Command="{Binding ImportRawShaderDataCommand}" CommandParameter="Cg_PS3_VertexData">Import</Button>
+                <Button Command="{Binding ExportRawShaderDataCommand}" CommandParameter="Cg_PS3_VertexData">Export</Button>
             </StackPanel>
 
             <Label>Cg_PS3 pixel data</Label>
             <StackPanel Orientation="Horizontal">
-                <Button Command="{Binding ImportRawShaderData}" CommandParameter="Cg_PS3_PixelData">Import</Button>
-                <Button Command="{Binding ExportRawShaderData}" CommandParameter="Cg_PS3_PixelData">Export</Button>
+                <Button Command="{Binding ImportRawShaderDataCommand}" CommandParameter="Cg_PS3_PixelData">Import</Button>
+                <Button Command="{Binding ExportRawShaderDataCommand}" CommandParameter="Cg_PS3_PixelData">Export</Button>
             </StackPanel>
 
             <Label>Vertex shader attributes</Label>

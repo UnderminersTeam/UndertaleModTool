@@ -2,23 +2,24 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Avalonia.Platform.Storage;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
-using PropertyChanged.SourceGenerator;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia;
 
-public partial class UndertaleSpriteViewModel : IUndertaleResourceViewModel
+public partial class UndertaleSpriteViewModel : ObservableObject, IUndertaleResourceViewModel
 {
     public MainViewModel MainVM;
     public UndertaleResource Resource => Sprite;
     public UndertaleSprite Sprite { get; }
 
-    [Notify]
-    private UndertaleSprite.TextureEntry? _TexturesSelected;
-    [Notify]
-    private UndertaleSprite.MaskEntry? _CollisionMasksSelected;
+    [ObservableProperty]
+    public partial UndertaleSprite.TextureEntry? TexturesSelected { get; set; }
+
+    [ObservableProperty]
+    public partial UndertaleSprite.MaskEntry? CollisionMasksSelected { get; set; }
 
     public UndertaleSpriteViewModel(UndertaleSprite sprite, IServiceProvider serviceProvider)
     {

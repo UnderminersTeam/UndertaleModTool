@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using PropertyChanged.SourceGenerator;
+using CommunityToolkit.Mvvm.ComponentModel;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia;
 
-public partial class DataExplorerViewModel
+public partial class DataExplorerViewModel : ObservableObject
 {
     public MainViewModel MainVM;
 
-    [Notify]
-    private ObservableCollection<Item> _TreeDataGridData = [];
+    [ObservableProperty]
+    public partial ObservableCollection<Item> TreeDataGridData { get; set; } = [];
 
     readonly List<ObservableCollectionView> observableCollectionViewList = [];
 
@@ -149,14 +149,14 @@ public partial class DataExplorerViewModel
         };
     }
 
-    public partial class Item
+    public partial class Item : ObservableObject
     {
-        [Notify]
-        private string _Text = "<unset text!>";
+        [ObservableProperty]
+        public partial string Text { get; set; } = "<unset text!>";
         public object? Value { get; set; }
         public object? Tag { get; set; }
 
-        [Notify]
-        private IList<Item>? _Children;
+        [ObservableProperty]
+        public partial IList<Item>? Children { get; set; }
     }
 }

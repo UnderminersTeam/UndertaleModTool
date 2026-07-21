@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 using Avalonia.Input;
 using Avalonia.Threading;
 using AvaloniaEdit.Document;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
-using PropertyChanged.SourceGenerator;
 using UndertaleModLib;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Decompiler;
@@ -13,7 +13,7 @@ using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia;
 
-public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
+public partial class UndertaleCodeViewModel : ObservableObject, IUndertaleResourceViewModel
 {
     public enum Tab
     {
@@ -27,14 +27,19 @@ public partial class UndertaleCodeViewModel : IUndertaleResourceViewModel
     public UndertaleResource Resource => Code;
     public UndertaleCode Code { get; }
 
-    [Notify]
-    private Tab _SelectedTab;
-    [Notify]
-    private (Tab Tab, int Line, int Column)? _LastGoToLocation = null;
-    [Notify]
-    private bool _GMLOutdated = false;
-    [Notify]
-    private bool _ASMOutdated = false;
+    [ObservableProperty]
+    public partial Tab SelectedTab { get; set; }
+
+    [ObservableProperty]
+    public partial (Tab Tab, int Line, int Column)? LastGoToLocation { get; set; } = null;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(AnyOutdated))]
+    public partial bool GMLOutdated { get; set; } = false;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(AnyOutdated))]
+    public partial bool ASMOutdated { get; set; } = false;
 
     public bool AnyOutdated => GMLOutdated || ASMOutdated;
 

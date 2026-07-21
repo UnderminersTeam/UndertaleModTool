@@ -12,7 +12,8 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
-using PropertyChanged.SourceGenerator;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 using UndertaleModLib.Project;
@@ -20,7 +21,7 @@ using UndertaleModLib.Util;
 
 namespace UndertaleModToolAvalonia;
 
-public partial class MainViewModel
+public partial class MainViewModel : ObservableObject
 {
     // Set this when testing.
     public IView? View;
@@ -44,52 +45,61 @@ public partial class MainViewModel
         $"{(Data?.GeneralInfo is not null ? " - " + Data.GeneralInfo.ToString() : "")}" +
         $"{(DataPath is not null ? " [" + DataPath + "]" : "")}";
 
-    [Notify]
-    private WindowState _WindowState = WindowState.Maximized;
+    [ObservableProperty]
+    public partial WindowState WindowState { get; set; } = WindowState.Maximized;
 
-    [Notify]
-    private bool _IsEnabled = true;
+    [ObservableProperty]
+    public partial bool IsEnabled { get; set; } = true;
 
     // Data
-    [Notify]
-    private UndertaleData? _Data;
-    [Notify]
-    private string? _DataPath;
-    [Notify]
-    private (uint Major, uint Minor, uint Release, uint Build) _DataVersion;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Title))]
+    public partial UndertaleData? Data { get; set; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Title))]
+    public partial string? DataPath { get; set; }
+
+    [ObservableProperty]
+    public partial (uint Major, uint Minor, uint Release, uint Build) DataVersion { get; set; }
 
     IStorageFolder? lastDataLocation;
 
     // Project
-    [Notify]
-    private ProjectContext? _Project;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Title))]
+    public partial ProjectContext? Project { get; set; }
 
     // Left panel
     public DataExplorerViewModel DataExplorer { get; set; }
 
-    [Notify]
-    private string _FilterText = "";
+    [ObservableProperty]
+    public partial string FilterText { get; set; } = "";
 
-    [Notify]
-    private bool _IsSorted = false;
+    [ObservableProperty]
+    public partial bool IsSorted { get; set; } = false;
 
     // Tabs
     public ObservableCollection<TabItemViewModel> Tabs { get; set; }
 
-    [Notify]
-    private TabItemViewModel? _TabSelected;
-    [Notify]
-    private int _TabSelectedIndex;
-    [Notify]
-    private bool _TabIsMarkedForExport = false;
-    [Notify]
-    private bool _TabCanMarkedForExport = false;
-    [Notify]
-    private string _TabSelectedResourceIdString = "None";
+    [ObservableProperty]
+    public partial TabItemViewModel? TabSelected { get; set; }
+
+    [ObservableProperty]
+    public partial int TabSelectedIndex { get; set; }
+
+    [ObservableProperty]
+    public partial bool TabIsMarkedForExport { get; set; } = false;
+
+    [ObservableProperty]
+    public partial bool TabCanMarkedForExport { get; set; } = false;
+
+    [ObservableProperty]
+    public partial string TabSelectedResourceIdString { get; set; } = "None";
 
     // Command text box
-    [Notify]
-    private string _CommandTextBoxText = "";
+    [ObservableProperty]
+    public partial string CommandTextBoxText { get; set; } = "";
 
     // Image cache
     public ImageCache ImageCache = new();
@@ -149,9 +159,8 @@ public partial class MainViewModel
         }
     }
 
-    public async void OpenDroppedFiles(object? parameter) => OpenDroppedFiles((IEnumerable<IStorageItem>?)parameter);
-
-    public async void OpenDroppedFiles(IEnumerable<IStorageItem>? files)
+    [RelayCommand]
+    public async Task OpenDroppedFiles(IEnumerable<IStorageItem>? files)
     {
         if (files is null)
             return;
@@ -177,8 +186,7 @@ public partial class MainViewModel
         }
     }
 
-    // Called by [Notify]
-    public void OnDataChanged()
+    partial void OnDataChanged(UndertaleData? value)
     {
         if (Data is not null)
         {
@@ -200,14 +208,12 @@ public partial class MainViewModel
         }
     }
 
-    // Called by [Notify]
-    public void OnFilterTextChanged()
+    partial void OnFilterTextChanged(string value)
     {
         DataExplorer.SetFilter();
     }
 
-    // Called by [Notify]
-    public void OnIsSortedChanged()
+    partial void OnIsSortedChanged(bool value)
     {
         DataExplorer.SetSort();
     }
@@ -974,8 +980,7 @@ public partial class MainViewModel
         return null;
     }
 
-    public void TabClose(object? parameter) => TabClose((TabItemViewModel)parameter!);
-
+    [RelayCommand]
     public void TabClose(TabItemViewModel tab)
     {
         var selected = TabSelected;
@@ -1042,8 +1047,7 @@ public partial class MainViewModel
         UpdateSelectedTabProperties();
     }
 
-    // Called by [Notify]
-    void OnTabSelectedChanged()
+    partial void OnTabSelectedChanged(TabItemViewModel? value)
     {
         UpdateSelectedTabProperties();
     }
@@ -1074,8 +1078,7 @@ public partial class MainViewModel
         TabCanMarkedForExport = false;
     }
 
-    // Called by [Notify]
-    void OnTabIsMarkedForExportChanged()
+    partial void OnTabIsMarkedForExportChanged(bool value)
     {
         if (Project is not null
             && TabSelected?.Content is IUndertaleResourceViewModel vm

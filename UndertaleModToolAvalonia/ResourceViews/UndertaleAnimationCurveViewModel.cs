@@ -1,16 +1,16 @@
-using PropertyChanged.SourceGenerator;
+using CommunityToolkit.Mvvm.ComponentModel;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia;
 
-public partial class UndertaleAnimationCurveViewModel : IUndertaleResourceViewModel
+public partial class UndertaleAnimationCurveViewModel : ObservableObject, IUndertaleResourceViewModel
 {
     public UndertaleResource Resource => AnimationCurve;
     public UndertaleAnimationCurve AnimationCurve { get; }
 
-    [Notify]
-    private UndertaleAnimationCurve.Channel? _ChannelSelected;
+    [ObservableProperty]
+    public partial UndertaleAnimationCurve.Channel? ChannelSelected { get; set; }
 
     public UndertaleAnimationCurveViewModel(UndertaleAnimationCurve animationCurve)
     {

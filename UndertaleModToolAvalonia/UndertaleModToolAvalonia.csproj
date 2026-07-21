@@ -29,12 +29,9 @@
         <PackageReference Include="Avalonia.Skia" Version="12.1.0" />
         <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.0" />
         <PackageReference Include="AvaloniaEdit.TextMate" Version="12.0.0" />
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="5.6.0" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.10" />
-        <PackageReference Include="PropertyChanged.SourceGenerator" Version="1.1.2">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
         <PackageReference Include="SDL3-CS" Version="3.4.12.3" />
         <PackageReference Include="SDL3-CS.Linux" Version="3.4.12.1" />
         <PackageReference Include="SDL3-CS.Linux.Mixer" Version="3.2.4.7" />

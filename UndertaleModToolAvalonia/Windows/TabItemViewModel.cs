@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using PropertyChanged.SourceGenerator;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace UndertaleModToolAvalonia;
 
@@ -11,17 +11,19 @@ public interface ITabContent
     void OnDetached() { }
 }
 
-public partial class TabItemViewModel
+public partial class TabItemViewModel : ObservableObject
 {
-    [Notify]
-    private ITabContent _Content = null!;
-    [Notify]
-    private bool _IsSelected = false;
+    [ObservableProperty]
+    public partial ITabContent Content { get; set; } = null!;
 
-    [Notify]
-    private bool _CanGoBack = false;
-    [Notify]
-    private bool _CanGoForward = false;
+    [ObservableProperty]
+    public partial bool IsSelected { get; set; } = false;
+
+    [ObservableProperty]
+    public partial bool CanGoBack { get; set; } = false;
+
+    [ObservableProperty]
+    public partial bool CanGoForward { get; set; } = false;
 
     private readonly List<ITabContent> history = [];
     private int historyPosition = -1;

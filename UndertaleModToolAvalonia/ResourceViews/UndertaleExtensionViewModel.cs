@@ -1,21 +1,22 @@
 ﻿using System;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
-using PropertyChanged.SourceGenerator;
 using UndertaleModLib;
 using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia;
 
-public partial class UndertaleExtensionViewModel : IUndertaleResourceViewModel
+public partial class UndertaleExtensionViewModel : ObservableObject, IUndertaleResourceViewModel
 {
     public MainViewModel MainVM;
     public UndertaleResource Resource => Extension;
     public UndertaleExtension Extension { get; }
 
-    [Notify]
-    private UndertaleExtensionFile? _FilesSelected;
-    [Notify]
-    private UndertaleExtensionFunction? _FunctionsSelected;
+    [ObservableProperty]
+    public partial UndertaleExtensionFile? FilesSelected { get; set; }
+
+    [ObservableProperty]
+    public partial UndertaleExtensionFunction? FunctionsSelected { get; set; }
 
     public UndertaleExtensionViewModel(UndertaleExtension extension, IServiceProvider serviceProvider)
     {

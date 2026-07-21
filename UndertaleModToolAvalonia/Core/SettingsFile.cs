@@ -4,7 +4,6 @@ using System.Text.Json;
 using Avalonia.Markup.Xaml;
 using Avalonia.Styling;
 using Microsoft.Extensions.DependencyInjection;
-using PropertyChanged.SourceGenerator;
 
 namespace UndertaleModToolAvalonia;
 
@@ -108,14 +107,13 @@ public partial class SettingsFile
         Dark = 2,
     }
 
-    [Notify]
-    private ThemeValue _Theme;
-
-    void OnThemeChanged()
+    public ThemeValue Theme
     {
-        if (App.Current is not null)
+        get;
+        set
         {
-            App.Current.RequestedThemeVariant = Theme switch
+            field = value;
+            App.Current?.RequestedThemeVariant = value switch
             {
                 ThemeValue.SystemDefault => ThemeVariant.Default,
                 ThemeValue.Light => ThemeVariant.Light,

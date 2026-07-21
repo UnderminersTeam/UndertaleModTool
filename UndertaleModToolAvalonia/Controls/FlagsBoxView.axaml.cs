@@ -7,7 +7,7 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Interactivity;
-using PropertyChanged.SourceGenerator;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace UndertaleModToolAvalonia;
 
@@ -21,12 +21,13 @@ public partial class FlagsBoxView : UserControl
         set { SetValue(ValueProperty, value); }
     }
 
-    public partial class Flag
+    public partial class Flag : ObservableObject
     {
         public dynamic FlagEnum;
         public string Name { get; set; }
 
-        [Notify] private bool _Checked;
+        [ObservableProperty]
+        public partial bool Checked { get; set; }
 
         public Flag(dynamic flagEnum, string name, bool _checked)
         {

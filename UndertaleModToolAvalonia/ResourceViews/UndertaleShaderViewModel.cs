@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.DependencyInjection;
 using UndertaleModLib;
 using UndertaleModLib.Models;
@@ -39,9 +41,8 @@ public partial class UndertaleShaderViewModel : IUndertaleResourceViewModel
         };
     }
 
-    public async void ImportRawShaderData(object? parameter) => ImportRawShaderData((string)parameter!);
-
-    public async void ImportRawShaderData(string parameter)
+    [RelayCommand]
+    public async Task ImportRawShaderData(string parameter)
     {
         IReadOnlyList<IStorageFile> files = await MainVM.View!.OpenFileDialog(new FilePickerOpenOptions
         {
@@ -81,9 +82,8 @@ public partial class UndertaleShaderViewModel : IUndertaleResourceViewModel
         rawShaderData.Data = bytes;
     }
 
-    public async void ExportRawShaderData(object? parameter) => ExportRawShaderData((string)parameter!);
-
-    public async void ExportRawShaderData(string parameter)
+    [RelayCommand]
+    public async Task ExportRawShaderData(string parameter)
     {
         UndertaleShader.UndertaleRawShaderData? rawShaderData = GetRawShaderDataFromString(parameter);
 
