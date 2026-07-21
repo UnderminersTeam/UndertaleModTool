@@ -38,7 +38,7 @@ public class RoomRenderer
             : IRenderCommand;
         public readonly record struct GameObjectRenderCommand(SKImage Image,
             ushort SourceX, ushort SourceY, ushort SourceWidth, ushort SourceHeight,
-            ushort TargetX, ushort TargetY, ushort TargetWidth, ushort TargetHeight,
+            ushort TargetX, ushort TargetY, ushort TargetWidth, ushort TargetHeight, ushort BoundingWidth, ushort BoundingHeight,
             int X, int Y, float ScaleX, float ScaleY, uint Color, float Rotation, int OriginX, int OriginY,
             NinePatchData? NinePatch)
             : IRenderCommand;
@@ -219,6 +219,8 @@ public class RoomRenderer
                     TargetY: texture.TargetY,
                     TargetWidth: texture.TargetWidth,
                     TargetHeight: texture.TargetHeight,
+                    BoundingWidth: texture.BoundingWidth,
+                    BoundingHeight: texture.BoundingHeight,
                     X: roomGameObject.X,
                     Y: roomGameObject.Y,
                     ScaleX: roomGameObject.ScaleX,
@@ -227,7 +229,7 @@ public class RoomRenderer
                     Rotation: -roomGameObject.Rotation,
                     OriginX: roomGameObject.ObjectDefinition!.Sprite.OriginX,
                     OriginY: roomGameObject.ObjectDefinition!.Sprite.OriginY,
-                    NinePatch: GetNinePatchData(roomGameObject.ObjectDefinition?.Sprite!)
+                    NinePatch: GetNinePatchData(roomGameObject.ObjectDefinition!.Sprite.V3NineSlice, texture)
                 ));
             }
         }
@@ -350,17 +352,21 @@ public class RoomRenderer
             ));
         }
 
-        static NinePatchData? GetNinePatchData(UndertaleSprite sprite)
+        static NinePatchData? GetNinePatchData(UndertaleSprite.NineSlice? nineSlice, UndertaleTexturePageItem texturePageItem)
         {
-            if (sprite.V3NineSlice is null)
+            if (nineSlice is null)
                 return null;
 
-            return new(sprite.V3NineSlice.Left, sprite.V3NineSlice.Top, (int)sprite.Width - sprite.V3NineSlice.Right, (int)sprite.Height - sprite.V3NineSlice.Bottom,
-                sprite.V3NineSlice.TileModes[0],
-                sprite.V3NineSlice.TileModes[1],
-                sprite.V3NineSlice.TileModes[2],
-                sprite.V3NineSlice.TileModes[3],
-                sprite.V3NineSlice.TileModes[4]);
+            return new(
+                nineSlice.Left - texturePageItem.TargetX,
+                nineSlice.Top - texturePageItem.TargetY,
+                texturePageItem.BoundingWidth - nineSlice.Right - texturePageItem.TargetX,
+                texturePageItem.BoundingHeight - nineSlice.Bottom - texturePageItem.TargetY,
+                nineSlice.TileModes[0],
+                nineSlice.TileModes[1],
+                nineSlice.TileModes[2],
+                nineSlice.TileModes[3],
+                nineSlice.TileModes[4]);
         }
     }
 
@@ -480,13 +486,20 @@ public class RoomRenderer
 
         if (c.NinePatch is NinePatchData ninePatch)
         {
-            SKRect destination = SKRect.Create(
-                    (-c.OriginX + c.TargetX) * c.ScaleX,
-                    (-c.OriginY + c.TargetY) * c.ScaleY,
-                    (c.TargetWidth) * c.ScaleX,
-                    (c.TargetHeight) * c.ScaleY);
+            // Width = scaled bounding width - unscaled left + right side (which is bounding width - target width), similarly for height
 
-            SKRectI center = new SKRectI(ninePatch.Left, ninePatch.Top, ninePatch.Right, ninePatch.Bottom);
+            SKRect destination = SKRect.Create(
+                (-c.OriginX * c.ScaleX) + c.TargetX,
+                (-c.OriginY * c.ScaleY) + c.TargetY,
+                (c.BoundingWidth * c.ScaleX) - (c.BoundingWidth - c.TargetWidth),
+                (c.BoundingHeight * c.ScaleY) - (c.BoundingHeight - c.TargetHeight));
+
+            //SKRectI center = new(ninePatch.Left, ninePatch.Top, ninePatch.Right, ninePatch.Bottom);
+
+            // TODO: This is necessary so it doesn't crash if the center is outside the actual texture item.
+            // Can only be fixed by not using DrawImageNinePatch probably
+            SKRectI center = new(Math.Max(ninePatch.Left, 0), Math.Max(ninePatch.Top, 0),
+                Math.Min(ninePatch.Right, c.Image.Width), Math.Min(ninePatch.Bottom, c.Image.Height));
 
             Canvas.DrawImageNinePatch(c.Image, center, destination, paint);
         }
