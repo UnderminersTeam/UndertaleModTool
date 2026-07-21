@@ -31,6 +31,23 @@ public class GameSpecificResolver
             return ConditionResult.Accept;
         },
 
+        ["Name.Regex"] = (UndertaleData data, string value) =>
+        {
+            string name = data?.GeneralInfo?.Name?.Content;
+            if (name is null)
+            {
+                return ConditionResult.Ignore;
+            }
+
+            Match m = Regex.Match(name, value, RegexOptions.CultureInvariant);
+            if (m.Success)
+            {
+                return ConditionResult.Accept;
+            }
+
+            return ConditionResult.Ignore;
+        },
+
         ["DisplayName.Regex"] = (UndertaleData data, string value) =>
         {
             string displayName = data?.GeneralInfo?.DisplayName?.Content;
