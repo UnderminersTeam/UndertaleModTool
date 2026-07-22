@@ -324,7 +324,11 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
         if (DataContext is not UndertaleCodeViewModel vm)
             return;
 
-        vm.GMLOutdated = true;
+        if (!vm.IsCodeProcessing)
+        {
+            vm.GMLOutdated = true;
+            vm.MainVM.Project?.MarkAssetForExport(vm.Code);
+        }
     }
 
     private void ASMTextEditor_TextChanged(object? sender, EventArgs e)
@@ -332,7 +336,10 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
         if (DataContext is not UndertaleCodeViewModel vm)
             return;
 
-        vm.ASMOutdated = true;
+        if (!vm.IsCodeProcessing)
+        {
+            vm.ASMOutdated = true;
+        }
     }
 
     // TODO: This code was mostly copied over, so it would be great if it could be made nicer. Or maybe do things differently.

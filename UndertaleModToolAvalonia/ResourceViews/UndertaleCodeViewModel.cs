@@ -123,7 +123,6 @@ public partial class UndertaleCodeViewModel : ObservableObject, IUndertaleResour
         if (MainVM.Project is not null)
         {
             MainVM.Project.UpdateCodeSource(Code, GMLTextDocument.Text);
-            MainVM.Project.MarkAssetForExport(Code);
         }
 
         return true;
