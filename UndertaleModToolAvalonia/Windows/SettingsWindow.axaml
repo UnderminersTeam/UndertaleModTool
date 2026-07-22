@@ -45,6 +45,8 @@
 
                 <CheckBox Content="Enable selection of any layer by default"
                           IsChecked="{Binding MainVM.Settings.EnableSelectAnyLayerByDefault}"/>
+                <CheckBox Content="Enable backup and restoring of files in the destination folder of projects"
+                          IsChecked="{Binding MainVM.Settings.EnableProjectBackup}"/>
             </StackPanel>
 
             <!--

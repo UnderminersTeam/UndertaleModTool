@@ -135,6 +135,8 @@ public partial class SettingsFile
 
     public bool EnableSelectAnyLayerByDefault { get; set; } = true;
 
+    public bool EnableProjectBackup { get; set; } = true;
+
     public string InstanceIdPrefix { get; set; } = "inst_";
 
     public Underanalyzer.Decompiler.DecompileSettings DecompileSettings { get; set; } = new();

@@ -751,7 +751,7 @@ public partial class MainViewModel : ObservableObject
         try
         {
             projectContext = ProjectContext.CreateWithDataFilePaths(DataPath, destinationDataPath, projectFilePath);
-            projectContext.Import(Data, null, Dispatcher.UIThread.Invoke);
+            projectContext.Import(Data, Settings!.EnableProjectBackup ? null : new GameFileNoOpBackup(), Dispatcher.UIThread.Invoke);
         }
         catch (ProjectException e)
         {
