@@ -7,6 +7,8 @@ public partial class TextBoxWindow : Window
     public string Message { get; set; } = "Message.";
     public string TitleText { get; set; } = "UndertaleModToolAvalonia v" + App.VersionString;
 
+    public TextBoxWindow() { }
+
     public TextBoxWindow(string message, string text = "", string? title = null, bool isMultiline = false, bool isReadOnly = false)
     {
         Message = message;

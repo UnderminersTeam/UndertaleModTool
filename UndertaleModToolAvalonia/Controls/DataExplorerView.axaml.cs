@@ -45,29 +45,25 @@ public partial class DataExplorerView : UserControl
 
                             if (value.Value is UndertaleNamedResource namedResource)
                             {
-                                textBlock[!TextBlock.TextProperty] = new Binding("Value.Name.Content");
+                                textBlock[!TextBlock.TextProperty] = CompiledBinding.Create<DataExplorerViewModel.Item, string>(x =>
+                                    ((UndertaleNamedResource)x.Value!).Name.Content);
 
                                 if (namedResource is UndertaleCode code)
                                 {
-                                    textBlock.BindClass("DisableForeground", new Binding("Value.ParentEntry")
-                                    {
-                                        Converter = ObjectConverters.IsNotNull
-                                    }, null!);
+                                    textBlock.BindClass("DisableForeground", CompiledBinding.Create<DataExplorerViewModel.Item, UndertaleCode>(x =>
+                                        ((UndertaleCode)x.Value!).ParentEntry, converter: ObjectConverters.IsNotNull), null!);
                                 }
                             }
                             else if (value.Value is UndertaleString _string)
                             {
-                                textBlock[!TextBlock.TextProperty] = new Binding("Value.Content");
+                                textBlock[!TextBlock.TextProperty] = CompiledBinding.Create<DataExplorerViewModel.Item, string>(x =>
+                                    ((UndertaleString)x.Value!).Content);
                             }
                             else if (value.Value is null)
                             {
                                 textBlock.Text = "(null)";
                                 textBlock.Classes.Add("DisableForeground");
                             }
-                            //else if (value.Value is UndertaleData data)
-                            //{
-                            //    textBlock[!TextBlock.TextProperty] = new Binding("Value.GeneralInfo");
-                            //}
 
                             return textBlock;
                         }), width: GridLength.Star

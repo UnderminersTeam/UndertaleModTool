@@ -13,9 +13,9 @@ namespace UndertaleModToolAvalonia;
 
 public partial class FlagsBoxView : UserControl
 {
-    public static readonly StyledProperty<dynamic> ValueProperty = AvaloniaProperty.Register<FlagsBoxView, dynamic>(
+    public static readonly StyledProperty<Enum> ValueProperty = AvaloniaProperty.Register<FlagsBoxView, Enum>(
         nameof(Value), defaultBindingMode: Avalonia.Data.BindingMode.TwoWay);
-    public dynamic Value
+    public Enum Value
     {
         get { return GetValue(ValueProperty); }
         set { SetValue(ValueProperty, value); }
@@ -23,13 +23,13 @@ public partial class FlagsBoxView : UserControl
 
     public partial class Flag : ObservableObject
     {
-        public dynamic FlagEnum;
+        public Enum FlagEnum;
         public string Name { get; set; }
 
         [ObservableProperty]
         public partial bool Checked { get; set; }
 
-        public Flag(dynamic flagEnum, string name, bool _checked)
+        public Flag(Enum flagEnum, string name, bool _checked)
         {
             FlagEnum = flagEnum;
             Name = name;
@@ -37,7 +37,7 @@ public partial class FlagsBoxView : UserControl
         }
     }
 
-    public ObservableCollection<Flag> Flags { get; set; } = new ObservableCollection<Flag>();
+    public ObservableCollection<Flag> Flags { get; set; } = new();
 
     public FlagsBoxView()
     {
@@ -58,7 +58,7 @@ public partial class FlagsBoxView : UserControl
             // Update checkboxes to fit with value.
             if (change.NewValue is Enum enumValue)
             {
-                foreach (dynamic flagEnum in Enum.GetValues(enumValue.GetType()))
+                foreach (Enum flagEnum in Enum.GetValues(enumValue.GetType()))
                 {
                     Flag? f = Flags.FirstOrDefault(x => (x!.FlagEnum) == flagEnum, null);
                     if (f is not null)
@@ -84,12 +84,11 @@ public partial class FlagsBoxView : UserControl
         {
             if (checkBox.IsChecked == true)
             {
-                Value |= flag.FlagEnum;
+                Value = (dynamic)Value | (dynamic)flag.FlagEnum;
             }
             else
             {
-                Value &= ~flag.FlagEnum;
-                Enum test = (Enum)Enum.ToObject(Value.GetType(), 42);
+                Value = (dynamic)Value & ~((dynamic)flag.FlagEnum);
             }
         }
     }
@@ -117,7 +116,7 @@ public class FlagEnumToStringConverter : IValueConverter
             }
             else
             {
-                // Can't do this because the type is dynamic, so the notification will be stored in Value. This may actually be a bug with Avalonia, I'm not sure.
+                // Can't do this for some unknowable reason.
                 // return new BindingNotification(new InvalidCastException(), BindingErrorType.Error);
                 DataValidationErrors.SetError(View!.ValueTextBox, new InvalidCastException());
                 return BindingOperations.DoNothing;
