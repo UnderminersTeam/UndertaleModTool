@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -21,6 +22,12 @@ public partial class UndertaleSpriteViewModel : ObservableObject, IUndertaleReso
     [ObservableProperty]
     public partial UndertaleSprite.MaskEntry? CollisionMasksSelected { get; set; }
 
+    [ObservableProperty]
+    public partial bool ShowNineSlice { get; set; }
+
+    [ObservableProperty]
+    public partial bool EnableNineSlice { get; set; }
+
     public UndertaleSpriteViewModel(UndertaleSprite sprite, IServiceProvider serviceProvider)
     {
         MainVM = serviceProvider.GetRequiredService<MainViewModel>();
@@ -31,6 +38,55 @@ public partial class UndertaleSpriteViewModel : ObservableObject, IUndertaleReso
             TexturesSelected = Sprite.Textures[0];
         if (Sprite.CollisionMasks.Count > 0)
             CollisionMasksSelected = Sprite.CollisionMasks[0];
+
+        UpdateSpriteProperties();
+    }
+
+    public void OnAttached()
+    {
+        Sprite.PropertyChanged += OnSpritePropertyChanged;
+    }
+
+    public void OnDetached()
+    {
+        Sprite.PropertyChanged -= OnSpritePropertyChanged;
+    }
+
+    void OnSpritePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        switch (e.PropertyName)
+        {
+            case nameof(UndertaleSprite.SVersion):
+            case nameof(UndertaleSprite.V3NineSlice):
+                UpdateSpriteProperties();
+                break;
+        }
+    }
+
+    void UpdateSpriteProperties()
+    {
+        if (Sprite.SVersion >= 2)
+        {
+            // TODO: sequences
+        }
+        if (Sprite.SVersion >= 3)
+        {
+            ShowNineSlice = true;
+            EnableNineSlice = Sprite.V3NineSlice is not null;
+        }
+        else
+        {
+            ShowNineSlice = false;
+            EnableNineSlice = false;
+        }
+    }
+
+    partial void OnEnableNineSliceChanged(bool value)
+    {
+        if (value)
+            Sprite.V3NineSlice ??= new();
+        else
+            Sprite.V3NineSlice = null;
     }
 
     public void TexturesSelectedChanged(object? item)

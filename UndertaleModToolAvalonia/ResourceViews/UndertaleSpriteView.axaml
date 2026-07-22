@@ -116,7 +116,6 @@
                 <Label>Type</Label>
                 <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleSprite+SpriteType}, Converter={StaticResource EnumTypeToValuesConverter}}"
                           SelectedItem="{Binding Sprite.SSpriteType}" />
-
             </Grid>
     
             <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
@@ -129,6 +128,47 @@
                 <Label>Playback speed type</Label>
                 <ComboBox ItemsSource="{Binding Source={x:Type undertalem:AnimSpeedType}, Converter={StaticResource EnumTypeToValuesConverter}}"
                           SelectedItem="{Binding Sprite.GMS2PlaybackSpeedType}" />
+            </Grid>
+
+            <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
+                  IsVisible="{Binding ShowNineSlice}">
+                <Label>Enable nine slice</Label>
+                <CheckBox IsChecked="{Binding EnableNineSlice}" />
+            </Grid>
+
+            <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
+                  IsVisible="{Binding EnableNineSlice}">
+                <Label>Left</Label>
+                <TextBox Text="{Binding Sprite.V3NineSlice.Left}" />
+
+                <Label>Top</Label>
+                <TextBox Text="{Binding Sprite.V3NineSlice.Top}" />
+
+                <Label>Right</Label>
+                <TextBox Text="{Binding Sprite.V3NineSlice.Right}" />
+
+                <Label>Bottom</Label>
+                <TextBox Text="{Binding Sprite.V3NineSlice.Bottom}" />
+
+                <Label>Left tile mode</Label>
+                <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleSprite+NineSlice+TileMode}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                          SelectedItem="{Binding Sprite.V3NineSlice.TileModes[0]}" />
+
+                <Label>Top tile mode</Label>
+                <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleSprite+NineSlice+TileMode}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                          SelectedItem="{Binding Sprite.V3NineSlice.TileModes[1]}" />
+
+                <Label>Right tile mode</Label>
+                <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleSprite+NineSlice+TileMode}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                          SelectedItem="{Binding Sprite.V3NineSlice.TileModes[2]}" />
+
+                <Label>Bottom tile mode</Label>
+                <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleSprite+NineSlice+TileMode}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                          SelectedItem="{Binding Sprite.V3NineSlice.TileModes[3]}" />
+
+                <Label>Center tile mode</Label>
+                <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleSprite+NineSlice+TileMode}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                          SelectedItem="{Binding Sprite.V3NineSlice.TileModes[4]}" />
             </Grid>
         </StackPanel>
     </ScrollViewer>
