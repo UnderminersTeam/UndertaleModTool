@@ -120,7 +120,7 @@ foreach ((string str, UndertaleShader.ShaderType type) in shadersNonExist)
 void DeactivateForChapter2()
 {
     CodeImportGroup group = new(Data);
-    group.QueueReplace("gml_GlobalScript_pal_swap_set", "");
+    /*group.QueueReplace("gml_GlobalScript_pal_swap_set", "");
     group.QueueReplace("gml_GlobalScript_pal_swap_init_system", "");
     group.QueueReplace("gml_GlobalScript_pal_swap_enable_layer", "");
     group.QueueReplace("gml_GlobalScript_pal_swap_get_pal_count", "");
@@ -130,7 +130,7 @@ void DeactivateForChapter2()
     group.QueueReplace("gml_GlobalScript_pal_swap_set_layer", "");
     group.QueueReplace("gml_GlobalScript_pal_swap_get_color_count", "");
     group.QueueReplace("gml_GlobalScript__pal_swap_layer_start", "");
-    group.QueueReplace("gml_GlobalScript__pal_swap_layer_end", "");
+    group.QueueReplace("gml_GlobalScript__pal_swap_layer_end", "");*/
     group.Import();
 }
 
