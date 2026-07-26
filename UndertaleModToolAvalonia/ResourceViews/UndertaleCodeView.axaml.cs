@@ -1,15 +1,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Reflection;
 using System.Xml;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.LogicalTree;
 using Avalonia.Media;
 using Avalonia.Media.TextFormatting;
 using Avalonia.Platform;
-using Avalonia.VisualTree;
 using AvaloniaEdit;
 using AvaloniaEdit.Document;
 using AvaloniaEdit.Highlighting;
@@ -22,24 +22,24 @@ using static UndertaleModToolAvalonia.UndertaleCodeViewModel;
 
 namespace UndertaleModToolAvalonia;
 
-public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
+public partial class UndertaleCodeView : UserControl
 {
-    private static IHighlightingDefinition? GMLHighlightingDefinition = null;
-    private static IHighlightingDefinition? ASMHighlightingDefinition = null;
-    private static uint HighlightingMajorVersion = 0;
+    static IHighlightingDefinition? GMLHighlightingDefinition = null;
+    static IHighlightingDefinition? ASMHighlightingDefinition = null;
+    static uint HighlightingMajorVersion = 0;
 
-    private static readonly Dictionary<string, UndertaleNamedResource> ScriptsCache = new();
-    private static readonly Dictionary<string, UndertaleNamedResource> FunctionsCache = new();
-    private static readonly Dictionary<string, UndertaleNamedResource> CodeCache = new();
-    private static readonly Dictionary<string, UndertaleNamedResource> NamedResourcesCache = new();
+    static readonly Dictionary<string, UndertaleNamedResource> ScriptsCache = new();
+    static readonly Dictionary<string, UndertaleNamedResource> FunctionsCache = new();
+    static readonly Dictionary<string, UndertaleNamedResource> CodeCache = new();
+    static readonly Dictionary<string, UndertaleNamedResource> NamedResourcesCache = new();
 
-    private readonly List<string> codeLocalsCache = new();
+    readonly List<string> codeLocalsCache = new();
 
-    private readonly NumberGenerator gmlNumberGenerator;
-    private readonly NameGenerator gmlNameGenerator;
-    private readonly NameGenerator asmNameGenerator;
+    readonly NumberGenerator gmlNumberGenerator;
+    readonly NameGenerator gmlNameGenerator;
+    readonly NameGenerator asmNameGenerator;
 
-    public (TextLocation, TextLocation) LastCaretLocations;
+    (TextLocation, TextLocation) lastCaretLocations;
 
     public UndertaleCodeView()
     {
@@ -49,56 +49,6 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
         gmlNameGenerator = new(this);
         asmNameGenerator = new(this);
 
-        DataContextChanged += async (_, __) =>
-        {
-            if (DataContext is UndertaleCodeViewModel vm)
-            {
-                vm.View = this;
-                if (vm.MainVM.Settings!.EnableSyntaxHighlighting)
-                {
-                    // Reload highlighting if major version changed
-                    if (HighlightingMajorVersion != vm.MainVM.Data!.GeneralInfo.Major)
-                    {
-                        UndertaleCodeView.GMLHighlightingDefinition = null;
-                        UndertaleCodeView.ASMHighlightingDefinition = null;
-                    }
-
-                    HighlightingMajorVersion = vm.MainVM.Data!.GeneralInfo.Major;
-
-                    UndertaleCodeView.GMLHighlightingDefinition ??= LoadHighlightingDefinition("GML");
-                    GMLTextEditor.SyntaxHighlighting = UndertaleCodeView.GMLHighlightingDefinition;
-
-                    UndertaleCodeView.ASMHighlightingDefinition ??= LoadHighlightingDefinition("ASM");
-                    ASMTextEditor.SyntaxHighlighting = UndertaleCodeView.ASMHighlightingDefinition;
-
-                    if (!GMLTextEditor.TextArea.TextView.ElementGenerators.Contains(gmlNumberGenerator))
-                        GMLTextEditor.TextArea.TextView.ElementGenerators.Add(gmlNumberGenerator);
-
-                    if (!GMLTextEditor.TextArea.TextView.ElementGenerators.Contains(gmlNameGenerator))
-                        GMLTextEditor.TextArea.TextView.ElementGenerators.Add(gmlNameGenerator);
-
-                    if (!ASMTextEditor.TextArea.TextView.ElementGenerators.Contains(asmNameGenerator))
-                        ASMTextEditor.TextArea.TextView.ElementGenerators.Add(asmNameGenerator);
-                }
-                else
-                {
-                    GMLTextEditor.SyntaxHighlighting = null;
-                    ASMTextEditor.SyntaxHighlighting = null;
-                    UndertaleCodeView.GMLHighlightingDefinition = null;
-                    UndertaleCodeView.ASMHighlightingDefinition = null;
-
-                    GMLTextEditor.TextArea.TextView.ElementGenerators.Remove(gmlNumberGenerator);
-                    GMLTextEditor.TextArea.TextView.ElementGenerators.Remove(gmlNameGenerator);
-                    ASMTextEditor.TextArea.TextView.ElementGenerators.Remove(asmNameGenerator);
-                }
-
-                UpdateHighlightingCache();
-
-                await vm.DecompileCurrent();
-                ProcessLastGoToLocation();
-            }
-        };
-
         InitializeTextEditor(GMLTextEditor);
         InitializeTextEditor(ASMTextEditor);
 
@@ -107,6 +57,94 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
 
         GMLTextEditor.TextArea.LostFocus += GMLTextEditor_LostFocus;
         ASMTextEditor.TextArea.LostFocus += ASMTextEditor_LostFocus;
+    }
+
+    protected override async void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+
+        if (change.Property == DataContextProperty)
+        {
+            if (change.OldValue is UndertaleCodeViewModel oldVM)
+                oldVM.PropertyChanged -= DataContext_PropertyChanged;
+
+            if (change.NewValue is not UndertaleCodeViewModel vm)
+                return;
+
+            vm.PropertyChanged += DataContext_PropertyChanged;
+
+            if (vm.MainVM.Settings!.EnableSyntaxHighlighting)
+            {
+                // Reload highlighting if major version changed
+                if (HighlightingMajorVersion != vm.MainVM.Data!.GeneralInfo.Major)
+                {
+                    GMLHighlightingDefinition = null;
+                    ASMHighlightingDefinition = null;
+                }
+
+                HighlightingMajorVersion = vm.MainVM.Data!.GeneralInfo.Major;
+
+                GMLHighlightingDefinition ??= LoadHighlightingDefinition("GML");
+                GMLTextEditor.SyntaxHighlighting = GMLHighlightingDefinition;
+
+                ASMHighlightingDefinition ??= LoadHighlightingDefinition("ASM");
+                ASMTextEditor.SyntaxHighlighting = ASMHighlightingDefinition;
+
+                if (!GMLTextEditor.TextArea.TextView.ElementGenerators.Contains(gmlNumberGenerator))
+                    GMLTextEditor.TextArea.TextView.ElementGenerators.Add(gmlNumberGenerator);
+
+                if (!GMLTextEditor.TextArea.TextView.ElementGenerators.Contains(gmlNameGenerator))
+                    GMLTextEditor.TextArea.TextView.ElementGenerators.Add(gmlNameGenerator);
+
+                if (!ASMTextEditor.TextArea.TextView.ElementGenerators.Contains(asmNameGenerator))
+                    ASMTextEditor.TextArea.TextView.ElementGenerators.Add(asmNameGenerator);
+            }
+            else
+            {
+                GMLTextEditor.SyntaxHighlighting = null;
+                ASMTextEditor.SyntaxHighlighting = null;
+                GMLHighlightingDefinition = null;
+                ASMHighlightingDefinition = null;
+
+                GMLTextEditor.TextArea.TextView.ElementGenerators.Remove(gmlNumberGenerator);
+                GMLTextEditor.TextArea.TextView.ElementGenerators.Remove(gmlNameGenerator);
+                ASMTextEditor.TextArea.TextView.ElementGenerators.Remove(asmNameGenerator);
+            }
+
+            UpdateHighlightingCache();
+
+            vm.GMLTabState = TabState.NeedsDecompile;
+            vm.ASMTabState = TabState.NeedsDecompile;
+
+            await vm.DecompileCurrent();
+        }
+    }
+
+    private void DataContext_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (DataContext is UndertaleCodeViewModel vm)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(UndertaleCodeViewModel.IsCodeProcessing):
+                    if (vm.IsCodeProcessing)
+                    {
+                        // Save carets
+                        lastCaretLocations = (GMLTextEditor.TextArea.Caret.Location, ASMTextEditor.TextArea.Caret.Location);
+                    }
+                    else
+                    {
+                        // Load carets
+                        GMLTextEditor.TextArea.Caret.Location = lastCaretLocations.Item1;
+                        ASMTextEditor.TextArea.Caret.Location = lastCaretLocations.Item2;
+                    }
+                    break;
+
+                case nameof(UndertaleCodeViewModel.LastGoToLocation):
+                    GoToLastGoToLocation();
+                    break;
+            }
+        }
     }
 
     static IHighlightingDefinition LoadHighlightingDefinition(string name)
@@ -217,31 +255,7 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
         textEditor.Options.HighlightCurrentLine = true;
     }
 
-    public void ProcessLastGoToLocation()
-    {
-        if (DataContext is UndertaleCodeViewModel vm)
-        {
-            if (!vm.IsCodeProcessing)
-            {
-                if (this.IsAttachedToVisualTree())
-                {
-                    GoToLastGoToLocation();
-                }
-                else
-                {
-                    void OnAttachedToLogicalTree(object? _, LogicalTreeAttachmentEventArgs __)
-                    {
-                        GoToLastGoToLocation();
-                        AttachedToLogicalTree -= OnAttachedToLogicalTree;
-                    }
-
-                    AttachedToLogicalTree += OnAttachedToLogicalTree;
-                }
-            }
-        }
-    }
-
-    public void GoToLastGoToLocation()
+    public async void GoToLastGoToLocation()
     {
         if (DataContext is not UndertaleCodeViewModel vm)
             return;
@@ -250,6 +264,8 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
             return;
 
         vm.SelectedTab = location.Tab;
+
+        await vm.DecompileCurrent();
 
         TextEditor textEditor = (location.Tab == Tab.GML) ? GMLTextEditor : ASMTextEditor;
 
@@ -818,29 +834,5 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
             res.Clicked += Clicked;
             return res;
         }
-    }
-}
-
-public interface IUndertaleCodeView
-{
-    private UndertaleCodeView View => (UndertaleCodeView)this;
-
-    public void SaveCaretPosition()
-    {
-        View.LastCaretLocations = (View.GMLTextEditor.TextArea.Caret.Location, View.ASMTextEditor.TextArea.Caret.Location);
-    }
-
-    public void RestoreCaretPosition()
-    {
-        View.GMLTextEditor.TextArea.Caret.Location = View.LastCaretLocations.Item1;
-        View.ASMTextEditor.TextArea.Caret.Location = View.LastCaretLocations.Item2;
-    }
-
-    public void ProcessLastGoToLocation();
-
-    public int GMLCaretOffset
-    {
-        get { return View.GMLTextEditor.CaretOffset; }
-        set { View.GMLTextEditor.CaretOffset = value; }
     }
 }

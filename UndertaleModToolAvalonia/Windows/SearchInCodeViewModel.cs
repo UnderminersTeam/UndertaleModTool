@@ -56,6 +56,8 @@ public partial class SearchInCodeViewModel : ObservableObject
     int currentCodeEntriesCount = 0;
     bool postToLoader = true;
 
+    bool resultsAreInAssembly = false;
+
     public SearchInCodeViewModel(IServiceProvider serviceProvider)
     {
         MainVM = serviceProvider.GetRequiredService<MainViewModel>();
@@ -129,6 +131,8 @@ public partial class SearchInCodeViewModel : ObservableObject
                 }
             }
         });
+
+        resultsAreInAssembly = IsInAssembly;
 
         Results = [.. sortedResultsList];
 
@@ -264,7 +268,7 @@ public partial class SearchInCodeViewModel : ObservableObject
         var tab = MainVM.TabOpen(searchResult.Code, inNewTab);
         if (tab is not null && tab.Content is UndertaleCodeViewModel vm)
         {
-            vm.GoToLocation(!IsInAssembly ? UndertaleCodeViewModel.Tab.GML : UndertaleCodeViewModel.Tab.ASM, searchResult.LineNumber, searchResult.ColumnNumber);
+            vm.GoToLocation(!resultsAreInAssembly ? UndertaleCodeViewModel.Tab.GML : UndertaleCodeViewModel.Tab.ASM, searchResult.LineNumber, searchResult.ColumnNumber);
         }
     }
 

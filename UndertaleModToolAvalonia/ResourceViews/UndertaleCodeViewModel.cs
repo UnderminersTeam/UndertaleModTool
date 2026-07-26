@@ -30,8 +30,6 @@ public partial class UndertaleCodeViewModel : ObservableObject, IUndertaleResour
         Error,
     }
 
-    public IUndertaleCodeView? View;
-
     public MainViewModel MainVM;
     public UndertaleResource Resource => Code;
     public UndertaleCode Code { get; }
@@ -117,7 +115,10 @@ public partial class UndertaleCodeViewModel : ObservableObject, IUndertaleResour
     {
         await CodeProcessStart();
 
-        await DecompileToTab(SelectedTab);
+        if (GetTabState(SelectedTab) is TabState.NeedsDecompile)
+        {
+            await DecompileToTab(SelectedTab);
+        }
 
         CodeProcessEnd();
     }
@@ -153,8 +154,6 @@ public partial class UndertaleCodeViewModel : ObservableObject, IUndertaleResour
         IsCodeProcessing = true;
 
         loaderWindow = MainVM.View!.LoaderOpen();
-
-        View?.SaveCaretPosition();
     }
 
     void CodeProcessEnd()
@@ -165,8 +164,6 @@ public partial class UndertaleCodeViewModel : ObservableObject, IUndertaleResour
         IsCodeProcessing = false;
 
         lastFocusedElement?.Focus();
-
-        View?.RestoreCaretPosition();
 
         codeProcessSemaphore.Release();
     }
