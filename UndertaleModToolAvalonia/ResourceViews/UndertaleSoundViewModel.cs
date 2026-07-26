@@ -32,12 +32,12 @@ public partial class UndertaleSoundViewModel : ObservableObject, IUndertaleResou
         UpdateSoundProperties();
     }
 
-    public void OnAttached()
+    void ITabContent.OnAttached()
     {
         Sound.PropertyChanged += OnSoundPropertyChanged;
     }
 
-    public void OnDetached()
+    void ITabContent.OnDetached()
     {
         Sound.PropertyChanged -= OnSoundPropertyChanged;
         StopAudio();

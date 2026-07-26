@@ -263,9 +263,9 @@ public partial class SearchInCodeViewModel : ObservableObject
         Interlocked.Increment(ref currentCodeEntriesCount);
     }
 
-    public void OpenSearchResult(SearchResult searchResult, bool inNewTab = false)
+    public async void OpenSearchResult(SearchResult searchResult, bool inNewTab = false)
     {
-        var tab = MainVM.TabOpen(searchResult.Code, inNewTab);
+        var tab = await MainVM.TabOpen(searchResult.Code, inNewTab);
         if (tab is not null && tab.Content is UndertaleCodeViewModel vm)
         {
             vm.GoToLocation(!resultsAreInAssembly ? UndertaleCodeViewModel.Tab.GML : UndertaleCodeViewModel.Tab.ASM, searchResult.LineNumber, searchResult.ColumnNumber);

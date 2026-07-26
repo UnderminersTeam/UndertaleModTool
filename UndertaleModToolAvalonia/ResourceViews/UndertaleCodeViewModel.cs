@@ -56,7 +56,7 @@ public partial class UndertaleCodeViewModel : ObservableObject, IUndertaleResour
                 Tab.GML => GMLTabState,
                 Tab.ASM => ASMTabState,
                 _ => throw new NotImplementedException(),
-            } == TabState.Ok;
+            } is TabState.Ok;
         }
     }
 
@@ -81,6 +81,30 @@ public partial class UndertaleCodeViewModel : ObservableObject, IUndertaleResour
         MainVM = serviceProvider.GetRequiredService<MainViewModel>();
 
         Code = code;
+    }
+
+    async Task<bool> ITabContent.OnSave()
+    {
+        await CodeProcessStart();
+
+        if (GetTabState(SelectedTab) is TabState.NeedsCompile)
+        {
+            await CompileFromTab(SelectedTab);
+
+            if (GetTabState(SelectedTab) is TabState.Error)
+            {
+                CodeProcessEnd();
+                return false;
+            }
+
+            if (GetTabState(SelectedTab) is TabState.NeedsDecompile)
+            {
+                await DecompileToTab(SelectedTab);
+            }
+        }
+
+        CodeProcessEnd();
+        return true;
     }
 
     public void CompileAndDecompileCurrent() => CompileAndDecompileTab(SelectedTab, force: true);

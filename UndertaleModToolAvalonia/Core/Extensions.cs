@@ -10,9 +10,9 @@ namespace UndertaleModToolAvalonia;
 public static class Extensions
 {
     /// <summary>
-    /// Waits on a Task without blocking the main thread.
+    /// Waits on a <see cref="Task{TResult}"/> without blocking the main thread.
     /// </summary>
-    public static T WaitOnDispatcherFrame<T>(this Task<T> task)
+    public static TResult WaitOnDispatcherFrame<TResult>(this Task<TResult> task)
     {
         if (!task.IsCompleted)
         {
@@ -22,6 +22,21 @@ public static class Extensions
         }
 
         return task.GetAwaiter().GetResult();
+    }
+
+    /// <summary>
+    /// Waits on a <see cref="Task"/> without blocking the main thread.
+    /// </summary>
+    public static void WaitOnDispatcherFrame(this Task task)
+    {
+        if (!task.IsCompleted)
+        {
+            DispatcherFrame frame = new();
+            _ = task.ContinueWith(static (_, s) => ((DispatcherFrame)s!).Continue = false, frame);
+            Dispatcher.UIThread.PushFrame(frame);
+        }
+
+        task.GetAwaiter().GetResult();
     }
 
     /// <summary>

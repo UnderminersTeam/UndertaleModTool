@@ -23,7 +23,7 @@ public partial class UndertaleEmbeddedAudioViewModel : IUndertaleResourceViewMod
         EmbeddedAudio = embeddedAudio;
     }
 
-    public void OnDetached()
+    void ITabContent.OnDetached()
     {
         StopAudio();
     }

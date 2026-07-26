@@ -94,12 +94,12 @@ public partial class UndertaleResourceReferenceView : UserControl
 
     public void Open()
     {
-        mainVM.TabOpen(Reference);
+        _ = mainVM.TabOpen(Reference);
     }
 
     public void OpenInNewTab()
     {
-        mainVM.TabOpen(Reference, inNewTab: true);
+        _ = mainVM.TabOpen(Reference, inNewTab: true);
     }
 
     public void Remove()

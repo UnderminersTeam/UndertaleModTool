@@ -102,7 +102,7 @@ public partial class ProjectAssetsWindow : Window
             return;
         }
 
-        MainVM.TabOpen(obj, inNewTab);
+        _ = MainVM.TabOpen(obj, inNewTab);
     }
 
     private void UnmarkSelectedListViewItemsForExport()

@@ -112,7 +112,7 @@ public partial class DataExplorerView : UserControl
                 {
                     hierarchicalRow.IsExpanded = !hierarchicalRow.IsExpanded;
                 }
-                vm.MainVM.TabOpen(item.Value, inNewTab);
+                _ = vm.MainVM.TabOpen(item.Value, inNewTab);
             }
         }
     }
@@ -171,7 +171,7 @@ public partial class DataExplorerView : UserControl
         DataExplorerViewModel.Item? item = GetItemFromTreeDataGridControl(e.Source);
         if (item is not null && vm.MainVM.Data is not null)
         {
-            vm.MainVM.TabOpen(item.Value);
+            _ = vm.MainVM.TabOpen(item.Value);
         }
     }
 
@@ -183,7 +183,7 @@ public partial class DataExplorerView : UserControl
         DataExplorerViewModel.Item? item = GetItemFromTreeDataGridControl(e.Source);
         if (item is not null && vm.MainVM.Data is not null)
         {
-            vm.MainVM.TabOpen(item.Value, inNewTab: true);
+            _ = vm.MainVM.TabOpen(item.Value, inNewTab: true);
         }
     }
 

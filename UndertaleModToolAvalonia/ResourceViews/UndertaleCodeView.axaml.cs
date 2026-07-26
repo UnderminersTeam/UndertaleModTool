@@ -730,7 +730,7 @@ public partial class UndertaleCodeView : UserControl
                         openMenuItem.Click += (_, _) =>
                         {
                             textEditor.TextArea.Focus();
-                            codeViewModel.MainVM.TabOpen(namedResource, false);
+                            _ = codeViewModel.MainVM.TabOpen(namedResource, false);
                         };
                         contextMenu.Items.Add(openMenuItem);
 
@@ -739,7 +739,7 @@ public partial class UndertaleCodeView : UserControl
                         openInNewTabMenuItem.Click += (_, _) =>
                         {
                             textEditor.TextArea.Focus();
-                            codeViewModel.MainVM.TabOpen(namedResource, true);
+                            _ = codeViewModel.MainVM.TabOpen(namedResource, true);
                         };
                         contextMenu.Items.Add(openInNewTabMenuItem);
 
@@ -752,7 +752,7 @@ public partial class UndertaleCodeView : UserControl
                     if (button == MouseButton.Middle || (button == MouseButton.Left && controlKey))
                     {
                         textEditor.TextArea.Focus();
-                        codeViewModel.MainVM.TabOpen(namedResource, true);
+                        _ = codeViewModel.MainVM.TabOpen(namedResource, true);
                         return true;
                     }
                     return false;

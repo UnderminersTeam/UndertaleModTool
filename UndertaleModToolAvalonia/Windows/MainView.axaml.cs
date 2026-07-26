@@ -124,7 +124,7 @@ public partial class MainView : UserControl, IView
                         TabStripItem? tabItem = control.FindLogicalAncestorOfType<TabStripItem>();
                         if (tabItem is not null && tabItem.DataContext is TabItemViewModel vmTabItem)
                         {
-                            vm.TabClose(vmTabItem);
+                            _ = vm.TabClose(vmTabItem);
                         }
                     }
                 }
@@ -159,7 +159,7 @@ public partial class MainView : UserControl, IView
                 TabStripItem? tabItem = control.FindLogicalAncestorOfType<TabStripItem>();
                 if (tabItem is not null && tabItem.DataContext is TabItemViewModel vmTabItem)
                 {
-                    vm.TabClose(vmTabItem);
+                    _ = vm.TabClose(vmTabItem);
                 }
             }
         }
@@ -169,7 +169,7 @@ public partial class MainView : UserControl, IView
     {
         if (DataContext is MainViewModel vm)
         {
-            vm.TabCloseAll();
+            _ = vm.TabCloseAll();
         }
     }
 

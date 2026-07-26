@@ -151,7 +151,7 @@ public partial class FindReferencesViewModel : ObservableObject
 
     public void OpenResult(FindReferencesResult result, bool inNewTab = false)
     {
-        MainVM.TabOpen(result.Resource, inNewTab);
+        _ = MainVM.TabOpen(result.Resource, inNewTab);
     }
 
     public class FindReferencesResult

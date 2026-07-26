@@ -42,12 +42,12 @@ public partial class UndertaleSpriteViewModel : ObservableObject, IUndertaleReso
         UpdateSpriteProperties();
     }
 
-    public void OnAttached()
+    void ITabContent.OnAttached()
     {
         Sprite.PropertyChanged += OnSpritePropertyChanged;
     }
 
-    public void OnDetached()
+    void ITabContent.OnDetached()
     {
         Sprite.PropertyChanged -= OnSpritePropertyChanged;
     }

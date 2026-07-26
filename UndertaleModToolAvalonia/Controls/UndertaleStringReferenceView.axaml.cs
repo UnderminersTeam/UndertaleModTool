@@ -73,12 +73,12 @@ public partial class UndertaleStringReferenceView : UserControl
 
     public void Open()
     {
-        mainVM.TabOpen(Reference);
+        _ = mainVM.TabOpen(Reference);
     }
 
     public void OpenInNewTab()
     {
-        mainVM.TabOpen(Reference, inNewTab: true);
+        _ = mainVM.TabOpen(Reference, inNewTab: true);
     }
 
     void UpdateString(TextBox textBox)

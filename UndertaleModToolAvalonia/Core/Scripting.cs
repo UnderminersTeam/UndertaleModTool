@@ -250,7 +250,8 @@ public class ScriptGlobals : IScriptInterface, IDisposable
 
     public bool MakeNewDataFile()
     {
-        return mainVM.NewData().Result;
+        mainVM.NewData();
+        return true;
     }
 
     public string? PromptChooseDirectory()

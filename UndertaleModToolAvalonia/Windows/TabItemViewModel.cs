@@ -1,14 +1,26 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace UndertaleModToolAvalonia;
 
 public interface ITabContent
 {
-    /// <summary>Runs after the tab content is attached to a tab, i.e. when it becomes a tab's content.</summary>
+    /// <summary>
+    /// Runs after the tab content is attached to a tab, i.e. when it becomes a tab's content.
+    /// </summary>
     void OnAttached() { }
-    /// <summary>Runs before the tab content is detached to a tab, i.e. when it stops being a tab's content.</summary>
+
+    /// <summary>
+    /// Runs before the tab content is detached from a tab, i.e. when it stops being a tab's content.
+    /// </summary>
     void OnDetached() { }
+
+    /// <summary>
+    /// Runs before <see cref="OnDetached"/>, when the data file is not closing. Use it to save the tab's temporary contents to the data file.
+    /// Return true if saving was successful; if false is returned, detaching will not continue.
+    /// </summary>
+    async Task<bool> OnSave() => true;
 }
 
 public partial class TabItemViewModel : ObservableObject
@@ -35,7 +47,10 @@ public partial class TabItemViewModel : ObservableObject
 
         history.Add(Content);
         historyPosition = 0;
+    }
 
+    public void OnOpen()
+    {
         Content.OnAttached();
     }
 
@@ -44,10 +59,18 @@ public partial class TabItemViewModel : ObservableObject
         Content.OnDetached();
     }
 
-    public void GoTo(ITabContent content)
+    public async Task<bool> Save()
+    {
+        return await Content.OnSave();
+    }
+
+    public async Task<bool> GoTo(ITabContent content)
     {
         if (content == Content)
-            return;
+            return true;
+
+        if (!await Content.OnSave())
+            return false;
 
         Content.OnDetached();
 
@@ -62,10 +85,15 @@ public partial class TabItemViewModel : ObservableObject
         CanGoForward = false;
 
         Content.OnAttached();
+
+        return true;
     }
 
-    public void GoBack()
+    public async Task<bool> GoBack()
     {
+        if (!await Content.OnSave())
+            return false;
+
         Content.OnDetached();
 
         historyPosition--;
@@ -75,10 +103,15 @@ public partial class TabItemViewModel : ObservableObject
         CanGoForward = true;
 
         Content.OnAttached();
+
+        return true;
     }
 
-    public void GoForward()
+    public async Task<bool> GoForward()
     {
+        if (!await Content.OnSave())
+            return false;
+
         Content.OnDetached();
 
         historyPosition++;
@@ -88,5 +121,7 @@ public partial class TabItemViewModel : ObservableObject
         CanGoForward = (historyPosition != history.Count - 1);
 
         Content.OnAttached();
+
+        return true;
     }
 }

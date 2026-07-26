@@ -80,7 +80,7 @@ public partial class MainViewModel : ObservableObject
     public partial bool IsSorted { get; set; } = false;
 
     // Tabs
-    public ObservableCollection<TabItemViewModel> Tabs { get; set; }
+    public ObservableCollection<TabItemViewModel> Tabs { get; set; } = [];
 
     [ObservableProperty]
     public partial TabItemViewModel? TabSelected { get; set; }
@@ -115,12 +115,9 @@ public partial class MainViewModel : ObservableObject
 
         DataExplorer = new(this);
 
-        Tabs = [
-            new TabItemViewModel(new DescriptionViewModel(
-                "Welcome to UndertaleModTool!",
-                "Open a data.win file to get started, then double click on the items on the left to view them."),
-                isSelected: true),
-        ];
+        _ = TabOpen(new DescriptionViewModel(
+            "Welcome to UndertaleModTool!",
+            "Open a data.win file to get started, then double click on the items on the left to view them."));
     }
 
     public void Initialize()
@@ -264,14 +261,12 @@ public partial class MainViewModel : ObservableObject
         return false;
     }
 
-    public Task<bool> NewData()
+    public void NewData()
     {
         CloseData();
 
         Data = UndertaleData.CreateNew();
         DataPath = null;
-
-        return Task.FromResult(true);
     }
 
     public async Task<bool> LoadData(Stream stream)
@@ -383,12 +378,12 @@ public partial class MainViewModel : ObservableObject
             }
         }
 
-        Data = null;
-        DataPath = null;
-
-        TabCloseAll();
+        TabCloseAllWithoutSaving();
 
         ClearProject();
+
+        Data = null;
+        DataPath = null;
     }
 
     public void UpdateVersion()
@@ -412,7 +407,7 @@ public partial class MainViewModel : ObservableObject
         if (await AskProjectSave("There are assets marked to be exported in the current project. Save project before closing it?")
             && await AskFileSave("Save data file before creating a new one?"))
         {
-            await NewData();
+            NewData();
         }
     }
 
@@ -452,6 +447,9 @@ public partial class MainViewModel : ObservableObject
     public async Task<bool> FileSaveTask()
     {
         if (Data is null)
+            return false;
+
+        if (!await TabSaveAll())
             return false;
 
         if (Project is not null)
@@ -891,7 +889,7 @@ public partial class MainViewModel : ObservableObject
 
         if (Settings!.OpenNewResourceAfterCreatingIt)
         {
-            TabOpen(res, inNewTab: true);
+            _ = TabOpen(res, inNewTab: true);
         }
     }
 
@@ -922,7 +920,7 @@ public partial class MainViewModel : ObservableObject
             mainView.OpenFindReferences(ServiceProvider, resource);
     }
 
-    public TabItemViewModel? TabOpen(object? item, bool inNewTab = false)
+    public async Task<TabItemViewModel?> TabOpen(object? item, bool inNewTab = false)
     {
         if (Data is null)
             return null;
@@ -965,7 +963,8 @@ public partial class MainViewModel : ObservableObject
         {
             if (!inNewTab && TabSelected is not null)
             {
-                TabGoTo(content);
+                if (!await TabGoTo(content))
+                    return null;
                 return TabSelected;
             }
             else
@@ -973,6 +972,7 @@ public partial class MainViewModel : ObservableObject
                 TabItemViewModel tab = new(content);
                 Tabs.Add(tab);
                 TabSelected = tab;
+                tab.OnOpen();
                 return tab;
             }
         }
@@ -980,13 +980,29 @@ public partial class MainViewModel : ObservableObject
         return null;
     }
 
-    [RelayCommand]
-    public void TabClose(TabItemViewModel tab)
+    public async Task<bool> TabSaveAll()
     {
-        var selected = TabSelected;
-        var index = TabSelectedIndex;
+        bool savedAll = true;
+
+        foreach (TabItemViewModel tab in Tabs)
+        {
+            if (!await tab.Save())
+                savedAll = false;
+        }
+
+        return savedAll;
+    }
+
+    [RelayCommand]
+    public async Task TabClose(TabItemViewModel tab)
+    {
+        if (!await tab.Save())
+            return;
 
         tab.OnClose();
+
+        TabItemViewModel? selected = TabSelected;
+        int index = TabSelectedIndex;
 
         Tabs.Remove(tab);
 
@@ -999,18 +1015,27 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    public void TabCloseSelected()
+    public async void TabCloseSelected()
     {
         if (TabSelected is not null)
-            TabClose(TabSelected);
+            _ = TabClose(TabSelected);
     }
 
-    public void TabCloseAll()
+    public async Task TabCloseAll()
     {
         foreach (TabItemViewModel tab in Tabs.ToList())
         {
-            TabClose(tab);
+            await TabClose(tab);
         }
+    }
+
+    public void TabCloseAllWithoutSaving()
+    {
+        foreach (TabItemViewModel tab in Tabs.ToList())
+        {
+            tab.OnClose();
+        }
+        Tabs.Clear();
     }
 
     public void TabSetToPrevious()
@@ -1029,21 +1054,31 @@ public partial class MainViewModel : ObservableObject
             TabSelectedIndex = 0;
     }
 
-    public void TabGoTo(ITabContent content)
+    public async Task<bool> TabGoTo(ITabContent content)
     {
-        TabSelected?.GoTo(content);
+        if (TabSelected is not null)
+            if (!await TabSelected.GoTo(content))
+                return false;
+
+        UpdateSelectedTabProperties();
+        return true;
+    }
+
+    public async void TabGoBack()
+    {
+        if (TabSelected is not null)
+            if (!await TabSelected.GoBack())
+                return;
+
         UpdateSelectedTabProperties();
     }
 
-    public void TabGoBack()
+    public async void TabGoForward()
     {
-        TabSelected?.GoBack();
-        UpdateSelectedTabProperties();
-    }
+        if (TabSelected is not null)
+            if (!await TabSelected.GoForward())
+                return;
 
-    public void TabGoForward()
-    {
-        TabSelected?.GoForward();
         UpdateSelectedTabProperties();
     }
 
