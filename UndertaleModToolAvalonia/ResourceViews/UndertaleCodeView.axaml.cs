@@ -18,6 +18,7 @@ using AvaloniaEdit.Rendering;
 using UndertaleModLib;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Models;
+using static UndertaleModToolAvalonia.UndertaleCodeViewModel;
 
 namespace UndertaleModToolAvalonia;
 
@@ -48,7 +49,7 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
         gmlNameGenerator = new(this);
         asmNameGenerator = new(this);
 
-        DataContextChanged += (_, __) =>
+        DataContextChanged += async (_, __) =>
         {
             if (DataContext is UndertaleCodeViewModel vm)
             {
@@ -93,8 +94,8 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
 
                 UpdateHighlightingCache();
 
-                vm.GMLOutdated = false;
-                vm.ASMOutdated = false;
+                await vm.DecompileCurrent();
+                ProcessLastGoToLocation();
             }
         };
 
@@ -210,7 +211,7 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
         ASMTextEditor.TextArea.TextView.Redraw();
     }
 
-    void InitializeTextEditor(TextEditor textEditor)
+    static void InitializeTextEditor(TextEditor textEditor)
     {
         textEditor.Options.ConvertTabsToSpaces = true;
         textEditor.Options.HighlightCurrentLine = true;
@@ -245,17 +246,17 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
         if (DataContext is not UndertaleCodeViewModel vm)
             return;
 
-        if (vm.LastGoToLocation is not (UndertaleCodeViewModel.Tab tab, int line, int column) location)
+        if (vm.LastGoToLocation is not (Tab tab, int line, int column) location)
             return;
 
         vm.SelectedTab = location.Tab;
 
-        TextEditor textEditor = (location.Tab == UndertaleCodeViewModel.Tab.GML) ? GMLTextEditor : ASMTextEditor;
+        TextEditor textEditor = (location.Tab == Tab.GML) ? GMLTextEditor : ASMTextEditor;
 
         textEditor.TextArea.Caret.Location = new(location.Line, location.Column);
         textEditor.TextArea.Focus();
 
-        void OnLayoutUpdated(object? _, EventArgs __)
+        void OnLayoutUpdated(object? sender, EventArgs e)
         {
             textEditor.ScrollTo(location.Line, location.Column);
             textEditor.LayoutUpdated -= OnLayoutUpdated;
@@ -291,31 +292,31 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
 
     private void GMLTextEditor_LostFocus(object? sender, FocusChangedEventArgs e)
     {
-        if (e.NavigationMethod == NavigationMethod.Unspecified)
+        if (DataContext is not UndertaleCodeViewModel vm)
             return;
 
-        if (DataContext is not UndertaleCodeViewModel vm)
+        if (e.NavigationMethod == NavigationMethod.Unspecified)
             return;
 
         if (vm.GMLFocused && vm.MainVM.Settings!.AutomaticallyCompileAndDecompileCodeOnLostFocus)
         {
             vm.GMLFocused = false;
-            vm.CompileAndDecompileGML(onlyIfOutdated: true);
+            vm.CompileAndDecompileTab(Tab.GML);
         }
     }
 
     private void ASMTextEditor_LostFocus(object? sender, FocusChangedEventArgs e)
     {
-        if (e.NavigationMethod == NavigationMethod.Unspecified)
+        if (DataContext is not UndertaleCodeViewModel vm)
             return;
 
-        if (DataContext is not UndertaleCodeViewModel vm)
+        if (e.NavigationMethod == NavigationMethod.Unspecified)
             return;
 
         if (vm.ASMFocused && vm.MainVM.Settings!.AutomaticallyCompileAndDecompileCodeOnLostFocus)
         {
             vm.ASMFocused = false;
-            vm.CompileAndDecompileASM(onlyIfOutdated: true);
+            vm.CompileAndDecompileTab(Tab.ASM);
         }
     }
 
@@ -326,7 +327,7 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
 
         if (!vm.IsCodeProcessing)
         {
-            vm.GMLOutdated = true;
+            vm.GMLTabState = TabState.NeedsCompile;
             vm.MainVM.Project?.MarkAssetForExport(vm.Code);
         }
     }
@@ -338,7 +339,7 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
 
         if (!vm.IsCodeProcessing)
         {
-            vm.ASMOutdated = true;
+            vm.ASMTabState = TabState.NeedsCompile;
         }
     }
 
@@ -710,7 +711,7 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
 
                         MenuItem openMenuItem = new();
                         openMenuItem.Header = "Open";
-                        openMenuItem.Click += (sender, _) =>
+                        openMenuItem.Click += (_, _) =>
                         {
                             textEditor.TextArea.Focus();
                             codeViewModel.MainVM.TabOpen(namedResource, false);
@@ -719,7 +720,7 @@ public partial class UndertaleCodeView : UserControl, IUndertaleCodeView
 
                         MenuItem openInNewTabMenuItem = new();
                         openInNewTabMenuItem.Header = "Open in new tab";
-                        openInNewTabMenuItem.Click += (sender, _) =>
+                        openInNewTabMenuItem.Click += (_, _) =>
                         {
                             textEditor.TextArea.Focus();
                             codeViewModel.MainVM.TabOpen(namedResource, true);

@@ -25,7 +25,7 @@ public partial class LoaderWindow : Window, ILoaderWindow
     string? message;
     string? status;
     int maximum = -1;
-    bool hasClosed = false;
+    bool canShow = true;
     Window? showOwner;
 
     public LoaderWindow()
@@ -42,7 +42,7 @@ public partial class LoaderWindow : Window, ILoaderWindow
             if (!e.IsProgrammatic)
                 e.Cancel = true;
             else
-                hasClosed = true;
+                canShow = false;
         };
     }
 
@@ -53,16 +53,22 @@ public partial class LoaderWindow : Window, ILoaderWindow
         {
             Dispatcher.UIThread.Post(() =>
             {
-                if (!hasClosed && !IsVisible)
+                if (canShow)
+                {
+                    canShow = false;
                     ShowDialog(owner);
+                }
             });
         });
     }
 
     public void EnsureShown()
     {
-        if (showOwner is not null)
+        if (showOwner is not null && canShow)
+        {
+            canShow = false;
             ShowDialog(showOwner);
+        }
     }
 
     public void UpdateText()
