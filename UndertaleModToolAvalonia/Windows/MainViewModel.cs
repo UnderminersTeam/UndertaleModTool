@@ -929,8 +929,8 @@ public partial class MainViewModel : ObservableObject
         {
             DescriptionViewModel vm => vm,
             "GeneralInfo" => new GeneralInfoViewModel(Data),
-            "GlobalInitScripts" => new GlobalInitScriptsViewModel((Data.GlobalInitScripts as ObservableCollection<UndertaleGlobalInit>)!),
-            "GameEndScripts" => new GameEndScriptsViewModel((Data.GameEndScripts as ObservableCollection<UndertaleGlobalInit>)!),
+            "GlobalInitScripts" => new GlobalInitScriptsViewModel(Data.FORM.GLOB.List),
+            "GameEndScripts" => new GameEndScriptsViewModel(Data.FORM.GMEN.List),
             UndertaleAudioGroup r => new UndertaleAudioGroupViewModel(r),
             UndertaleSound r => new UndertaleSoundViewModel(r, ServiceProvider),
             UndertaleSprite r => new UndertaleSpriteViewModel(r, ServiceProvider),
@@ -942,6 +942,7 @@ public partial class MainViewModel : ObservableObject
             UndertaleTimeline r => new UndertaleTimelineViewModel(r),
             UndertaleGameObject r => new UndertaleGameObjectViewModel(r, ServiceProvider),
             UndertaleRoom r => new UndertaleRoomViewModel(r, ServiceProvider),
+            "Extensions" => new UndertaleExtensionChunkViewModel(Data.FORM.EXTN),
             UndertaleExtension r => new UndertaleExtensionViewModel(r, ServiceProvider),
             UndertaleTexturePageItem r => new UndertaleTexturePageItemViewModel(r, ServiceProvider),
             UndertaleCode r => new UndertaleCodeViewModel(r, ServiceProvider),

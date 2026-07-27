@@ -247,7 +247,7 @@ namespace UndertaleModLib
     public class UndertaleChunkEXTN : UndertaleListChunk<UndertaleExtension>
     {
         public override string Name => "EXTN";
-        public List<byte[]> productIdData = new List<byte[]>();
+        public ObservableCollection<ByteArrayWrapper> productIdData { get; set; } = new ObservableCollection<ByteArrayWrapper>(); // TODO: Capitalize property
 
         private bool checkedFor2022_6 = false;
         private bool checkedFor2023_4 = false;
@@ -371,7 +371,7 @@ namespace UndertaleModLib
 
             // Strange data for each extension, some kind of unique identifier based on
             // the product ID for each of them
-            productIdData = new List<byte[]>();
+            productIdData.Clear();
             if (UndertaleExtension.ProductDataEligible(reader.undertaleData))
             {
                 for (int i = 0; i < List.Count; i++)
@@ -406,6 +406,14 @@ namespace UndertaleModLib
             CheckFor2023_4(reader);
 
             return base.UnserializeObjectCount(reader);
+        }
+
+        public class ByteArrayWrapper(byte[] v)
+        {
+            public byte[] ByteArray { get; set; } = v;
+
+            public static implicit operator byte[](ByteArrayWrapper v) => v.ByteArray;
+            public static implicit operator ByteArrayWrapper(byte[] v) => new(v);
         }
     }
 

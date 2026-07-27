@@ -96,6 +96,9 @@
                                         <DataTemplate DataType="l:GameEndScriptsViewModel">
                                             <TextBlock Text="Game End scripts"/>
                                         </DataTemplate>
+                                        <DataTemplate DataType="l:UndertaleExtensionChunkViewModel">
+                                            <TextBlock Text="Extension chunk"/>
+                                        </DataTemplate>
                                         <!-- Resources -->
                                         <DataTemplate DataType="l:UndertaleAudioGroupViewModel">
                                             <TextBlock Text="{Binding AudioGroup.Name.Content, StringFormat=Audio group - {0}}"/>
@@ -207,6 +210,9 @@
                                     </DataTemplate>
                                     <DataTemplate DataType="l:GameEndScriptsViewModel">
                                         <l:GameEndScriptsView />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="l:UndertaleExtensionChunkViewModel">
+                                        <l:UndertaleExtensionChunkView />
                                     </DataTemplate>
                                     <!-- Resources -->
                                     <DataTemplate DataType="l:UndertaleAudioGroupViewModel">
