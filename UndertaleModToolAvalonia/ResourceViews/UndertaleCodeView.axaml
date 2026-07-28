@@ -33,10 +33,7 @@
                                              IsEnabled="{Binding !IsCodeProcessing, Mode=OneWay}"
                                              TextChanged="GMLTextEditor_TextChanged"
                                              ShowLineNumbers="True"
-                                             WordWrap="True"
-                                             Background="#FF282828"
-                                             FontFamily="{DynamicResource AvaloniaEditFontFamily}"
-                                             FontSize="{DynamicResource AvaloniaEditFontSize}">
+                                             WordWrap="True">
                         <AvaloniaEdit:TextEditor.KeyBindings>
                             <KeyBinding Gesture="{OnPlatform 'Ctrl+K', macOS='Meta+K'}" Command="{Binding CompileAndDecompileGML}" />
                         </AvaloniaEdit:TextEditor.KeyBindings>
@@ -50,10 +47,7 @@
                                              IsEnabled="{Binding !IsCodeProcessing, Mode=OneWay}"
                                              TextChanged="ASMTextEditor_TextChanged"
                                              ShowLineNumbers="True"
-                                             WordWrap="True"
-                                             Background="#FF282828"
-                                             FontFamily="{DynamicResource AvaloniaEditFontFamily}"
-                                             FontSize="{DynamicResource AvaloniaEditFontSize}">
+                                             WordWrap="True">
                         <AvaloniaEdit:TextEditor.KeyBindings>
                             <KeyBinding Gesture="{OnPlatform 'Ctrl+K', macOS='Meta+K'}" Command="{Binding CompileAndDecompileASM}" />
                         </AvaloniaEdit:TextEditor.KeyBindings>

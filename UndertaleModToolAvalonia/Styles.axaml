@@ -1,9 +1,9 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:sys="using:System">
+        xmlns:AvaloniaEdit="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit">
     <Styles.Resources>
         <FontFamily x:Key="ContentControlThemeFontFamily">$Default</FontFamily>
-        <sys:Double x:Key="ControlContentThemeFontSize">12</sys:Double>
+        <x:Double x:Key="ControlContentThemeFontSize">12</x:Double>
         <Thickness x:Key="ComboBoxItemThemePadding">5,4</Thickness>
         <Thickness x:Key="ExpanderContentPadding">4</Thickness>
         <x:Double x:Key="ExpanderMinHeight">0</x:Double>
@@ -14,9 +14,12 @@
         <x:Double x:Key="TabStripItemMinHeight">28</x:Double>
         <x:Double x:Key="TextControlThemeMinHeight">0</x:Double>
         <x:Double x:Key="TreeViewItemMinHeight">0</x:Double>
+        <!-- AvaloniaEdit -->
+        <SolidColorBrush x:Key="TextAreaSelectionBrush" Color="#646464" />
         <!-- Custom resource values -->
         <FontFamily x:Key="AvaloniaEditFontFamily">Consolas,Liberation Mono,Menlo</FontFamily>
         <x:Double x:Key="AvaloniaEditFontSize">12</x:Double>
+        <SolidColorBrush x:Key="AvaloniaEditBackground" Color="#282828" />
     </Styles.Resources>
     
     <FluentTheme DensityStyle="Compact"/>
@@ -84,6 +87,13 @@
         <Style.Resources>
             <x:Double x:Key="ExpanderChevronButtonSize">24</x:Double>
         </Style.Resources>
+    </Style>
+
+    <!-- AvaloniaEdit -->
+    <Style Selector="AvaloniaEdit|TextEditor">
+        <Setter Property="Background" Value="{DynamicResource AvaloniaEditBackground}" />
+        <Setter Property="FontFamily" Value="{DynamicResource AvaloniaEditFontFamily}" />
+        <Setter Property="FontSize" Value="{DynamicResource AvaloniaEditFontSize}" />
     </Style>
 
     <!-- Disable scroll auto hide -->
