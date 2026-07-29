@@ -14,7 +14,7 @@ namespace UndertaleModToolAvalonia;
 public partial class UndertaleStringReferenceView : UserControl
 {
     public static readonly StyledProperty<UndertaleString> ReferenceProperty = AvaloniaProperty.Register<UndertaleStringReferenceView, UndertaleString>(
-        nameof(Reference));
+        nameof(Reference), defaultBindingMode: BindingMode.TwoWay);
     public UndertaleString Reference
     {
         get { return GetValue(ReferenceProperty); }

@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.VisualTree;
 using Avalonia.Xaml.Interactions.DragAndDrop;
@@ -15,7 +16,7 @@ using AddFuncType = Func<object?, Task<UndertaleResource?>>;
 public partial class UndertaleResourceReferenceView : UserControl
 {
     public static readonly StyledProperty<UndertaleResource?> ReferenceProperty = AvaloniaProperty.Register<UndertaleResourceReferenceView, UndertaleResource?>(
-        nameof(Reference), defaultBindingMode: Avalonia.Data.BindingMode.TwoWay);
+        nameof(Reference), defaultBindingMode: BindingMode.TwoWay);
     public UndertaleResource? Reference
     {
         get { return GetValue(ReferenceProperty); }
