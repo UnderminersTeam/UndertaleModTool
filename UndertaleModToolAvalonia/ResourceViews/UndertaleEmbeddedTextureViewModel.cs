@@ -55,7 +55,7 @@ public partial class UndertaleEmbeddedTextureViewModel : IUndertaleResourceViewM
             Title = "Export image",
             FileTypeChoices = type.filePickerFileTypeList,
             DefaultExtension = $"*.{type.extension}",
-            SuggestedFileName = $"{EmbeddedTexture.Name.Content}.{type.extension}",
+            SuggestedFileName = $"{EmbeddedTexture.Name?.Content ?? "image"}.{type.extension}",
         });
 
         if (file is null)
@@ -74,7 +74,7 @@ public partial class UndertaleEmbeddedTextureViewModel : IUndertaleResourceViewM
             Title = "Export image as PNG",
             FileTypeChoices = FilePickerFileTypes.PNG,
             DefaultExtension = ".png",
-            SuggestedFileName = $"{EmbeddedTexture.Name.Content}.png",
+            SuggestedFileName = $"{EmbeddedTexture.Name?.Content ?? "image"}.png",
         });
 
         if (file is null)

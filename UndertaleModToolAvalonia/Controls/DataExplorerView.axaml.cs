@@ -197,7 +197,7 @@ public partial class DataExplorerView : UserControl
         {
             string? name = item.Value switch
             {
-                UndertaleNamedResource namedResource => namedResource.Name.Content,
+                UndertaleNamedResource namedResource => namedResource.Name?.Content,
                 UndertaleString _string => _string.Content,
                 _ => null,
             };

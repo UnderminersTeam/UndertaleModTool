@@ -95,7 +95,7 @@ public partial class UndertaleShaderViewModel : IUndertaleResourceViewModel
             Title = "Export shader",
             FileTypeChoices = FilePickerFileTypes.BIN,
             DefaultExtension = ".bin",
-            SuggestedFileName = Shader.Name?.Content + "_" + parameter + ".bin",
+            SuggestedFileName = (Shader.Name?.Content ?? "shader") + "_" + parameter + ".bin",
         });
 
         if (file is null)

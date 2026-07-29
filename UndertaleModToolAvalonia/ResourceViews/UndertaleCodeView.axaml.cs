@@ -188,21 +188,21 @@ public partial class UndertaleCodeView : UserControl
 
         foreach (var script in data.Scripts)
         {
-            if (script is null)
+            if (script is null || script.Name is null)
                 continue;
             ScriptsCache[script.Name.Content] = script;
         }
 
         foreach (var function in data.Functions)
         {
-            if (function is null)
+            if (function is null || function.Name is null)
                 continue;
             FunctionsCache[function.Name.Content] = function;
         }
 
         foreach (var code in data.Code)
         {
-            if (code is null)
+            if (code is null || code.Name is null)
                 continue;
             CodeCache[code.Name.Content] = code;
         }
@@ -210,19 +210,19 @@ public partial class UndertaleCodeView : UserControl
         // NOTE: Remember to add new types
         IEnumerable?[] objLists = [
             data.Sounds,
-                data.Sprites,
-                data.Backgrounds,
-                data.Paths,
-                data.Scripts,
-                data.Fonts,
-                data.GameObjects,
-                data.Rooms,
-                data.Extensions,
-                data.Shaders,
-                data.Timelines,
-                data.AnimationCurves,
-                data.Sequences,
-                data.AudioGroups
+            data.Sprites,
+            data.Backgrounds,
+            data.Paths,
+            data.Scripts,
+            data.Fonts,
+            data.GameObjects,
+            data.Rooms,
+            data.Extensions,
+            data.Shaders,
+            data.Timelines,
+            data.AnimationCurves,
+            data.Sequences,
+            data.AudioGroups
         ];
 
         foreach (IEnumerable? list in objLists)
@@ -232,12 +232,12 @@ public partial class UndertaleCodeView : UserControl
 
             foreach (var obj in list)
             {
-                if (obj is UndertaleNamedResource namedObj)
+                if (obj is UndertaleNamedResource namedObj && namedObj.Name is not null)
                     NamedResourcesCache[namedObj.Name.Content] = namedObj;
             }
         }
 
-        UndertaleCodeLocals? locals = data.CodeLocals?.ByName(vm.Code.Name.Content);
+        UndertaleCodeLocals? locals = data.CodeLocals?.ByName(vm.Code.Name?.Content);
         if (locals != null)
         {
             foreach (var local in locals.Locals)
@@ -472,7 +472,7 @@ public partial class UndertaleCodeView : UserControl
 
                 foreach (UndertaleNamedResource? obj in possibleObjects)
                 {
-                    if (obj is null)
+                    if (obj?.Name is null)
                         continue;
 
                     MenuItem item = new();
@@ -618,7 +618,7 @@ public partial class UndertaleCodeView : UserControl
                     {
                         if (namedResource != null)
                         {
-                            if (CodeCache.TryGetValue(namedResource.Name.Content, out _))
+                            if (namedResource.Name is not null && CodeCache.TryGetValue(namedResource.Name.Content, out _))
                                 namedResource = null; // in GMS2.3 every custom "function" is in fact a member variable, and the names in functions make no sense (they have the gml_Script_ prefix)
                         }
                         else

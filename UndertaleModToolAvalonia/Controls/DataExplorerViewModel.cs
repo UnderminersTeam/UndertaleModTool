@@ -101,7 +101,7 @@ public partial class DataExplorerViewModel : ObservableObject
     {
         foreach (ObservableCollectionView view in observableCollectionViewList)
         {
-            view.SetFilter(item => AssetNameContainsText(((Item)item!).Value, MainVM.FilterText ?? ""));
+            view.SetFilter(item => AssetNameContainsText(((Item)item!).Value, MainVM.FilterText));
         }
     }
 
@@ -131,10 +131,13 @@ public partial class DataExplorerViewModel : ObservableObject
 
     static bool AssetNameContainsText(object? asset, string text)
     {
+        if (text == "")
+            return true;
+
         string? name = AssetGetName(asset);
 
         if (name is null)
-            return true;
+            return false;
 
         return name.Contains(text, StringComparison.OrdinalIgnoreCase);
     }
@@ -143,7 +146,7 @@ public partial class DataExplorerViewModel : ObservableObject
     {
         return asset switch
         {
-            UndertaleNamedResource namedResource => namedResource.Name.Content,
+            UndertaleNamedResource namedResource => namedResource.Name?.Content,
             UndertaleString _string => _string.Content,
             _ => null,
         };

@@ -116,7 +116,7 @@ public partial class UndertaleSpriteViewModel : ObservableObject, IUndertaleReso
 
     public async void ExportAllTexturesAsPNGs()
     {
-        string GetFileNameOfTexture(int i) => $"{Sprite.Name.Content}_{i}.png";
+        string GetFileNameOfTexture(int i) => $"{Sprite.Name?.Content ?? "image"}_{i}.png";
 
         IReadOnlyList<IStorageFolder> folders = await MainVM.View!.OpenFolderDialog(new FolderPickerOpenOptions()
         {

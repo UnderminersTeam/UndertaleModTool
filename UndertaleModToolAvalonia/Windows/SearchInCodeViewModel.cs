@@ -287,7 +287,7 @@ public partial class SearchInCodeViewModel : ObservableObject
             LineNumber = lineNumber;
             ColumnNumber = columnNumber;
 
-            Location = code.Name.Content + ":" + lineNumber + "," + columnNumber;
+            Location = (code.Name?.Content ?? "<null name>") + ":" + lineNumber + "," + columnNumber;
             Text = text.Trim();
         }
     }
