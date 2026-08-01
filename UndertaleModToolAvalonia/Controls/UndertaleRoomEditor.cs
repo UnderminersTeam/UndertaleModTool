@@ -88,6 +88,8 @@ public class UndertaleRoomEditor : Control
         PointerPoint pointerPoint = e.GetCurrentPoint(this);
         InteractionMode interactionMode = GetInteractionMode();
 
+        bool shift = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+
         var roomItems = Updater.MakeRoomItems(vm!.Room);
 
         if (pointerPoint.Properties.IsMiddleButtonPressed)
@@ -121,7 +123,7 @@ public class UndertaleRoomEditor : Control
         {
             if (pointerPoint.Properties.IsLeftButtonPressed)
             {
-                SetRoomTileAtPointer(roomItems, vm!.SelectedTileBackground, vm!.SelectedTileSourceRect);
+                SetRoomTileAtPointer(roomItems, vm!.SelectedTileBackground, vm!.SelectedTileSourceRect, overrideGrid: shift);
             }
             else if (pointerPoint.Properties.IsRightButtonPressed)
             {
@@ -136,6 +138,8 @@ public class UndertaleRoomEditor : Control
         InteractionMode interactionMode = GetInteractionMode();
         UndertaleRoom.Layer? tilesLayer = GetSelectedTilesLayer();
 
+        bool shift = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+
         var roomItems = Updater.MakeRoomItems(vm!.Room);
 
         pointerPosition = e.GetPosition(this);
@@ -147,7 +151,7 @@ public class UndertaleRoomEditor : Control
         {
             if (pointerPoint.Properties.IsLeftButtonPressed)
             {
-                ItemMoveOnMoved(roomItems);
+                ItemMoveOnMoved(roomItems, overrideGrid: shift);
                 roomItems = Updater.MakeRoomItems(vm!.Room);
             }
         }
@@ -170,7 +174,7 @@ public class UndertaleRoomEditor : Control
             if (pointerPoint.Properties.IsLeftButtonPressed)
             {
                 // TODO: Add dragging that respects size of tile
-                SetRoomTileAtPointer(roomItems, vm!.SelectedTileBackground, vm!.SelectedTileSourceRect);
+                SetRoomTileAtPointer(roomItems, vm!.SelectedTileBackground, vm!.SelectedTileSourceRect, overrideGrid: shift);
             }
             else if (pointerPoint.Properties.IsRightButtonPressed)
             {
@@ -392,7 +396,7 @@ public class UndertaleRoomEditor : Control
         }
     }
 
-    void ItemMoveOnMoved(List<RoomItem> roomItems)
+    void ItemMoveOnMoved(List<RoomItem> roomItems, bool overrideGrid)
     {
         if (vm!.IsLocked)
             return;
@@ -403,7 +407,7 @@ public class UndertaleRoomEditor : Control
             double x = pointerPositionInRoom.X - itemMoveOffset.X;
             double y = pointerPositionInRoom.Y - itemMoveOffset.Y;
 
-            if (vm!.IsGridEnabled)
+            if (vm!.IsGridEnabled != overrideGrid)
             {
                 x = (Math.Floor(pointerPositionInRoom.X / vm.GridWidth) * vm.GridWidth)
                     - (Math.Floor(itemMoveOffset.X / vm.GridWidth) * vm.GridWidth);
@@ -513,7 +517,7 @@ public class UndertaleRoomEditor : Control
         return null;
     }
 
-    void SetRoomTileAtPointer(List<RoomItem> roomItems, UndertaleBackground? background, Rect? sourceRect)
+    void SetRoomTileAtPointer(List<RoomItem> roomItems, UndertaleBackground? background, Rect? sourceRect, bool overrideGrid)
     {
         if (vm!.IsLocked)
             return;
@@ -523,7 +527,7 @@ public class UndertaleRoomEditor : Control
             double x = pointerPositionInRoom.X;
             double y = pointerPositionInRoom.Y;
 
-            if (vm!.IsGridEnabled)
+            if (vm!.IsGridEnabled != overrideGrid)
             {
                 x = (Math.Floor(pointerPositionInRoom.X / vm.GridWidth) * vm.GridWidth);
                 y = (Math.Floor(pointerPositionInRoom.Y / vm.GridHeight) * vm.GridHeight);
