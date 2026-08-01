@@ -16,34 +16,20 @@ public partial class UndertaleRoomView : UserControl
     {
         InitializeComponent();
 
-        DataContextChanged += (_, __) =>
+        DataContextChanged += (_, _) =>
         {
             if (DataContext is UndertaleRoomViewModel vm)
             {
-                vm.PropertyChanged += (_, e) =>
+                vm.PropertyChanged += (source, e) =>
                 {
                     if (e.PropertyName == nameof(UndertaleRoomViewModel.RoomTreeItemsSelectedItem))
                     {
                         var item = vm.RoomTreeItemsSelectedItem;
-                        if (item is not null)
-                        {
-                            TreeViewItem? treeViewItem = GetTreeViewItem(RoomItemsTreeView, item);
-
-                            if (treeViewItem is null)
-                                return;
-
-                            // Recursively expand parents of this item
-                            TreeViewItem currentViewItem = treeViewItem;
-                            while (currentViewItem.Parent is TreeViewItem parentTreeViewItem)
-                            {
-                                parentTreeViewItem.IsExpanded = true;
-                                currentViewItem = parentTreeViewItem;
-                            }
-
-                            treeViewItem.BringIntoView();
-                        }
+                        ExpandToTreeViewItem(GetTreeViewItem(RoomItemsTreeView, item));
                     }
                 };
+
+                vm.RoomTreeItemsSelectedItem = RoomItemsTreeView.Items[0];
             }
         };
     }
@@ -410,5 +396,21 @@ public partial class UndertaleRoomView : UserControl
         }
 
         return null;
+    }
+
+    static void ExpandToTreeViewItem(TreeViewItem? treeViewItem)
+    {
+        if (treeViewItem is null)
+            return;
+
+        // Recursively expand parents of this item
+        TreeViewItem currentViewItem = treeViewItem;
+        while (currentViewItem.Parent is TreeViewItem parentTreeViewItem)
+        {
+            parentTreeViewItem.IsExpanded = true;
+            currentViewItem = parentTreeViewItem;
+        }
+
+        treeViewItem.BringIntoView();
     }
 }

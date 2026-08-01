@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -62,6 +63,14 @@ public partial class UndertaleRoomViewModel : ObservableObject, IUndertaleResour
 
     [ObservableProperty]
     public partial uint TileSetColumns { get; set; } = 0;
+
+    [ObservableProperty]
+    public partial UndertaleBackground? SelectedTileBackground { get; set; }
+
+    [ObservableProperty]
+    public partial Rect? SelectedTileSourceRect { get; set; }
+
+    TilesViewModel tilesViewModel = new();
 
     public UndertaleRoomViewModel(UndertaleRoom room, IServiceProvider serviceProvider)
     {
@@ -199,13 +208,14 @@ public partial class UndertaleRoomViewModel : ObservableObject, IUndertaleResour
         Room.GameObjects.Remove(instance);
     }
 
-    public void AddTile()
+    public Tile AddTile()
     {
         Tile tile = new()
         {
             InstanceID = MainVM.Data!.GeneralInfo.LastTile++,
         };
         Room.Tiles.Add(tile);
+        return tile;
     }
 
     public void RemoveTile(Tile tile, UndertalePointerList<Tile>? legacyTilesList = null)
@@ -425,12 +435,13 @@ public partial class UndertaleRoomViewModel : ObservableObject, IUndertaleResour
         {
             TreeViewItem { Name: "RoomTreeViewItem" } => Room,
             TreeViewItem => null,
+            RoomTreeItem { Tag: "Tiles" } => tilesViewModel,
+            RoomTreeItem => null,
             UndertalePointerList<Tile> => null,
             UndertalePointerList<SpriteInstance> => null,
             UndertalePointerList<SequenceInstance> => null,
             UndertalePointerList<ParticleSystemInstance> => null,
             UndertalePointerList<TextItemInstance> => null,
-            RoomTreeItem => null,
             object o => o,
             _ => null,
         };
@@ -443,5 +454,10 @@ public partial class UndertaleRoomViewModel : ObservableObject, IUndertaleResour
         public string Header { get; set; } = header;
         public string Tag { get; set; } = tag;
         public IEnumerable ItemsSource { get; set; } = itemsSource;
+    }
+
+    public class TilesViewModel
+    {
+        // Nothing here, it only exists so I can put it as a DataType in XAML
     }
 }

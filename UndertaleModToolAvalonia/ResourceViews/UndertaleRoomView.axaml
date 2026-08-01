@@ -194,7 +194,7 @@
                         <ContentControl.DataTemplates>
                             <DataTemplate DataType="undertalem:UndertaleRoom">
                                 <StackPanel>
-                                    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                                    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,2*">
                                         <Label>Name</Label>
                                         <l:UndertaleStringReferenceView Reference="{Binding Name}" />
 
@@ -241,12 +241,15 @@
                                             <TextBox Grid.Column="0" Text="{Binding GravityX}"/>
                                             <TextBox Grid.Column="1" Text="{Binding GravityY}"/>
                                         </Grid>
+
+                                        <Label>Meters per pixel</Label>
+                                        <TextBox Text="{Binding MetersPerPixel}" />
                                     </Grid>
-                                
-                                    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
-                                          IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
-                                          Converter={StaticResource VersionCompareConverter},
-                                          ConverterParameter=GE2}">
+
+                                    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,2*"
+                                            IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
+                                            Converter={StaticResource VersionCompareConverter},
+                                            ConverterParameter=GE2}">
                                         <Label>Game objects</Label>
                                         <l:EditableDataGrid ItemsSource="{Binding GameObjects}" ItemFactory="{x:Null}" HeadersVisibility="None">
                                             <l:EditableDataGrid.Columns>
@@ -260,11 +263,11 @@
                                             </l:EditableDataGrid.Columns>
                                         </l:EditableDataGrid>
                                     </Grid>
-                                
-                                    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
-                                          IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
-                                          Converter={StaticResource VersionCompareConverter},
-                                          ConverterParameter=GE2024.13}">
+
+                                    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,2*"
+                                            IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
+                                            Converter={StaticResource VersionCompareConverter},
+                                            ConverterParameter=GE2024.13}">
                                         <Label>Instance creation order IDs</Label>
                                         <l:EditableDataGrid ItemsSource="{Binding InstanceCreationOrderIDs.InstanceIDs}" ItemFactory="{x:Null}" HeadersVisibility="None">
                                             <l:EditableDataGrid.Columns>
@@ -281,7 +284,7 @@
                                 </StackPanel>
                             </DataTemplate>
                             <DataTemplate DataType="undertalem:UndertaleRoom+Background">
-                                <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                                <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,2*">
                                     <Label>Enabled</Label>
                                     <CheckBox IsChecked="{Binding Enabled}"/>
 
@@ -314,7 +317,7 @@
                                 </Grid>
                             </DataTemplate>
                             <DataTemplate DataType="undertalem:UndertaleRoom+View">
-                                <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                                <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,2*">
                                     <Label>Enabled</Label>
                                     <CheckBox IsChecked="{Binding Enabled}" />
 
@@ -351,7 +354,7 @@
                                 </Grid>
                             </DataTemplate>
                             <DataTemplate DataType="undertalem:UndertaleRoom+GameObject">
-                                <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                                <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,2*">
                                     <Label>Position X/Y</Label>
                                     <Grid ColumnDefinitions="1*,1*">
                                         <TextBox Grid.Column="0" Text="{Binding X}" />
@@ -390,8 +393,21 @@
                                     <l:UndertaleResourceReferenceView Reference="{Binding PreCreateCode}" ReferenceType="undertalem:UndertaleCode" />
                                 </Grid>
                             </DataTemplate>
+                            <DataTemplate DataType="l:UndertaleRoomViewModel+TilesViewModel">
+                                <Grid RowDefinitions="Auto,1*">
+                                    <l:UndertaleResourceReferenceView
+                                        Grid.Row="0"
+                                        Reference="{Binding #Root.DataContext.SelectedTileBackground}" ReferenceType="undertalem:UndertaleBackground"/>
+                                    <l:RoomTilePicker
+                                        Grid.Row="1"
+                                        SelectedTileBackground="{Binding #Root.DataContext.SelectedTileBackground}"
+                                        SelectedTileSourceRect="{Binding #Root.DataContext.SelectedTileSourceRect}"
+                                        TileWidth="{Binding #Root.DataContext.GridWidth}"
+                                        TileHeight="{Binding #Root.DataContext.GridHeight}"/>
+                                </Grid>
+                            </DataTemplate>
                             <DataTemplate DataType="undertalem:UndertaleRoom+Tile">
-                                <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                                <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,2*">
                                     <Label>Position X/Y</Label>
                                     <Grid ColumnDefinitions="1*,1*">
                                         <TextBox Grid.Column="0" Text="{Binding X}" />
@@ -440,7 +456,7 @@
                             </DataTemplate>
                             <DataTemplate DataType="undertalem:UndertaleRoom+Layer">
                                 <StackPanel Name="Layer">
-                                    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                                    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,2*">
                                         <Label>Layer type</Label>
                                         <TextBlock Text="{Binding LayerType}" FontWeight="Bold" VerticalAlignment="Center" />
                                         
@@ -458,11 +474,11 @@
                                     </Grid>
                                 
                                     <!-- TODO: Properties for all types of layers -->
-                                    <!-- TODO: Don't use ReflectionBinding. But {Binding #Layer.((undertalem:UndertaleRoom.Layer)DataContext).XOffset} doesn't work -->
+                                    <!-- TODO: Don't use ReflectionBinding. But {Binding #Layer.((undertalem:UndertaleRoom+Layer)DataContext).XOffset} doesn't work -->
                                     <ContentControl Content="{Binding Data}">
                                         <ContentControl.DataTemplates>
                                             <DataTemplate DataType="undertalem:UndertaleRoom+Layer+LayerBackgroundData">
-                                                <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                                                <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,2*">
                                                     <Label>Offset X/Y</Label>
                                                     <Grid ColumnDefinitions="1*,1*">
                                                         <TextBox Grid.Column="0" Text="{ReflectionBinding #Layer.DataContext.XOffset}" />
@@ -513,7 +529,7 @@
                                             </DataTemplate>
                                             <DataTemplate DataType="undertalem:UndertaleRoom+Layer+LayerTilesData">
                                                 <StackPanel>
-                                                    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                                                    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,2*">
                                                         <Label>Offset X/Y</Label>
                                                         <Grid ColumnDefinitions="1*,1*">
                                                             <TextBox Grid.Column="0" Text="{ReflectionBinding #Layer.DataContext.XOffset}" />
@@ -550,7 +566,7 @@
                                                         <Button Command="{Binding #Root.DataContext.SelectedTileDataRotateClockwise}" HotKey="Z">Rotate (Z)</Button>
                                                     </StackPanel>
 
-                                                    <l:UndertaleRoomTilePicker
+                                                    <l:LayerTilePicker
                                                         SelectedTileData="{Binding #Root.DataContext.SelectedTileData}"
                                                         TileSetColumns="{Binding #Root.DataContext.TileSetColumns}"
                                                         MinHeight="{Binding $parent[ScrollViewer].Viewport.Height}" />
@@ -563,7 +579,7 @@
                                             -->
                                             <DataTemplate DataType="undertalem:UndertaleRoom+Layer+LayerAssetsData">
                                                 <StackPanel>
-                                                    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                                                    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,2*">
                                                         <Label>Offset X/Y</Label>
                                                         <Grid ColumnDefinitions="1*,1*">
                                                             <TextBox Grid.Column="0" Text="{ReflectionBinding #Layer.DataContext.XOffset}" />
@@ -591,7 +607,7 @@
                                 </StackPanel>
                             </DataTemplate>
                             <DataTemplate DataType="undertalem:UndertaleRoom+SpriteInstance">
-                                <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                                <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,2*">
                                     <Label>Name</Label>
                                     <l:UndertaleStringReferenceView Reference="{Binding Name}" />
                                     
@@ -629,7 +645,7 @@
                                 </Grid>
                             </DataTemplate>
                             <DataTemplate DataType="undertalem:UndertaleRoom+SequenceInstance">
-                                <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                                <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,2*">
                                     <Label>Name</Label>
                                     <l:UndertaleStringReferenceView Reference="{Binding Name}" />
 
@@ -638,7 +654,7 @@
                             </DataTemplate>
                             <DataTemplate DataType="undertalem:UndertaleRoom+ParticleSystemInstance">
                                 <StackPanel>
-                                    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                                    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,2*">
                                         <Label>Name</Label>
                                         <l:UndertaleStringReferenceView Reference="{Binding Name}" />
 
@@ -664,7 +680,7 @@
                                         <TextBox Text="{Binding Rotation}" />
                                     </Grid>
                                     
-                                    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*"
+                                    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,2*"
                                           IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
                                           Converter={StaticResource VersionCompareConverter},
                                           ConverterParameter=GE2024.14}">
@@ -674,7 +690,7 @@
                                 </StackPanel>
                             </DataTemplate>
                             <DataTemplate DataType="undertalem:UndertaleRoom+TextItemInstance">
-                                <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                                <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,2*">
                                     <Label>Name</Label>
                                     <l:UndertaleStringReferenceView Reference="{Binding Name}" />
 
