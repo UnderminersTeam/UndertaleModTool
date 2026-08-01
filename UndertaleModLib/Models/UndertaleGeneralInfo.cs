@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using UndertaleModLib.Compiler;
@@ -30,7 +31,7 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         SyncVertex1 = 0x0002,
 
         /// <summary>
-        /// Use synchronization to avoid tearing. TODO: difference?
+        /// Use synchronization to avoid tearing using D3D.
         /// </summary>
         SyncVertex2 = 0x0004,
 
@@ -59,7 +60,11 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         /// </summary>
         ScreenKey = 0x0080,
 
+        /// <summary>
+        /// Adaptive V-sync
+        /// </summary>
         SyncVertex3 = 0x0100,
+        
         StudioVersionB1 = 0x0200,
         StudioVersionB2 = 0x0400,
         StudioVersionB3 = 0x0800,
@@ -809,7 +814,8 @@ public class UndertaleOptions : UndertaleObject, IDisposable
         LegacyOtherBehavior = 0x100000000,
         AudioErrorBehavior = 0x200000000,
         AllowInstanceChange = 0x400000000,
-        LegacyPrimitiveDrawing = 0x800000000
+        LegacyPrimitiveDrawing = 0x800000000,
+        UseRawMouse = 0x1000000000
     }
 
     /// <summary>
@@ -1005,6 +1011,7 @@ public class UndertaleOptions : UndertaleObject, IDisposable
             Info = (OptionsFlags)reader.ReadUInt64();
             Scale = reader.ReadInt32();
             WindowColor = reader.ReadUInt32();
+            Debug.WriteLine("Window Color: " + WindowColor);
             ColorDepth = reader.ReadUInt32();
             Resolution = reader.ReadUInt32();
             Frequency = reader.ReadUInt32();
