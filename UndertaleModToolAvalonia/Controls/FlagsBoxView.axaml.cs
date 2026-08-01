@@ -60,7 +60,7 @@ public partial class FlagsBoxView : UserControl
             {
                 foreach (Enum flagEnum in Enum.GetValues(enumValue.GetType()))
                 {
-                    Flag? f = Flags.FirstOrDefault(x => (x!.FlagEnum) == flagEnum, null);
+                    Flag? f = Flags.FirstOrDefault(x => (dynamic)(x!.FlagEnum) == (dynamic)flagEnum, null);
                     if (f is not null)
                     {
                         f.Checked = enumValue.HasFlag(flagEnum);
