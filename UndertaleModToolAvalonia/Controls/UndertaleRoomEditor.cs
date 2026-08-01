@@ -169,6 +169,7 @@ public class UndertaleRoomEditor : Control
         {
             if (pointerPoint.Properties.IsLeftButtonPressed)
             {
+                // TODO: Add dragging that respects size of tile
                 SetRoomTileAtPointer(roomItems, vm!.SelectedTileBackground, vm!.SelectedTileSourceRect);
             }
             else if (pointerPoint.Properties.IsRightButtonPressed)

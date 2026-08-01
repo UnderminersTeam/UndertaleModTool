@@ -87,6 +87,36 @@ public class RoomTilePicker : TilePicker
         SelectedTileSourceRect = new(x, y, TileWidth, TileHeight);
     }
 
+    public override void SelectTileTo(Point point)
+    {
+        UndertaleTexturePageItem? texturePageItem = SelectedTileBackground?.Texture;
+        if (texturePageItem is null)
+            return;
+
+        point -= translation;
+        point /= scaling;
+
+        double x = Math.Floor(point.X / TileWidth) * TileWidth;
+        double y = Math.Floor(point.Y / TileHeight) * TileHeight;
+
+        if (x < 0 || y < 0 || x + TileWidth > texturePageItem.BoundingWidth || y + TileHeight > texturePageItem.BoundingHeight)
+            return;
+
+        if (SelectedTileSourceRect is Rect rect)
+        {
+            double rectLeft = (x < rect.X) ? x : rect.Left;
+            double rectTop = (y < rect.Y) ? y : rect.Top;
+            double rectRight = (x >= rect.Right) ? (x + TileWidth) : rect.Right;
+            double rectBottom = (y >= rect.Bottom) ? (y + TileHeight) : rect.Bottom;
+
+            SelectedTileSourceRect = new(rectLeft, rectTop, rectRight - rectLeft, rectBottom - rectTop);
+        }
+        else
+        {
+            SelectedTileSourceRect = new(x, y, TileWidth, TileHeight);
+        }
+    }
+
     public new class CustomDrawOperation : TilePicker.CustomDrawOperation
     {
         public Rect? SelectedTileSourceRect;
@@ -170,6 +200,8 @@ public class LayerTilePicker : TilePicker
             }
         }
     }
+
+    public override void SelectTileTo(Point point) => SelectTileAt(point); // TODO: Multiple tile select
 
     public new class CustomDrawOperation : TilePicker.CustomDrawOperation
     {
@@ -287,7 +319,14 @@ public abstract class TilePicker : Control
         var pointerPoint = e.GetCurrentPoint(this);
         if (pointerPoint.Properties.IsLeftButtonPressed)
         {
-            SelectTileAt(pointerPoint.Position);
+            if (e.KeyModifiers.HasFlag(KeyModifiers.Alt))
+            {
+                SelectTileTo(pointerPoint.Position);
+            }
+            else
+            {
+                SelectTileAt(pointerPoint.Position);
+            }
         }
         else if (pointerPoint.Properties.IsMiddleButtonPressed)
         {
@@ -329,6 +368,7 @@ public abstract class TilePicker : Control
     }
 
     public abstract void SelectTileAt(Point point);
+    public abstract void SelectTileTo(Point point);
 
     void TranslationMoveOnPressed(Point point)
     {
