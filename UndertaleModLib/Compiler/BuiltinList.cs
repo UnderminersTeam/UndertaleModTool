@@ -1155,11 +1155,8 @@ public class BuiltinList : IBuiltins
         DefineFunction("surface_get_texture", 1);
         DefineFunction("surface_set_target", 1);
         DefineFunction("surface_set_target_ext", 2);
-        if (gms2)
-        {
-            DefineFunction("surface_reset_target", 0);
-            DefineFunction("surface_depth_disable", 1);
-        }
+        DefineFunction("surface_reset_target", 0);
+        DefineFunction("surface_depth_disable", 1);
         DefineFunction("surface_get_depth_disable", 0);
         DefineFunction("draw_surface", 3);
         DefineFunction("draw_surface_ext", 8);
