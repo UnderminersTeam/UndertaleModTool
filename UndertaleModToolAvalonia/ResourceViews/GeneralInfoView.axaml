@@ -27,7 +27,7 @@
                     <Label>Bytecode version</Label>
                     <TextBox Text="{Binding GeneralInfo.BytecodeVersion}"/>
 
-                    <Label>FileName</Label>
+                    <Label>File name</Label>
                     <l:UndertaleStringReferenceView Reference="{Binding GeneralInfo.FileName}"/>
 
                     <Label>Config</Label>

@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.LogicalTree;
 using Avalonia.VisualTree;
 using Avalonia.Xaml.Interactions.DragAndDrop;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,7 +27,8 @@ public partial class UndertaleStringReferenceView : UserControl
     public UndertaleStringReferenceView()
     {
         InitializeComponent();
-        UpdateTextBoxWatermark();
+
+        ReferenceTextBox.AddHandler(TextBox.KeyDownEvent, TextBox_KeyDown_Tunnel, RoutingStrategies.Tunnel);
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -39,11 +41,19 @@ public partial class UndertaleStringReferenceView : UserControl
         }
     }
 
-    private void TextBox_KeyDown(object? sender, KeyEventArgs e)
+    protected override void OnDetachedFromLogicalTree(LogicalTreeAttachmentEventArgs e)
     {
-        if (sender is TextBox textBox && e.Key == Key.Enter)
+        base.OnDetachedFromLogicalTree(e);
+
+        UpdateReferenceToText();
+    }
+
+    private void TextBox_KeyDown_Tunnel(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter && e.KeyModifiers.HasFlag(KeyModifiers.Control))
         {
-            UpdateString(textBox);
+            e.Handled = true;
+            UpdateReferenceToText();
         }
     }
 
@@ -58,17 +68,13 @@ public partial class UndertaleStringReferenceView : UserControl
 
     private void TextBox_LostFocus(object? sender, RoutedEventArgs e)
     {
-        if (sender is TextBox textBox)
-        {
-            UpdateString(textBox);
-        }
+        UpdateReferenceToText();
     }
 
     public void Add()
     {
-        if (mainVM.Data is null)
-            return;
-        Reference = mainVM.Data.Strings.MakeString("", createNew: true);
+        if (mainVM.Data is not null)
+            Reference = mainVM.Data.Strings.MakeString("");
     }
 
     public void Open()
@@ -81,16 +87,11 @@ public partial class UndertaleStringReferenceView : UserControl
         _ = mainVM.TabOpen(Reference, inNewTab: true);
     }
 
-    void UpdateString(TextBox textBox)
+    void UpdateReferenceToText()
     {
-        if (Reference is not null)
+        if (mainVM.Data is not null && ReferenceTextBox.Text is not null)
         {
-            // TODO: Ask if user wants to change all references or just this one
-            BindingOperations.GetBindingExpressionBase(textBox, TextBox.TextProperty)!.UpdateSource();
-        }
-        else
-        {
-            // TODO: Create new string
+            Reference = mainVM.Data.Strings.MakeString(ReferenceTextBox.Text);
         }
     }
 
