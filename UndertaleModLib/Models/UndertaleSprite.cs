@@ -168,7 +168,7 @@ public class UndertaleSprite : UndertaleNamedResource, IProjectAsset, PrePaddedO
     public int VectorCollisionMaskHeight { get; set; }
     public UndertaleObservableList<byte[]> VectorCollisionMaskRLEData { get; set; }
     public UndertaleObservableList<int> VectorFrameToShapeMap { get; set; }
-
+    
     public UndertaleSequence V2Sequence;
 
     public NineSlice V3NineSlice;
@@ -778,7 +778,85 @@ public class UndertaleSprite : UndertaleNamedResource, IProjectAsset, PrePaddedO
             ReadMaskData(reader);
         }
     }
+    
+    /// <summary>
+    /// In case <see cref="V2Sequence"/> is null, we can optionally generate a sequence to use.
+    /// </summary>
+    public UndertaleSequence GenerateSequence(UndertaleSprite sprite)
+    {
+        sprite ??= this;
 
+        // create the keyframes list
+        var spriteFrames = new UndertaleSequence.SpriteFramesKeyframes()
+        {
+            List = new UndertaleSimpleList<UndertaleSequence.Keyframe<UndertaleSequence.SpriteFramesKeyframes.Data>>()
+        };
+        
+        // generate keyframe data
+        for (int i = 0; i < sprite.Textures.Count; i++)
+        {
+            // the channel
+            var channel = new UndertaleSequence.Keyframe<UndertaleSequence.SpriteFramesKeyframes.Data>.KeyframeChannel()
+            {
+                Channel = 0,
+                Value = new UndertaleSequence.SpriteFramesKeyframes.Data()
+                {
+                    Value = i
+                }
+            };
+            
+            // the keyframe
+            var keyframe = new UndertaleSequence.Keyframe<UndertaleSequence.SpriteFramesKeyframes.Data>()
+            {
+                Key = i,
+                Length = 1f,
+                Stretch = false,
+                Disabled = false,
+                Channels = new UndertaleSimpleList<UndertaleSequence.Keyframe<UndertaleSequence.SpriteFramesKeyframes.Data>.KeyframeChannel>()
+                {
+                    channel
+                }
+            };
+
+            spriteFrames.List.Add(keyframe);
+        }
+
+        UndertaleSequence sequence = new()
+        {
+            Name = sprite.Name,
+            BroadcastMessages = new(),
+            FunctionIDs = new(),
+            Moments = new(),
+            Playback = UndertaleSequence.PlaybackType.Loop,
+            PlaybackSpeed = sprite.GMS2PlaybackSpeed,
+            PlaybackSpeedType = sprite.GMS2PlaybackSpeedType,
+            Volume = 1f,
+            OriginX = sprite.OriginX,
+            OriginY = sprite.OriginY,
+            Length = sprite.Textures.Count,
+            Width = sprite.Width,
+            Height = sprite.Height,
+            
+            // one sprite frames track
+            Tracks = new()
+            {
+                new UndertaleSequence.Track()
+                {
+                    ModelName = new UndertaleString("GMSpriteFramesTrack"),
+                    Name = new UndertaleString("frames"),
+                    BuiltinName = 0,
+                    Traits = UndertaleSequence.Track.TrackTraits.None,
+                    IsCreationTrack = false,
+                    Tags = new(),
+                    Tracks = new(),
+                    Keyframes = spriteFrames
+                }
+            }
+        };
+
+        return sequence;
+    }
+    
     /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
     public static uint UnserializeChildObjectCount(UndertaleReader reader)
     {
