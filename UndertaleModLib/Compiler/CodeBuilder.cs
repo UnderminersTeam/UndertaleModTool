@@ -261,7 +261,7 @@ internal class CodeBuilder : ICodeBuilder
             }
 
             // Transform irregular instance types to Self (including Other, apparently)
-            if (variableInstanceType is not (InstanceType.Self or InstanceType.Local or InstanceType.Builtin or 
+            if (variableInstanceType is not (InstanceType.Self or InstanceType.Local or InstanceType.Builtin or
                                              InstanceType.Global or InstanceType.Static))
             {
                 variableInstanceType = InstanceType.Self;
@@ -278,7 +278,7 @@ internal class CodeBuilder : ICodeBuilder
                 // Register/define non-local variable, and update variable on instruction immediately
                 _globalContext.CurrentCompileGroup.RegisterNonLocalVariable(variableName);
                 UndertaleString nameString = _globalContext.CurrentCompileGroup.MakeString(variableName, out int nameStringId);
-                UndertaleInstruction.InstanceType actualInstType = 
+                UndertaleInstruction.InstanceType actualInstType =
                     _globalContext.Data.Variables.CalculateInstType((UndertaleInstruction.InstanceType)variableInstanceType, isBuiltin, _globalContext.Data);
                 if (_variableLookup.TryGetValue((nameString, actualInstType), out UndertaleVariable existingVariable))
                 {
@@ -297,6 +297,28 @@ internal class CodeBuilder : ICodeBuilder
             if (variableType is VariableType.Normal or VariableType.Instance)
             {
                 utInstruction.TypeInst = (UndertaleInstruction.InstanceType)instructionInstanceType;
+            }
+        }
+    }
+
+    /// <inheritdoc/>
+    public void PatchVariableHashInstruction(IGMInstruction instruction, string variableName, bool isBuiltin)
+    {
+        if (instruction is UndertaleInstruction utInstruction)
+        {
+            // Register/define non-local variable, and update variable on instruction immediately
+            _globalContext.CurrentCompileGroup.RegisterNonLocalVariable(variableName);
+            UndertaleString nameString = _globalContext.CurrentCompileGroup.MakeString(variableName, out int nameStringId);
+            if (_variableLookup.TryGetValue((nameString, UndertaleInstruction.InstanceType.Self), out UndertaleVariable existingVariable))
+            {
+                utInstruction.ValueVariable = existingVariable;
+            }
+            else
+            {
+                UndertaleVariable newVariable = _globalContext.Data.Variables.Define(
+                    nameString, nameStringId, UndertaleInstruction.InstanceType.Self, isBuiltin, _globalContext.Data);
+                _variableLookup.Add((nameString, UndertaleInstruction.InstanceType.Self), newVariable);
+                utInstruction.ValueVariable = newVariable;
             }
         }
     }

@@ -38,6 +38,10 @@ async Task ExtractSprites(string folder, string prefix)
         sprites = new List<UndertaleSprite> { };
         foreach (UndertaleSprite sprite in Data.Sprites)
         {
+            if (sprite is null)
+            {
+                continue;
+            }
             if (sprite.Name.Content.StartsWith(prefix))
             {
                 sprites.Add(sprite);
@@ -74,6 +78,11 @@ async Task ExtractSprites(string folder, string prefix)
 
 void ExtractSprite(UndertaleSprite sprite, string folder, TextureWorker worker)
 {
+    if (sprite is null)
+    {
+        return;
+    }
+
     using MagickImageCollection gif = new();
     bool anyValidFrames = false;
     for (int picCount = 0; picCount < sprite.Textures.Count; picCount++)
