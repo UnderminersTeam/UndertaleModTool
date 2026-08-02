@@ -123,7 +123,7 @@ public class UndertaleRoomEditor : Control
         {
             if (pointerPoint.Properties.IsLeftButtonPressed)
             {
-                SetRoomTileAtPointer(roomItems, vm!.SelectedTileBackground, vm!.SelectedTileSourceRect, overrideGrid: shift);
+                SetRoomTileAtPointer(roomItems, vm!.SelectedTileResource, vm!.SelectedTileSourceRect, overrideGrid: shift);
             }
             else if (pointerPoint.Properties.IsRightButtonPressed)
             {
@@ -174,7 +174,7 @@ public class UndertaleRoomEditor : Control
             if (pointerPoint.Properties.IsLeftButtonPressed)
             {
                 // TODO: Add dragging that respects size of tile
-                SetRoomTileAtPointer(roomItems, vm!.SelectedTileBackground, vm!.SelectedTileSourceRect, overrideGrid: shift);
+                SetRoomTileAtPointer(roomItems, vm!.SelectedTileResource, vm!.SelectedTileSourceRect, overrideGrid: shift);
             }
             else if (pointerPoint.Properties.IsRightButtonPressed)
             {
@@ -235,7 +235,7 @@ public class UndertaleRoomEditor : Control
                     UndertaleRoom.Tile? tile = GetRoomTileAtPointer(roomItems);
                     if (tile is not null)
                     {
-                        vm!.SelectedTileBackground = tile.BackgroundDefinition;
+                        vm!.SelectedTileResource = tile.ObjectDefinition;
                         vm!.SelectedTileSourceRect = new(tile.SourceX, tile.SourceY, tile.Width, tile.Height);
                     }
                 }
@@ -328,6 +328,13 @@ public class UndertaleRoomEditor : Control
         {
             return tilesLayer;
         }
+        return null;
+    }
+
+    UndertaleRoom.Layer? GetSelectedLegacyTilesLayer()
+    {
+        if (vm!.RoomTreeItemsSelectedItem is UndertalePointerList<UndertaleRoom.Tile> && vm!.CategorySelected is UndertaleRoom.Layer { LayerType: UndertaleRoom.LayerType.Assets } layer)
+            return layer;
         return null;
     }
 
@@ -492,7 +499,9 @@ public class UndertaleRoomEditor : Control
             if (roomItem.Selectable is null)
                 continue;
 
-            if (roomItem.Selectable.Category.Equals("Tiles") && roomItem.Object is UndertaleRoom.Tile tile
+            UndertaleRoom.Layer? legacyTilesLayer = GetSelectedLegacyTilesLayer();
+
+            if (roomItem.Selectable.Category.Equals((object?)legacyTilesLayer ?? "Tiles") && roomItem.Object is UndertaleRoom.Tile tile
                 && tile.X == x && tile.Y == y)
             {
                 return tile;
@@ -508,7 +517,9 @@ public class UndertaleRoomEditor : Control
             if (roomItem.Selectable is null)
                 continue;
 
-            if (roomItem.Selectable.Category.Equals("Tiles") && roomItem.Object is UndertaleRoom.Tile tile
+            UndertaleRoom.Layer? legacyTilesLayer = GetSelectedLegacyTilesLayer();
+
+            if (roomItem.Selectable.Category.Equals((object?)legacyTilesLayer ?? "Tiles") && roomItem.Object is UndertaleRoom.Tile tile
                 && RectContainsPoint(roomItem.Selectable.Bounds, roomItem.Selectable.Rotation, roomItem.Selectable.Pivot, pointerPositionInRoom))
             {
                 return tile;
@@ -517,12 +528,12 @@ public class UndertaleRoomEditor : Control
         return null;
     }
 
-    void SetRoomTileAtPointer(List<RoomItem> roomItems, UndertaleBackground? background, Rect? sourceRect, bool overrideGrid)
+    void SetRoomTileAtPointer(List<RoomItem> roomItems, UndertaleNamedResource? resource, Rect? sourceRect, bool overrideGrid)
     {
         if (vm!.IsLocked)
             return;
 
-        if (background is not null && sourceRect is Rect sourceRectNN)
+        if (resource is not null && sourceRect is Rect sourceRectNN)
         {
             double x = pointerPositionInRoom.X;
             double y = pointerPositionInRoom.Y;
@@ -536,10 +547,18 @@ public class UndertaleRoomEditor : Control
             UndertaleRoom.Tile? tile = GetRoomTileAtExactPosition(roomItems, x, y);
             if (tile is null)
             {
-                tile = vm!.AddTile();
+                UndertaleRoom.Layer? legacyTilesLayer = GetSelectedLegacyTilesLayer();
+                if (legacyTilesLayer is not null)
+                {
+                    tile = vm!.AddLegacyTileInstance(legacyTilesLayer);
+                }
+                else
+                {
+                    tile = vm!.AddTile();
+                }
             }
 
-            tile.BackgroundDefinition = background;
+            tile.ObjectDefinition = resource;
             tile.SourceX = (int)sourceRectNN.X;
             tile.SourceY = (int)sourceRectNN.Y;
             tile.Width = (uint)sourceRectNN.Width;
@@ -557,7 +576,15 @@ public class UndertaleRoomEditor : Control
 
         if (hoveredItem is UndertaleRoom.Tile tile)
         {
-            vm.RemoveTile(tile);
+            UndertaleRoom.Layer? legacyTilesLayer = GetSelectedLegacyTilesLayer();
+            if (legacyTilesLayer is not null)
+            {
+                vm.RemoveAsset(legacyTilesLayer.AssetsData.LegacyTiles, tile);
+            }
+            else
+            {
+                vm.RemoveTile(tile);
+            }
             hoveredItem = null;
         }
     }

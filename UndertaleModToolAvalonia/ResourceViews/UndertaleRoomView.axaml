@@ -394,17 +394,37 @@
                                 </Grid>
                             </DataTemplate>
                             <DataTemplate DataType="l:UndertaleRoomViewModel+TilesViewModel">
-                                <Grid RowDefinitions="Auto,1*">
-                                    <l:UndertaleResourceReferenceView
-                                        Grid.Row="0"
-                                        Reference="{Binding #Root.DataContext.SelectedTileBackground}" ReferenceType="undertalem:UndertaleBackground"/>
-                                    <l:RoomTilePicker
-                                        Grid.Row="1"
-                                        SelectedTileBackground="{Binding #Root.DataContext.SelectedTileBackground}"
-                                        SelectedTileSourceRect="{Binding #Root.DataContext.SelectedTileSourceRect}"
-                                        TileWidth="{Binding #Root.DataContext.GridWidth}"
-                                        TileHeight="{Binding #Root.DataContext.GridHeight}"/>
-                                </Grid>
+                                <StackPanel>
+                                    <Grid RowDefinitions="Auto,1*"
+                                          IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
+                                          Converter={StaticResource VersionCompareConverter},
+                                          ConverterParameter=L2}">
+                                        <l:UndertaleResourceReferenceView
+                                            Grid.Row="0"
+                                            Reference="{Binding #Root.DataContext.SelectedTileResource}" ReferenceType="undertalem:UndertaleBackground"/>
+                                        <l:RoomTilePicker
+                                            Grid.Row="1"
+                                            SelectedTileBackground="{Binding #Root.DataContext.SelectedTileResource}"
+                                            SelectedTileSourceRect="{Binding #Root.DataContext.SelectedTileSourceRect}"
+                                            TileWidth="{Binding #Root.DataContext.GridWidth}"
+                                            TileHeight="{Binding #Root.DataContext.GridHeight}"/>
+                                    </Grid>
+                                    
+                                    <Grid RowDefinitions="Auto,1*"
+                                          IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
+                                          Converter={StaticResource VersionCompareConverter},
+                                          ConverterParameter=GE2}">
+                                        <l:UndertaleResourceReferenceView
+                                            Grid.Row="0"
+                                            Reference="{Binding #Root.DataContext.SelectedTileResource}" ReferenceType="undertalem:UndertaleSprite"/>
+                                        <l:LegacyTilePicker
+                                            Grid.Row="1"
+                                            SelectedTileSprite="{Binding #Root.DataContext.SelectedTileResource}"
+                                            SelectedTileSourceRect="{Binding #Root.DataContext.SelectedTileSourceRect}"
+                                            TileWidth="{Binding #Root.DataContext.GridWidth}"
+                                            TileHeight="{Binding #Root.DataContext.GridHeight}"/>
+                                    </Grid>
+                                </StackPanel>
                             </DataTemplate>
                             <DataTemplate DataType="undertalem:UndertaleRoom+Tile">
                                 <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,2*">

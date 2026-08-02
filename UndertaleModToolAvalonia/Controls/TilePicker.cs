@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Data;
@@ -12,7 +13,25 @@ using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia;
 
-public class RoomTilePicker : TilePicker
+public class LegacyTilePicker : RoomOrLegacyTilePicker
+{
+    public static readonly StyledProperty<UndertaleSprite?> SelectedTileSpriteProperty =
+        AvaloniaProperty.Register<LegacyTilePicker, UndertaleSprite?>(nameof(SelectedTileSprite),
+            defaultBindingMode: BindingMode.OneWay);
+
+    public UndertaleSprite? SelectedTileSprite
+    {
+        get => GetValue(SelectedTileSpriteProperty);
+        set => SetValue(SelectedTileSpriteProperty, value);
+    }
+
+    public override UndertaleTexturePageItem? GetTexturePageItem()
+    {
+        return SelectedTileSprite?.Textures.FirstOrDefault()?.Texture;
+    }
+}
+
+public class RoomTilePicker : RoomOrLegacyTilePicker
 {
     public static readonly StyledProperty<UndertaleBackground?> SelectedTileBackgroundProperty =
         AvaloniaProperty.Register<RoomTilePicker, UndertaleBackground?>(nameof(SelectedTileBackground),
@@ -24,8 +43,16 @@ public class RoomTilePicker : TilePicker
         set => SetValue(SelectedTileBackgroundProperty, value);
     }
 
+    public override UndertaleTexturePageItem? GetTexturePageItem()
+    {
+        return SelectedTileBackground?.Texture;
+    }
+}
+
+public abstract class RoomOrLegacyTilePicker : TilePicker
+{
     public static readonly StyledProperty<Rect?> SelectedTileSourceRectProperty =
-        AvaloniaProperty.Register<RoomTilePicker, Rect?>(nameof(SelectedTileSourceRect),
+        AvaloniaProperty.Register<RoomOrLegacyTilePicker, Rect?>(nameof(SelectedTileSourceRect),
             defaultBindingMode: BindingMode.TwoWay);
 
     public Rect? SelectedTileSourceRect
@@ -35,7 +62,7 @@ public class RoomTilePicker : TilePicker
     }
 
     public static readonly StyledProperty<uint> TileWidthProperty =
-        AvaloniaProperty.Register<RoomTilePicker, uint>(nameof(TileWidth),
+        AvaloniaProperty.Register<RoomOrLegacyTilePicker, uint>(nameof(TileWidth),
             defaultBindingMode: BindingMode.OneWay);
 
     public uint TileWidth
@@ -45,7 +72,7 @@ public class RoomTilePicker : TilePicker
     }
 
     public static readonly StyledProperty<uint> TileHeightProperty =
-        AvaloniaProperty.Register<RoomTilePicker, uint>(nameof(TileHeight),
+        AvaloniaProperty.Register<RoomOrLegacyTilePicker, uint>(nameof(TileHeight),
             defaultBindingMode: BindingMode.OneWay);
 
     public uint TileHeight
@@ -56,22 +83,27 @@ public class RoomTilePicker : TilePicker
 
     public override void Render(DrawingContext context)
     {
-        context.Custom(new CustomDrawOperation()
+        if (GetTexturePageItem() is UndertaleTexturePageItem texturePageItem)
         {
-            Bounds = new Rect(0, 0, Bounds.Width, Bounds.Height),
-            Translation = translation,
-            Scaling = scaling,
-            SelectedColor = selectedColor,
-            Background = SelectedTileBackground,
-            SelectedTileSourceRect = SelectedTileSourceRect,
-        });
+            context.Custom(new CustomDrawOperation()
+            {
+                Bounds = new Rect(0, 0, Bounds.Width, Bounds.Height),
+                Translation = translation,
+                Scaling = scaling,
+                SelectedColor = selectedColor,
+                TexturePageItem = texturePageItem,
+                SelectedTileSourceRect = SelectedTileSourceRect,
+            });
+        }
 
         base.Render(context);
     }
 
+    public abstract UndertaleTexturePageItem? GetTexturePageItem();
+
     public override void SelectTileAt(Point point)
     {
-        UndertaleTexturePageItem? texturePageItem = SelectedTileBackground?.Texture;
+        UndertaleTexturePageItem? texturePageItem = GetTexturePageItem();
         if (texturePageItem is null)
             return;
 
@@ -89,7 +121,7 @@ public class RoomTilePicker : TilePicker
 
     public override void SelectTileTo(Point point)
     {
-        UndertaleTexturePageItem? texturePageItem = SelectedTileBackground?.Texture;
+        UndertaleTexturePageItem? texturePageItem = GetTexturePageItem();
         if (texturePageItem is null)
             return;
 
@@ -119,13 +151,14 @@ public class RoomTilePicker : TilePicker
 
     public new class CustomDrawOperation : TilePicker.CustomDrawOperation
     {
-        public Rect? SelectedTileSourceRect;
+        public required Rect? SelectedTileSourceRect;
 
         public override void DrawTiles(SKCanvas canvas, SKImage image)
         {
-            UndertaleTexturePageItem texturePageItem = Background!.Texture;
+            if (TexturePageItem is null)
+                return;
 
-            canvas.DrawImage(image, SKRect.Create(texturePageItem.TargetX, texturePageItem.TargetY, texturePageItem.TargetWidth, texturePageItem.TargetHeight), SKSamplingOptions.Default);
+            canvas.DrawImage(image, SKRect.Create(TexturePageItem.TargetX, TexturePageItem.TargetY, TexturePageItem.TargetWidth, TexturePageItem.TargetHeight), SKSamplingOptions.Default);
 
             selectedTileRect = SelectedTileSourceRect?.ToSKRect();
         }
@@ -146,7 +179,7 @@ public class LayerTilePicker : TilePicker
 
     public static readonly StyledProperty<uint> TileSetColumnsProperty =
         AvaloniaProperty.Register<LayerTilePicker, uint>(nameof(TileSetColumns),
-            defaultBindingMode: BindingMode.TwoWay);
+            defaultBindingMode: BindingMode.TwoWay, defaultValue: 0);
 
     public uint TileSetColumns
     {
@@ -156,7 +189,9 @@ public class LayerTilePicker : TilePicker
 
     public override void Render(DrawingContext context)
     {
-        if (DataContext is UndertaleRoom.Layer.LayerTilesData layerTilesData)
+        if (DataContext is UndertaleRoom.Layer.LayerTilesData layerTilesData
+            && layerTilesData.Background is UndertaleBackground background
+            && background.Texture is UndertaleTexturePageItem texturePageItem)
         {
             context.Custom(new CustomDrawOperation()
             {
@@ -164,7 +199,8 @@ public class LayerTilePicker : TilePicker
                 Translation = translation,
                 Scaling = scaling,
                 SelectedColor = selectedColor,
-                Background = layerTilesData.Background,
+                TexturePageItem = texturePageItem,
+                Background = background,
                 SelectedTileData = SelectedTileData,
                 VisualColumns = TileSetColumns,
             });
@@ -205,13 +241,12 @@ public class LayerTilePicker : TilePicker
 
     public new class CustomDrawOperation : TilePicker.CustomDrawOperation
     {
-        public uint SelectedTileData;
-        public uint VisualColumns = 0;
+        public required uint SelectedTileData;
+        public required uint VisualColumns = 0;
+        public required UndertaleBackground Background;
 
         public override void DrawTiles(SKCanvas canvas, SKImage image)
         {
-            UndertaleTexturePageItem texturePageItem = Background!.Texture;
-
             uint tileW = Background.GMS2TileWidth;
             uint tileH = Background.GMS2TileHeight;
             uint borderX = Background.GMS2OutputBorderX;
@@ -219,10 +254,10 @@ public class LayerTilePicker : TilePicker
             uint tileColumns = Background.GMS2TileColumns;
             uint tileCount = Background.GMS2TileCount;
 
-            ushort targetX = texturePageItem.TargetX;
-            ushort targetY = texturePageItem.TargetY;
-            ushort sourceX = texturePageItem.SourceX;
-            ushort sourceY = texturePageItem.SourceY;
+            ushort targetX = TexturePageItem.TargetX;
+            ushort targetY = TexturePageItem.TargetY;
+            ushort sourceX = TexturePageItem.SourceX;
+            ushort sourceY = TexturePageItem.SourceY;
 
             if (VisualColumns == 0)
                 VisualColumns = tileColumns;
@@ -388,7 +423,7 @@ public abstract class TilePicker : Control
         public required Vector Translation;
         public required double Scaling;
         public required SKColor SelectedColor;
-        public required UndertaleBackground? Background;
+        public required UndertaleTexturePageItem TexturePageItem;
 
         protected SKRect? selectedTileRect = null;
 
@@ -409,9 +444,6 @@ public abstract class TilePicker : Control
             using var lease = leaseFeature.Lease();
             SKCanvas canvas = lease.SkCanvas;
 
-            if (Background is null)
-                return;
-
             // Checkered background
 
             int gridSize = 8;
@@ -429,9 +461,7 @@ public abstract class TilePicker : Control
 
             // Tiles
 
-            UndertaleTexturePageItem texturePageItem = Background.Texture;
-
-            SKImage? image = mainVM.ImageCache.GetCachedImageFromTexturePageItem(texturePageItem);
+            SKImage? image = mainVM.ImageCache.GetCachedImageFromTexturePageItem(TexturePageItem);
 
             if (image is null)
                 return;

@@ -65,12 +65,12 @@ public partial class UndertaleRoomViewModel : ObservableObject, IUndertaleResour
     public partial uint TileSetColumns { get; set; } = 0;
 
     [ObservableProperty]
-    public partial UndertaleBackground? SelectedTileBackground { get; set; }
+    public partial UndertaleNamedResource? SelectedTileResource { get; set; }
 
     [ObservableProperty]
     public partial Rect? SelectedTileSourceRect { get; set; }
 
-    TilesViewModel tilesViewModel = new();
+    readonly TilesViewModel tilesViewModel = new();
 
     public UndertaleRoomViewModel(UndertaleRoom room, IServiceProvider serviceProvider)
     {
@@ -230,7 +230,7 @@ public partial class UndertaleRoomViewModel : ObservableObject, IUndertaleResour
         }
     }
 
-    public void AddLegacyTileInstance(Layer layer)
+    public Tile AddLegacyTileInstance(Layer layer)
     {
         Tile tile = new()
         {
@@ -239,6 +239,8 @@ public partial class UndertaleRoomViewModel : ObservableObject, IUndertaleResour
         };
 
         layer.AssetsData.LegacyTiles.Add(tile);
+
+        return tile;
     }
 
     public void AddSpriteInstance(Layer layer, UndertaleSprite? sprite = null, int x = 0, int y = 0)
@@ -437,7 +439,7 @@ public partial class UndertaleRoomViewModel : ObservableObject, IUndertaleResour
             TreeViewItem => null,
             RoomTreeItem { Tag: "Tiles" } => tilesViewModel,
             RoomTreeItem => null,
-            UndertalePointerList<Tile> => null,
+            UndertalePointerList<Tile> => tilesViewModel,
             UndertalePointerList<SpriteInstance> => null,
             UndertalePointerList<SequenceInstance> => null,
             UndertalePointerList<ParticleSystemInstance> => null,
