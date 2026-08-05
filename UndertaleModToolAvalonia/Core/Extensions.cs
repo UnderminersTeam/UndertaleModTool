@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -51,5 +52,30 @@ public static class Extensions
                 return brush;
         }
         throw new InvalidOperationException($"Key {key} is not a valid resource");
+    }
+
+    public static void SetDarkTitleBar(this Window window, bool isDark)
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            WindowsDllImports.SetDarkTitleBar(window, isDark);
+            window.Activate();
+        }
+    }
+}
+
+public static class WindowsDllImports
+{
+    [DllImport("dwmapi.dll", PreserveSig = true)]
+    private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int value, int size);
+
+    public static void SetDarkTitleBar(Window window, bool isDark)
+    {
+        nint? handle = window.TryGetPlatformHandle()?.Handle;
+        if (handle is null) return;
+
+        int value = isDark ? 1 : 0;
+        // Attribute 20: DWMWA_USE_IMMERSIVE_DARK_MODE
+        _ = DwmSetWindowAttribute(handle.Value, 20, ref value, sizeof(int));
     }
 }

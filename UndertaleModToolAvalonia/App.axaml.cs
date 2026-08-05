@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Styling;
@@ -37,6 +38,24 @@ public partial class App : Application
             desktop.MainWindow = new MainWindow
             {
                 DataContext = vm,
+            };
+
+            Window.WindowOpenedEvent.AddClassHandler(typeof(Window), (source, e) =>
+            {
+                if (source is Window window)
+                {
+                    bool isDark = (ActualThemeVariant == ThemeVariant.Dark);
+                    window.SetDarkTitleBar(isDark);
+                }
+            });
+
+            ActualThemeVariantChanged += (s, e) =>
+            {
+                bool isDark = (ActualThemeVariant == ThemeVariant.Dark);
+                foreach (var window in desktop.Windows)
+                {
+                    window.SetDarkTitleBar(isDark);
+                }
             };
         }
 
