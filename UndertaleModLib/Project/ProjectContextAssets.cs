@@ -150,22 +150,32 @@ partial class ProjectContext
         });
 
         // Import code
-        CodeImportGroup importGroup = new(Data)
+        if (Data.IsYYC())
         {
-            AutoCreateAssets = false,
-            MainThreadAction = MainThreadAction
-        };
-        foreach (SerializableCode asset in loadedCodeAssets)
-        {
-            asset.ImportCode(this, importGroup);
+            if (loadedCodeAssets.Count > 0)
+            {
+                throw new ProjectException("Compiling GML VM code is not possible with YYC games");
+            }
         }
-        try
+        else
         {
-            importGroup.Import(true);
-        }
-        catch (Exception e)
-        {
-            throw new ProjectException(e.Message, e);
+            CodeImportGroup importGroup = new(Data)
+            {
+                AutoCreateAssets = false,
+                MainThreadAction = MainThreadAction
+            };
+            foreach (SerializableCode asset in loadedCodeAssets)
+            {
+                asset.ImportCode(this, importGroup);
+            }
+            try
+            {
+                importGroup.Import(true);
+            }
+            catch (Exception e)
+            {
+                throw new ProjectException(e.Message, e);
+            }
         }
 
         // Pack textures
