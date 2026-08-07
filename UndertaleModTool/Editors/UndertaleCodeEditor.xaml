@@ -29,6 +29,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="1*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
@@ -82,5 +83,8 @@
                 </Grid>
             </TabItem>
         </TabControl>
+		<TextBlock Grid.Row="6" Grid.ColumnSpan="2" Margin="3" HorizontalAlignment="Center" Foreground="DarkGray" FontStyle="Italic" TextWrapping="Wrap" TextAlignment="Center">
+			Hint: You can change the font size in the code editor using Ctrl and the mouse wheel, or by pressing +-.
+		</TextBlock>
     </Grid>
 </local:DataUserControl>
