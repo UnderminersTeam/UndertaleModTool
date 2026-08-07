@@ -82,6 +82,7 @@ These are scripts developed primarily for use in Undertale/Deltarune.
 - `UndertaleDebugMsg.csx`: Displays the contents of `global.msg` on-screen while debug mode is enabled in Undertale.
 - `UndertaleDebugToggler.csx`: Makes it possible to switch debug mode on and off using F1 in Undertale.
 - `UndertaleDialogSimulator.csx`: Adds a dialogue editor to Undertale.
+- `UndertaleEnableDogShrine.csx`: Enables the Dog Shrine on the PC and PlayStation (when run on PC using a compatible runner) releases of Undertale
 - `UndertaleFixAlphysLabCrashAndroid.csx`: Fixes a crash at Alphys's lab on Android devices in Undertale.
 - `UndertaleGoToRoom.csx`: Adds a debug hotkey to go to a room ID, in Undertale.
 - `UndertaleRunButton.csx`: Removes the debug check from the Backspace hotkey speed boost in Undertale.
