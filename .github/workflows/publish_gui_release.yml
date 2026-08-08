@@ -57,16 +57,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
         configuration: [Release]
         bundled: [true]
+        target: [linux-x64, osx-arm64, osx-x64, win-x64]
         include:
-          - os: ubuntu-latest
+          - target: linux-x64
+            os: ubuntu-latest
             rid: linux-x64
-          - os: macOS-latest
+            output: CLI-ubuntu-latest
+          - target: osx-arm64
+            os: macOS-latest
+            rid: osx-arm64
+            output: CLI-macOS-latest
+          - target: osx-x64
+            os: macOS-latest
             rid: osx-x64
-          - os: windows-latest
+            output: CLI-macOS-latest-x86
+          - target: win-x64
+            os: windows-latest
             rid: win-x64
+            output: CLI-windows-latest
 
     runs-on: ${{ matrix.os }}
 
@@ -83,22 +93,22 @@ jobs:
     - name: Build
       run: dotnet build UndertaleModCli --no-restore
     - name: Publish ${{ matrix.os }} CLI
-      run: dotnet publish UndertaleModCli -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=false --output CLI-${{ matrix.os }}
+      run: dotnet publish UndertaleModCli -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=false --output ${{ matrix.output }}
     - name: Copy external files
       run: |
-        cp ./README.md ./CLI-${{ matrix.os }}/
-        cp ./SCRIPTS.md ./CLI-${{ matrix.os }}/
-        cp ./LICENSE.txt ./CLI-${{ matrix.os }}/
-        cp -r ./UndertaleModTool/Scripts/ ./CLI-${{ matrix.os }}/Scripts/
-        rm ./CLI-${{ matrix.os }}/Underanalyzer.pdb
+        cp ./README.md ./${{ matrix.output }}/
+        cp ./SCRIPTS.md ./${{ matrix.output }}/
+        cp ./LICENSE.txt ./${{ matrix.output }}/
+        cp -r ./UndertaleModTool/Scripts/ ./${{ matrix.output }}/Scripts/
+        rm ./${{ matrix.output }}/Underanalyzer.pdb
     - name: Create zip for stable release CLI
       run: |
-        7z a -tzip CLI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}.zip ./CLI-${{ matrix.os }}/* -mx9 
+        7z a -tzip ${{ matrix.output }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}.zip ./${{ matrix.output }}/* -mx9 
     - name: Upload artifact
       uses: actions/upload-artifact@v7
       with:
-          name: CLI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}
-          path: CLI-${{ matrix.os }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}.zip
+          name: ${{ matrix.output }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}
+          path: ${{ matrix.output }}-${{ matrix.configuration }}-isBundled-${{ matrix.bundled }}.zip
           archive: false
     
 
