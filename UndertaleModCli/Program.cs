@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.Scripting;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.IO;
@@ -11,8 +12,10 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Underanalyzer.Decompiler;
 using UndertaleModLib;
 using UndertaleModLib.Compiler;
+using UndertaleModLib.Decompiler;
 using UndertaleModLib.Models;
 using UndertaleModLib.Project;
 using UndertaleModLib.Scripting;
@@ -203,6 +206,7 @@ public partial class Program : IScriptInterface
         };
         Option<bool> dumpStringsOption = new("-s", "--strings") { Description = "Whether to dump all strings" };
         Option<bool> dumpTexturesOption = new("-t", "--textures") { Description = "Whether to dump all embedded textures" };
+        Option<bool> dumpSpritesOption = new("--sprites") { Description = "Whether to dump all sprites" };
         Command dumpCommand = new("dump", "Dump certain properties about the game data file")
         {
             dataFileArgument,
@@ -210,7 +214,8 @@ public partial class Program : IScriptInterface
             dumpOutputOption,
             dumpCodeOption,
             dumpStringsOption,
-            dumpTexturesOption
+            dumpTexturesOption,
+            dumpSpritesOption
         };
         dumpCommand.SetAction(parseResult =>
         {
@@ -221,7 +226,8 @@ public partial class Program : IScriptInterface
                 Output = parseResult.GetValue(dumpOutputOption),
                 Code = parseResult.GetValue(dumpCodeOption),
                 Strings = parseResult.GetValue(dumpStringsOption),
-                Textures = parseResult.GetValue(dumpTexturesOption)
+                Textures = parseResult.GetValue(dumpTexturesOption),
+                Sprites = parseResult.GetValue(dumpSpritesOption)
             });
         });
 
@@ -495,15 +501,30 @@ public partial class Program : IScriptInterface
         // If user provided code to dump, dump code
         if ((options.Code?.Length > 0) && (program.Data.Code?.Count > 0))
         {
-            // If user wanted to dump everything, do that, otherwise only dump what user provided
-            string[] codeArray;
-            if (options.Code.Contains(UMT_DUMP_ALL))
-                codeArray = program.Data.Code.Select(c => c.Name.Content).ToArray();
-            else
-                codeArray = options.Code;
+            GlobalDecompileContext globalDecompileContext = new(program.Data);
+            IDecompileSettings decompilerSettings = program.Data.ToolInfo.DecompilerSettings;
 
-            foreach (string code in codeArray)
-                program.DumpCodeEntry(code);
+            // If user wanted to dump everything, do that, otherwise only dump what user provided
+            if (options.Code.Contains(UMT_DUMP_ALL))
+            {
+                int totalCores = Environment.ProcessorCount;
+                int outerLimit = Math.Max(1, totalCores / 4);
+                Parallel.ForEach(program.Data.Code, new ParallelOptions { MaxDegreeOfParallelism = outerLimit }, code =>
+                {
+                    if (code.ParentEntry is not null)
+                    {
+                        return;
+                    }
+                    program.DumpCodeEntry(code, globalDecompileContext, decompilerSettings);
+                });
+            }
+            else
+            {
+                foreach (string code in options.Code)
+                {
+                    program.DumpCodeEntry(code, globalDecompileContext, decompilerSettings);
+                }
+            }
         }
 
         // If user wanted to dump strings, dump all of them in a text file
@@ -513,6 +534,10 @@ public partial class Program : IScriptInterface
         // If user wanted to dump embedded textures, dump all of them
         if (options.Textures)
             program.DumpAllTextures();
+
+        // If user wanted to dump sprites, dump all of them
+        if (options.Sprites)
+            program.DumpAllSprites().Wait();
 
         return EXIT_SUCCESS;
     }
@@ -809,32 +834,44 @@ public partial class Program : IScriptInterface
     /// <summary>
     /// Dumps a code entry from a data file.
     /// </summary>
-    /// <param name="codeEntry">The code entry that should get dumped</param>
-    private void DumpCodeEntry(string codeEntry)
+    /// <param name="codeEntryName">The code entry name that should get dumped</param>
+    /// <param name="context">Decompile context to use when dumping</param>
+    /// <param name="settings">Settings to use for the decompiler</param>
+    private void DumpCodeEntry(string codeEntryName, GlobalDecompileContext context, IDecompileSettings settings)
     {
-        UndertaleCode code = Data.Code.ByName(codeEntry);
-
+        UndertaleCode code = Data.Code.ByName(codeEntryName);
 
         if (code == null)
         {
-            Console.Error.WriteLine($"Data file does not contain a code entry named {codeEntry}!");
+            Console.Error.WriteLine($"Data file does not contain a code entry named {codeEntryName}!");
             return;
         }
 
+        DumpCodeEntry(code, context, settings);
+    }
+
+    /// <summary>
+    /// Dumps a code entry from a data file.
+    /// </summary>
+    /// <param name="code">The code entry that should get dumped</param>
+    /// <param name="context">Decompile context to use when dumping</param>
+    /// <param name="settings">Settings to use for the decompiler</param>
+    private void DumpCodeEntry(UndertaleCode code, GlobalDecompileContext context, IDecompileSettings settings)
+    {
         string directory = Path.Join(Output.FullName, "CodeEntries");
 
         Directory.CreateDirectory(directory);
 
         if (Verbose)
-            Console.WriteLine($"Dumping {codeEntry}");
+            Console.WriteLine($"Dumping {code.Name?.Content}");
 
-        string dest = Paths.TryJoinVerifyWithinDirectory(directory, $"{codeEntry}.gml");
+        string dest = Paths.TryJoinVerifyWithinDirectory(directory, $"{code.Name?.Content}.gml");
         if (dest is null)
         {
-            Console.Error.WriteLine($"Failed to export code entry with name {codeEntry}");
+            Console.Error.WriteLine($"Failed to export code entry with name {code.Name?.Content}");
             return;
         }
-        File.WriteAllText(dest, GetDecompiledText(code));
+        File.WriteAllText(dest, GetDecompiledText(code, context, settings));
     }
 
     /// <summary>
@@ -885,6 +922,83 @@ public partial class Program : IScriptInterface
             }
             using FileStream fs = new(dest, FileMode.Create);
             texture.TextureData.Image.SavePng(fs);
+        }
+    }
+
+    /// <summary>
+    /// Helper class for exporting texture page items, e.g. for dumping sprites.
+    /// </summary>
+    private class TextureToExport
+    {
+        public UndertaleTexturePageItem PageItem { get; set; }
+        public UndertaleEmbeddedTexture Page => PageItem.TexturePage;
+        public string FileExportLocation { get; set; }
+
+        public TextureToExport(UndertaleTexturePageItem pageItem, string fileExportLocation) => (PageItem, FileExportLocation) = (pageItem, fileExportLocation);
+    }
+
+    /// <summary>
+    /// Dumps all sprites in a data file.
+    /// </summary>
+    private async Task DumpAllSprites()
+    {
+        string directory = Path.Join(Output.FullName, "Sprites");
+
+        Directory.CreateDirectory(directory);
+
+        // As of writing, this code is copied over from the ExportAllSprites.csx script
+
+        // TODO: make this configurable, but this is a reasonable default
+        bool padded = true;
+
+        ConcurrentDictionary<string, ConcurrentBag<TextureToExport>> texturesToExport = new();
+
+        Console.WriteLine("Fetching sprite textures...");
+        await Task.Run(() => Parallel.ForEach(Data.Sprites, spr =>
+        {
+            FetchTexturesFromSprite(spr);
+        }));
+
+        Console.WriteLine("Exporting sprite textures...");
+        await Task.Run(() => ExportTextures());
+
+        void FetchTexturesFromSprite(UndertaleSprite sprite)
+        {
+            if (sprite is not { SSpriteType: UndertaleSprite.SpriteType.Normal, Textures.Count: > 0 })
+            {
+                // IncrementProgressParallel();
+                return;
+            }
+
+            for (int i = 0; i < sprite.Textures.Count; i++)
+            {
+                if (sprite.Textures[i]?.Texture is not null)
+                {
+                    UndertaleTexturePageItem pageItem = sprite.Textures[i].Texture;
+
+                    var bag = texturesToExport.GetOrAdd(pageItem.TexturePage.Name.Content, _ => new ConcurrentBag<TextureToExport>());
+                    bag.Add(new TextureToExport(pageItem, Paths.JoinVerifyWithinDirectory(directory, $"{sprite.Name.Content}_{i}.png")));
+                }
+            }
+            // IncrementProgressParallel();
+        }
+
+        void ExportTextures()
+        {
+            int totalCores = Environment.ProcessorCount;
+            int outerLimit = Math.Max(1, totalCores / 4);
+            Parallel.ForEach(texturesToExport, new ParallelOptions { MaxDegreeOfParallelism = outerLimit }, kvp =>
+            {
+                using TextureWorker localWorker = new();
+
+                foreach (TextureToExport tte in kvp.Value)
+                {
+                    if (Verbose)
+                        Console.WriteLine($"Dumping {tte.PageItem.Name}");
+                    localWorker.ExportAsPNG(tte.PageItem, tte.FileExportLocation, null, padded);
+                }
+                // IncrementProgressParallel();
+            });
         }
     }
 

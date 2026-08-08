@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using Underanalyzer.Decompiler;
@@ -19,6 +20,7 @@ namespace UndertaleModLib
     /// It includes all the data within it accessible by either the <see cref="FORM"/>-Chunk attribute,
     /// but also via already organized attributes such as <see cref="Backgrounds"/> or <see cref="GameObjects"/>.
     /// TODO: add more documentation about how a data file works at one point.</remarks>
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
     public class UndertaleData : IDisposable
     {
         /// <summary>

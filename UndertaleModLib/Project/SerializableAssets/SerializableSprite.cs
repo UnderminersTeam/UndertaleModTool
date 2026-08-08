@@ -85,6 +85,12 @@ internal sealed class SerializableSprite : ISerializableTextureProjectAsset
     public NineSliceProperties NineSlice { get; set; }
 
     /// <summary>
+    /// Texture importing properties, optionally defined.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public TextureImportProperties TextureImport { get; set; }
+
+    /// <summary>
     /// Extra properties attached to sprites, but not always present in older versions of GameMaker.
     /// </summary>
     public struct ExtraProperties()
@@ -137,6 +143,19 @@ internal sealed class SerializableSprite : ISerializableTextureProjectAsset
             BlankRepeat = 3,
             Hide = 4
         }
+    }
+
+    /// <summary>
+    /// Texture (group) information attached to sprites, optionally.
+    /// Not mirrored directly in GameMaker's data format, but will affect importing.
+    /// </summary>
+    public struct TextureImportProperties()
+    {
+        /// <summary>
+        /// Whether cropping should be allowed when placing textures on the atlas during importing.
+        /// </summary>
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        public bool DisableCrop { get; set; } = false;
     }
 
     /// <inheritdoc/>
@@ -251,8 +270,10 @@ internal sealed class SerializableSprite : ISerializableTextureProjectAsset
     public void Serialize(ProjectContext projectContext, string destinationFile)
     {
         // Write main JSON
-        using FileStream fs = new(destinationFile, FileMode.Create);
-        JsonSerializer.Serialize<ISerializableProjectAsset>(fs, this, ProjectContext.JsonOptions);
+        using (FileStream fs = new(destinationFile, FileMode.Create))
+        {
+            JsonSerializer.Serialize<ISerializableProjectAsset>(fs, this, ProjectContext.JsonOptions);
+        }
 
         // Write images and masks as PNGs
         string directory = Path.GetDirectoryName(destinationFile);
@@ -373,11 +394,17 @@ internal sealed class SerializableSprite : ISerializableTextureProjectAsset
         // Get JSON filename (of main asset file)
         if (!projectContext.AssetDataNamesToPaths.TryGetValue(new(DataName, AssetType), out string jsonFilename))
         {
-            throw new ProjectException("Failed to get background asset path");
+            throw new ProjectException("Failed to get sprite asset path");
         }
 
         // TODO: support loading other file types as well
         // TODO: support texture groups (or separate pages)
+
+        bool allowCrop = true;
+        if (TextureImport.DisableCrop)
+        {
+            allowCrop = false;
+        }
 
         string baseFilename = Path.GetFileNameWithoutExtension(jsonFilename);
         string directory = Path.GetDirectoryName(jsonFilename);
@@ -391,7 +418,7 @@ internal sealed class SerializableSprite : ISerializableTextureProjectAsset
             {
                 // Add image to packer
                 _textureImages.Add(texturePacker.AddImage(TextureWorker.ReadBGRAImageFromFile(Path.Join(directory, filename)),
-                                                          TextureGroupPacker.BorderFlags.Enabled));
+                                                          TextureGroupPacker.BorderFlags.Enabled, allowCrop));
             }
             catch (Exception e)
             {
