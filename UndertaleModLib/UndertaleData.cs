@@ -8,6 +8,7 @@ using Underanalyzer.Decompiler;
 using Underanalyzer.Decompiler.GameSpecific;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Models;
+using static UndertaleModLib.Models.UndertaleGeneralInfo;
 
 namespace UndertaleModLib
 {
@@ -502,6 +503,17 @@ namespace UndertaleModLib
         /// <summary>
         /// Sets the GMS2+ version flag in GeneralInfo.
         /// </summary>
+        public void SetGMS2Version(IDEVersion ver) {
+            bool? isLTS = null;
+            if (ver.Branch == BranchType.LTS2022_0) isLTS = true;
+            if (ver.Branch == BranchType.Post2022_0) isLTS = false;
+            SetGMS2Version(ver.Major, ver.Minor, ver.Release, ver.Build, isLTS);
+        }
+
+
+        /// <summary>
+        /// Sets the GMS2+ version flag in GeneralInfo.
+        /// </summary>
         /// <param name="major">The major version.</param>
         /// <param name="minor">The minor version.</param>
         /// <param name="release">The release version.</param>
@@ -536,6 +548,11 @@ namespace UndertaleModLib
         /// <summary>
         /// Reports whether the version of the data file is the same or higher than a specified version.
         /// </summary>
+        public bool IsVersionAtLeast(IDEVersion ver) => IsVersionAtLeast(ver.Major, ver.Minor, ver.Release, ver.Build);
+
+        /// <summary>
+        /// Reports whether the version of the data file is the same or higher than a specified version.
+        /// </summary>
         /// <param name="major">The major version.</param>
         /// <param name="minor">The minor version.</param>
         /// <param name="release">The release version.</param>
@@ -563,6 +580,12 @@ namespace UndertaleModLib
 
             return true; // The version is exactly what supplied.
         }
+
+        /// <summary>
+        /// Reports whether the version of the data file is the same or higher than a specified version, and off the LTS branch that lacks some features.
+        /// </summary>
+        /// <returns>Whether the version of the data file is the same or higher than a specified version. Always false for LTS.</returns>
+        public bool IsNonLTSVersionAtLeast(IDEVersion ver) => IsNonLTSVersionAtLeast(ver.Major, ver.Minor, ver.Release, ver.Build);
 
         /// <summary>
         /// Reports whether the version of the data file is the same or higher than a specified version, and off the LTS branch that lacks some features.

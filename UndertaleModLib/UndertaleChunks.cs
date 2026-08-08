@@ -4,6 +4,7 @@ using System.IO;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
 using static UndertaleModLib.Models.UndertaleRoom;
+using static UndertaleModLib.Models.UndertaleGeneralInfo;
 
 namespace UndertaleModLib
 {
@@ -214,15 +215,8 @@ namespace UndertaleModLib
             reader.Bytecode14OrLower = Object.BytecodeVersion <= 14;
 
             reader.Position += 42;
-
-            Object.Major = reader.ReadUInt32();
-            Object.Minor = reader.ReadUInt32();
-            Object.Release = reader.ReadUInt32();
-            Object.Build = reader.ReadUInt32();
-
-            var readVer = (Object.Major, Object.Minor, Object.Release, Object.Build, Object.Branch);
-            var detectedVer = UndertaleGeneralInfo.TestForCommonGMSVersions(reader, readVer);
-            (Object.Major, Object.Minor, Object.Release, Object.Build, Object.Branch) = detectedVer;
+            Object.Version = reader.ReadUndertaleObject<IDEVersion>();
+            Object.Version = UndertaleGeneralInfo.TestForCommonGMSVersions(reader, Object.Version);
         }
     }
 
