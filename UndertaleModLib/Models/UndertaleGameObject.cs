@@ -209,7 +209,7 @@ public class UndertaleGameObject : UndertaleNamedResource, IProjectAsset, INotif
         {
             v.Serialize(writer);
         }
-        FixEvents();
+        FixBrokenEvents();
         writer.WriteUndertaleObject(Events);
     }
 
@@ -264,14 +264,18 @@ public class UndertaleGameObject : UndertaleNamedResource, IProjectAsset, INotif
     /// It is possible to create a new event in the UndertaleModTool GUI that has no actions.
     /// Events with zero actions will lead to a segfault in the runner when loading chunk OBJT,
     /// because it assumes there is at least one action per event.
-    /// This has been proven on Undertale 1.01, maybe modern runners are not affected.
+    /// This has been tested on Undertale 1.001; modern runners may not be affected.
     ///
     /// This method removes these empty events.
     /// </summary>
-    private void FixEvents() {
-        foreach (UndertalePointerList<Event> events in Events) {
-            for (int i = events.Count - 1; i >= 0; i--) {
-                if (events[i].Actions.Count == 0) {
+    private void FixBrokenEvents() 
+    {
+        foreach (UndertalePointerList<Event> events in Events) 
+        {
+            for (int i = events.Count - 1; i >= 0; i--) 
+            {
+                if (events[i].Actions.Count == 0) 
+                {
                     events.RemoveAt(i);
                 }
             }
