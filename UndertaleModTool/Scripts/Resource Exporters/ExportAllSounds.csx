@@ -23,6 +23,11 @@ if ((Data.AudioGroups?.Count ?? 0) > 0)
 
 byte[] EMPTY_WAV_FILE_BYTES = System.Convert.FromBase64String("UklGRiQAAABXQVZFZm10IBAAAAABAAIAQB8AAAB9AAAEABAAZGF0YQAAAAA=");
 string DEFAULT_AUDIOGROUP_NAME = "audiogroup_default";
+string dataDirectory = Path.GetDirectoryName(FilePath);
+int builtinAudioGroupId = Data.GetBuiltinSoundGroupID();
+HashSet<string> createdDirectories = new(StringComparer.OrdinalIgnoreCase);
+HashSet<string> reservedDestinationPaths = new(StringComparer.OrdinalIgnoreCase);
+List<(string SoundName, string DestinationPath, byte[] Data, string SourcePath)> dumpJobs = new();
 
 int maxCount = Data.Sounds.Count;
 SetProgressBar(null, "Sounds", 0, maxCount);
@@ -46,27 +51,19 @@ IList<UndertaleEmbeddedAudio> GetAudioGroupData(UndertaleSound sound)
 {
     loadedAudioGroups ??= new();
 
-    // Try getting cached audio group by name.
-    string audioGroupName = sound.AudioGroup is not null ? sound.AudioGroup.Name.Content : DEFAULT_AUDIOGROUP_NAME;
-    if (loadedAudioGroups.ContainsKey(audioGroupName))
+    string audioGroupName = GetAudioGroupName(sound);
+    string relativeAudioGroupPath = GetAudioGroupPath(sound);
+    string cacheKey = $"{sound.GroupID}:{relativeAudioGroupPath}";
+    if (loadedAudioGroups.TryGetValue(cacheKey, out IList<UndertaleEmbeddedAudio> cachedAudioGroup))
     {
-        return loadedAudioGroups[audioGroupName];
+        return cachedAudioGroup;
     }
 
-    // Not cached, so try locating audiogroup file.
-    string relativeAudioGroupPath;
-    if (sound.AudioGroup is UndertaleAudioGroup { Path.Content: string customRelativePath })
-    {
-        relativeAudioGroupPath = customRelativePath;
-    }
-    else
-    {
-        relativeAudioGroupPath = $"audiogroup{sound.GroupID}.dat";
-    }
-    string groupFilePath = Paths.JoinVerifyWithinDirectory(Path.GetDirectoryName(FilePath), relativeAudioGroupPath);
+    string groupFilePath = Paths.JoinVerifyWithinDirectory(dataDirectory, relativeAudioGroupPath);
     if (!File.Exists(groupFilePath))
     {
         // Doesn't exist... don't try loading.
+        loadedAudioGroups[cacheKey] = null;
         return null;
     }
 
@@ -79,12 +76,13 @@ IList<UndertaleEmbeddedAudio> GetAudioGroupData(UndertaleSound sound)
             data = UndertaleIO.Read(stream, (warning, _) => ScriptWarning($"A warning occured while trying to load {audioGroupName}:\n{warning}"));
         }
 
-        loadedAudioGroups[audioGroupName] = data.EmbeddedAudio;
+        loadedAudioGroups[cacheKey] = data.EmbeddedAudio;
         return data.EmbeddedAudio;
-    } 
+    }
     catch (Exception e)
     {
         ScriptError($"An error occured while trying to load {audioGroupName}:\n{e.Message}");
+        loadedAudioGroups[cacheKey] = null;
         return null;
     }
 }
@@ -98,10 +96,10 @@ byte[] GetSoundData(UndertaleSound sound)
     }
 
     // Try to get audio from its audiogroup.
-    if (sound.GroupID > Data.GetBuiltinSoundGroupID())
+    if (sound.GroupID != builtinAudioGroupId && sound.AudioID >= 0)
     {
         IList<UndertaleEmbeddedAudio> audioGroup = GetAudioGroupData(sound);
-        if (audioGroup is not null)
+        if (audioGroup is not null && sound.AudioID < audioGroup.Count)
         {
             return audioGroup[sound.AudioID].Data;
         }
@@ -109,6 +107,83 @@ byte[] GetSoundData(UndertaleSound sound)
 
     // All attempts to get data failed; just use empty WAV data.
     return EMPTY_WAV_FILE_BYTES;
+}
+
+string GetAudioGroupName(UndertaleSound sound)
+{
+    string audioGroupName = sound.AudioGroup?.Name?.Content;
+    return string.IsNullOrWhiteSpace(audioGroupName) ? DEFAULT_AUDIOGROUP_NAME : audioGroupName;
+}
+
+string GetAudioGroupPath(UndertaleSound sound)
+{
+    return sound.AudioGroup is UndertaleAudioGroup { Path.Content: string customRelativePath }
+        ? customRelativePath
+        : $"audiogroup{sound.GroupID}.dat";
+}
+
+void EnsureDirectory(string path)
+{
+    if (createdDirectories.Add(path))
+    {
+        Directory.CreateDirectory(path);
+    }
+}
+
+string ReserveUniqueDestinationPath(string directory, string soundName, string extension)
+{
+    string destinationPath = Paths.JoinVerifyWithinDirectory(directory, soundName + extension);
+    if (reservedDestinationPaths.Add(destinationPath))
+    {
+        return destinationPath;
+    }
+
+    for (int suffix = 1; ; suffix++)
+    {
+        destinationPath = Paths.JoinVerifyWithinDirectory(directory, $"{soundName}_{suffix}{extension}");
+        if (reservedDestinationPaths.Add(destinationPath))
+        {
+            return destinationPath;
+        }
+    }
+}
+
+void CopyExternalSound(UndertaleSound sound, string soundName, string audioExt)
+{
+    string externalFilename = sound.File?.Content;
+    if (string.IsNullOrWhiteSpace(externalFilename))
+    {
+        ScriptWarning($"Skipping external audio for \"{soundName}\": no source file is set.");
+        return;
+    }
+
+    if (!externalFilename.Contains('.'))
+    {
+        // Add file extension if none already exists (assume OGG).
+        externalFilename += ".ogg";
+    }
+
+    try
+    {
+        string sourcePath = Paths.JoinVerifyWithinDirectory(dataDirectory, externalFilename);
+        if (!File.Exists(sourcePath))
+        {
+            ScriptWarning($"Skipping external audio for \"{soundName}\": source file was not found ({externalFilename}).");
+            return;
+        }
+
+        string externalDirectory = groupedExport
+            ? Paths.JoinVerifyWithinDirectory(exportedSoundsDir, GetAudioGroupName(sound), "external")
+            : Paths.JoinVerifyWithinDirectory(exportedSoundsDir, "external");
+        EnsureDirectory(externalDirectory);
+
+        string destPath = ReserveUniqueDestinationPath(externalDirectory, soundName, audioExt);
+        dumpJobs.Add((soundName, destPath, null, sourcePath));
+    }
+    catch (Exception ex)
+    {
+        ScriptWarning($"Skipping external audio for \"{soundName}\": {ex.Message}");
+    }
 }
 
 void DumpSounds()
@@ -124,21 +199,41 @@ void DumpSounds()
             IncProgressLocal();
         }
     }
+
+    int maxParallelism = Math.Clamp(Environment.ProcessorCount, 1, 8);
+    Parallel.ForEach(dumpJobs, new ParallelOptions { MaxDegreeOfParallelism = maxParallelism }, job =>
+    {
+        try
+        {
+            if (job.Data is not null)
+            {
+                File.WriteAllBytes(job.DestinationPath, job.Data);
+            }
+            else
+            {
+                File.Copy(job.SourcePath, job.DestinationPath, true);
+            }
+        }
+        catch (Exception ex)
+        {
+            ScriptWarning($"Skipping audio export for \"{job.SoundName}\": {ex.Message}");
+        }
+    });
 }
 
 void DumpSound(UndertaleSound sound)
 {
     // Determine output audio file path.
     string soundName = sound.Name.Content;
-    string soundFilePath;
+    string soundDirectory;
     if (groupedExport)
     {
-        soundFilePath = Paths.JoinVerifyWithinDirectory(exportedSoundsDir, sound.AudioGroup.Name.Content, soundName);
-        Directory.CreateDirectory(Paths.JoinVerifyWithinDirectory(exportedSoundsDir, sound.AudioGroup.Name.Content));
+        soundDirectory = Paths.JoinVerifyWithinDirectory(exportedSoundsDir, GetAudioGroupName(sound));
+        EnsureDirectory(soundDirectory);
     }
     else
     {
-        soundFilePath = Paths.JoinVerifyWithinDirectory(exportedSoundsDir, soundName);
+        soundDirectory = exportedSoundsDir;
     }
 
     // Determine output file type.
@@ -170,32 +265,14 @@ void DumpSound(UndertaleSound sound)
         // Only copy external audio if enabled.
         if (copyExternalAudio)
         {
-            string externalFilename = sound.File.Content;
-            if (!externalFilename.Contains('.'))
-            {
-                // Add file extension if none already exists (assume OGG).
-                externalFilename += ".ogg";
-            }
-            string sourcePath = Paths.JoinVerifyWithinDirectory(Path.GetDirectoryName(FilePath), externalFilename);
-            string destPath;
-            if (groupedExport)
-            {
-                destPath = Paths.JoinVerifyWithinDirectory(exportedSoundsDir, sound.AudioGroup.Name.Content, "external", soundName + audioExt);
-                Directory.CreateDirectory(Paths.JoinVerifyWithinDirectory(exportedSoundsDir, sound.AudioGroup.Name.Content, "external"));
-            }
-            else
-            {
-                destPath = Paths.JoinVerifyWithinDirectory(exportedSoundsDir, "external", soundName + audioExt);
-                Directory.CreateDirectory(Paths.JoinVerifyWithinDirectory(exportedSoundsDir, "external"));
-            }
-            File.Copy(sourcePath, destPath, true);
+            CopyExternalSound(sound, soundName, audioExt);
         }
     }
     if (isEmbedded)
     {
-        File.WriteAllBytes(soundFilePath + audioExt, GetSoundData(sound));
+        string destinationPath = ReserveUniqueDestinationPath(soundDirectory, soundName, audioExt);
+        dumpJobs.Add((soundName, destinationPath, GetSoundData(sound), null));
     }
 
     IncProgressLocal();
 }
-
