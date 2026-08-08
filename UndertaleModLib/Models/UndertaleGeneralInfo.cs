@@ -186,21 +186,21 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     }
 
     /// <summary>
-    /// The GameMaker IDE Version this game was made in.
+    /// Represents a GameMaker runtime version.
     /// </summary>
     /// <remarks>
-    /// UTMT also uses this to track the data file format for games made in 
-    /// GMS2 since the version stored in GEN8 is no longer being updated.
+    /// Can be stored in the data file directly, or detected based on file format 
+    /// (as in many GMS2 games and above, where the stored version stopped getting updated).
     /// </remarks>
-    public struct IDEVersion: UndertaleObject
+    public struct RuntimeVersion
     {
         /// <summary>
         /// The most significant version part.
         /// 
-        /// This can be 1, 2 or a year after 2021.
+        /// This can be 1, 2, 2022, 2023, 2024, or 2026.
         /// </summary>
         /// <remarks>
-        /// If greater than 1, serialization produces "2.0.0.0" due to the flag no longer updating in data.win
+        /// If greater than 1, serialization produces "2.0.0.0" due to the flag no longer being updated.
         /// </remarks>
         public uint Major;
 
@@ -224,7 +224,10 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         /// </summary>
         public BranchType Branch;
 
-        public IDEVersion(uint major, uint minor = 0, uint release = 0, uint build = 0, BranchType branch = BranchType.Pre2022_0)
+        /// <summary>
+        /// Creates a new runtime version with the specified parts and branch type.
+        /// </summary>
+        public RuntimeVersion(uint major, uint minor = 0, uint release = 0, uint build = 0, BranchType branch = BranchType.Pre2022_0)
         {
             Major = major;
             Minor = minor;
@@ -233,13 +236,19 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
             Branch = branch;
         }
 
-        public IDEVersion()
+        /// <summary>
+        /// Returns a default runtime version of 1.0.0.1337 (not a real version).
+        /// </summary>
+        public RuntimeVersion()
         {
             Major = 1;
             Build = 1337;
         }
 
-        public void Serialize(UndertaleWriter writer)
+        /// <summary>
+        /// Serializes the version to the given <see cref="UndertaleWriter"/>.
+        /// </summary>
+        public readonly void Serialize(UndertaleWriter writer)
         {
             writer.Write(Major);
             writer.Write(Minor);
@@ -247,6 +256,9 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
             writer.Write(Build);
         }
 
+        /// <summary>
+        /// Reads the version from the given <see cref="UndertaleReader"/> into this object.
+        /// </summary>
         public void Unserialize(UndertaleReader reader)
         {
             Major = reader.ReadUInt32();
@@ -257,9 +269,8 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     }
 
     /// <summary>
-    /// Different GameMaker release branches. LTS has some but not all features of equivalent newer versions.
+    /// Different GameMaker release branches. 2022 LTS has some but not all features of equivalent newer versions.
     /// </summary>
-    // TODO: implement LTS 2026
     public enum BranchType
     {
         Pre2022_0,
@@ -324,9 +335,9 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     public UndertaleString Name { get; set; }
 
     /// <summary>
-    /// The GameMaker IDE Version this game was made in.
+    /// The GameMaker runtime version this game was made in, either as stored by the data file, or as detected by file format. (This can be inaccurate!)
     /// </summary>
-    public IDEVersion Version;
+    public RuntimeVersion Version;
 
     /// <summary>
     /// The major version of the data file.
@@ -436,9 +447,9 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     /// </summary>
     public bool InfoTimestampOffset { get; set; } = true;
 
-    public static IDEVersion TestForCommonGMSVersions(UndertaleReader reader, IDEVersion readVersion)
+    public static RuntimeVersion TestForCommonGMSVersions(UndertaleReader reader, RuntimeVersion readVersion)
     {
-        IDEVersion detectedVer = readVersion;
+        RuntimeVersion detectedVer = readVersion;
 
         // Some GMS2+ version detection. The rest is spread around, mostly in UndertaleChunks.cs
         if (reader.AllChunkNames.Contains("UILR"))      // 2024.13, not present on LTS
@@ -474,8 +485,8 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
 
         // The version number here is no longer updated,
         // but it's still useful for the tool
-        IDEVersion ver = Major < 2 ? Version : new(2);
-        writer.WriteUndertaleObject(ver);
+        RuntimeVersion ver = Major < 2 ? Version : new(2);
+        ver.Serialize(writer);
 
         writer.Write(DefaultWindowWidth);
         writer.Write(DefaultWindowHeight);
@@ -534,8 +545,9 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     /// <inheritdoc />
     public void Unserialize(UndertaleReader reader)
     {
-        Func<UndertaleString> readFileNameDelegate = reader.ReadUndertaleString;
+        Func<UndertaleString> readFileNameDelegate;
         if (reader.ReadOnlyGEN8)
+        {
             readFileNameDelegate = () =>
             {
                 UndertaleString res = reader.ReadUndertaleString();
@@ -551,6 +563,11 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
 
                 return res;
             };
+        }
+        else
+        {
+            readFileNameDelegate = reader.ReadUndertaleString;
+        }
 
         IsDebuggerDisabled = reader.ReadByte() != 0;
         BytecodeVersion = reader.ReadByte();
@@ -563,14 +580,13 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         byte[] guidData = reader.ReadBytes(16);
         DirectPlayGuid = new Guid(guidData);
         Name = reader.ReadUndertaleString();
-        Version = reader.ReadUndertaleObject<IDEVersion>();
+        Version.Unserialize(reader);
 
         if (reader.ReadOnlyGEN8)
             return;
 
         // TestForCommonGMSVersions is run during the object counting phase, so the previous general info is always accurate.
-        var prevGenInfo = reader.undertaleData.GeneralInfo;
-        Version = prevGenInfo.Version;
+        Version = reader.undertaleData.GeneralInfo.Version;
 
         DefaultWindowWidth = reader.ReadUInt32();
         DefaultWindowHeight = reader.ReadUInt32();

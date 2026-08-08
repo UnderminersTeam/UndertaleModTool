@@ -9,7 +9,6 @@ using Underanalyzer.Decompiler;
 using Underanalyzer.Decompiler.GameSpecific;
 using UndertaleModLib.Compiler;
 using UndertaleModLib.Models;
-using static UndertaleModLib.Models.UndertaleGeneralInfo;
 
 namespace UndertaleModLib
 {
@@ -502,14 +501,22 @@ namespace UndertaleModLib
             return (allowGMS2 || !IsGameMaker2()) && (IsVersionAtLeast(1, 0, 0, stableBuild) || (IsVersionAtLeast(1, 0, 0, betaBuild) && !IsVersionAtLeast(1, 0, 0, 1000)));
         }
 
+        // Helper for verifying valid major GMS2 versions
+        private static void VerifyMajorGMS2Version(uint major)
+        {
+            if (major != 2 && major != 2022 && major != 2023 && major != 2024 && major != 2026)
+            {
+                throw new NotSupportedException("Attempted to set a version of GameMaker " + major + " using SetGMS2Version");
+            }
+        }
+
         /// <summary>
         /// Sets the GMS2+ version flag in GeneralInfo.
         /// </summary>
-        public void SetGMS2Version(IDEVersion ver) {
-            bool? isLTS = null;
-            if (ver.Branch == BranchType.LTS2022_0) isLTS = true;
-            if (ver.Branch == BranchType.Post2022_0) isLTS = false;
-            SetGMS2Version(ver.Major, ver.Minor, ver.Release, ver.Build, isLTS);
+        public void SetGMS2Version(UndertaleGeneralInfo.RuntimeVersion ver) 
+        {
+            VerifyMajorGMS2Version(ver.Major);
+            GeneralInfo.Version = ver;
         }
 
 
@@ -523,8 +530,7 @@ namespace UndertaleModLib
         /// <param name="isLTS">If included, alter the data branch between LTS and non-LTS.</param>
         public void SetGMS2Version(uint major, uint minor = 0, uint release = 0, uint build = 0, bool? isLTS = null)
         {
-            if (major != 2 && major != 2022 && major != 2023 && major != 2024)
-                throw new NotSupportedException("Attempted to set a version of GameMaker " + major + " using SetGMS2Version");
+            VerifyMajorGMS2Version(major);
 
             GeneralInfo.Major = major;
             GeneralInfo.Minor = minor;
@@ -550,7 +556,7 @@ namespace UndertaleModLib
         /// <summary>
         /// Reports whether the version of the data file is the same or higher than a specified version.
         /// </summary>
-        public bool IsVersionAtLeast(IDEVersion ver) => IsVersionAtLeast(ver.Major, ver.Minor, ver.Release, ver.Build);
+        public bool IsVersionAtLeast(UndertaleGeneralInfo.RuntimeVersion ver) => IsVersionAtLeast(ver.Major, ver.Minor, ver.Release, ver.Build);
 
         /// <summary>
         /// Reports whether the version of the data file is the same or higher than a specified version.
@@ -587,7 +593,7 @@ namespace UndertaleModLib
         /// Reports whether the version of the data file is the same or higher than a specified version, and off the LTS branch that lacks some features.
         /// </summary>
         /// <returns>Whether the version of the data file is the same or higher than a specified version. Always false for LTS.</returns>
-        public bool IsNonLTSVersionAtLeast(IDEVersion ver) => IsNonLTSVersionAtLeast(ver.Major, ver.Minor, ver.Release, ver.Build);
+        public bool IsNonLTSVersionAtLeast(UndertaleGeneralInfo.RuntimeVersion ver) => IsNonLTSVersionAtLeast(ver.Major, ver.Minor, ver.Release, ver.Build);
 
         /// <summary>
         /// Reports whether the version of the data file is the same or higher than a specified version, and off the LTS branch that lacks some features.
