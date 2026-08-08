@@ -284,11 +284,11 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     public bool IsDebuggerDisabled { get; set; } = true;
 
     /// <summary>
-    /// The bytecode version of the data file, (theoretically) indicating the data file format version.
+    /// The "bytecode" (actually "WAD") version of the data file, indicating the data file format version, to an extent.
     /// </summary>
     /// <remarks>
-    /// It's theoretical because this is stuck on 17 since GMS2 and this library uses 
-    /// the IDE version (via version checks) for those modern versions instead.
+    /// This value has been stuck on 17 since early GMS2 versions, and this library uses 
+    /// the runtime version (via file format checks) for those modern versions instead.
     /// </remarks>
     public byte BytecodeVersion { get; set; } = 0x10;
 
