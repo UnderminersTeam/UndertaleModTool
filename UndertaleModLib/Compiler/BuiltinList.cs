@@ -269,9 +269,9 @@ public class BuiltinList : IBuiltins
             DefineFunction("@@GetInstance@@", 1);
             DefineFunction("@@NullObject@@", 0);
             DefineFunction("@@NewGMLObject@@");
-            DefineFunction("@@SetStatic@@", 0);  // does this actually exist???
+            DefineFunction("@@SetStatic@@", 0);
             DefineFunction("@@CopyStatic@@", 1);
-            DefineFunction("static_get", 1);    // same question here
+            DefineFunction("static_get", 1);
         }
         DefineFunction("matrix_get", 1);
         DefineFunction("matrix_set", 2);
@@ -388,7 +388,8 @@ public class BuiltinList : IBuiltins
             DefineFunction("d3d_light_enable", 2);
             DefineFunction("d3d_set_lighting", 1);
         }
-        if (!gms2_3) {
+        if (!gms2_3) 
+        {
             DefineFunction("action_path_old", 3);
             DefineFunction("action_set_sprite", 2);
             DefineFunction("action_draw_font", 1);
@@ -791,7 +792,8 @@ public class BuiltinList : IBuiltins
         DefineFunction("collision_circle", 6);
         DefineFunction("collision_ellipse", 7);
         DefineFunction("collision_line", 7);
-        if (gms2) {
+        if (gms2) 
+        {
             DefineFunction("collision_point_list", 7);
             DefineFunction("collision_rectangle_list", 9);
             DefineFunction("collision_circle_list", 8);
@@ -830,7 +832,8 @@ public class BuiltinList : IBuiltins
             DefineFunction("instance_create_layer", 4);
             DefineFunction("instance_id_get", 1);
             DefineFunction("instance_activate_layer", 1);
-            if (!gms2_3) {
+            if (!gms2_3) 
+            {
                 DefineFunction("instance_deactivate_region_special", 8);
             }
         }
@@ -1092,7 +1095,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("draw_sprite_general", 16);
         DefineFunction("draw_sprite_tiled", 4);
         DefineFunction("draw_sprite_tiled_ext", 8);
-        if (!gms2_3)
+        if (!gms2) // (runner accepts until gms2_3)
         {
             DefineFunction("draw_background", 3);
             DefineFunction("draw_background_ext", 8);
@@ -1319,7 +1322,8 @@ public class BuiltinList : IBuiltins
         DefineFunction("array_set_2D_pre", 4);
         DefineFunction("array_set_2D_post", 4);
         DefineFunction("array_get_2D", 3);
-        if (wad >= 16) {
+        if (wad >= 16) 
+        {
             DefineFunction("array_equals", 2);
             DefineFunction("array_create");
             DefineFunction("array_copy", 5);
@@ -1634,7 +1638,8 @@ public class BuiltinList : IBuiltins
         DefineFunction("part_type_color1", 2);
         DefineFunction("part_type_color2", 3);
         DefineFunction("part_type_color3", 4);
-        if (!gms2_3) {
+        if (!gms2_3) 
+        {
             DefineFunction("part_type_color", 4);
             DefineFunction("part_type_colour", 4);
             DefineFunction("part_type_alpha", 4);
@@ -1777,7 +1782,7 @@ public class BuiltinList : IBuiltins
                 DefineFunction("background_flush_multi", 1);
             }
         }
-        if (!gms2_3)
+        if (!gms2) // (runner accepts until gms2_3)
         {
             DefineFunction("sound_name", 1);
             DefineFunction("sound_exists", 1);
@@ -1913,8 +1918,10 @@ public class BuiltinList : IBuiltins
         DefineFunction("script_exists", 1);
         DefineFunction("script_get_name", 1);
         DefineFunction("script_execute");
-        if (!gm2022_1) {
-            DefineFunction("path_name", 1);}
+        if (!gm2022_1) 
+        {
+            DefineFunction("path_name", 1);
+        }
         DefineFunction("path_exists", 1);
         DefineFunction("path_get_name", 1);
         DefineFunction("path_get_length", 1);
@@ -2003,7 +2010,8 @@ public class BuiltinList : IBuiltins
         DefineFunction("room_set_persistent", 2);
         DefineFunction("room_set_background_color", 3);
         DefineFunction("room_set_background_colour", 3);
-        if (!gms2_3) {
+        if (!gms2) // (runner accepts until gms2_3)
+        {
             DefineFunction("room_set_background", 12);
         }
         if (!gms2)
@@ -2023,7 +2031,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("room_instance_clear", 1);
         DefineFunction("asset_get_index", 1);
         DefineFunction("asset_get_type", 1);
-        if (!gms2_3)
+        if (!gms2) // (runner accepts until gms2_3)
         {
             DefineFunction("room_tile_add", 9);
             DefineFunction("room_tile_add_ext", 12);
@@ -2034,7 +2042,7 @@ public class BuiltinList : IBuiltins
             DefineFunction("room_get_camera", 2);
             DefineFunction("room_set_camera", 3);
         }
-        if (!gms2_3)
+        if (!gms2) // (runner accepts until gms2_3)
         {
             DefineFunction("sound_play", 1);
             DefineFunction("sound_loop", 1);
@@ -2104,7 +2112,8 @@ public class BuiltinList : IBuiltins
         DefineFunction("draw_flush", 0);
         if (gms2)
         {
-            if (!gms2_3) {
+            if (!gms2_3) 
+            {
                 DefineFunction("gpu_get_alphatestfunc", 0);
                 DefineFunction("gpu_set_alphatestfunc", 1);
             }
@@ -2560,7 +2569,6 @@ public class BuiltinList : IBuiltins
         DefineFunction("steam_upload_score_buffer", 3);
         if (wad >= 16)
         {
-
             DefineFunction("steam_upload_score_buffer_ext", 4);
             DefineFunction("steam_upload_score_ext", 3);
         }
@@ -2976,7 +2984,7 @@ public class BuiltinList : IBuiltins
         }
         DefineFunction("xboxlive_matchmaking_set_find_timeout", 1);
         DefineFunction("browser_input_capture", 1);
-        if (wad >= 16)
+        if (gms2) // (runner accepts wad >= 16)
         {
             DefineFunction("layer_get_id", 1);
             DefineFunction("layer_get_id_at_depth", 1);
@@ -3240,7 +3248,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("switch_recording_enable", 0);
         DefineFunction("switch_recording_disable", 0);
         DefineFunction("switch_irsensor_set_mode", 2);
-        if (major == 2 && minor > 3)  // TODO: which version was this added?
+        if (major > 2 || (major == 2 && minor > 3))  // TODO: which version was this added?
         {
             DefineFunction("switch_irsensor_common_config_set_all", 5);
             DefineFunction("switch_irsensor_common_config_set_exposure_time", 2);
@@ -3310,8 +3318,8 @@ public class BuiltinList : IBuiltins
             DefineFunction("dbg_same_line", 0);
             DefineFunction("dbg_add_font_glyphs");
         }
-        if (gm2022_1) {
-            DefineFunction("event_perform_async", 2);
+        if (gm2022_1) 
+        {
             DefineFunction("fx_create", 1);
             DefineFunction("fx_get_name", 1);
             DefineFunction("fx_get_parameter_names", 1);
@@ -3331,6 +3339,7 @@ public class BuiltinList : IBuiltins
         {
             DefineFunction("scheduler_resolution_set", 1);
             DefineFunction("scheduler_resolution_get", 0);
+            DefineFunction("event_perform_async", 2);
             DefineFunction("show_debug_message_ext", 2);
             DefineFunction("ref_create");
             DefineFunction("gif_open");
