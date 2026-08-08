@@ -406,6 +406,12 @@ public class GlobalDecompileContext : IGameContext
                     return null;
                 }
                 return $"{_instanceIdPrefix}{assetIndex}";
+            case AssetType.AudioGroup:
+                if (assetIndex >= (Data.AudioGroups?.Count ?? 0))
+                {
+                    return null;
+                }
+                return Data.AudioGroups[assetIndex]?.Name?.Content;
         }
 
         return null;
