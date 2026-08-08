@@ -20,6 +20,7 @@ namespace UndertaleModLib.Project;
 [JsonDerivedType(typeof(SerializableSequence), nameof(Sequence))]
 [JsonDerivedType(typeof(SerializableAnimationCurve), nameof(AnimationCurve))]
 [JsonDerivedType(typeof(SerializableFont), nameof(Font))]
+[JsonDerivedType(typeof(SerializableShader), nameof(Shader))]
 public interface ISerializableProjectAsset
 {
     /// <summary>
@@ -93,7 +94,8 @@ public enum SerializableAssetType
     Sprite,
     Sequence,
     AnimationCurve,
-    Font
+    Font,
+    Shader
 }
 
 /// <summary>
@@ -119,6 +121,7 @@ public static class SerializableAssetTypeExtensions
             Sequence => "Sequence",
             AnimationCurve => "Animation Curve",
             Font => "Font",
+            Shader => "Shader",
             _ => throw new NotImplementedException()
         };
     }
@@ -140,6 +143,7 @@ public static class SerializableAssetTypeExtensions
             Sequence => "sequence",
             AnimationCurve => "animcurve",
             Font => "font",
+            Shader => "shader",
             _ => throw new NotImplementedException()
         };
     }
@@ -162,6 +166,7 @@ public static class SerializableAssetTypeExtensions
             Sequence => "sequences",
             AnimationCurve => "animcurves",
             Font => "fonts",
+            Shader => "shaders",
             _ => throw new NotImplementedException()
         };
     }

@@ -30,6 +30,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Margin="3">Name</TextBlock>
@@ -148,5 +149,9 @@
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </local:DataGridDark>
+        
+        <Border Grid.Row="9" Grid.Column="1" Margin="20" Background="LightPink" BorderBrush="Red" BorderThickness="3">
+            <TextBlock TextWrapping="Wrap" Margin="3" Foreground="Red">WARNING: Editing shader data directly in the above fields is not recommended, as some of the data is compiled in binary form. Instead, use the shader import/export scripts to move shaders between existing games (including any of your own), or use the project system to do the same.</TextBlock>
+        </Border>
     </Grid>
 </local:DataUserControl>

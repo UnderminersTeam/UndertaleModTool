@@ -1134,7 +1134,8 @@ internal sealed class SerializableRoom : ISerializableProjectAsset
                                     TileDepth = tile.Depth,
                                     ScaleX = tile.ScaleX,
                                     ScaleY = tile.ScaleY,
-                                    Color = tile.Color
+                                    Color = tile.Color,
+                                    InstanceID = ++projectContext.Data.GeneralInfo.LastTile
                                 };
                                 if (projectContext.Data.IsGameMaker2())
                                 {
