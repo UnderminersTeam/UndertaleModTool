@@ -8,6 +8,7 @@ using UndertaleModLib.Models;
 using Underanalyzer.Compiler;
 using UndertaleModLib.Compiler;
 using static UndertaleModLib.Util.AssetReferenceTypes;
+using System.Diagnostics.CodeAnalysis;
 
 namespace UndertaleModLib.Decompiler;
 
@@ -37,6 +38,7 @@ public class GlobalDecompileContext : IGameContext
     public bool UsingRoomInstanceReferences => Data?.IsVersionAtLeast(2024, 2) ?? false;
     public bool UsingFunctionScriptReferences => Data?.IsVersionAtLeast(2024, 2) ?? false;
     public bool UsingNewFunctionResolution => Data?.IsVersionAtLeast(2024, 13) ?? false;
+    public bool UsingStructSpecialCaseNames => Data?.IsVersionAtLeast(2024, 13) ?? false;
     public bool UsingLogicalShortCircuit => Data?.ShortCircuit ?? true;
     public bool UsingLongCompoundBitwise => Data?.IsVersionAtLeast(2, 3, 2) ?? false;
     public bool UsingExtraRepeatInstruction => !(Data?.IsNonLTSVersionAtLeast(2022, 11) ?? false);
@@ -44,14 +46,20 @@ public class GlobalDecompileContext : IGameContext
     public bool UsingReentrantStatic => !(Data?.IsVersionAtLeast(2024, 11) ?? false);
     public bool UsingNewFunctionVariables => Data?.IsVersionAtLeast(2024, 2) ?? false;
     public bool UsingSelfToBuiltin => Data?.IsVersionAtLeast(2024, 2) ?? false;
+    public bool UsingVariableHashFunctions => Data?.IsVersionAtLeast(2024, 2) ?? false;
     public bool UsingGlobalConstantFunction => Data?.IsVersionAtLeast(2023, 11) ?? false;
     public bool UsingObjectFunctionForesight => Data?.IsVersionAtLeast(2024, 11) ?? false;
     public bool UsingBetterTryBreakContinue => Data?.IsVersionAtLeast(2024, 11) ?? false;
     public bool UsingBuiltinDefaultArguments => Data?.IsVersionAtLeast(2024, 11) ?? false;
+    public bool UsingExternalStructArrays => Data?.IsVersionAtLeast(2024, 11) ?? false;
     public bool UsingArrayCopyOnWrite => Data?.ArrayCopyOnWrite ?? false;
     public bool UsingNewArrayOwners => Data?.IsVersionAtLeast(2, 3, 2) ?? false;
     public bool UsingOptimizedFunctionDeclarations => Data?.IsVersionAtLeast(2024, 14) ?? false;
     public bool UsingNewChainedFunctionArgumentOrder => Data?.IsVersionAtLeast(2024, 14, 4) ?? false;
+    public bool UsingTemplateStrings => Data?.IsNonLTSVersionAtLeast(2023, 4) ?? false;
+    public bool UsingModernTemplateStrings => Data?.IsVersionAtLeast(2024, 14) ?? false;
+    public bool UsingStructAnyNonemptyString => Data?.IsVersionAtLeast(2024, 14) ?? false;
+    public bool UsingFixedDefaultArgumentFunctionDecls => Data?.IsVersionAtLeast(2024, 14) ?? false;
     public GameSpecificRegistry GameSpecificRegistry => Data?.GameSpecificRegistry;
     public IBuiltins Builtins { get; private set; } = null;
     public ICodeBuilder CodeBuilder { get; private set; } = null;
@@ -468,5 +476,22 @@ public class GlobalDecompileContext : IGameContext
 
         // Perform lookup, adding "gml_Script_" prefix that global function scripts have
         return _scriptIdLookup.TryGetValue($"gml_Script_{functionName}", out assetId);
+    }
+
+    /// <inheritdoc/>
+    public bool LookupCommonNegativeConstant(int value, [NotNullWhen(true)] out string name)
+    {
+        if (value == -3)
+        {
+            name = "all";
+            return true;
+        }
+        if (value == -4)
+        {
+            name = "noone";
+            return true;
+        }
+        name = null;
+        return false;
     }
 }

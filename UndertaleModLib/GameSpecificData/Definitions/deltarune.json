@@ -8,6 +8,10 @@
     {
       "ConditionKind": "DisplayName.Regex",
       "Value": "(?i)^deltarune"
+    },
+    {
+      "ConditionKind": "Name.Regex",
+      "Value": "(?i)^deltarune"
     }
   ],
   "UnderanalyzerFilename": "deltarune.json"
