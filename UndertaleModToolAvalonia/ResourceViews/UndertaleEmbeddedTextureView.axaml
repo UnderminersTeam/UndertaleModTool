@@ -1,0 +1,48 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:l="clr-namespace:UndertaleModToolAvalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="UndertaleModToolAvalonia.UndertaleEmbeddedTextureView"
+             x:DataType="l:UndertaleEmbeddedTextureViewModel">
+    <UserControl.Resources>
+        <l:VersionCompareConverter x:Key="VersionCompareConverter" />
+    </UserControl.Resources>
+
+    <ScrollViewer>
+        <StackPanel>
+            <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
+                <Label>Scaled</Label>
+                <TextBox Text="{Binding EmbeddedTexture.Scaled}" />
+                
+                <Label>Size</Label>
+                <Grid ColumnDefinitions="1*,1*">
+                    <TextBox Grid.Column="0" Text="{Binding EmbeddedTexture.TextureData.Width}" IsReadOnly="True" />
+                    <TextBox Grid.Column="1" Text="{Binding EmbeddedTexture.TextureData.Height}" IsReadOnly="True" />
+                </Grid>
+            </Grid>
+        
+            <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties"
+                    IsVisible="{Binding $parent[l:MainView].((l:MainViewModel)DataContext).DataVersion,
+                    Converter={StaticResource VersionCompareConverter},
+                    ConverterParameter=GE2.0.6}">
+                <Label>Generated mips</Label>
+                <TextBox Text="{Binding EmbeddedTexture.GeneratedMips}" />
+            </Grid>
+
+            <StackPanel Orientation="Horizontal">
+                <Button Command="{Binding ImportImage}">Import image</Button>
+                <Button Command="{Binding ExportImage}">Export image</Button>
+                <Button Command="{Binding ExportImageAsPNG}">Export image as PNG</Button>
+            </StackPanel>
+            
+            <!-- TODO: Click on item to open -->
+            <!-- TODO: Failed to load message -->
+            <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center"
+                          MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
+                <l:SKImageViewer Image="{Binding EmbeddedTexture.TextureData.Image}" />
+            </ScrollViewer>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

@@ -14,6 +14,11 @@ namespace UndertaleModLib.Util
         private Dictionary<UndertaleEmbeddedTexture, MagickImage> embeddedDictionary = new();
         private readonly object embeddedDictionaryLock = new();
 
+        private static MagickReadSettings magickReadSettings = new()
+        {
+            ColorSpace = ColorSpace.sRGB,
+        };
+
         /// <summary>
         /// Retrieves an image representing the supplied texture page.
         /// </summary>
@@ -51,6 +56,19 @@ namespace UndertaleModLib.Util
         {
             using var image = GetTextureFor(texPageItem, imageName ?? Path.GetFileNameWithoutExtension(filePath), includePadding);
             SaveImageToFile(image, filePath);
+        }
+
+        /// <summary>
+        /// Exports the given texture page item, as a PNG, to the supplied stream. (With or without padding.)
+        /// </summary>
+        /// <param name="texPageItem">Texture page item to export.</param>
+        /// <param name="stream">Stream to export to.</param>
+        /// <param name="imageName">Image name to be used when throwing exceptions.</param>
+        /// <param name="includePadding">True if padding should be exported; false otherwise.</param>
+        public void ExportAsPNG(UndertaleTexturePageItem texPageItem, Stream stream, string imageName = null, bool includePadding = false)
+        {
+            using var image = GetTextureFor(texPageItem, imageName ?? "Image", includePadding);
+            SaveImageToStream(image, stream);
         }
 
         /// <summary>
@@ -115,11 +133,16 @@ namespace UndertaleModLib.Util
         /// <returns>An image, in uncompressed BGRA format, containing the contents of the image file at the given path.</returns>
         public static MagickImage ReadBGRAImageFromFile(string filePath)
         {
-            MagickReadSettings settings = new()
-            {
-                ColorSpace = ColorSpace.sRGB,
-            };
-            MagickImage image = new(filePath, settings);
+            return ConfigureReadBGRAImage(new(filePath, magickReadSettings));
+        }
+
+        public static MagickImage ReadBGRAImageFromStream(Stream stream)
+        {
+            return ConfigureReadBGRAImage(new(stream, magickReadSettings));
+        }
+
+        private static MagickImage ConfigureReadBGRAImage(MagickImage image)
+        {
             image.Alpha(AlphaOption.Set);
             image.Format = MagickFormat.Bgra;
             image.Depth = 8;
@@ -259,6 +282,16 @@ namespace UndertaleModLib.Util
         public static void SaveImageToFile(IMagickImage<byte> image, string filePath)
         {
             using var stream = new FileStream(filePath, FileMode.Create);
+            SaveImageToStream(image, stream);
+        }
+
+        /// <summary>
+        /// Saves the provided image as a PNG file, at the specified stream.
+        /// </summary>
+        /// <param name="image">Image to save.</param>
+        /// <param name="stream">Stream to save the image to.</param>
+        public static void SaveImageToStream(IMagickImage<byte> image, Stream stream)
+        {
             image.Write(stream, MagickFormat.Png32);
         }
 

@@ -1,0 +1,50 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:l="clr-namespace:UndertaleModToolAvalonia"
+        mc:Ignorable="d"
+        x:Class="UndertaleModToolAvalonia.ProjectAssetsWindow"
+        x:DataType="l:ProjectAssetsWindow"
+        DataContext="{Binding $self}"
+        Title="Unexported project assets"
+        Height="450"
+        Width="800"
+        WindowStartupLocation="CenterOwner">
+    <Grid RowDefinitions="Auto,1*">
+        <StackPanel Grid.Row="0" Margin="8">
+            <Label>
+                Below is a list of all assets currently waiting to be exported to disk for the current project, once it is next saved.
+            </Label>
+            <Label>
+                To quickly add or remove assets from being part of the project, you can drag and drop assets here, or delete them.
+            </Label>
+        </StackPanel>
+        <DataGrid Grid.Row="1" ItemsSource="{x:Null}" Name="AssetsDataGrid" IsReadOnly="True" CanUserResizeColumns="True"
+                  DoubleTapped="DataGrid_DoubleTapped"
+                  PointerReleased="DataGrid_PointerReleased"
+                  Background="Transparent">
+            <DataGrid.Resources>
+                <l:ProjectAssetsWindowDataGridDropHandler x:Key="ProjectAssetsWindowDataGridDropHandler"/>
+            </DataGrid.Resources>
+            <Interaction.Behaviors>
+                <ContextDropBehavior Handler="{StaticResource ProjectAssetsWindowDataGridDropHandler}"/>
+            </Interaction.Behaviors>
+            <DataGrid.Styles>
+                <Style Selector="DataGridRow">
+                    <Setter Property="ContextMenu">
+                        <ContextMenu>
+                            <MenuItem Header="Open" Click="DataGridRow_Open_Click"/>
+                            <MenuItem Header="Open in new tab" Click="DataGridRow_OpenInNewTab_Click"/>
+                            <MenuItem Header="Unmark for export" Click="DataGridRow_UnmarkForExport_Click"/>
+                        </ContextMenu>
+                    </Setter>
+                </Style>
+            </DataGrid.Styles>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name" Binding="{ReflectionBinding Name}" Width="Auto" />
+                <DataGridTextColumn Header="Asset type" Binding="{ReflectionBinding AssetType}" Width="Auto" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</Window>

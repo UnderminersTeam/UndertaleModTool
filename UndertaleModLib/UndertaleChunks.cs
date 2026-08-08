@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
@@ -244,7 +247,7 @@ namespace UndertaleModLib
     public class UndertaleChunkEXTN : UndertaleListChunk<UndertaleExtension>
     {
         public override string Name => "EXTN";
-        public List<byte[]> productIdData = new List<byte[]>();
+        public ObservableCollection<ByteArrayWrapper> productIdData { get; set; } = new ObservableCollection<ByteArrayWrapper>(); // TODO: Capitalize property
 
         private bool checkedFor2022_6 = false;
         private bool checkedFor2023_4 = false;
@@ -368,7 +371,7 @@ namespace UndertaleModLib
 
             // Strange data for each extension, some kind of unique identifier based on
             // the product ID for each of them
-            productIdData = new List<byte[]>();
+            productIdData.Clear();
             if (UndertaleExtension.ProductDataEligible(reader.undertaleData))
             {
                 for (int i = 0; i < List.Count; i++)
@@ -403,6 +406,14 @@ namespace UndertaleModLib
             CheckFor2023_4(reader);
 
             return base.UnserializeObjectCount(reader);
+        }
+
+        public class ByteArrayWrapper(byte[] v)
+        {
+            public byte[] ByteArray { get; set; } = v;
+
+            public static implicit operator byte[](ByteArrayWrapper v) => v.ByteArray;
+            public static implicit operator ByteArrayWrapper(byte[] v) => new(v);
         }
     }
 
@@ -1743,7 +1754,7 @@ namespace UndertaleModLib
         public uint VarCount2 { get; set; }
         public uint MaxLocalVarCount { get; set; }
         public bool DifferentVarCounts { get; set; }
-        public List<UndertaleVariable> List = new List<UndertaleVariable>();
+        public ObservableCollection<UndertaleVariable> List = new ObservableCollection<UndertaleVariable>();
 
         [Obsolete]
         public uint InstanceVarCount { get => VarCount1; set => VarCount1 = value; }
@@ -1793,7 +1804,7 @@ namespace UndertaleModLib
             else
                 varLength = 12;
             List.Clear();
-            List.Capacity = (int)(Length / varLength);
+            //List.Capacity = (int)(Length / varLength);
             while (reader.Position + varLength <= startPosition + Length)
                 List.Add(reader.ReadUndertaleObject<UndertaleVariable>());
         }

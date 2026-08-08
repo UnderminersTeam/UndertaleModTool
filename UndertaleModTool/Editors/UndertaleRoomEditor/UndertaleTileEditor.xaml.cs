@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -560,9 +561,9 @@ namespace UndertaleModTool
             PaletteCursorVisibility = Visibility.Visible;
 
             uint brushTile = BrushTilesData.TileData[0][0] & TILE_INDEX;
-            int index = PaletteTilesData.Background.GMS2TileIds.FindIndex(
-                id => id.ID == brushTile
-            );
+            int index = PaletteTilesData.Background.GMS2TileIds
+                .Select((item, index) => new { Item = item, Index = index })
+                .FirstOrDefault(id => id.Item.ID == brushTile)?.Index ?? -1;
             if (index == -1)
                 index = 0;
             MovePaletteCursor((int)(index / PaletteTilesData.Background.GMS2ItemsPerTileCount));
