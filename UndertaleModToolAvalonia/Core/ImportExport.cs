@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using ImageMagick;
 using SkiaSharp;
 using UndertaleModLib.Models;
 using UndertaleModLib.Util;
@@ -75,20 +76,25 @@ public static class ImportExport
         await stream.WriteAsync(sprite.CollisionMasks[collisionMaskIndex].Data);
     }
 
-    public static async Task ExportTexturePageItemAsPNG(UndertaleTexturePageItem texturePageItem, Stream stream, MainViewModel mainVM)
+    public static async Task ImportTexturePageItem(UndertaleTexturePageItem texturePageItem, Stream stream)
     {
-        SKBitmap bitmap = new(texturePageItem.BoundingWidth, texturePageItem.BoundingHeight, SKColorType.Bgra8888, SKAlphaType.Unpremul);
-        SKCanvas canvas = new(bitmap);
+        using MagickImage image = TextureWorker.ReadBGRAImageFromStream(stream);
 
-        SKImage? image = mainVM.ImageCache.GetCachedImageFromTexturePageItem(texturePageItem);
+        // TODO: Deal with this
+        var format = texturePageItem.TexturePage.TextureData.Image.Format;
+        if (format == GMImage.ImageFormat.Dds)
+            return;
 
-        if (image is null)
-            throw new InvalidOperationException();
+        // TODO: And this
+        if (image.Width != texturePageItem.SourceWidth || image.Height != texturePageItem.SourceHeight)
+            return;
 
-        canvas.DrawImage(image, SKRect.Create(texturePageItem.TargetX, texturePageItem.TargetY, texturePageItem.TargetWidth, texturePageItem.TargetHeight), SKSamplingOptions.Default);
+        texturePageItem.ReplaceTexture(image);
+    }
 
-        bool result = bitmap.Encode(stream, SKEncodedImageFormat.Png, 100);
-        if (!result)
-            throw new InvalidOperationException();
+    public static async Task ExportTexturePageItemAsPNG(UndertaleTexturePageItem texturePageItem, Stream stream, bool includePadding)
+    {
+        using var textureWorker = new TextureWorker();
+        textureWorker.ExportAsPNG(texturePageItem, stream, texturePageItem.Name.Content, includePadding);
     }
 }

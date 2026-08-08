@@ -161,7 +161,7 @@ public partial class UndertaleSpriteViewModel : ObservableObject, IUndertaleReso
 
             using (var stream = await file.OpenWriteAsync())
             {
-                await ImportExport.ExportTexturePageItemAsPNG(texture, stream, MainVM);
+                await ImportExport.ExportTexturePageItemAsPNG(texture, stream, includePadding: true);
             }
         }
     }

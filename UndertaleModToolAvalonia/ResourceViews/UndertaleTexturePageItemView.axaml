@@ -37,7 +37,9 @@
             </Grid>
 
             <StackPanel Orientation="Horizontal">
-                <Button Command="{Binding SaveImage}">Save image</Button>
+                <Button Command="{Binding LoadImageWithoutPadding}">Load image (without padding)</Button>
+                <Button Command="{Binding SaveImageWithoutPadding}">Save image (without padding)</Button>
+                <Button Command="{Binding SaveImageWithPadding}">Save image (with padding)</Button>
             </StackPanel>
 
             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center"
