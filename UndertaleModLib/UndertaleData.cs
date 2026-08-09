@@ -349,7 +349,7 @@ namespace UndertaleModLib
         public BuiltinList BuiltinList;
 
         /// <summary>
-        /// Cache for 2.3-style functions defined in global scripts. Can be re-built by setting this to null.
+        /// Cache for 2.3-style functions defined in global scripts.
         /// </summary>
         public GlobalFunctions GlobalFunctions;
 
