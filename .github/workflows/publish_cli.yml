@@ -37,7 +37,7 @@ jobs:
     - name: Build
       run: dotnet build UndertaleModCli --no-restore
     - name: Publish ${{ matrix.os }} CLI
-      run: dotnet publish UndertaleModCli -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=false --output CLI-${{ matrix.os }}
+      run: dotnet publish UndertaleModCli -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=true --output CLI-${{ matrix.os }}
     - name: Copy external files
       run: |
         cp ./README.md ./CLI-${{ matrix.os }}/
