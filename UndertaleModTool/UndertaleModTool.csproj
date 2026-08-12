@@ -89,7 +89,7 @@
         </PackageReference>
         <PackageReference Include="Ookii.Dialogs.Wpf" Version="5.0.1" />
         <PackageReference Include="PropertyChanged.Fody" Version="4.1.0" PrivateAssets="All" />
-        <PackageReference Include="Microsoft.Windows.Compatibility" Version="10.0.10" />
+        <PackageReference Include="Microsoft.Windows.Compatibility" Version="10.0.11" />
     </ItemGroup>
     <Target Name="AfterResolveReferences">
         <ItemGroup>
