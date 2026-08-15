@@ -63,8 +63,8 @@ namespace UndertaleModTool.Windows
                 sourceObjName = sourceObj.GetType().Name;
             this.sourceObjName = sourceObjName;
 
-            Title = $"The references of game asset \"{sourceObjName}\"";
-            label.Text = $"The search results for the game asset\n\"{sourceObjName}\".";
+            Title = $"References of game asset \"{sourceObjName}\"";
+            label.Text = $"Results for game asset\n\"{sourceObjName}\".";
             SourceObject = sourceObj;
 
             if (results is null)
@@ -86,8 +86,8 @@ namespace UndertaleModTool.Windows
 
             this.data = data;
 
-            Title = "The unreferenced game assets";
-            label.Text = "The search results for the unreferenced game assets.";
+            Title = "Unreferenced game assets";
+            label.Text = "Results for unreferenced game assets.";
 
             if (results is null)
             {

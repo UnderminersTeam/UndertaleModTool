@@ -32,6 +32,7 @@ namespace UndertaleModTool
         private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
         private static readonly HashSetTypesOverride gameObjType = new() { typeof(UndertaleGameObject) };
         private bool handleMouseScroll = true;
+        private bool showingNoChildrenFoundMessage = false;
 
         public UndertaleGameObjectEditor()
         {
@@ -229,14 +230,16 @@ namespace UndertaleModTool
             try
             {
                 bool hasChildren = dialog.ShowReferencesFor(gameObj, gameObjType, showIfNoResults: false);
-                if (!hasChildren)
+                if (!hasChildren && !showingNoChildrenFoundMessage)
                 {
                     var originalCont = button.Content;
 
+                    showingNoChildrenFoundMessage = true;
                     button.Content = "(no children were found)";
                     await Task.Delay(2000);
 
                     button.Content = originalCont;
+                    showingNoChildrenFoundMessage = false;
                 }
             }
             catch (Exception ex)
