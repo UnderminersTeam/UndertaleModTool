@@ -349,7 +349,8 @@ namespace UndertaleModLib
         public BuiltinList BuiltinList;
 
         /// <summary>
-        /// Cache for 2.3-style functions defined in global scripts.
+        /// Cache for GMLv2 functions defined in global scripts. 
+        /// Can be updated by <see cref="Decompiler.GlobalDecompileContext"/>, if no <see cref="IGlobalFunctions"/> is provided to it.
         /// </summary>
         public GlobalFunctions GlobalFunctions;
 
