@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using UndertaleModLib.Models;
-using UndertaleModLib.Util;
 
 namespace UndertaleModLib
 {
@@ -32,13 +31,19 @@ namespace UndertaleModLib
         /// <summary>
         /// Creates a new observable list, which is empty and has the specified initial capacity.
         /// </summary>
-        public UndertaleObservableList(int capacity)
+        public UndertaleObservableList(int capacity) : this()
         {
-            // Get ahold of internal list
-            internalList = (List<T>)itemsField.GetValue(this);
-
             // Set capacity directly
             internalList.Capacity = capacity;
+        }
+
+        /// <summary>
+        /// Creates a new observable list from the contents of the provided enumerable.
+        /// </summary>
+        public UndertaleObservableList(IEnumerable<T> enumerable) : this()
+        {
+            // Add range of elements directly to internal list
+            internalList.AddRange(enumerable);
         }
 
         /// <summary>
@@ -62,6 +67,12 @@ namespace UndertaleModLib
         {
             internalList.Add(item);
         }
+
+        /// <inheritdoc cref="List{T}.FindIndex(Predicate{T})"/>
+        public int FindIndex(Predicate<T> match)
+        {
+            return internalList.FindIndex(match);
+        }
     }
 
     /// <summary>
@@ -69,6 +80,27 @@ namespace UndertaleModLib
     /// </summary>
     public class UndertaleSimpleList<T> : UndertaleObservableList<T>, UndertaleObject where T : UndertaleObject, new()
     {
+        /// <summary>
+        /// Creates a new simple list, which is empty and has default capacity.
+        /// </summary>
+        public UndertaleSimpleList()
+        {
+        }
+
+        /// <summary>
+        /// Creates a new simple list, which is empty and has the specified initial capacity.
+        /// </summary>
+        public UndertaleSimpleList(int capacity) : base(capacity)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new simple list from the contents of the provided enumerable.
+        /// </summary>
+        public UndertaleSimpleList(IEnumerable<T> enumerable) : base(enumerable)
+        {
+        }
+
         /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
@@ -234,6 +266,27 @@ namespace UndertaleModLib
     /// </summary>
     public class UndertaleSimpleListShort<T> : UndertaleObservableList<T>, UndertaleObject where T : UndertaleObject, new()
     {
+        /// <summary>
+        /// Creates a new (short) simple list, which is empty and has default capacity.
+        /// </summary>
+        public UndertaleSimpleListShort()
+        {
+        }
+
+        /// <summary>
+        /// Creates a new (short) simple list, which is empty and has the specified initial capacity.
+        /// </summary>
+        public UndertaleSimpleListShort(int capacity) : base(capacity)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new (short) simple list from the contents of the provided enumerable.
+        /// </summary>
+        public UndertaleSimpleListShort(IEnumerable<T> enumerable) : base(enumerable)
+        {
+        }
+
         private void EnsureShortCount()
         {
             if (Count > Int16.MaxValue)
@@ -344,6 +397,27 @@ namespace UndertaleModLib
     /// </summary>
     public class UndertalePointerList<T> : UndertaleObservableList<T>, UndertaleObject where T : UndertaleObject, new()
     {
+        /// <summary>
+        /// Creates a new pointer list, which is empty and has default capacity.
+        /// </summary>
+        public UndertalePointerList()
+        {
+        }
+
+        /// <summary>
+        /// Creates a new pointer list, which is empty and has the specified initial capacity.
+        /// </summary>
+        public UndertalePointerList(int capacity) : base(capacity)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new pointer list from the contents of the provided enumerable.
+        /// </summary>
+        public UndertalePointerList(IEnumerable<T> enumerable) : base(enumerable)
+        {
+        }
+
         /// <inheritdoc />
         public void Serialize(UndertaleWriter writer)
         {
@@ -354,7 +428,7 @@ namespace UndertaleModLib
             // Write all pointers
             foreach (T obj in this)
             {
-                writer.WriteUndertaleObjectPointer<T>(obj);
+                writer.WriteUndertaleObjectPointer(obj);
             }
 
             // Write blobs, if necessary for the given type
@@ -439,7 +513,9 @@ namespace UndertaleModLib
                         if (reader.undertaleData.IsGameMaker2())
                         {
                             if (!reader.undertaleData.IsVersionAtLeast(2024, 11))
+                            {
                                 reader.undertaleData.SetGMS2Version(2024, 11);
+                            }
                         }
                         realCount--;
                     }
@@ -454,7 +530,7 @@ namespace UndertaleModLib
             // Advance to start of first object (particularly, if blobs exist)
             if (realCount > 0)
             {
-                T firstItem = this.First(i => i is not null);
+                T firstItem = this.First(obj => obj is not null);
                 uint pos = reader.GetAddressForUndertaleObject(firstItem);
                 if (reader.AbsPosition != pos)
                 {
@@ -478,8 +554,10 @@ namespace UndertaleModLib
                 {
                     T obj = this[(int)j];
                     if (obj is null)
+                    {
                         continue;
-                    
+                    }
+
                     // Unserialize pre-padding, if this is a type that requires it
                     if (t.IsAssignableTo(typeof(PrePaddedObject)))
                     {
@@ -510,7 +588,7 @@ namespace UndertaleModLib
         public static uint UnserializeChildObjectCount(UndertaleReader reader)
         {
             // Read base object count; short-circuit if there's no objects
-            uint count = reader.ReadUInt32(), pointerCount = count;
+            uint count = reader.ReadUInt32();
             if (count == 0)
             {
                 return 0;
@@ -528,13 +606,17 @@ namespace UndertaleModLib
                     if (reader.undertaleData.IsGameMaker2())
                     {
                         if (!reader.undertaleData.IsVersionAtLeast(2024, 11))
+                        {
                             reader.undertaleData.SetGMS2Version(2024, 11);
+                        }
                     }
                     else
                     {
-                        reader.SubmitWarning("Null pointers found in pointer list on file built with GMS pre-2!");
+                        reader.SubmitWarning("Null pointers found in pointer list on file built with pre-GMS2!");
                     }
-                    i--; count--;
+
+                    i--;
+                    count--;
                     continue;
                 }
                 pointers[i] = pointer;

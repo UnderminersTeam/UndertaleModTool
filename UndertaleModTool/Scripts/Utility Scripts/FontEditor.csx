@@ -1297,7 +1297,7 @@ static void TrySetFormIcon(Form form)
     {
         string part1 = Path.GetDirectoryName(Application.ExecutablePath);
         string part2 = AppDomain.CurrentDomain.FriendlyName + ".exe";
-        string exepath = Path.Combine(part1, part2);
+        string exepath = Paths.JoinVerifyWithinDirectory(part1, part2);
         Icon icon = Icon.ExtractAssociatedIcon(exepath);
         form.Icon = icon;
     }

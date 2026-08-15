@@ -19,7 +19,7 @@ if (exportFolder == null)
 }
 
 //Overwrite Check One
-if (File.Exists(Path.Combine(exportFolder, "unused_strings_log.txt")))
+if (File.Exists(Path.Join(exportFolder, "unused_strings_log.txt")))
 {
     bool overwriteCheckOne = ScriptQuestion(@"An 'unused_strings_log.txt' file already exists.
 Would you like to overwrite it?");
@@ -64,9 +64,9 @@ for (var i = (stringsUsageCountArray.Length - 1); i >= 0; i--)
         }
     }
 }
-File.WriteAllText(Path.Combine(exportFolder, "unused_strings_log.txt"), output);
+File.WriteAllText(Path.Join(exportFolder, "unused_strings_log.txt"), output);
 HideProgressBar();
-ScriptMessage("Complete. " + found_count.ToString() + " unused strings were found and " + removed_count.ToString() + " were removed. Further details have been written to the log at " + Path.Combine(exportFolder, "unused_strings_log.txt"));
+ScriptMessage("Complete. " + found_count.ToString() + " unused strings were found and " + removed_count.ToString() + " were removed. Further details have been written to the log at " + Path.Join(exportFolder, "unused_strings_log.txt"));
 return;
 
 uint[] GetStringUsageCount()

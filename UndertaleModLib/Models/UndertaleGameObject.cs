@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using UndertaleModLib.Project;
+using UndertaleModLib.Project.SerializableAssets;
 
 namespace UndertaleModLib.Models;
 
@@ -29,11 +31,11 @@ public enum CollisionShapeFlags : uint
 /// <summary>
 /// A game object in a data file.
 /// </summary>
-public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChanged, IDisposable
+public class UndertaleGameObject : UndertaleNamedResource, IProjectAsset, INotifyPropertyChanged, IDisposable
 {
-    public UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _sprite = new();
-    public UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _parentId = new();
-    public UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _textureMaskId = new();
+    private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _sprite = new();
+    private UndertaleResourceById<UndertaleGameObject, UndertaleChunkOBJT> _parentId = new();
+    private UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT> _textureMaskId = new();
 
     public static readonly int EventTypeCount = Enum.GetValues(typeof(EventType)).Length;
 
@@ -52,7 +54,9 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     /// </summary>
     public bool Visible { get; set; } = true;
 
-    // TODO: This summary
+    /// <summary>
+    /// Field present for rollback multiplayer, starting in GameMaker 2022.5, and removed in GameMaker 2026.1 (non-initial LTS).
+    /// </summary>
     public bool Managed { get; set; }
 
     /// <summary>
@@ -139,7 +143,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     /// <summary>
     /// The vertices used for a <see cref="CollisionShape"/> of type <see cref="CollisionShapeFlags.Custom"/>.
     /// </summary>
-    public List<UndertalePhysicsVertex> PhysicsVertices { get; set; } = new List<UndertalePhysicsVertex>();
+    public UndertaleObservableList<UndertalePhysicsVertex> PhysicsVertices { get; set; } = new();
 
     #endregion
 
@@ -175,7 +179,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         writer.WriteUndertaleString(Name);
         writer.WriteUndertaleObject(_sprite);
         writer.Write(Visible);
-        if (writer.undertaleData.IsVersionAtLeast(2022, 5))
+        if (writer.undertaleData.IsVersionAtLeast(2022, 5) && !writer.undertaleData.IsVersionAtLeast(2026, 1))
             writer.Write(Managed);
         writer.Write(Solid);
         writer.Write(Depth);
@@ -207,6 +211,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         {
             v.Serialize(writer);
         }
+        FixBrokenEvents();
         writer.WriteUndertaleObject(Events);
     }
 
@@ -216,7 +221,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         Name = reader.ReadUndertaleString();
         _sprite = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>>();
         Visible = reader.ReadBoolean();
-        if (reader.undertaleData.IsVersionAtLeast(2022, 5))
+        if (reader.undertaleData.IsVersionAtLeast(2022, 5) && !reader.undertaleData.IsVersionAtLeast(2026, 1))
             Managed = reader.ReadBoolean();
         Solid = reader.ReadBoolean();
         Depth = reader.ReadInt32();
@@ -247,14 +252,36 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         Awake = reader.ReadBoolean();
         Kinematic = reader.ReadBoolean();
         // Needs to be done manually because count is separated
-        PhysicsVertices.Capacity = physicsShapeVertexCount;
+        PhysicsVertices.SetCapacity(physicsShapeVertexCount);
         for (int i = 0; i < physicsShapeVertexCount; i++)
         {
-            UndertalePhysicsVertex v = new UndertalePhysicsVertex();
+            UndertalePhysicsVertex v = new();
             v.Unserialize(reader);
-            PhysicsVertices.Add(v);
+            PhysicsVertices.InternalAdd(v);
         }
         Events = reader.ReadUndertaleObject<UndertalePointerList<UndertalePointerList<Event>>>();
+    }
+
+    /// <summary>
+    /// It is possible to create a new event in the UndertaleModTool GUI that has no actions.
+    /// Events with zero actions will lead to a segfault in the runner when loading chunk OBJT,
+    /// because it assumes there is at least one action per event.
+    /// This has been tested on Undertale 1.001; modern runners may not be affected.
+    ///
+    /// This method removes these empty events.
+    /// </summary>
+    private void FixBrokenEvents() 
+    {
+        foreach (UndertalePointerList<Event> events in Events) 
+        {
+            for (int i = events.Count - 1; i >= 0; i--) 
+            {
+                if (events[i].Actions.Count == 0) 
+                {
+                    events.RemoveAt(i);
+                }
+            }
+        }
     }
 
     /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
@@ -262,7 +289,7 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
     {
         uint count = 0;
 
-        if (reader.undertaleData.IsVersionAtLeast(2022, 5))
+        if (reader.undertaleData.IsVersionAtLeast(2022, 5) && !reader.undertaleData.IsVersionAtLeast(2026, 1))
             reader.Position += 64 + 4; // + "Managed"
         else
             reader.Position += 64;
@@ -447,6 +474,24 @@ public class UndertaleGameObject : UndertaleNamedResource, INotifyPropertyChange
         Name = null;
         Events = new();
     }
+
+    /// <inheritdoc/>
+    ISerializableProjectAsset IProjectAsset.GenerateSerializableProjectAsset(ProjectContext projectContext)
+    {
+        SerializableGameObject serializable = new();
+        serializable.PopulateFromData(projectContext, this);
+        return serializable;
+    }
+
+    /// <inheritdoc/>
+    public string ProjectName => Name?.Content ?? "<unknown name>";
+
+    /// <inheritdoc/>
+    public SerializableAssetType ProjectAssetType => SerializableAssetType.GameObject;
+
+    /// <inheritdoc/>
+    public bool ProjectExportable => Name?.Content is not null;
+
 
     /// <summary>
     /// Generic events that an <see cref="UndertaleGameObject"/> uses.

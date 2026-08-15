@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using UndertaleModLib.Util;
 
 EnsureDataLoaded();
 
@@ -62,7 +63,7 @@ IList<UndertaleEmbeddedAudio> GetAudioGroupData(UndertaleSound sound)
     {
         relativeAudioGroupPath = $"audiogroup{sound.GroupID}.dat";
     }
-    string groupFilePath = Path.Combine(Path.GetDirectoryName(FilePath), relativeAudioGroupPath);
+    string groupFilePath = Paths.JoinVerifyWithinDirectory(Path.GetDirectoryName(FilePath), relativeAudioGroupPath);
     if (!File.Exists(groupFilePath))
     {
         // Doesn't exist... don't try loading.
@@ -132,12 +133,12 @@ void DumpSound(UndertaleSound sound)
     string soundFilePath;
     if (groupedExport)
     {
-        soundFilePath = Path.Combine(exportedSoundsDir, sound.AudioGroup.Name.Content, soundName);
-        Directory.CreateDirectory(Path.Combine(exportedSoundsDir, sound.AudioGroup.Name.Content));
+        soundFilePath = Paths.JoinVerifyWithinDirectory(exportedSoundsDir, sound.AudioGroup.Name.Content, soundName);
+        Directory.CreateDirectory(Paths.JoinVerifyWithinDirectory(exportedSoundsDir, sound.AudioGroup.Name.Content));
     }
     else
     {
-        soundFilePath = Path.Combine(exportedSoundsDir, soundName);
+        soundFilePath = Paths.JoinVerifyWithinDirectory(exportedSoundsDir, soundName);
     }
 
     // Determine output file type.
@@ -175,17 +176,17 @@ void DumpSound(UndertaleSound sound)
                 // Add file extension if none already exists (assume OGG).
                 externalFilename += ".ogg";
             }
-            string sourcePath = Path.Combine(Path.GetDirectoryName(FilePath), externalFilename);
+            string sourcePath = Paths.JoinVerifyWithinDirectory(Path.GetDirectoryName(FilePath), externalFilename);
             string destPath;
             if (groupedExport)
             {
-                destPath = Path.Combine(exportedSoundsDir, sound.AudioGroup.Name.Content, "external", soundName + audioExt);
-                Directory.CreateDirectory(Path.Combine(exportedSoundsDir, sound.AudioGroup.Name.Content, "external"));
+                destPath = Paths.JoinVerifyWithinDirectory(exportedSoundsDir, sound.AudioGroup.Name.Content, "external", soundName + audioExt);
+                Directory.CreateDirectory(Paths.JoinVerifyWithinDirectory(exportedSoundsDir, sound.AudioGroup.Name.Content, "external"));
             }
             else
             {
-                destPath = Path.Combine(exportedSoundsDir, "external", soundName + audioExt);
-                Directory.CreateDirectory(Path.Combine(exportedSoundsDir, "external"));
+                destPath = Paths.JoinVerifyWithinDirectory(exportedSoundsDir, "external", soundName + audioExt);
+                Directory.CreateDirectory(Paths.JoinVerifyWithinDirectory(exportedSoundsDir, "external"));
             }
             File.Copy(sourcePath, destPath, true);
         }

@@ -17,11 +17,11 @@ if (texFolder is null)
 }
 
 // Create subdirectories.
-string sprFolder = Path.Combine(texFolder, "Sprites");
+string sprFolder = Path.Join(texFolder, "Sprites");
 Directory.CreateDirectory(sprFolder);
-string fntFolder = Path.Combine(texFolder, "Fonts");
+string fntFolder = Path.Join(texFolder, "Fonts");
 Directory.CreateDirectory(fntFolder);
-string bgrFolder = Path.Combine(texFolder, "Backgrounds");
+string bgrFolder = Path.Join(texFolder, "Backgrounds");
 Directory.CreateDirectory(bgrFolder);
 
 SetProgressBar(null, "Textures", 0, Data.TexturePageItems.Count);
@@ -65,9 +65,9 @@ void DumpSprite(UndertaleSprite sprite)
         if (sprite.Textures[i]?.Texture is not null)
         {
             UndertaleTexturePageItem tex = sprite.Textures[i].Texture;
-            string sprFolder2 = Path.Combine(sprFolder, sprite.Name.Content);
+            string sprFolder2 = Paths.JoinVerifyWithinDirectory(sprFolder, sprite.Name.Content);
             Directory.CreateDirectory(sprFolder2);
-            worker.ExportAsPNG(tex, Path.Combine(sprFolder2, $"{sprite.Name.Content}_{i}.png"));
+            worker.ExportAsPNG(tex, Paths.JoinVerifyWithinDirectory(sprFolder2, $"{sprite.Name.Content}_{i}.png"));
         }
     }
 
@@ -82,9 +82,9 @@ void DumpFont(UndertaleFont font)
     }
 
     UndertaleTexturePageItem tex = font.Texture;
-    string fntFolder2 = Path.Combine(fntFolder, font.Name.Content);
+    string fntFolder2 = Paths.JoinVerifyWithinDirectory(fntFolder, font.Name.Content);
     Directory.CreateDirectory(fntFolder2);
-    worker.ExportAsPNG(tex, Path.Combine(fntFolder2, $"{font.Name.Content}_0.png"));
+    worker.ExportAsPNG(tex, Paths.JoinVerifyWithinDirectory(fntFolder2, $"{font.Name.Content}_0.png"));
     IncrementProgressParallel();
 }
 
@@ -96,8 +96,8 @@ void DumpBackground(UndertaleBackground background)
     }
 
     UndertaleTexturePageItem tex = background.Texture;
-    string bgrFolder2 = Path.Combine(bgrFolder, background.Name.Content);
+    string bgrFolder2 = Paths.JoinVerifyWithinDirectory(bgrFolder, background.Name.Content);
     Directory.CreateDirectory(bgrFolder2);
-    worker.ExportAsPNG(tex, Path.Combine(bgrFolder2, $"{background.Name.Content}_0.png"));
+    worker.ExportAsPNG(tex, Paths.JoinVerifyWithinDirectory(bgrFolder2, $"{background.Name.Content}_0.png"));
     IncrementProgressParallel();
 }

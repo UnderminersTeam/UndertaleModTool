@@ -27,10 +27,15 @@ public class LoadOptions
 	/// </summary>
 	public FileInfo Output { get; set; }
 
-	/// <summary>
-	/// Determines if Cli should be run in interactive mode
-	/// </summary>
-	public bool Interactive { get; set; } = false;
+    /// <summary>
+    /// If the existing file path at <see cref="Output"/> should be overwritten
+    /// </summary>
+    public bool Overwrite { get; set; } = false;
+
+    /// <summary>
+    /// Determines if Cli should be run in interactive mode
+    /// </summary>
+    public bool Interactive { get; set; } = false;
 
 	/// <summary>
 	/// Determines if Cli should print out verbose logs

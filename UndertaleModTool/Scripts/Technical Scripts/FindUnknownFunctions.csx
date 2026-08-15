@@ -1,4 +1,4 @@
-//Adapted from original script by Grossley
+// Adapted from original script by Grossley
 using System.Text;
 using System;
 using System.IO;
@@ -9,8 +9,10 @@ using UndertaleModLib.Util;
 EnsureDataLoaded();
 
 string exportFolder = PromptChooseDirectory();
-if (exportFolder == null)
-    throw new ScriptException("The export folder was not set.");
+if (exportFolder is null)
+{
+    throw new ScriptCancelledException("The export folder was not set.");
+}
 
 //Overwrite Check One
 if (File.Exists(exportFolder + "unknown_functions.txt"))

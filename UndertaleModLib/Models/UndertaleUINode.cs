@@ -925,7 +925,7 @@ public class UndertaleUITextItemInstance : UndertaleRoom.TextItemInstance, IUnde
     }
 
     /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
-    public static uint UnserializeChildObjectCount(UndertaleReader reader)
+    public new static uint UnserializeChildObjectCount(UndertaleReader reader)
     {
         reader.Position += 17 * 4;
         return IUndertaleFlexInstanceProperties.UnserializeChildObjectCount(reader);

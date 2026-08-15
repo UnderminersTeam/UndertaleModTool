@@ -86,7 +86,7 @@ namespace UndertaleModTests
                     throw new Exception("Failed to disassemble script " + code.Name.Content, e);
                 }
 
-                IList<UndertaleInstruction> reasm = Assembler.Assemble(disasm, data.Functions, data.Variables, data.Strings);
+                IList<UndertaleInstruction> reasm = Assembler.Assemble(disasm, data);
                 Assert.AreEqual(code.Instructions.Count, reasm.Count, "Reassembled instruction count didn't match the disassembly for script " + code.Name.Content);
                 uint address = 0;
                 for(int i = 0; i < code.Instructions.Count; i++)

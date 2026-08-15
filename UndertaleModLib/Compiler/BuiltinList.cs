@@ -9,7 +9,37 @@ namespace UndertaleModLib.Compiler;
 /// <summary>
 /// Record of builtin variable information.
 /// </summary>
-public record VariableInfo(string Name, bool IsGlobal, bool CanSet, bool IsAutomaticArray = false) : IBuiltinVariable;
+public record VariableInfo : IBuiltinVariable
+{
+    /// <summary>
+    /// Name of the builtin variable.
+    /// </summary>
+    public string Name { get; }
+
+    /// <summary>
+    /// Whether or not the builtin variable can be set.
+    /// </summary>
+    public bool CanSet { get; }
+
+    /// <summary>
+    /// Whether or not the builtin variable is a global variable.
+    /// </summary>
+    public bool IsGlobal { get; }
+
+    /// <summary>
+    /// Whether or not the builtin variable will automatically
+    /// add an array index when compiled, if one is not already present.
+    /// </summary>
+    public bool IsAutomaticArray { get; }
+
+    public VariableInfo(string name, bool canSet, bool isGlobal = true, bool isAutoArray = false)
+    {
+        Name = name;
+        CanSet = canSet;
+        IsGlobal = isGlobal;
+        IsAutomaticArray = isAutoArray;
+    }
+}
 
 /// <summary>
 /// Record of builtin function information.
@@ -30,21 +60,22 @@ public record FunctionInfo : IBuiltinFunction
     /// </summary>
     public FunctionClassification Classification { get; } = FunctionClassification.None;
 
-    public FunctionInfo(string name, int numArguments)
+    public FunctionInfo(string name, int numArgs)
     {
         Name = name;
-        MinArguments = numArguments;
-        MaxArguments = numArguments;
+        MinArguments = numArgs;
+        MaxArguments = numArgs;
     }
 
-    public FunctionInfo(string name, int minNumArguments, int maxNumArguments)
+    public FunctionInfo(string name, int minNumArgs, int maxNumArgs)
     {
         Name = name;
-        MinArguments = minNumArguments;
-        MaxArguments = maxNumArguments;
+        MinArguments = minNumArgs;
+        MaxArguments = maxNumArgs;
     }
 
-    public FunctionInfo(string name, int numArguments, FunctionClassification classification) : this(name, numArguments)
+    public FunctionInfo(string name, int numArgs, FunctionClassification classification)
+        : this(name, numArgs)
     {
         Classification = classification;
     }
@@ -55,14 +86,14 @@ public record FunctionInfo : IBuiltinFunction
 /// </summary>
 public class BuiltinList : IBuiltins
 {
-    public Dictionary<string, double> Constants { get; private set; } = null;
-    public Dictionary<string, VariableInfo> GlobalNotArray { get; private set; } = null;
-    public Dictionary<string, VariableInfo> GlobalArray { get; private set; } = null;
-    public Dictionary<string, VariableInfo> Instance { get; private set; } = null;
-    public Dictionary<string, VariableInfo> InstanceLimitedEvent { get; private set; } = null;
     public Dictionary<string, FunctionInfo> Functions { get; private set; } = null;
+    public Dictionary<string, double> Constants { get; private set; } = null;
+    public Dictionary<string, VariableInfo> GlobalVars { get; private set; } = null;
+    public Dictionary<string, VariableInfo> GlobalArrayVars { get; private set; } = null;
+    public Dictionary<string, VariableInfo> InstanceVars { get; private set; } = null;
+    public Dictionary<string, VariableInfo> InstanceLimitedVars { get; private set; } = null;
 
-    public BuiltinList() 
+    public BuiltinList()
     {
         InitializeMain(null);
     }
@@ -71,6 +102,46 @@ public class BuiltinList : IBuiltins
     {
         InitializeMain(data);
         LoadFunctionsFromData(data);
+    }
+
+    /// <summary>
+    /// Loads builtin functions purely based on functions used by game data already.
+    /// </summary>
+    private void LoadFunctionsFromData(UndertaleData data)
+    {
+        if (data.Functions is null)
+        {
+            // No functions (probably YYC), so don't do this
+            return;
+        }
+
+        // First, make script lookup to avoid script names being marked as builtin
+        HashSet<string> scriptLookup = new(data.Scripts.Count);
+        foreach (UndertaleScript script in data.Scripts)
+        {
+            string name = script?.Name?.Content;
+            if (name is null)
+                continue;
+            if (name.StartsWith("gml_Script_", StringComparison.Ordinal))
+                continue;
+            scriptLookup.Add(name);
+        }
+
+        // Load in all functions that aren't detected as scripts, and which aren't already builtin functions
+        Functions ??= new(data.Functions.Count);
+        foreach (UndertaleFunction function in data.Functions)
+        {
+            string name = function?.Name?.Content;
+            if (name is null)
+                continue;
+            if (name.StartsWith("gml_Script_", StringComparison.Ordinal))
+                continue;
+            if (scriptLookup.Contains(name))
+                continue;
+            if (Functions.ContainsKey(name))
+                continue;
+            DefineFunction(name);
+        }
     }
 
     /// <inheritdoc/>
@@ -86,19 +157,19 @@ public class BuiltinList : IBuiltins
     /// <inheritdoc/>
     public IBuiltinVariable LookupBuiltinVariable(string name)
     {
-        if (Instance.TryGetValue(name, out VariableInfo instanceVar))
+        if (InstanceVars.TryGetValue(name, out VariableInfo instanceVar))
         {
             return instanceVar;
         }
-        if (GlobalNotArray.TryGetValue(name, out VariableInfo globalNotArrayVar))
+        if (GlobalVars.TryGetValue(name, out VariableInfo globalVar))
         {
-            return globalNotArrayVar;
+            return globalVar;
         }
-        if (GlobalArray.TryGetValue(name, out VariableInfo globalArrayVar))
+        if (GlobalArrayVars.TryGetValue(name, out VariableInfo globalArrayVar))
         {
             return globalArrayVar;
         }
-        if (InstanceLimitedEvent.TryGetValue(name, out VariableInfo instanceLimitedVar))
+        if (InstanceLimitedVars.TryGetValue(name, out VariableInfo instanceLimitedVar))
         {
             return instanceLimitedVar;
         }
@@ -122,50 +193,41 @@ public class BuiltinList : IBuiltins
     /// <summary>
     /// Helper function to define a builtin function with a specific number of arguments.
     /// </summary>
-    private void DefineFunction(string name, int numArguments)
+    private void DefineFunction(string name, int numArgs)
     {
-        Functions[name] = new FunctionInfo(name, numArguments);
+        Functions[name] = new FunctionInfo(name, numArgs);
     }
 
     /// <summary>
     /// Helper function to define a builtin function with a specific number of arguments, and a function classification.
     /// </summary>
-    private void DefineFunction(string name, int numArguments, FunctionClassification classification)
+    private void DefineFunction(string name, int numArgs, FunctionClassification classification)
     {
-        Functions[name] = new FunctionInfo(name, numArguments, classification);
+        Functions[name] = new FunctionInfo(name, numArgs, classification);
     }
 
     /// <summary>
-    /// Loads builtin functions purely based on functions used by game data already.
+    /// Helper function to define a global variable with the given name and assignability.
     /// </summary>
-    private void LoadFunctionsFromData(UndertaleData data)
+    private void DefineGlobal(string name, bool canSet)
     {
-        if (data.Functions is null)
-        {
-            // No functions (probably YYC), so don't do this
-            return;
-        }
+        GlobalVars[name] = new VariableInfo(name, canSet);
+    }
 
-        // First, make script lookup to avoid script names being marked as builtin
-        HashSet<string> scriptLookup = new(data.Scripts.Count);
-        foreach (UndertaleScript script in data.Scripts)
-        {
-            if (script?.Name?.Content is string name && !name.StartsWith("gml_Script_", StringComparison.Ordinal))
-            {
-                scriptLookup.Add(name);
-            }
-        }
+    /// <summary>
+    /// Helper function to define a global automatic array variable with the given name and assignability.
+    /// </summary>
+    private void DefineGlobalAutoArray(string name, bool canSet)
+    {
+        GlobalArrayVars[name] = new VariableInfo(name, canSet, true, true);
+    }
 
-        // Load in all functions that aren't detected as scripts, and which aren't already builtin functions
-        Functions ??= new(data.Functions.Count);
-        foreach (UndertaleFunction function in data.Functions)
-        {
-            if (function?.Name?.Content is string name && !name.StartsWith("gml_Script_", StringComparison.Ordinal) && 
-                !scriptLookup.Contains(name) && !Functions.ContainsKey(name))
-            {
-                DefineFunction(name);
-            }
-        }
+    /// <summary>
+    /// Helper function to define an instance (self) variable with the given name and assignability.
+    /// </summary>
+    private void DefineInstanceVar(string name, bool canSet)
+    {
+        InstanceVars[name] = new VariableInfo(name, canSet, false);
     }
 
     /// <summary>
@@ -173,40 +235,67 @@ public class BuiltinList : IBuiltins
     /// </summary>
     private void InitializeMain(UndertaleData data)
     {
+        // Some of these versions are taken from https://github.com/BioTomateDE/GameMakerRunnerFunctionsExistence
+        var gen8 = data?.GeneralInfo;
+        uint major = gen8?.Major ?? 0;
+        uint minor = gen8?.Minor ?? 0;
+        uint release = gen8?.Release ?? 0;
+        uint build = gen8?.Build ?? 0;
+
+        byte wad = gen8?.BytecodeVersion ?? 0;
+        bool gms2 = major >= 2;
+        bool gms2_3 = major > 2 || (gms2 && minor >= 3);
+        bool gm2022_1 = major > 2022 || (major == 2022 && minor >= 1);
+
         // Functions
         Functions = new(4096);
-        DefineFunction("@@This@@", 0);
-        DefineFunction("@@Other@@", 0);
-        DefineFunction("@@Global@@", 0);
-        DefineFunction("@@GetInstance@@", 1);
-        DefineFunction("@@NullObject@@", 0);
-        DefineFunction("@@NewGMLObject@@");
-        DefineFunction("@@NewGMLArray@@");
-        DefineFunction("@@SetStatic@@", 0);
-        DefineFunction("@@CopyStatic@@", 1);
-        DefineFunction("static_get", 1);
-        DefineFunction("@@throw@@", 1);
-        DefineFunction("@@try_hook@@", 2);
-        DefineFunction("@@try_unhook@@", 0);
-        DefineFunction("@@finish_catch@@", 0);
-        DefineFunction("@@finish_finally@@", 0);
+        if (wad >= 15)
+        {
+            DefineFunction("@@This@@", 0);
+            DefineFunction("@@throw@@", 1);
+            DefineFunction("@@try_hook@@", 2);
+            DefineFunction("@@try_unhook@@", 0);
+            DefineFunction("@@finish_catch@@", 0);
+            DefineFunction("@@finish_finally@@", 0);
+        }
+        if (wad >= 16)
+        {
+            DefineFunction("@@Other@@", 0);
+            DefineFunction("@@NewGMLArray@@");
+        }
+        if (gms2_3)
+        {
+            DefineFunction("@@Global@@", 0);
+            DefineFunction("@@GetInstance@@", 1);
+            DefineFunction("@@NullObject@@", 0);
+            DefineFunction("@@NewGMLObject@@");
+            DefineFunction("@@SetStatic@@", 0);
+            DefineFunction("@@CopyStatic@@", 1);
+            DefineFunction("static_get", 1);
+        }
         DefineFunction("matrix_get", 1);
         DefineFunction("matrix_set", 2);
         DefineFunction("matrix_build", 9);
-        DefineFunction("matrix_build_lookat", 9);
-        DefineFunction("matrix_build_identity", 0);
-        DefineFunction("matrix_build_projection_ortho", 4);
-        DefineFunction("matrix_build_projection_perspective", 4);
-        DefineFunction("matrix_build_projection_perspective_fov", 4);
+        if (wad >= 16)
+        {
+            DefineFunction("matrix_build_lookat", 9);
+            DefineFunction("matrix_build_identity", 0);
+            DefineFunction("matrix_build_projection_ortho", 4);
+            DefineFunction("matrix_build_projection_perspective", 4);
+            DefineFunction("matrix_build_projection_perspective_fov", 4);
+            DefineFunction("matrix_transform_vertex", 4);
+        }
         DefineFunction("matrix_multiply", 2);
-        DefineFunction("matrix_transform_vertex", 4);
-        DefineFunction("matrix_stack_push");
-        DefineFunction("matrix_stack_pop", 0);
-        DefineFunction("matrix_stack_set", 1);
-        DefineFunction("matrix_stack_clear", 0);
-        DefineFunction("matrix_stack_top", 0);
-        DefineFunction("matrix_stack_is_empty", 0);
-        if (data?.GeneralInfo?.Major < 2)
+        if (gms2)
+        {
+            DefineFunction("matrix_stack_push");
+            DefineFunction("matrix_stack_pop", 0);
+            DefineFunction("matrix_stack_set", 1);
+            DefineFunction("matrix_stack_clear", 0);
+            DefineFunction("matrix_stack_top", 0);
+            DefineFunction("matrix_stack_is_empty", 0);
+        }
+        if (!gms2)
         {
             DefineFunction("d3d_start", 0);
             DefineFunction("d3d_end", 0);
@@ -267,8 +356,11 @@ public class BuiltinList : IBuiltins
             DefineFunction("d3d_model_clear", 1);
             DefineFunction("d3d_model_load", 2);
             DefineFunction("d3d_model_save", 2);
-            DefineFunction("d3d_model_load_buffer", 2);
-            DefineFunction("d3d_model_save_buffer", 2);
+            if (wad >= 16)
+            {
+                DefineFunction("d3d_model_load_buffer", 2);
+                DefineFunction("d3d_model_save_buffer", 2);
+            }
             DefineFunction("d3d_model_draw", 5);
             DefineFunction("d3d_model_primitive_begin", 2);
             DefineFunction("d3d_model_primitive_end", 1);
@@ -296,7 +388,7 @@ public class BuiltinList : IBuiltins
             DefineFunction("d3d_light_enable", 2);
             DefineFunction("d3d_set_lighting", 1);
         }
-        if (data?.GeneralInfo?.Major < 2)
+        if (!gms2_3) 
         {
             DefineFunction("action_path_old", 3);
             DefineFunction("action_set_sprite", 2);
@@ -505,8 +597,11 @@ public class BuiltinList : IBuiltins
         DefineFunction("ds_map_read");
         DefineFunction("ds_map_secure_save", 2);
         DefineFunction("ds_map_secure_load", 1);
-        DefineFunction("ds_map_secure_load_buffer", 1);
-        DefineFunction("ds_map_secure_save_buffer", 2);
+        if (wad >= 16)
+        {
+            DefineFunction("ds_map_secure_load_buffer", 1);
+            DefineFunction("ds_map_secure_save_buffer", 2);
+        }
         DefineFunction("ds_map_set", 3);
         DefineFunction("ds_map_set_pre", 3);
         DefineFunction("ds_map_set_post", 3);
@@ -587,17 +682,20 @@ public class BuiltinList : IBuiltins
         DefineFunction("file_text_write_string", 2);
         DefineFunction("file_text_write_real", 2);
         DefineFunction("file_text_writeln", 1);
-        DefineFunction("file_open_read", 1);
-        DefineFunction("file_open_write", 1);
-        DefineFunction("file_open_append", 1);
-        DefineFunction("file_close", 0);
-        DefineFunction("file_read_string", 0);
-        DefineFunction("file_read_real", 0);
-        DefineFunction("file_readln", 0);
-        DefineFunction("file_eof", 0);
-        DefineFunction("file_write_string", 1);
-        DefineFunction("file_write_real", 1);
-        DefineFunction("file_writeln", 0);
+        if (!gms2_3)
+        {
+            DefineFunction("file_open_read", 1);
+            DefineFunction("file_open_write", 1);
+            DefineFunction("file_open_append", 1);
+            DefineFunction("file_close", 0);
+            DefineFunction("file_read_string", 0);
+            DefineFunction("file_read_real", 0);
+            DefineFunction("file_readln", 0);
+            DefineFunction("file_eof", 0);
+            DefineFunction("file_write_string", 1);
+            DefineFunction("file_write_real", 1);
+            DefineFunction("file_writeln", 0);
+        }
         DefineFunction("file_exists", 1);
         DefineFunction("file_delete", 1);
         DefineFunction("file_rename", 2);
@@ -636,7 +734,10 @@ public class BuiltinList : IBuiltins
         DefineFunction("json_encode", 1);
         DefineFunction("json_decode", 1);
         DefineFunction("zip_unzip", 2);
-        DefineFunction("load_csv", 1);
+        if (wad >= 16)
+        {
+            DefineFunction("load_csv", 1);
+        }
         DefineFunction("move_random", 2);
         DefineFunction("place_free", 2);
         DefineFunction("place_empty");
@@ -644,12 +745,18 @@ public class BuiltinList : IBuiltins
         DefineFunction("place_snapped", 2);
         DefineFunction("move_snap", 2);
         DefineFunction("move_towards_point", 3);
-        DefineFunction("move_contact", 1);
+        if (!gms2_3)
+        {
+            DefineFunction("move_contact", 1);
+        }
         DefineFunction("move_contact_solid", 2);
         DefineFunction("move_contact_all", 2);
         DefineFunction("move_outside_solid", 2);
         DefineFunction("move_outside_all", 2);
-        DefineFunction("move_bounce", 1);
+        if (!gms2_3)
+        {
+            DefineFunction("move_bounce", 1);
+        }
         DefineFunction("move_bounce_solid", 1);
         DefineFunction("move_bounce_all", 1);
         DefineFunction("move_wrap", 3);
@@ -681,16 +788,22 @@ public class BuiltinList : IBuiltins
         DefineFunction("mp_grid_draw", 1);
         DefineFunction("mp_grid_to_ds_grid", 2);
         DefineFunction("collision_point", 5);
-        DefineFunction("collision_point_list", 7);
         DefineFunction("collision_rectangle", 7);
-        DefineFunction("collision_rectangle_list", 9);
         DefineFunction("collision_circle", 6);
-        DefineFunction("collision_circle_list", 8);
         DefineFunction("collision_ellipse", 7);
-        DefineFunction("collision_ellipse_list", 9);
         DefineFunction("collision_line", 7);
-        DefineFunction("collision_line_list", 9);
-        DefineFunction("collision_shape", 9);
+        if (gms2) 
+        {
+            DefineFunction("collision_point_list", 7);
+            DefineFunction("collision_rectangle_list", 9);
+            DefineFunction("collision_circle_list", 8);
+            DefineFunction("collision_ellipse_list", 9);
+            DefineFunction("collision_line_list", 9);
+        }
+        if (wad >= 16 && !gms2_3)
+        {
+            DefineFunction("collision_shape", 9);
+        }
         DefineFunction("point_in_rectangle", 6);
         DefineFunction("point_in_triangle", 8);
         DefineFunction("point_in_circle", 5);
@@ -701,35 +814,47 @@ public class BuiltinList : IBuiltins
         DefineFunction("instance_exists", 1);
         DefineFunction("instance_number", 1);
         DefineFunction("instance_position", 3);
-        DefineFunction("instance_position_list", 5);
+        if (gms2)
+        {
+            DefineFunction("instance_position_list", 5);
+            DefineFunction("instance_place_list", 5);
+        }
         DefineFunction("instance_nearest", 3);
         DefineFunction("instance_furthest", 3);
         DefineFunction("instance_place", 3);
-        DefineFunction("instance_place_list", 5);
-        if (data?.GeneralInfo?.Major < 2)
+        if (!gms2)
         {
             DefineFunction("instance_create", 3);
         }
-        DefineFunction("instance_create_depth", 4);
-        DefineFunction("instance_create_layer", 4);
+        if (wad >= 16)
+        {
+            DefineFunction("instance_create_depth", 4);
+            DefineFunction("instance_create_layer", 4);
+            DefineFunction("instance_id_get", 1);
+            DefineFunction("instance_activate_layer", 1);
+            if (!gms2_3) 
+            {
+                DefineFunction("instance_deactivate_region_special", 8);
+            }
+        }
         DefineFunction("instance_copy", 1);
         DefineFunction("instance_change", 2);
         DefineFunction("instance_destroy");
-        DefineFunction("instance_sprite", 1);
+        if (!gms2_3)
+        {
+            DefineFunction("instance_sprite", 1);
+        }
         DefineFunction("position_empty", 2);
         DefineFunction("position_meeting", 3);
         DefineFunction("position_destroy", 2);
         DefineFunction("position_change", 4);
-        DefineFunction("instance_id_get", 1);
         DefineFunction("instance_deactivate_all", 1);
         DefineFunction("instance_deactivate_object", 1);
         DefineFunction("instance_deactivate_region", 6);
-        DefineFunction("instance_deactivate_region_special", 8);
         DefineFunction("instance_deactivate_layer", 1);
         DefineFunction("instance_activate_all", 0);
         DefineFunction("instance_activate_object", 1);
         DefineFunction("instance_activate_region", 5);
-        DefineFunction("instance_activate_layer", 1);
         DefineFunction("room_goto", 1);
         DefineFunction("room_goto_previous", 0);
         DefineFunction("room_goto_next", 0);
@@ -754,15 +879,27 @@ public class BuiltinList : IBuiltins
         DefineFunction("draw_enable_drawevent", 1);
         DefineFunction("device_mouse_x_to_gui", 1);
         DefineFunction("device_mouse_y_to_gui", 1);
-        DefineFunction("display_get_windows_vertex_buffer_method", 0);
-        DefineFunction("display_get_windows_alternate_sync", 0);
-        DefineFunction("display_set_windows_vertex_buffer_method", 1);
-        DefineFunction("display_set_windows_alternate_sync", 1);
-        DefineFunction("display_set_ui_visibility", 1);
-        DefineFunction("display_set_timing_method", 1);
-        DefineFunction("display_get_timing_method", 0);
-        DefineFunction("display_set_sleep_margin", 1);
-        DefineFunction("display_get_sleep_margin", 0);
+        if (wad >= 15)
+        {
+            DefineFunction("display_set_windows_alternate_sync", 1);
+            if (!gms2_3)
+            {
+                DefineFunction("display_get_windows_vertex_buffer_method", 0);
+                DefineFunction("display_get_windows_alternate_sync", 0);
+                DefineFunction("display_set_windows_vertex_buffer_method", 1);
+            }
+        }
+        if (wad >= 16)
+        {
+            DefineFunction("display_set_ui_visibility", 1);
+        }
+        if (gms2)
+        {
+            DefineFunction("display_set_timing_method", 1);
+            DefineFunction("display_get_timing_method", 0);
+            DefineFunction("display_set_sleep_margin", 1);
+            DefineFunction("display_get_sleep_margin", 0);
+        }
         DefineFunction("window_set_fullscreen", 1);
         DefineFunction("window_get_fullscreen", 0);
         DefineFunction("window_set_caption", 1);
@@ -804,7 +941,11 @@ public class BuiltinList : IBuiltins
         DefineFunction("draw_get_colour", 0);
         DefineFunction("draw_get_alpha", 0);
         DefineFunction("merge_color", 3);
-        DefineFunction("make_color", 3);
+        if (!gms2_3)
+        {
+            DefineFunction("make_color", 3);
+            DefineFunction("make_colour", 3);
+        }
         DefineFunction("make_color_rgb", 3);
         DefineFunction("make_color_hsv", 3);
         DefineFunction("color_get_red", 1);
@@ -814,7 +955,6 @@ public class BuiltinList : IBuiltins
         DefineFunction("color_get_saturation", 1);
         DefineFunction("color_get_value", 1);
         DefineFunction("merge_colour", 3);
-        DefineFunction("make_colour", 3);
         DefineFunction("make_colour_rgb", 3);
         DefineFunction("make_colour_hsv", 3);
         DefineFunction("colour_get_red", 1);
@@ -823,7 +963,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("colour_get_hue", 1);
         DefineFunction("colour_get_saturation", 1);
         DefineFunction("colour_get_value", 1);
-        if (data?.GeneralInfo?.Major < 2)
+        if (!gms2_3)
         {
             DefineFunction("draw_set_blend_mode", 1);
             DefineFunction("draw_set_blend_mode_ext", 2);
@@ -878,7 +1018,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("draw_vertex_texture_color", 6);
         DefineFunction("draw_vertex_texture_colour", 6);
         DefineFunction("sprite_get_uvs", 2);
-        if (data?.GeneralInfo?.Major < 2)
+        if (!gms2_3)
         {
             DefineFunction("background_get_uvs", 1);
             DefineFunction("background_get_texture", 1);
@@ -891,12 +1031,18 @@ public class BuiltinList : IBuiltins
         DefineFunction("font_get_uvs", 1);
         DefineFunction("sprite_get_texture", 2);
         DefineFunction("font_get_texture", 1);
-        DefineFunction("texture_exists", 1);
+        if (!gms2_3)
+        {
+            DefineFunction("texture_exists", 1);
+        }
         DefineFunction("texture_get_width", 1);
         DefineFunction("texture_get_height", 1);
-        DefineFunction("texture_global_scale", 1);
-        DefineFunction("texture_get_uvs", 1);
-        if (data?.GeneralInfo?.Major >= 2)
+        if (wad >= 16)
+        {
+            DefineFunction("texture_global_scale", 1);
+            DefineFunction("texture_get_uvs", 1);
+        }
+        if (gms2_3)
         {
             DefineFunction("texture_prefetch", 1);
             DefineFunction("texture_flush", 1);
@@ -907,7 +1053,7 @@ public class BuiltinList : IBuiltins
             DefineFunction("texturegroup_get_fonts", 1);
             DefineFunction("texturegroup_get_tilesets", 1);
         }
-        if (data?.GeneralInfo?.Major >= 2 || data?.GeneralInfo?.Minor >= 3) // Since 1.3?
+        if (gms2 || (major == 1 && minor >= 3))
         {
             DefineFunction("draw_enable_swf_aa", 1);
             DefineFunction("draw_set_swf_aa_level", 1);
@@ -936,8 +1082,11 @@ public class BuiltinList : IBuiltins
         DefineFunction("draw_self", 0);
         DefineFunction("draw_sprite", 4);
         DefineFunction("draw_sprite_pos", 11);
-        DefineFunction("draw_shape", 12);
-        DefineFunction("draw_shape_string", 11);
+        if (wad >= 16 && !gms2_3)
+        {
+            DefineFunction("draw_shape", 12);
+            DefineFunction("draw_shape_string", 11);
+        }
         DefineFunction("draw_sprite_ext", 9);
         DefineFunction("draw_sprite_stretched", 6);
         DefineFunction("draw_sprite_stretched_ext", 8);
@@ -946,7 +1095,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("draw_sprite_general", 16);
         DefineFunction("draw_sprite_tiled", 4);
         DefineFunction("draw_sprite_tiled_ext", 8);
-        if (data?.GeneralInfo?.Major < 2)
+        if (!gms2) // (runner accepts until gms2_3)
         {
             DefineFunction("draw_background", 3);
             DefineFunction("draw_background_ext", 8);
@@ -957,9 +1106,6 @@ public class BuiltinList : IBuiltins
             DefineFunction("draw_background_general", 15);
             DefineFunction("draw_background_tiled", 3);
             DefineFunction("draw_background_tiled_ext", 7);
-        }
-        if (data?.GeneralInfo?.Major < 2)
-        {
             DefineFunction("tile_get_x", 1);
             DefineFunction("tile_get_y", 1);
             DefineFunction("tile_get_left", 1);
@@ -1000,7 +1146,10 @@ public class BuiltinList : IBuiltins
         }
         DefineFunction("surface_create", 2);
         DefineFunction("surface_create_ext", 3);
-        DefineFunction("surface_create_special", 3);
+        if (wad >= 16 && !gms2_3)
+        {
+            DefineFunction("surface_create_special", 3);
+        }
         DefineFunction("surface_resize", 3);
         DefineFunction("surface_free", 1);
         DefineFunction("surface_exists", 1);
@@ -1053,7 +1202,10 @@ public class BuiltinList : IBuiltins
         DefineFunction("get_integer_async", 2);
         DefineFunction("get_string_async", 2);
         DefineFunction("get_login_async", 2);
-        DefineFunction("get_color", 1);
+        if (!gms2_3)
+        {
+            DefineFunction("get_color", 1);
+        }
         DefineFunction("get_open_filename", 2);
         DefineFunction("get_save_filename", 2);
         DefineFunction("get_open_filename_ext", 4);
@@ -1074,14 +1226,14 @@ public class BuiltinList : IBuiltins
         DefineFunction("mouse_check_button_released", 1);
         DefineFunction("mouse_wheel_up", 0);
         DefineFunction("mouse_wheel_down", 0);
-        if (data?.GeneralInfo?.Major >= 2)
+        if (gms2)
         {
             DefineFunction("keyboard_virtual_show", 4);
             DefineFunction("keyboard_virtual_hide", 0);
             DefineFunction("keyboard_virtual_status", 0);
             DefineFunction("keyboard_virtual_height", 0);
         }
-        if (data?.GeneralInfo?.Major < 2)
+        if (!gms2)
         {
             DefineFunction("joystick_exists", 1, FunctionClassification.Joystick);
             DefineFunction("joystick_direction", 1, FunctionClassification.Joystick);
@@ -1102,11 +1254,14 @@ public class BuiltinList : IBuiltins
         DefineFunction("mouse_clear", 1);
         DefineFunction("io_clear", 0);
         DefineFunction("device_mouse_dbclick_enable", 1);
-        DefineFunction("gpio_set", 2);
-        DefineFunction("gpio_clear", 1);
-        DefineFunction("gpio_get", 1);
-        DefineFunction("gpio_set_mode", 2);
-        if (data?.GeneralInfo?.Major >= 2)
+        if (wad >= 16 && !gms2_3)
+        {
+            DefineFunction("gpio_set", 2);
+            DefineFunction("gpio_clear", 1);
+            DefineFunction("gpio_get", 1);
+            DefineFunction("gpio_set_mode", 2);
+        }
+        if (gms2)
         {
             DefineFunction("gesture_drag_time", 1);
             DefineFunction("gesture_drag_distance", 1);
@@ -1131,7 +1286,10 @@ public class BuiltinList : IBuiltins
             DefineFunction("gesture_get_rotate_angle", 0);
             DefineFunction("gesture_get_tap_count", 0);
         }
-        DefineFunction("is_bool", 1);
+        if (wad >= 15)
+        {
+            DefineFunction("is_bool", 1);
+        }
         DefineFunction("is_real", 1);
         DefineFunction("is_string", 1);
         DefineFunction("is_array", 1);
@@ -1142,7 +1300,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("is_vec3", 1);
         DefineFunction("is_vec4", 1);
         DefineFunction("is_matrix", 1);
-        if (data?.IsVersionAtLeast(2, 3) == true)
+        if (gms2_3)
         {
             DefineFunction("is_numeric", 1);
             DefineFunction("is_nan", 1);
@@ -1164,10 +1322,14 @@ public class BuiltinList : IBuiltins
         DefineFunction("array_set_2D_pre", 4);
         DefineFunction("array_set_2D_post", 4);
         DefineFunction("array_get_2D", 3);
-        DefineFunction("array_equals", 2);
-        DefineFunction("array_create");
-        DefineFunction("array_copy", 5);
-        if (data?.IsVersionAtLeast(2, 3) == true)
+        if (wad >= 16) 
+        {
+            DefineFunction("array_equals", 2);
+            DefineFunction("array_create");
+            DefineFunction("array_copy", 5);
+            DefineFunction("typeof", 1);
+        }
+        if (gms2_3)
         {
             DefineFunction("array_length", 1);
             DefineFunction("array_resize", 2);
@@ -1209,15 +1371,17 @@ public class BuiltinList : IBuiltins
             DefineFunction("instanceof", 1);
             DefineFunction("exception_unhandled_handler", 1);
         }
-        DefineFunction("typeof", 1);
         DefineFunction("variable_global_exists", 1);
         DefineFunction("variable_global_get", 1);
         DefineFunction("variable_global_set", 2);
-        DefineFunction("variable_instance_exists", 2);
-        DefineFunction("variable_instance_get", 2);
-        DefineFunction("variable_instance_set", 3);
-        DefineFunction("variable_instance_get_names", 1);
-        if (data?.IsVersionAtLeast(2, 3) == true)
+        if (wad >= 16)
+        {
+            DefineFunction("variable_instance_exists", 2);
+            DefineFunction("variable_instance_get", 2);
+            DefineFunction("variable_instance_set", 3);
+            DefineFunction("variable_instance_get_names", 1);
+        }
+        if (gms2_3)
         {
             DefineFunction("variable_instance_names_count", 1);
             DefineFunction("variable_struct_exists", 2);
@@ -1238,8 +1402,14 @@ public class BuiltinList : IBuiltins
         DefineFunction("random_set_seed", 1);
         DefineFunction("random_get_seed", 0);
         DefineFunction("randomize", 0);
-        DefineFunction("randomise", 0);
-        DefineFunction("random_use_old_version", 1);
+        if (wad >= 16)
+        {
+            DefineFunction("randomise", 0);
+        }
+        if (wad >= 15 && !gms2_3)
+        {
+            DefineFunction("random_use_old_version", 1);
+        }
         DefineFunction("abs", 1);
         DefineFunction("round", 1);
         DefineFunction("floor", 1);
@@ -1272,8 +1442,11 @@ public class BuiltinList : IBuiltins
         DefineFunction("logn", 2);
         DefineFunction("min");
         DefineFunction("max");
-        DefineFunction("min3", 3);
-        DefineFunction("max3", 3);
+        if (!gms2_3)
+        {
+            DefineFunction("min3", 3);
+            DefineFunction("max3", 3);
+        }
         DefineFunction("mean");
         DefineFunction("median");
         DefineFunction("choose");
@@ -1283,13 +1456,19 @@ public class BuiltinList : IBuiltins
         DefineFunction("dot_product_3d", 6);
         DefineFunction("dot_product_normalised", 4);
         DefineFunction("dot_product_3d_normalised", 6);
-        DefineFunction("dot_product_normalized", 4);
-        DefineFunction("dot_product_3d_normalized", 6);
+        if (wad >= 16)
+        {
+            DefineFunction("dot_product_normalized", 4);
+            DefineFunction("dot_product_3d_normalized", 6);
+        }
         DefineFunction("math_set_epsilon", 1);
         DefineFunction("math_get_epsilon", 0);
         DefineFunction("angle_difference", 2);
         DefineFunction("real", 1);
-        DefineFunction("bool", 1);
+        if (gms2)
+        {
+            DefineFunction("bool", 1);
+        }
         DefineFunction("string", 1);
         DefineFunction("int64", 1);
         DefineFunction("ptr", 1);
@@ -1316,8 +1495,11 @@ public class BuiltinList : IBuiltins
         DefineFunction("string_replace", 3);
         DefineFunction("string_replace_all", 3);
         DefineFunction("string_count", 2);
-        DefineFunction("string_hash_to_newline", 1);
-        if (data?.IsVersionAtLeast(2, 3) == true)
+        if (wad >= 16)
+        {
+            DefineFunction("string_hash_to_newline", 1);
+        }
+        if (gms2_3)
         {
             DefineFunction("string_pos_ext", 3);
             DefineFunction("string_last_pos", 2);
@@ -1335,7 +1517,6 @@ public class BuiltinList : IBuiltins
             DefineFunction("string_concat");
             DefineFunction("string_concat_ext", 1);
             DefineFunction("string_foreach", 2);
-
         }
         DefineFunction("point_distance", 4);
         DefineFunction("point_distance_3d", 6);
@@ -1349,33 +1530,42 @@ public class BuiltinList : IBuiltins
         DefineFunction("external_define");
         DefineFunction("external_call");
         DefineFunction("external_free", 1);
-        DefineFunction("external_define0", 3);
-        DefineFunction("external_call0", 1);
-        DefineFunction("external_define1", 4);
-        DefineFunction("external_call1", 2);
-        DefineFunction("external_define2", 5);
-        DefineFunction("external_call2", 3);
-        DefineFunction("external_define3", 6);
-        DefineFunction("external_call3", 4);
-        DefineFunction("external_define4", 7);
-        DefineFunction("external_call4", 5);
-        DefineFunction("external_define5", 3);
-        DefineFunction("external_call5", 6);
-        DefineFunction("external_define6", 3);
-        DefineFunction("external_call6", 7);
-        DefineFunction("external_define7", 3);
-        DefineFunction("external_call7", 8);
-        DefineFunction("external_define8", 3);
-        DefineFunction("external_call8", 9);
+        if (!gms2_3)
+        {
+            DefineFunction("external_define0", 3);
+            DefineFunction("external_call0", 1);
+            DefineFunction("external_define1", 4);
+            DefineFunction("external_call1", 2);
+            DefineFunction("external_define2", 5);
+            DefineFunction("external_call2", 3);
+            DefineFunction("external_define3", 6);
+            DefineFunction("external_call3", 4);
+            DefineFunction("external_define4", 7);
+            DefineFunction("external_call4", 5);
+            DefineFunction("external_define5", 3);
+            DefineFunction("external_call5", 6);
+            DefineFunction("external_define6", 3);
+            DefineFunction("external_call6", 7);
+            DefineFunction("external_define7", 3);
+            DefineFunction("external_call7", 8);
+            DefineFunction("external_define8", 3);
+            DefineFunction("external_call8", 9);
+        }
         DefineFunction("window_handle", 0);
         DefineFunction("window_device", 0);
         DefineFunction("logical_xor", 2);
-        DefineFunction("debug_get_callstack");
+        if (wad >= 16)
+        {
+            DefineFunction("debug_get_callstack");
+            DefineFunction("debug_event", 1);
+        }
         DefineFunction("show_debug_message", 1);
         DefineFunction("show_debug_overlay", 1);
-        DefineFunction("debug_event", 1);
-        DefineFunction("alarm_get", 1);
-        DefineFunction("alarm_set", 2);
+        if (wad >= 15)
+        {
+            DefineFunction("alarm_get", 1);
+            DefineFunction("alarm_set", 2);
+        }
         DefineFunction("clipboard_has_text", 0);
         DefineFunction("clipboard_set_text", 1);
         DefineFunction("clipboard_get_text", 0);
@@ -1422,8 +1612,11 @@ public class BuiltinList : IBuiltins
         DefineFunction("date_is_today", 1);
         DefineFunction("date_set_timezone", 1);
         DefineFunction("date_get_timezone", 0);
-        DefineFunction("game_set_speed", 2);
-        DefineFunction("game_get_speed", 1);
+        if (wad >= 16)
+        {
+            DefineFunction("game_set_speed", 2);
+            DefineFunction("game_get_speed", 1);
+        }
         DefineFunction("part_type_create", 0);
         DefineFunction("part_type_destroy", 1);
         DefineFunction("part_type_exists", 1);
@@ -1445,18 +1638,21 @@ public class BuiltinList : IBuiltins
         DefineFunction("part_type_color1", 2);
         DefineFunction("part_type_color2", 3);
         DefineFunction("part_type_color3", 4);
-        DefineFunction("part_type_color", 4);
+        if (!gms2_3) 
+        {
+            DefineFunction("part_type_color", 4);
+            DefineFunction("part_type_colour", 4);
+            DefineFunction("part_type_alpha", 4);
+        }
         DefineFunction("part_type_colour_mix", 3);
         DefineFunction("part_type_colour_rgb", 7);
         DefineFunction("part_type_colour_hsv", 7);
         DefineFunction("part_type_colour1", 2);
         DefineFunction("part_type_colour2", 3);
         DefineFunction("part_type_colour3", 4);
-        DefineFunction("part_type_colour", 4);
         DefineFunction("part_type_alpha1", 2);
         DefineFunction("part_type_alpha2", 3);
         DefineFunction("part_type_alpha3", 4);
-        DefineFunction("part_type_alpha", 4);
         DefineFunction("part_type_blend", 2);
         DefineFunction("part_system_create", 0);
         DefineFunction("part_system_destroy", 1);
@@ -1469,7 +1665,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("part_system_automatic_draw", 2);
         DefineFunction("part_system_update", 1);
         DefineFunction("part_system_drawit", 1);
-        if (data?.GeneralInfo?.Major >= 2)
+        if (gms2)
         {
             DefineFunction("part_system_create_layer", 2);
             DefineFunction("part_system_get_layer", 1);
@@ -1491,15 +1687,23 @@ public class BuiltinList : IBuiltins
         DefineFunction("effect_create_below", 5);
         DefineFunction("effect_create_above", 5);
         DefineFunction("effect_clear", 0);
-        DefineFunction("sprite_name", 1);
+        if (!gm2022_1)
+        {
+            DefineFunction("sprite_name", 1);
+        }
         DefineFunction("sprite_exists", 1);
         DefineFunction("sprite_get_name", 1);
         DefineFunction("sprite_get_number", 1);
         DefineFunction("sprite_get_width", 1);
         DefineFunction("sprite_get_height", 1);
-        DefineFunction("sprite_get_transparent", 1);
-        DefineFunction("sprite_get_smooth", 1);
-        DefineFunction("sprite_get_preload", 1);
+        if (!gms2_3)
+        {
+            DefineFunction("sprite_get_transparent", 1);
+            DefineFunction("sprite_get_smooth", 1);
+            DefineFunction("sprite_get_preload", 1);
+            DefineFunction("sprite_get_precise", 1);
+            DefineFunction("sprite_set_precise", 2);
+        }
         DefineFunction("sprite_get_xoffset", 1);
         DefineFunction("sprite_get_yoffset", 1);
         DefineFunction("sprite_get_bbox_mode", 1);
@@ -1507,13 +1711,11 @@ public class BuiltinList : IBuiltins
         DefineFunction("sprite_get_bbox_right", 1);
         DefineFunction("sprite_get_bbox_top", 1);
         DefineFunction("sprite_get_bbox_bottom", 1);
-        DefineFunction("sprite_get_precise", 1);
         DefineFunction("sprite_collision_mask", 9);
         DefineFunction("sprite_get_tpe", 2);
         DefineFunction("sprite_set_offset", 3);
         DefineFunction("sprite_set_bbox_mode", 2);
         DefineFunction("sprite_set_bbox", 5);
-        DefineFunction("sprite_set_precise", 2);
         DefineFunction("sprite_set_alpha_from_sprite", 2);
         DefineFunction("sprite_add", 6);
         DefineFunction("sprite_replace", 7);
@@ -1530,17 +1732,23 @@ public class BuiltinList : IBuiltins
         DefineFunction("sprite_set_cache_size", 2);
         DefineFunction("sprite_set_cache_size_ext", 3);
         DefineFunction("font_set_cache_size", 2);
-        DefineFunction("sprite_prefetch", 1);
-        DefineFunction("sprite_prefetch_multi", 1);
-        DefineFunction("sprite_flush", 1);
-        DefineFunction("sprite_flush_multi", 1);
-        if (data?.GeneralInfo?.Major >= 2)
+        if (wad >= 15)
+        {
+            DefineFunction("sprite_prefetch", 1);
+            DefineFunction("sprite_prefetch_multi", 1);
+        }
+        if (wad >= 16)
+        {
+            DefineFunction("sprite_flush", 1);
+            DefineFunction("sprite_flush_multi", 1);
+        }
+        if (gms2)
         {
             DefineFunction("sprite_set_speed", 3);
             DefineFunction("sprite_get_speed_type", 1);
             DefineFunction("sprite_get_speed", 1);
         }
-        if (data?.GeneralInfo?.Major < 2)
+        if (!gms2_3)
         {
             DefineFunction("background_name", 1);
             DefineFunction("background_exists", 1);
@@ -1563,12 +1771,18 @@ public class BuiltinList : IBuiltins
             DefineFunction("background_duplicate", 1);
             DefineFunction("background_assign", 2);
             DefineFunction("background_save", 2);
-            DefineFunction("background_prefetch", 1);
-            DefineFunction("background_prefetch_multi", 1);
-            DefineFunction("background_flush", 1);
-            DefineFunction("background_flush_multi", 1);
+            if (wad >= 15)
+            {
+                DefineFunction("background_prefetch", 1);
+                DefineFunction("background_prefetch_multi", 1);
+            }
+            if (wad >= 16)
+            {
+                DefineFunction("background_flush", 1);
+                DefineFunction("background_flush_multi", 1);
+            }
         }
-        if (data?.GeneralInfo?.Major < 2)
+        if (!gms2) // (runner accepts until gms2_3)
         {
             DefineFunction("sound_name", 1);
             DefineFunction("sound_exists", 1);
@@ -1672,8 +1886,16 @@ public class BuiltinList : IBuiltins
         DefineFunction("audio_sync_group_debug", 1);
         DefineFunction("audio_sync_group_is_playing", 1);
         DefineFunction("audio_debug", 1);
-        DefineFunction("audio_delete", 1);
-        DefineFunction("font_name", 1);
+        if (wad >= 16 && !gms2_3)
+        {
+            DefineFunction("audio_delete", 1);
+            DefineFunction("font_set_dynamic_texture_size", 1);
+            DefineFunction("font_get_dynamic_texture_size", 0);
+        }
+        if (!gm2022_1)
+        {
+            DefineFunction("font_name", 1);
+        }
         DefineFunction("font_exists", 1);
         DefineFunction("font_get_name", 1);
         DefineFunction("font_get_fontname", 1);
@@ -1682,10 +1904,11 @@ public class BuiltinList : IBuiltins
         DefineFunction("font_get_italic", 1);
         DefineFunction("font_get_first", 1);
         DefineFunction("font_get_last", 1);
-        DefineFunction("font_set_dynamic_texture_size", 1);
-        DefineFunction("font_get_dynamic_texture_size", 0);
-        DefineFunction("font_add_enable_aa", 1);
-        DefineFunction("font_add_get_enable_aa", 0);
+        if (gms2)
+        {
+            DefineFunction("font_add_enable_aa", 1);
+            DefineFunction("font_add_get_enable_aa", 0);
+        }
         DefineFunction("font_add", 6);
         DefineFunction("font_add_sprite", 4);
         DefineFunction("font_add_sprite_ext", 4);
@@ -1695,11 +1918,17 @@ public class BuiltinList : IBuiltins
         DefineFunction("script_exists", 1);
         DefineFunction("script_get_name", 1);
         DefineFunction("script_execute");
-        DefineFunction("path_name", 1);
+        if (!gm2022_1) 
+        {
+            DefineFunction("path_name", 1);
+        }
         DefineFunction("path_exists", 1);
         DefineFunction("path_get_name", 1);
         DefineFunction("path_get_length", 1);
-        DefineFunction("path_get_time", 2);
+        if (wad >= 15 && !gms2_3)
+        {
+            DefineFunction("path_get_time", 2);
+        }
         DefineFunction("path_get_kind", 1);
         DefineFunction("path_get_closed", 1);
         DefineFunction("path_get_precision", 1);
@@ -1729,7 +1958,10 @@ public class BuiltinList : IBuiltins
         DefineFunction("path_rotate", 2);
         DefineFunction("path_rescale", 3);
         DefineFunction("path_shift", 3);
-        DefineFunction("timeline_name", 1);
+        if (!gm2022_1)
+        {
+            DefineFunction("timeline_name", 1);
+        }
         DefineFunction("timeline_exists", 1);
         DefineFunction("timeline_get_name", 1);
         DefineFunction("timeline_add", 0);
@@ -1739,13 +1971,16 @@ public class BuiltinList : IBuiltins
         DefineFunction("timeline_moment_add_script", 3);
         DefineFunction("timeline_size", 1);
         DefineFunction("timeline_max_moment", 1);
-        DefineFunction("object_name", 1);
+        if (!gm2022_1)
+        {
+            DefineFunction("object_name", 1);
+        }
         DefineFunction("object_exists", 1);
         DefineFunction("object_get_name", 1);
         DefineFunction("object_get_sprite", 1);
         DefineFunction("object_get_solid", 1);
         DefineFunction("object_get_visible", 1);
-        if (data?.GeneralInfo?.Major < 2)
+        if (!gms2)
         {
             DefineFunction("object_set_depth", 2);
             DefineFunction("object_get_depth", 1);
@@ -1760,8 +1995,14 @@ public class BuiltinList : IBuiltins
         DefineFunction("object_set_visible", 2);
         DefineFunction("object_set_persistent", 2);
         DefineFunction("object_set_mask", 2);
-        DefineFunction("object_set_collisions", 2);
-        DefineFunction("room_name", 1);
+        if (wad >= 16 && !gms2_3)
+        {
+            DefineFunction("object_set_collisions", 2);
+        }
+        if (!gms2_3)
+        {
+            DefineFunction("room_name", 1);
+        }
         DefineFunction("room_exists", 1);
         DefineFunction("room_get_name", 1);
         DefineFunction("room_set_width", 2);
@@ -1769,12 +2010,15 @@ public class BuiltinList : IBuiltins
         DefineFunction("room_set_persistent", 2);
         DefineFunction("room_set_background_color", 3);
         DefineFunction("room_set_background_colour", 3);
-        if (data?.GeneralInfo?.Major < 2)
+        if (!gms2) // (runner accepts until gms2_3)
         {
             DefineFunction("room_set_background", 12);
+        }
+        if (!gms2)
+        {
             DefineFunction("room_set_view", 16);
         }
-        if (data?.GeneralInfo?.Major >= 2)
+        if (gms2)
         {
             DefineFunction("room_set_viewport", 7);
             DefineFunction("room_get_viewport", 2);
@@ -1787,18 +2031,18 @@ public class BuiltinList : IBuiltins
         DefineFunction("room_instance_clear", 1);
         DefineFunction("asset_get_index", 1);
         DefineFunction("asset_get_type", 1);
-        if (data?.GeneralInfo?.Major < 2)
+        if (!gms2) // (runner accepts until gms2_3)
         {
             DefineFunction("room_tile_add", 9);
             DefineFunction("room_tile_add_ext", 12);
             DefineFunction("room_tile_clear", 1);
         }
-        if (data?.GeneralInfo?.Major >= 2)
+        if (gms2)
         {
             DefineFunction("room_get_camera", 2);
             DefineFunction("room_set_camera", 3);
         }
-        if (data?.GeneralInfo?.Major < 2)
+        if (!gms2) // (runner accepts until gms2_3)
         {
             DefineFunction("sound_play", 1);
             DefineFunction("sound_loop", 1);
@@ -1840,31 +2084,39 @@ public class BuiltinList : IBuiltins
         DefineFunction("url_open", 1);
         DefineFunction("url_open_ext", 2);
         DefineFunction("url_open_full", 3);
-        DefineFunction("ads_setup", 2);
-        DefineFunction("ads_engagement_launch", 0);
-        DefineFunction("ads_engagement_available", 0);
-        DefineFunction("ads_engagement_active", 0);
-        DefineFunction("ads_get_display_height", 1);
-        DefineFunction("ads_get_display_width", 1);
-        DefineFunction("ads_move", 3);
-        DefineFunction("ads_interstitial_available", 0);
-        DefineFunction("ads_interstitial_display", 0);
-        DefineFunction("ads_enable", 3);
-        DefineFunction("ads_disable", 1);
-        DefineFunction("ads_event", 1);
-        DefineFunction("ads_event_preload", 1);
+        if (!gm2022_1)
+        {
+            DefineFunction("ads_setup", 2);
+            DefineFunction("ads_engagement_launch", 0);
+            DefineFunction("ads_engagement_available", 0);
+            DefineFunction("ads_engagement_active", 0);
+            DefineFunction("ads_get_display_height", 1);
+            DefineFunction("ads_get_display_width", 1);
+            DefineFunction("ads_move", 3);
+            DefineFunction("ads_interstitial_available", 0);
+            DefineFunction("ads_interstitial_display", 0);
+            DefineFunction("ads_enable", 3);
+            DefineFunction("ads_disable", 1);
+            DefineFunction("ads_event", 1);
+            DefineFunction("ads_event_preload", 1);
+            DefineFunction("ads_set_reward_callback", 1);
+        }
         DefineFunction("shop_leave_rating", 4);
         DefineFunction("analytics_event", 1);
         DefineFunction("analytics_event_ext");
-        DefineFunction("ads_set_reward_callback", 1);
-        if (data?.GeneralInfo?.Major < 2)
+        if (!gms2)
         {
             DefineFunction("draw_enable_alphablend", 1);
         }
         DefineFunction("draw_texture_flush", 0);
         DefineFunction("draw_flush", 0);
-        if (data?.GeneralInfo?.Major >= 2)
+        if (gms2)
         {
+            if (!gms2_3) 
+            {
+                DefineFunction("gpu_get_alphatestfunc", 0);
+                DefineFunction("gpu_set_alphatestfunc", 1);
+            }
             DefineFunction("gpu_set_blendenable", 1);
             DefineFunction("gpu_set_ztestenable", 1);
             DefineFunction("gpu_set_zfunc", 1);
@@ -1878,7 +2130,6 @@ public class BuiltinList : IBuiltins
             DefineFunction("gpu_set_colourwriteenable");
             DefineFunction("gpu_set_alphatestenable", 1);
             DefineFunction("gpu_set_alphatestref", 1);
-            DefineFunction("gpu_set_alphatestfunc", 1);
             DefineFunction("gpu_set_texfilter", 1);
             DefineFunction("gpu_set_texfilter_ext", 2);
             DefineFunction("gpu_set_texrepeat", 1);
@@ -1916,7 +2167,6 @@ public class BuiltinList : IBuiltins
             DefineFunction("gpu_get_colourwriteenable", 0);
             DefineFunction("gpu_get_alphatestenable", 0);
             DefineFunction("gpu_get_alphatestref", 0);
-            DefineFunction("gpu_get_alphatestfunc", 0);
             DefineFunction("gpu_get_texfilter", 0);
             DefineFunction("gpu_get_texfilter_ext", 1);
             DefineFunction("gpu_get_texrepeat", 0);
@@ -1955,13 +2205,19 @@ public class BuiltinList : IBuiltins
         DefineFunction("os_get_info", 0);
         DefineFunction("os_get_language", 0);
         DefineFunction("os_get_region", 0);
-        DefineFunction("os_check_permission", 1);
-        DefineFunction("os_request_permission", 1);
+        if (wad >= 16)
+        {
+            DefineFunction("os_check_permission", 1);
+            DefineFunction("os_request_permission", 1);
+        }
         DefineFunction("display_get_dpi_x", 0);
         DefineFunction("display_get_dpi_y", 0);
         DefineFunction("display_set_gui_size", 2);
         DefineFunction("display_set_gui_maximise");
-        DefineFunction("display_set_gui_maximize");
+        if (gms2)
+        {
+            DefineFunction("display_set_gui_maximize");
+        }
         DefineFunction("device_get_tilt_x", 0);
         DefineFunction("device_get_tilt_y", 0);
         DefineFunction("device_get_tilt_z", 0);
@@ -1978,31 +2234,37 @@ public class BuiltinList : IBuiltins
         DefineFunction("iap_status", 0);
         DefineFunction("iap_acquire", 2);
         DefineFunction("iap_consume", 1);
-        DefineFunction("iap_is_purchased", 1);
+        if (!gms2_3)
+        {
+            DefineFunction("iap_is_purchased", 1);
+        }
         DefineFunction("iap_enumerate_products", 1);
         DefineFunction("iap_restore_all", 0);
         DefineFunction("iap_product_details", 2);
         DefineFunction("iap_purchase_details", 2);
-        DefineFunction("iap_store_status", 0);
-        DefineFunction("iap_product_status", 1);
-        DefineFunction("iap_is_downloaded", 1);
-        DefineFunction("iap_event_queue", 0);
-        DefineFunction("iap_files_purchased", 0);
-        DefineFunction("iap_product_files", 2);
-        DefineFunction("facebook_init", 0);
-        DefineFunction("facebook_login", 2);
-        DefineFunction("facebook_status", 0);
-        DefineFunction("facebook_graph_request", 4);
-        DefineFunction("facebook_dialog", 3);
-        DefineFunction("facebook_logout", 0);
-        DefineFunction("facebook_launch_offerwall", 1);
-        DefineFunction("facebook_post_message", 7);
-        DefineFunction("facebook_send_invite", 5);
-        DefineFunction("facebook_user_id", 0);
-        DefineFunction("facebook_accesstoken", 0);
-        DefineFunction("facebook_check_permission", 1);
-        DefineFunction("facebook_request_read_permissions", 1);
-        DefineFunction("facebook_request_publish_permissions", 1);
+        if (!gms2_3)
+        {
+            DefineFunction("iap_store_status", 0);
+            DefineFunction("iap_product_status", 1);
+            DefineFunction("iap_is_downloaded", 1);
+            DefineFunction("iap_event_queue", 0);
+            DefineFunction("iap_files_purchased", 0);
+            DefineFunction("iap_product_files", 2);
+            DefineFunction("facebook_init", 0);
+            DefineFunction("facebook_login", 2);
+            DefineFunction("facebook_status", 0);
+            DefineFunction("facebook_graph_request", 4);
+            DefineFunction("facebook_dialog", 3);
+            DefineFunction("facebook_logout", 0);
+            DefineFunction("facebook_launch_offerwall", 1);
+            DefineFunction("facebook_post_message", 7);
+            DefineFunction("facebook_send_invite", 5);
+            DefineFunction("facebook_user_id", 0);
+            DefineFunction("facebook_accesstoken", 0);
+            DefineFunction("facebook_check_permission", 1);
+            DefineFunction("facebook_request_read_permissions", 1);
+            DefineFunction("facebook_request_publish_permissions", 1);
+        }
         DefineFunction("gamepad_is_supported", 0, FunctionClassification.Gamepad);
         DefineFunction("gamepad_get_device_count", 0, FunctionClassification.Gamepad);
         DefineFunction("gamepad_is_connected", 1, FunctionClassification.Gamepad);
@@ -2024,7 +2286,10 @@ public class BuiltinList : IBuiltins
         DefineFunction("gamepad_add_mapping_from_string", 1, FunctionClassification.Gamepad);
         DefineFunction("gamepad_add_mapping_from_file", 1, FunctionClassification.Gamepad);
         DefineFunction("gamepad_get_database", 0, FunctionClassification.Gamepad);
-        DefineFunction("YoYo_OSPauseEvent", 0);
+        if (!gms2_3)
+        {
+            DefineFunction("YoYo_OSPauseEvent", 0);
+        }
         DefineFunction("os_is_paused", 0);
         DefineFunction("window_has_focus", 0);
         DefineFunction("base64_encode", 1);
@@ -2193,9 +2458,12 @@ public class BuiltinList : IBuiltins
         DefineFunction("gml_pragma");
         DefineFunction("buffer_create", 3);
         DefineFunction("buffer_delete", 1);
-        DefineFunction("buffer_get_type", 1);
-        DefineFunction("buffer_get_alignment", 1);
-        DefineFunction("buffer_exists", 1);
+        if (wad >= 16)
+        {
+            DefineFunction("buffer_get_type", 1);
+            DefineFunction("buffer_get_alignment", 1);
+            DefineFunction("buffer_exists", 1);
+        }
         DefineFunction("buffer_write", 3);
         DefineFunction("buffer_read", 2);
         DefineFunction("buffer_poke", 4);
@@ -2223,14 +2491,20 @@ public class BuiltinList : IBuiltins
         DefineFunction("buffer_async_group_begin", 1);
         DefineFunction("buffer_async_group_end", 0);
         DefineFunction("buffer_async_group_option", 2);
-        DefineFunction("buffer_get_surface", ((data?.IsVersionAtLeast(2, 3, 1) ?? false) ? 3 : 5)); // be more robust here
+        if (major > 2 || (gms2_3 && release >= 1) || (gms2 && minor > 3))
+            DefineFunction("buffer_get_surface", 3);
+        else
+            DefineFunction("buffer_get_surface", 5);
         DefineFunction("buffer_set_surface", 5);
         DefineFunction("buffer_set_network_safe", 2);
         DefineFunction("buffer_create_from_vertex_buffer", 3);
         DefineFunction("buffer_create_from_vertex_buffer_ext", 5);
         DefineFunction("buffer_copy_from_vertex_buffer", 5);
-        DefineFunction("buffer_compress", 3);
-        DefineFunction("buffer_decompress", 1);
+        if (gms2)
+        {
+            DefineFunction("buffer_compress", 3);
+            DefineFunction("buffer_decompress", 1);
+        }
         DefineFunction("network_create_socket", 1);
         DefineFunction("network_create_socket_ext", 2);
         DefineFunction("network_create_server", 3);
@@ -2243,7 +2517,10 @@ public class BuiltinList : IBuiltins
         DefineFunction("network_send_udp", 5);
         DefineFunction("network_send_udp_raw", 5);
         DefineFunction("network_resolve", 1);
-        DefineFunction("network_receive_packet", 3);
+        if (wad < 16)
+        {
+            DefineFunction("network_receive_packet", 3);
+        }
         DefineFunction("network_destroy", 1);
         DefineFunction("network_set_timeout", 3);
         DefineFunction("network_get_address", 1);
@@ -2265,7 +2542,10 @@ public class BuiltinList : IBuiltins
         DefineFunction("steam_file_exists", 1);
         DefineFunction("steam_file_size", 1);
         DefineFunction("steam_file_share", 1);
-        DefineFunction("steam_publish_workshop_file", 4);
+        if (!gms2_3)
+        {
+            DefineFunction("steam_publish_workshop_file", 4);
+        }
         DefineFunction("steam_is_screenshot_requested", 0);
         DefineFunction("steam_send_screenshot", 3);
         DefineFunction("steam_is_user_logged_on", 0);
@@ -2286,9 +2566,12 @@ public class BuiltinList : IBuiltins
         DefineFunction("steam_stats_ready", 0);
         DefineFunction("steam_create_leaderboard", 3);
         DefineFunction("steam_upload_score", 2);
-        DefineFunction("steam_upload_score_ext", 3);
         DefineFunction("steam_upload_score_buffer", 3);
-        DefineFunction("steam_upload_score_buffer_ext", 4);
+        if (wad >= 16)
+        {
+            DefineFunction("steam_upload_score_buffer_ext", 4);
+            DefineFunction("steam_upload_score_ext", 3);
+        }
         DefineFunction("steam_download_scores_around_user", 3);
         DefineFunction("steam_download_scores", 3);
         DefineFunction("steam_download_friends_scores", 1);
@@ -2333,9 +2616,15 @@ public class BuiltinList : IBuiltins
         DefineFunction("steam_ugc_query_set_allow_cached_response", 2);
         DefineFunction("steam_ugc_send_query", 1);
         DefineFunction("shader_set", 1);
-        DefineFunction("shader_get_name", 1);
+        if (gms2)
+        {
+            DefineFunction("shader_get_name", 1);
+        }
         DefineFunction("shader_reset", 0);
-        DefineFunction("shader_current", 0);
+        if (wad >= 16)
+        {
+            DefineFunction("shader_current", 0);
+        }
         DefineFunction("shader_is_compiled", 1);
         DefineFunction("shader_get_sampler_index", 2);
         DefineFunction("shader_get_uniform", 2);
@@ -2356,10 +2645,13 @@ public class BuiltinList : IBuiltins
         DefineFunction("vertex_format_add_position", 0);
         DefineFunction("vertex_format_add_position_3d", 0);
         DefineFunction("vertex_format_add_colour", 0);
-        DefineFunction("vertex_format_add_color", 0);
-        DefineFunction("vertex_format_add_normal", 0);
-        DefineFunction("vertex_format_add_texcoord", 0);
+        if (wad >= 16)
+        {
+            DefineFunction("vertex_format_add_color", 0);
+            DefineFunction("vertex_format_add_texcoord", 0);
+        }
         DefineFunction("vertex_format_add_textcoord", 0);
+        DefineFunction("vertex_format_add_normal", 0);
         DefineFunction("vertex_format_add_custom", 2);
         DefineFunction("vertex_create_buffer", 0);
         DefineFunction("vertex_create_buffer_ext", 1);
@@ -2369,7 +2661,10 @@ public class BuiltinList : IBuiltins
         DefineFunction("vertex_position", 3);
         DefineFunction("vertex_position_3d", 4);
         DefineFunction("vertex_colour", 3);
-        DefineFunction("vertex_color", 3);
+        if (wad >= 16)
+        {
+            DefineFunction("vertex_color", 3);
+        }
         DefineFunction("vertex_argb", 2);
         DefineFunction("vertex_texcoord", 3);
         DefineFunction("vertex_normal", 4);
@@ -2394,7 +2689,16 @@ public class BuiltinList : IBuiltins
         DefineFunction("skeleton_animation_set_ext", 2);
         DefineFunction("skeleton_animation_get_ext", 1);
         DefineFunction("skeleton_animation_get_duration", 1);
-        DefineFunction("skeleton_animation_get_frames", 1);
+        if (wad >= 16)
+        {
+            DefineFunction("skeleton_animation_get_frames", 1);
+            DefineFunction("skeleton_animation_get_frame", 1);
+            DefineFunction("skeleton_animation_set_frame", 2);
+            DefineFunction("skeleton_get_minmax", 0);
+            DefineFunction("skeleton_get_num_bounds", 0);
+            DefineFunction("skeleton_get_bounds", 1);
+            DefineFunction("draw_skeleton_instance", 11);
+        }
         DefineFunction("skeleton_animation_clear", 1);
         DefineFunction("skeleton_skin_set", 1);
         DefineFunction("skeleton_skin_get", 0);
@@ -2408,89 +2712,122 @@ public class BuiltinList : IBuiltins
         DefineFunction("skeleton_bone_state_set", 2);
         DefineFunction("draw_skeleton", 11);
         DefineFunction("draw_skeleton_time", 11);
-        DefineFunction("draw_skeleton_instance", 11);
         DefineFunction("draw_skeleton_collision", 9);
         DefineFunction("skeleton_animation_list", 2);
         DefineFunction("skeleton_skin_list", 2);
         DefineFunction("skeleton_slot_data", 2);
-        DefineFunction("skeleton_animation_get_frame", 1);
-        DefineFunction("skeleton_animation_set_frame", 2);
-        DefineFunction("skeleton_get_minmax", 0);
-        DefineFunction("skeleton_get_num_bounds", 0);
-        DefineFunction("skeleton_get_bounds", 1);
-        DefineFunction("yyg_player_run", 4);
-        DefineFunction("yyg_player_restarted", 0);
-        DefineFunction("yyg_player_launch_args", 0);
+        if (!gms2_3)
+        {
+            DefineFunction("yyg_player_run", 4);
+            DefineFunction("yyg_player_restarted", 0);
+            DefineFunction("yyg_player_launch_args", 0);
+        }
         DefineFunction("extension_stubfunc_real");
         DefineFunction("extension_stubfunc_string");
         DefineFunction("ps4_share_screenshot_enable", 1);
         DefineFunction("ps4_share_video_enable", 1);
-        DefineFunction("ps4_gamepad_reset_colour", 1);
-        DefineFunction("video_open", 1);
-        DefineFunction("video_close", 0);
-        DefineFunction("video_draw", 0);
-        DefineFunction("video_set_volume", 1);
-        DefineFunction("psn_get_leaderboard_score_range", 4);
-        DefineFunction("psn_default_user_name", 0);
-        DefineFunction("psn_name_for_pad", 1);
-        DefineFunction("psn_unlock_trophy", 2);
-        DefineFunction("psn_init_np_libs");
-        DefineFunction("psn_exit_np_libs", 0);
-        DefineFunction("psn_get_leaderboard_score", 2);
-        DefineFunction("psn_post_leaderboard_score", 3);
-        DefineFunction("psn_post_leaderboard_score_comment", 4);
-        DefineFunction("psn_check_np_availability", 2);
-        DefineFunction("psn_tick_error_dialog", 0);
-        DefineFunction("psn_get_friends_scores", 4);
-        DefineFunction("psn_name_for_user", 1);
-        DefineFunction("psn_default_user", 0);
-        DefineFunction("psn_user_for_pad", 1);
-        DefineFunction("psn_tick", 0);
-        DefineFunction("psn_np_status", 1);
-        DefineFunction("psn_show_error_dialog", 1);
-        DefineFunction("psn_check_free_space", 2);
-        DefineFunction("psn_init_leaderboard", 1);
-        DefineFunction("psn_np_check_plus", 3);
-        DefineFunction("psn_np_commerce_dialog_open", 3);
-        DefineFunction("psn_np_commerce_dialog_open_on_product", 3);
-        DefineFunction("psn_np_commerce_dialog_tick", 0);
-        DefineFunction("psn_np_notify_plus_feature", 3);
-        DefineFunction("psn_set_content_restriction", 1);
-        DefineFunction("psn_load_modules", 0);
-        DefineFunction("psn_get_avatar_url", 1);
-        DefineFunction("psn_get_tus_data", 2);
-        DefineFunction("psn_set_tus_data", 4);
-        DefineFunction("psn_get_tus_variable", 2);
-        DefineFunction("psn_set_tus_variable", 3);
-        DefineFunction("psn_delete_tus_data", 2);
-        DefineFunction("psn_get_entitlement_list", 0);
-        DefineFunction("matchmaking_reset_create_params", 0);
-        DefineFunction("matchmaking_add_create_param", 2);
-        DefineFunction("matchmaking_session_create", 2);
-        DefineFunction("matchmaking_session_get_users", 1);
-        DefineFunction("matchmaking_session_get_owner", 1);
-        DefineFunction("matchmaking_session_get_ping_info", 1);
-        DefineFunction("matchmaking_session_set_hidden", 2);
-        DefineFunction("matchmaking_session_set_closed", 1);
-        DefineFunction("matchmaking_session_set_open", 1);
-        DefineFunction("matchmaking_reset_find_params", 0);
-        DefineFunction("matchmaking_add_find_param", 3);
-        DefineFunction("matchmaking_session_find", 0);
-        DefineFunction("matchmaking_session_join", 1);
-        DefineFunction("matchmaking_session_leave", 1);
-        DefineFunction("matchmaking_session_update", 1);
-        DefineFunction("matchmaking_start");
-        DefineFunction("matchmaking_stop", 0);
-        DefineFunction("matchmaking_session_invite_start", 1);
-        DefineFunction("matchmaking_send_invites_no_ui", 4);
-        DefineFunction("matchmaking_send_invites", 3);
-        DefineFunction("matchmaking_tick_invites", 0);
-        DefineFunction("matchmaking_join_invite", 1);
-        DefineFunction("psn_content_restriction_add", 2);
-        DefineFunction("psn_net_check", 1);
-        DefineFunction("psn_setup_trophies", 0);
-        DefineFunction("psn_init_trophy");
-        DefineFunction("psn_get_trophy_unlock_state", 1);
+        if (gms2_3)
+        {
+            DefineFunction("ps4_gamepad_reset_colour", 1);
+        }
+        if (wad >= 16)
+        {
+            DefineFunction("video_open", 1);
+            DefineFunction("video_close", 0);
+            DefineFunction("video_draw", 0);
+            DefineFunction("video_set_volume", 1);
+        }
+        if (wad >= 15)
+        {
+            DefineFunction("psn_get_leaderboard_score_range", 4);
+            DefineFunction("psn_default_user_name", 0);
+            DefineFunction("psn_name_for_pad", 1);
+            DefineFunction("psn_unlock_trophy", 2);
+            DefineFunction("psn_init_np_libs");
+            DefineFunction("psn_exit_np_libs", 0);
+            DefineFunction("psn_get_leaderboard_score", 2);
+            DefineFunction("psn_post_leaderboard_score", 3);
+            if (wad >= 16)
+            {
+                DefineFunction("psn_post_leaderboard_score_comment", 4);
+            }
+            DefineFunction("psn_check_np_availability", 2);
+            DefineFunction("psn_tick_error_dialog", 0);
+            DefineFunction("psn_get_friends_scores", 4);
+            DefineFunction("psn_name_for_user", 1);
+            DefineFunction("psn_default_user", 0);
+            DefineFunction("psn_user_for_pad", 1);
+            DefineFunction("psn_tick", 0);
+            DefineFunction("psn_np_status", 1);
+            if (wad >= 16)
+            {
+                DefineFunction("psn_show_error_dialog", 1);
+                if (!gms2_3)
+                {
+                    DefineFunction("psn_check_free_space", 2);
+                }
+            }
+            if (gms2_3)
+            {
+                DefineFunction("psn_init_leaderboard", 1);
+            }
+            DefineFunction("psn_np_check_plus", 3);
+            DefineFunction("psn_np_commerce_dialog_open", 3);
+            DefineFunction("psn_np_commerce_dialog_open_on_product", 3);
+            DefineFunction("psn_np_commerce_dialog_tick", 0);
+            DefineFunction("psn_np_notify_plus_feature", 3);
+            DefineFunction("psn_set_content_restriction", 1);
+            DefineFunction("psn_load_modules", 0);
+            if (wad >= 16)
+            {
+                DefineFunction("psn_get_avatar_url", 1);
+                DefineFunction("psn_get_tus_data", 2);
+                DefineFunction("psn_set_tus_data", 4);
+                DefineFunction("psn_get_tus_variable", 2);
+                DefineFunction("psn_set_tus_variable", 3);
+                DefineFunction("psn_delete_tus_data", 2);
+                DefineFunction("psn_get_entitlement_list", 0);
+            }
+            DefineFunction("psn_content_restriction_add", 2);
+            if (gms2_3)
+            {
+                DefineFunction("psn_net_check", 1);
+                DefineFunction("psn_setup_trophies", 0);
+            }
+            DefineFunction("psn_init_trophy");
+            if (wad >= 16)
+            {
+                DefineFunction("psn_get_trophy_unlock_state", 1);
+            }
+            DefineFunction("matchmaking_reset_create_params", 0);
+            DefineFunction("matchmaking_add_create_param", 2);
+            DefineFunction("matchmaking_session_create", 2);
+            DefineFunction("matchmaking_session_get_users", 1);
+            DefineFunction("matchmaking_session_get_owner", 1);
+            DefineFunction("matchmaking_session_get_ping_info", 1);
+            if (wad >= 16)
+            {
+                DefineFunction("matchmaking_session_set_hidden", 2);
+            }
+            DefineFunction("matchmaking_session_set_closed", 1);
+            DefineFunction("matchmaking_session_set_open", 1);
+            DefineFunction("matchmaking_reset_find_params", 0);
+            DefineFunction("matchmaking_add_find_param", 3);
+            DefineFunction("matchmaking_session_find", 0);
+            DefineFunction("matchmaking_session_join", 1);
+            DefineFunction("matchmaking_session_leave", 1);
+            DefineFunction("matchmaking_session_update", 1);
+            DefineFunction("matchmaking_start");
+            DefineFunction("matchmaking_stop", 0);
+            if (wad >= 16)
+            {
+                DefineFunction("matchmaking_session_invite_start", 1);
+                DefineFunction("matchmaking_send_invites_no_ui", 4);
+            }
+            DefineFunction("matchmaking_send_invites", 3);
+            DefineFunction("matchmaking_tick_invites", 0);
+            DefineFunction("matchmaking_join_invite", 1);
+        }
         DefineFunction("xboxone_get_user_count", 0);
         DefineFunction("xboxone_get_user", 1);
         DefineFunction("xboxone_get_activating_user", 0);
@@ -2527,18 +2864,21 @@ public class BuiltinList : IBuiltins
         DefineFunction("xboxone_fire_event");
         DefineFunction("xboxone_get_stats_for_user");
         DefineFunction("xboxone_stats_setup", 3);
-        DefineFunction("xboxone_stats_set_stat_real", 3);
-        DefineFunction("xboxone_stats_set_stat_int", 3);
-        DefineFunction("xboxone_stats_set_stat_string", 3);
-        DefineFunction("xboxone_stats_delete_stat", 2);
-        DefineFunction("xboxone_stats_get_stat", 2);
-        DefineFunction("xboxone_stats_get_stat_names", 1);
-        DefineFunction("xboxone_stats_add_user", 1);
-        DefineFunction("xboxone_stats_remove_user", 1);
-        DefineFunction("xboxone_stats_flush_user", 2);
-        DefineFunction("xboxone_stats_get_leaderboard", 6);
-        DefineFunction("xboxone_stats_get_social_leaderboard", 7);
-        DefineFunction("xboxone_achievements_set_progress", 3);
+        if (gms2)
+        {
+            DefineFunction("xboxone_stats_set_stat_real", 3);
+            DefineFunction("xboxone_stats_set_stat_int", 3);
+            DefineFunction("xboxone_stats_set_stat_string", 3);
+            DefineFunction("xboxone_stats_delete_stat", 2);
+            DefineFunction("xboxone_stats_get_stat", 2);
+            DefineFunction("xboxone_stats_get_stat_names", 1);
+            DefineFunction("xboxone_stats_add_user", 1);
+            DefineFunction("xboxone_stats_remove_user", 1);
+            DefineFunction("xboxone_stats_flush_user", 2);
+            DefineFunction("xboxone_stats_get_leaderboard", 6);
+            DefineFunction("xboxone_stats_get_social_leaderboard", 7);
+            DefineFunction("xboxone_achievements_set_progress", 3);
+        }
         DefineFunction("xboxone_set_rich_presence");
         DefineFunction("xboxone_read_player_leaderboard", 4);
         DefineFunction("xboxone_matchmaking_create");
@@ -2550,54 +2890,82 @@ public class BuiltinList : IBuiltins
         DefineFunction("xboxone_matchmaking_send_invites", 3);
         DefineFunction("xboxone_matchmaking_set_joinable_session", 2);
         DefineFunction("xboxone_matchmaking_join_invite", 4);
-        DefineFunction("xboxone_matchmaking_join_session", 3);
-        DefineFunction("xboxone_matchmaking_set_find_timeout", 1);
+        if (gms2)
+        {
+            DefineFunction("xboxone_matchmaking_join_session", 3);
+            DefineFunction("xboxone_matchmaking_set_find_timeout", 1);
+        }
         DefineFunction("xboxone_debug", 2);
         DefineFunction("xboxone_chat_add_user_to_channel", 2);
         DefineFunction("xboxone_chat_remove_user_from_channel", 2);
         DefineFunction("xboxone_chat_set_muted", 2);
         DefineFunction("xboxone_product_show_details", 2);
-        DefineFunction("xboxone_set_service_configuration_id", 1);
-        DefineFunction("xboxone_generate_player_session_id", 0);
-        DefineFunction("xboxone_package_check_license", 1);
-        DefineFunction("xboxlive_get_user_count", 0);
-        DefineFunction("xboxlive_get_user", 1);
-        DefineFunction("xboxlive_get_activating_user", 0);
-        DefineFunction("xboxlive_user_is_active", 1);
-        DefineFunction("xboxlive_user_is_guest", 1);
-        DefineFunction("xboxlive_user_is_signed_in");
-        DefineFunction("xboxlive_user_is_signing_in");
-        DefineFunction("xboxlive_user_is_remote", 1);
-        DefineFunction("xboxlive_gamedisplayname_for_user");
-        DefineFunction("xboxlive_appdisplayname_for_user");
-        DefineFunction("xboxlive_gamertag_for_user");
-        DefineFunction("xboxlive_agegroup_for_user", 1);
-        DefineFunction("xboxlive_gamerscore_for_user", 1);
-        DefineFunction("xboxlive_reputation_for_user", 1);
-        DefineFunction("xboxlive_user_for_pad", 1);
-        DefineFunction("xboxlive_pad_count_for_user", 1);
-        DefineFunction("xboxlive_sponsor_for_user", 1);
-        DefineFunction("xboxlive_pad_for_user", 2);
-        DefineFunction("xboxlive_show_account_picker");
-        DefineFunction("xboxlive_sprite_add_from_gamerpicture", 4);
-        DefineFunction("xboxlive_show_profile_card_for_user", 2);
-        DefineFunction("xboxlive_set_savedata_user", 1);
-        DefineFunction("xboxlive_get_savedata_user", 0);
-        DefineFunction("xboxlive_get_file_error", 0);
-        DefineFunction("uwp_was_terminated", 0);
-        DefineFunction("uwp_was_closed_by_user", 0);
-        DefineFunction("uwp_is_suspending", 0);
-        DefineFunction("uwp_is_constrained", 0);
-        DefineFunction("uwp_suspend", 0);
-        DefineFunction("uwp_show_help", 1);
-        DefineFunction("uwp_license_trial_version", 0);
-        DefineFunction("uwp_license_trial_user", 0);
-        DefineFunction("uwp_license_trial_time_remaining", 0);
-        DefineFunction("uwp_check_privilege", 3);
-        DefineFunction("xboxlive_user_id_for_user", 1);
-        DefineFunction("xboxlive_fire_event");
-        DefineFunction("xboxlive_get_stats_for_user");
-        DefineFunction("xboxlive_stats_setup", 3);
+        if (wad >= 16)
+        {
+            DefineFunction("xboxone_generate_player_session_id", 0);
+            DefineFunction("xboxone_package_check_license", 1);
+        }
+        if (wad >= 15)
+        {
+            DefineFunction("xboxone_set_service_configuration_id", 1);
+            DefineFunction("xboxlive_get_user_count", 0);
+            DefineFunction("xboxlive_get_user", 1);
+            DefineFunction("xboxlive_get_activating_user", 0);
+            DefineFunction("xboxlive_user_is_active", 1);
+            DefineFunction("xboxlive_user_is_guest", 1);
+            DefineFunction("xboxlive_user_is_signed_in");
+            if (wad >= 16)
+            {
+                DefineFunction("xboxlive_user_is_signing_in");
+                DefineFunction("xboxlive_gamertag_for_user");
+            }
+            DefineFunction("xboxlive_user_is_remote", 1);
+            DefineFunction("xboxlive_gamedisplayname_for_user");
+            DefineFunction("xboxlive_appdisplayname_for_user");
+            DefineFunction("xboxlive_agegroup_for_user", 1);
+            DefineFunction("xboxlive_gamerscore_for_user", 1);
+            DefineFunction("xboxlive_reputation_for_user", 1);
+            DefineFunction("xboxlive_user_for_pad", 1);
+            DefineFunction("xboxlive_pad_count_for_user", 1);
+            DefineFunction("xboxlive_sponsor_for_user", 1);
+            DefineFunction("xboxlive_pad_for_user", 2);
+            DefineFunction("xboxlive_show_account_picker");
+            DefineFunction("xboxlive_sprite_add_from_gamerpicture", 4);
+            DefineFunction("xboxlive_show_profile_card_for_user", 2);
+            DefineFunction("xboxlive_set_savedata_user", 1);
+            DefineFunction("xboxlive_get_savedata_user", 0);
+            DefineFunction("xboxlive_get_file_error", 0);
+            DefineFunction("uwp_was_terminated", 0);
+            DefineFunction("uwp_was_closed_by_user", 0);
+            DefineFunction("uwp_is_suspending", 0);
+            DefineFunction("uwp_is_constrained", 0);
+            DefineFunction("uwp_suspend", 0);
+            DefineFunction("uwp_show_help", 1);
+            DefineFunction("uwp_license_trial_version", 0);
+            DefineFunction("uwp_license_trial_user", 0);
+            DefineFunction("uwp_license_trial_time_remaining", 0);
+            DefineFunction("uwp_check_privilege", 3);
+            DefineFunction("xboxlive_user_id_for_user", 1);
+            DefineFunction("xboxlive_fire_event");
+            DefineFunction("xboxlive_get_stats_for_user");
+            DefineFunction("xboxlive_stats_setup", 3);
+            DefineFunction("xboxlive_set_rich_presence");
+            DefineFunction("xboxlive_matchmaking_create");
+            DefineFunction("xboxlive_matchmaking_find");
+            DefineFunction("xboxlive_matchmaking_start", 1);
+            DefineFunction("xboxlive_matchmaking_stop", 1);
+            DefineFunction("xboxlive_matchmaking_session_get_users", 1);
+            DefineFunction("xboxlive_matchmaking_session_leave", 1);
+            DefineFunction("xboxlive_matchmaking_send_invites", 3);
+            DefineFunction("xboxlive_matchmaking_set_joinable_session", 2);
+            DefineFunction("xboxlive_matchmaking_join_invite", 3);
+            DefineFunction("xboxlive_matchmaking_join_session", 3);
+            DefineFunction("xboxlive_chat_add_user_to_channel", 2);
+            DefineFunction("xboxlive_chat_remove_user_from_channel", 2);
+            DefineFunction("xboxlive_chat_set_muted", 2);
+            DefineFunction("xboxlive_set_service_configuration_id", 1);
+            DefineFunction("xboxlive_generate_player_session_id", 0);
+        }
         DefineFunction("xboxlive_stats_set_stat_real", 3);
         DefineFunction("xboxlive_stats_set_stat_int", 3);
         DefineFunction("xboxlive_stats_set_stat_string", 3);
@@ -2610,26 +2978,13 @@ public class BuiltinList : IBuiltins
         DefineFunction("xboxlive_stats_get_leaderboard", 6);
         DefineFunction("xboxlive_stats_get_social_leaderboard", 7);
         DefineFunction("xboxlive_achievements_set_progress", 3);
-        DefineFunction("xboxlive_set_rich_presence");
-        DefineFunction("xboxlive_read_player_leaderboard", 4);
-        DefineFunction("xboxlive_matchmaking_create");
-        DefineFunction("xboxlive_matchmaking_find");
-        DefineFunction("xboxlive_matchmaking_start", 1);
-        DefineFunction("xboxlive_matchmaking_stop", 1);
-        DefineFunction("xboxlive_matchmaking_session_get_users", 1);
-        DefineFunction("xboxlive_matchmaking_session_leave", 1);
-        DefineFunction("xboxlive_matchmaking_send_invites", 3);
-        DefineFunction("xboxlive_matchmaking_set_joinable_session", 2);
-        DefineFunction("xboxlive_matchmaking_join_invite", 3);
-        DefineFunction("xboxlive_matchmaking_join_session", 3);
+        if (wad >= 16)
+        {
+            DefineFunction("xboxlive_read_player_leaderboard", 4);
+        }
         DefineFunction("xboxlive_matchmaking_set_find_timeout", 1);
-        DefineFunction("xboxlive_chat_add_user_to_channel", 2);
-        DefineFunction("xboxlive_chat_remove_user_from_channel", 2);
-        DefineFunction("xboxlive_chat_set_muted", 2);
-        DefineFunction("xboxlive_set_service_configuration_id", 1);
-        DefineFunction("xboxlive_generate_player_session_id", 0);
         DefineFunction("browser_input_capture", 1);
-        if (data?.GeneralInfo?.Major >= 2)
+        if (gms2) // (runner accepts wad >= 16)
         {
             DefineFunction("layer_get_id", 1);
             DefineFunction("layer_get_id_at_depth", 1);
@@ -2734,8 +3089,11 @@ public class BuiltinList : IBuiltins
             DefineFunction("tilemap_get_tile_height", 1);
             DefineFunction("tilemap_get_width", 1);
             DefineFunction("tilemap_get_height", 1);
-            DefineFunction("tilemap_set_width", 2);
-            DefineFunction("tilemap_set_height", 2);
+            if (gms2)
+            {
+                DefineFunction("tilemap_set_width", 2);
+                DefineFunction("tilemap_set_height", 2);
+            }
             DefineFunction("tilemap_get_x", 1);
             DefineFunction("tilemap_get_y", 1);
             DefineFunction("tilemap_get", 3);
@@ -2855,8 +3213,11 @@ public class BuiltinList : IBuiltins
         DefineFunction("switch_controller_support_set_show_explain_text", 1);
         DefineFunction("switch_controller_support_set_show_identification_colours", 1);
         DefineFunction("switch_controller_support_set_show_identification_colors", 1);
-        DefineFunction("switch_controller_support_set_identification_colour", 2);
-        DefineFunction("switch_controller_support_set_identification_color", 2);
+        if (gms2_3)
+        {
+            DefineFunction("switch_controller_support_set_identification_colour", 2);
+            DefineFunction("switch_controller_support_set_identification_color", 2);
+        }
         DefineFunction("switch_controller_support_set_left_justify", 1);
         DefineFunction("switch_controller_support_set_permit_joycon_dual", 1);
         DefineFunction("switch_controller_support_set_singleplayer_only", 1);
@@ -2887,32 +3248,35 @@ public class BuiltinList : IBuiltins
         DefineFunction("switch_recording_enable", 0);
         DefineFunction("switch_recording_disable", 0);
         DefineFunction("switch_irsensor_set_mode", 2);
-        DefineFunction("switch_irsensor_common_config_set_all", 5);
-        DefineFunction("switch_irsensor_common_config_set_exposure_time", 2);
-        DefineFunction("switch_irsensor_common_config_set_light_target", 2);
-        DefineFunction("switch_irsensor_common_config_set_gain", 2);
-        DefineFunction("switch_irsensor_common_config_is_negative_image_used", 2);
-        DefineFunction("switch_irsensor_cluster_config_set_defaults", 1);
-        DefineFunction("switch_irsensor_cluster_config_set_window_of_interest", 5);
-        DefineFunction("switch_irsensor_cluster_config_set_object_pixel_count_min", 2);
-        DefineFunction("switch_irsensor_cluster_config_set_object_pixel_count_max", 2);
-        DefineFunction("switch_irsensor_cluster_config_set_object_intensity_min", 2);
-        DefineFunction("switch_irsensor_cluster_config_set_external_light_filtering", 2);
-        DefineFunction("switch_irsensor_cluster_create_state_buffer", 1);
-        DefineFunction("switch_irsensor_moment_config_set_defaults", 1);
-        DefineFunction("switch_irsensor_moment_config_set_window_of_interest", 5);
-        DefineFunction("switch_irsensor_moment_config_set_preprocess", 2);
-        DefineFunction("switch_irsensor_moment_config_set_preprocess_intensity_threshold", 2);
-        DefineFunction("switch_irsensor_moment_create_state_buffer", 1);
-        DefineFunction("switch_irsensor_image_config_set_defaults", 1);
-        DefineFunction("switch_irsensor_image_config_set_format", 2);
-        DefineFunction("switch_irsensor_image_config_set_orig_format", 2);
-        DefineFunction("switch_irsensor_image_config_set_trimming_format", 2);
-        DefineFunction("switch_irsensor_image_config_set_trimming_start", 3);
-        DefineFunction("switch_irsensor_image_config_set_external_light_filtering", 2);
-        DefineFunction("switch_irsensor_image_create_state_buffers", 1);
-        DefineFunction("switch_irsensor_hand_config_set_mode", 2);
-        DefineFunction("switch_irsensor_hand_create_state_buffers", 1);
+        if (major > 2 || (major == 2 && minor > 3))  // TODO: which version was this added?
+        {
+            DefineFunction("switch_irsensor_common_config_set_all", 5);
+            DefineFunction("switch_irsensor_common_config_set_exposure_time", 2);
+            DefineFunction("switch_irsensor_common_config_set_light_target", 2);
+            DefineFunction("switch_irsensor_common_config_set_gain", 2);
+            DefineFunction("switch_irsensor_common_config_is_negative_image_used", 2);
+            DefineFunction("switch_irsensor_cluster_config_set_defaults", 1);
+            DefineFunction("switch_irsensor_cluster_config_set_window_of_interest", 5);
+            DefineFunction("switch_irsensor_cluster_config_set_object_pixel_count_min", 2);
+            DefineFunction("switch_irsensor_cluster_config_set_object_pixel_count_max", 2);
+            DefineFunction("switch_irsensor_cluster_config_set_object_intensity_min", 2);
+            DefineFunction("switch_irsensor_cluster_config_set_external_light_filtering", 2);
+            DefineFunction("switch_irsensor_cluster_create_state_buffer", 1);
+            DefineFunction("switch_irsensor_moment_config_set_defaults", 1);
+            DefineFunction("switch_irsensor_moment_config_set_window_of_interest", 5);
+            DefineFunction("switch_irsensor_moment_config_set_preprocess", 2);
+            DefineFunction("switch_irsensor_moment_config_set_preprocess_intensity_threshold", 2);
+            DefineFunction("switch_irsensor_moment_create_state_buffer", 1);
+            DefineFunction("switch_irsensor_image_config_set_defaults", 1);
+            DefineFunction("switch_irsensor_image_config_set_format", 2);
+            DefineFunction("switch_irsensor_image_config_set_orig_format", 2);
+            DefineFunction("switch_irsensor_image_config_set_trimming_format", 2);
+            DefineFunction("switch_irsensor_image_config_set_trimming_start", 3);
+            DefineFunction("switch_irsensor_image_config_set_external_light_filtering", 2);
+            DefineFunction("switch_irsensor_image_create_state_buffers", 1);
+            DefineFunction("switch_irsensor_hand_config_set_mode", 2);
+            DefineFunction("switch_irsensor_hand_create_state_buffers", 1);
+        }
         DefineFunction("switch_bnvib_load", 1);
         DefineFunction("switch_bnvib_unload", 1);
         DefineFunction("switch_bnvib_get_value", 2);
@@ -2922,7 +3286,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("switch_bnvib_get_loop_start_position", 1);
         DefineFunction("switch_bnvib_get_length", 1);
         DefineFunction("switch_bnvib_get_sampling_rate", 1);
-        if (data?.GeneralInfo?.Major == 1 && data?.GeneralInfo?.Build <= 1763)
+        if (major == 1 && build <= 1763 /* wad < 16 */)
         {
             DefineFunction("immersion_play_effect", 1, FunctionClassification.Immersion);
             DefineFunction("immersion_stop", 0, FunctionClassification.Immersion);
@@ -2930,7 +3294,7 @@ public class BuiltinList : IBuiltins
 
         // TODO: narrow down the versions and move to the correct places?
         // (these are from 2023.11 fnames)
-        if (data?.IsVersionAtLeast(2023) == true)
+        if (major >= 2023)
         {
             DefineFunction("move_and_collide", 3);
             DefineFunction("game_change", 2);
@@ -2954,7 +3318,24 @@ public class BuiltinList : IBuiltins
             DefineFunction("dbg_same_line", 0);
             DefineFunction("dbg_add_font_glyphs");
         }
-        if (data?.IsVersionAtLeast(2, 3) == true)
+        if (gm2022_1) 
+        {
+            DefineFunction("fx_create", 1);
+            DefineFunction("fx_get_name", 1);
+            DefineFunction("fx_get_parameter_names", 1);
+            DefineFunction("fx_get_parameter", 2);
+            DefineFunction("fx_get_parameters", 1);
+            DefineFunction("fx_get_single_layer", 1);
+            DefineFunction("fx_set_parameter");
+            DefineFunction("fx_set_parameters", 2);
+            DefineFunction("fx_set_single_layer", 2);
+            DefineFunction("layer_set_fx", 2);
+            DefineFunction("layer_get_fx", 1);
+            DefineFunction("layer_clear_fx", 1);
+            DefineFunction("layer_enable_fx", 2);
+            DefineFunction("layer_fx_is_enabled", 1);
+        }
+        if (gms2_3)
         {
             DefineFunction("scheduler_resolution_set", 1);
             DefineFunction("scheduler_resolution_get", 0);
@@ -3184,20 +3565,6 @@ public class BuiltinList : IBuiltins
             DefineFunction("animcurve_exists", 1);
             DefineFunction("animcurve_channel_new", 0);
             DefineFunction("animcurve_point_new", 0);
-            DefineFunction("fx_create", 1);
-            DefineFunction("fx_get_name", 1);
-            DefineFunction("fx_get_parameter_names", 1);
-            DefineFunction("fx_get_parameter", 2);
-            DefineFunction("fx_get_parameters", 1);
-            DefineFunction("fx_get_single_layer", 1);
-            DefineFunction("fx_set_parameter");
-            DefineFunction("fx_set_parameters", 2);
-            DefineFunction("fx_set_single_layer", 2);
-            DefineFunction("layer_set_fx", 2);
-            DefineFunction("layer_get_fx", 1);
-            DefineFunction("layer_clear_fx", 1);
-            DefineFunction("layer_enable_fx", 2);
-            DefineFunction("layer_fx_is_enabled", 1);
             DefineFunction("gc_collect", 0);
             DefineFunction("gc_enable", 1);
             DefineFunction("gc_is_enabled", 0);
@@ -3260,7 +3627,7 @@ public class BuiltinList : IBuiltins
             DefineFunction("db_to_lin", 1);
         }
 
-        // List of constants
+        // Constants
         Constants = new(1024);
         Constants["self"] = -1.0;
         Constants["other"] = -2.0;
@@ -3293,10 +3660,8 @@ public class BuiltinList : IBuiltins
         Constants["c_white"] = 16777215.0;
         Constants["c_yellow"] = 65535.0;
         Constants["c_orange"] = 4235519.0;
-        if (data?.GeneralInfo?.Major < 2)
-        {
+        if (!gms2)
             Constants["bm_complex"] = -1.0;
-        }
         Constants["bm_normal"] = 0.0;
         Constants["bm_add"] = 1.0;
         Constants["bm_max"] = 2.0;
@@ -3318,7 +3683,7 @@ public class BuiltinList : IBuiltins
         Constants["bm_dest_colour"] = 9.0;
         Constants["bm_inv_dest_colour"] = 10.0;
         Constants["bm_src_alpha_sat"] = 11.0;
-        if (data?.GeneralInfo?.Major >= 2)
+        if (gms2)
         {
             Constants["tf_point"] = 0.0;
             Constants["tf_linear"] = 1.0;
@@ -3352,6 +3717,12 @@ public class BuiltinList : IBuiltins
         Constants["mb_left"] = 1.0;
         Constants["mb_right"] = 2.0;
         Constants["mb_middle"] = 3.0;
+        if (gms2_3)
+        {
+            // Note: These two constants were actually added in 2.3.3, but version detection is not reliable for that.
+            Constants["mb_side1"] = 4.0;
+            Constants["mb_side2"] = 5.0;
+        }
         Constants["vk_nokey"] = 0.0;
         Constants["vk_anykey"] = 1.0;
         Constants["vk_enter"] = 13.0;
@@ -3462,7 +3833,7 @@ public class BuiltinList : IBuiltins
         Constants["ev_keypress"] = 9.0;
         Constants["ev_keyrelease"] = 10.0;
         Constants["ev_trigger"] = 11.0;
-        if (data?.GeneralInfo?.Major >= 2)
+        if (gms2)
         {
             Constants["ev_cleanup"] = 11.0;
             Constants["ev_gesture"] = 13.0;
@@ -3588,7 +3959,7 @@ public class BuiltinList : IBuiltins
         Constants["ev_system_event"] = 75.0;
         Constants["ev_broadcast_message"] = 76.0;
         Constants["ev_audio_playback_ended"] = 80.0;
-        if (data?.GeneralInfo?.Major >= 2)
+        if (gms2)
         {
             Constants["ev_gesture_tap"] = 0.0;
             Constants["ev_gesture_double_tap"] = 1.0;
@@ -3705,10 +4076,9 @@ public class BuiltinList : IBuiltins
         Constants["os_win32"] = 0.0;
         Constants["os_windows"] = 0.0;
         Constants["os_macosx"] = 1.0;
-        if (data?.GeneralInfo?.Major < 2)
-        {
+        if (!gms2)
             Constants["os_psp"] = 2.0;
-        }
+
         Constants["os_ios"] = 3.0;
         Constants["os_android"] = 4.0;
         Constants["os_symbian"] = 5.0;
@@ -3725,7 +4095,10 @@ public class BuiltinList : IBuiltins
         Constants["os_ps3"] = 16.0;
         Constants["os_xbox360"] = 17.0;
         Constants["os_uwp"] = 18.0;
-        Constants["os_switch_beta"] = 20.0; // This is what NXTALE identifies itself as. It likely was an old version name(?) Unfortunately, it shares an id with tvos. However, since this tool is written for Undertale, we give it priority over tvos.
+        // This is what NXTALE identifies itself as. It likely was an old version name (?).
+        // Unfortunately, it shares an id with tvos.
+        // However, since this tool is written for Undertale, we give it priority over tvos.
+        Constants["os_switch_beta"] = 20.0;
         Constants["os_tvos"] = 20.0;
         Constants["os_switch"] = 21.0;
         Constants["os_ps5"] = 22.0;
@@ -3758,14 +4131,10 @@ public class BuiltinList : IBuiltins
         Constants["asset_sprite"] = 1.0;
         Constants["asset_sound"] = 2.0;
         Constants["asset_room"] = 3.0;
-        if (data?.GeneralInfo?.Major < 2)
-        {
-            Constants["asset_background"] = 4.0;
-        }
-        else
-        {
+        if (gms2)
             Constants["asset_tiles"] = 9.0;
-        }
+        else
+            Constants["asset_background"] = 4.0;
         Constants["asset_path"] = 5.0;
         Constants["asset_script"] = 6.0;
         Constants["asset_font"] = 7.0;
@@ -4020,7 +4389,7 @@ public class BuiltinList : IBuiltins
         Constants["timezone_utc"] = 1.0;
         Constants["gamespeed_fps"] = 0.0;
         Constants["gamespeed_microseconds"] = 1.0;
-        if (data?.GeneralInfo?.Major >= 2)
+        if (gms2)
         {
             Constants["spritespeed_framespersecond"] = 0.0;
             Constants["spritespeed_framespergameframe"] = 1.0;
@@ -4210,7 +4579,7 @@ public class BuiltinList : IBuiltins
         Constants["vbm_most_compatible"] = 2.0;
         Constants["tm_sleep"] = 0.0;
         Constants["tm_countvsyncs"] = 1.0;
-        if (data?.GeneralInfo?.Major >= 2)
+        if (gms2)
         {
             Constants["layerelementtype_undefined"] = 0.0;
             Constants["layerelementtype_background"] = 1.0;
@@ -4238,7 +4607,7 @@ public class BuiltinList : IBuiltins
         Constants["cull_counterclockwise"] = 2.0;
         Constants["lighttype_dir"] = 0.0;
         Constants["lighttype_point"] = 1.0;
-        if (data?.GeneralInfo?.Major >= 2)
+        if (gms2)
         {
             Constants["kbv_type_default"] = 0.0;
             Constants["kbv_type_ascii"] = 1.0;
@@ -4267,239 +4636,250 @@ public class BuiltinList : IBuiltins
         // This one is a special case; it only exports to browser. I don't think this library supports
         // browser at all though, so we'll just assume it's -1. Wouldn't hurt anyway.
         Constants["os_browser"] = -1.0;
-
-        // Moving on to the variables
-        GlobalNotArray = new(128);
-        GlobalArray = new(128);
-
-        GlobalNotArray["argument_relative"] = new VariableInfo("argument_relative", true, false);
-        GlobalNotArray["argument_count"] = new VariableInfo("argument_count", true, false);
-        GlobalNotArray["argument"] = new VariableInfo("argument", true, true);
-        GlobalNotArray["argument0"] = new VariableInfo("argument0", true, true);
-        GlobalNotArray["argument1"] = new VariableInfo("argument1", true, true);
-        GlobalNotArray["argument2"] = new VariableInfo("argument2", true, true);
-        GlobalNotArray["argument3"] = new VariableInfo("argument3", true, true);
-        GlobalNotArray["argument4"] = new VariableInfo("argument4", true, true);
-        GlobalNotArray["argument5"] = new VariableInfo("argument5", true, true);
-        GlobalNotArray["argument6"] = new VariableInfo("argument6", true, true);
-        GlobalNotArray["argument7"] = new VariableInfo("argument7", true, true);
-        GlobalNotArray["argument8"] = new VariableInfo("argument8", true, true);
-        GlobalNotArray["argument9"] = new VariableInfo("argument9", true, true);
-        GlobalNotArray["argument10"] = new VariableInfo("argument10", true, true);
-        GlobalNotArray["argument11"] = new VariableInfo("argument11", true, true);
-        GlobalNotArray["argument12"] = new VariableInfo("argument12", true, true);
-        GlobalNotArray["argument13"] = new VariableInfo("argument13", true, true);
-        GlobalNotArray["argument14"] = new VariableInfo("argument14", true, true);
-        GlobalNotArray["argument15"] = new VariableInfo("argument15", true, true);
-        GlobalNotArray["debug_mode"] = new VariableInfo("debug_mode", true, false);
-        GlobalNotArray["pointer_invalid"] = new VariableInfo("pointer_invalid", true, false);
-        GlobalNotArray["pointer_null"] = new VariableInfo("pointer_null", true, false);
-        GlobalNotArray["undefined"] = new VariableInfo("undefined", true, false);
-        if (data?.GeneralInfo?.Major >= 2)
+        if (gms2)
         {
-            GlobalNotArray["infinity"] = new VariableInfo("infinity", true, false);
-            GlobalNotArray["NaN"] = new VariableInfo("NaN", true, false);
+            Constants["time_source_global"] = 0.0;
+            Constants["time_source_game"] = 1.0;
+            Constants["time_source_units_seconds"] = 0.0;
+            Constants["time_source_units_frames"] = 1.0;
+            Constants["time_source_expire_nearest"] = 0.0;
+            Constants["time_source_expire_after"] = 1.0;
+            Constants["time_source_state_initial"] = 0.0;
+            Constants["time_source_state_active"] = 1.0;
+            Constants["time_source_state_paused"] = 2.0;
+            Constants["time_source_state_stopped"] = 3.0;
         }
-        GlobalNotArray["room"] = new VariableInfo("room", true, true);
-        GlobalNotArray["room_first"] = new VariableInfo("room_first", true, false);
-        GlobalNotArray["room_last"] = new VariableInfo("room_last", true, false);
-        GlobalNotArray["transition_kind"] = new VariableInfo("transition_kind", true, true);
-        GlobalNotArray["transition_steps"] = new VariableInfo("transition_steps", true, true);
-        GlobalNotArray["score"] = new VariableInfo("score", true, true);
-        GlobalNotArray["lives"] = new VariableInfo("lives", true, true);
-        GlobalNotArray["health"] = new VariableInfo("health", true, true);
-        GlobalNotArray["game_id"] = new VariableInfo("game_id", true, false);
-        GlobalNotArray["game_display_name"] = new VariableInfo("game_display_name", true, false);
-        GlobalNotArray["game_project_name"] = new VariableInfo("game_project_name", true, false);
-        GlobalNotArray["game_save_id"] = new VariableInfo("game_save_id", true, false);
-        GlobalNotArray["working_directory"] = new VariableInfo("working_directory", true, false);
-        GlobalNotArray["temp_directory"] = new VariableInfo("temp_directory", true, false);
-        GlobalNotArray["program_directory"] = new VariableInfo("program_directory", true, false);
-        GlobalNotArray["instance_count"] = new VariableInfo("instance_count", true, false);
-        GlobalNotArray["instance_id"] = new VariableInfo("instance_id", true, false);
-        GlobalNotArray["room_width"] = new VariableInfo("room_width", true, true);
-        GlobalNotArray["room_height"] = new VariableInfo("room_height", true, true);
-        GlobalNotArray["room_caption"] = new VariableInfo("room_caption", true, true);
-        GlobalNotArray["room_speed"] = new VariableInfo("room_speed", true, true);
-        GlobalNotArray["room_persistent"] = new VariableInfo("room_persistent", true, true);
-        GlobalNotArray["background_color"] = new VariableInfo("background_color", true, true);
-        GlobalNotArray["background_showcolor"] = new VariableInfo("background_showcolor", true, true);
-        GlobalNotArray["background_colour"] = new VariableInfo("background_colour", true, true);
-        GlobalNotArray["background_showcolour"] = new VariableInfo("background_showcolour", true, true);
-        if (data?.GeneralInfo?.Major < 2)
-        {
-            GlobalArray["background_visible"] = new VariableInfo("background_visible", true, true, true);
-            GlobalArray["background_foreground"] = new VariableInfo("background_foreground", true, true, true);
-            GlobalArray["background_index"] = new VariableInfo("background_index", true, true, true);
-            GlobalArray["background_x"] = new VariableInfo("background_x", true, true, true);
-            GlobalArray["background_y"] = new VariableInfo("background_y", true, true, true);
-            GlobalArray["background_width"] = new VariableInfo("background_width", true, false, true);
-            GlobalArray["background_height"] = new VariableInfo("background_height", true, false, true);
-            GlobalArray["background_htiled"] = new VariableInfo("background_htiled", true, true, true);
-            GlobalArray["background_vtiled"] = new VariableInfo("background_vtiled", true, true, true);
-            GlobalArray["background_xscale"] = new VariableInfo("background_xscale", true, true, true);
-            GlobalArray["background_yscale"] = new VariableInfo("background_yscale", true, true, true);
-            GlobalArray["background_hspeed"] = new VariableInfo("background_hspeed", true, true, true);
-            GlobalArray["background_vspeed"] = new VariableInfo("background_vspeed", true, true, true);
-            GlobalArray["background_blend"] = new VariableInfo("background_blend", true, true, true);
-            GlobalArray["background_alpha"] = new VariableInfo("background_alpha", true, true, true);
-        }
-        GlobalNotArray["view_enabled"] = new VariableInfo("view_enabled", true, true);
-        GlobalNotArray["view_current"] = new VariableInfo("view_current", true, false);
-        GlobalNotArray["view_visible"] = new VariableInfo("view_visible", true, true);
-        GlobalArray["view_xview"] = new VariableInfo("view_xview", true, true, true);
-        GlobalArray["view_yview"] = new VariableInfo("view_yview", true, true, true);
-        GlobalArray["view_wview"] = new VariableInfo("view_wview", true, true, true);
-        GlobalArray["view_hview"] = new VariableInfo("view_hview", true, true, true);
-        GlobalArray["view_angle"] = new VariableInfo("view_angle", true, true, true);
-        GlobalArray["view_hborder"] = new VariableInfo("view_hborder", true, true, true);
-        GlobalArray["view_vborder"] = new VariableInfo("view_vborder", true, true, true);
-        GlobalArray["view_hspeed"] = new VariableInfo("view_hspeed", true, true, true);
-        GlobalArray["view_vspeed"] = new VariableInfo("view_vspeed", true, true, true);
-        GlobalArray["view_object"] = new VariableInfo("view_object", true, true, true);
-        GlobalArray["view_xport"] = new VariableInfo("view_xport", true, true, true);
-        GlobalArray["view_yport"] = new VariableInfo("view_yport", true, true, true);
-        GlobalArray["view_wport"] = new VariableInfo("view_wport", true, true, true);
-        GlobalArray["view_hport"] = new VariableInfo("view_hport", true, true, true);
-        GlobalArray["view_surface_id"] = new VariableInfo("view_surface_id", true, true, true);
-        GlobalArray["view_camera"] = new VariableInfo("view_camera", true, true, true);
-        GlobalNotArray["mouse_x"] = new VariableInfo("mouse_x", true, false);
-        GlobalNotArray["mouse_y"] = new VariableInfo("mouse_y", true, false);
-        GlobalNotArray["mouse_button"] = new VariableInfo("mouse_button", true, true);
-        GlobalNotArray["mouse_lastbutton"] = new VariableInfo("mouse_lastbutton", true, true);
-        GlobalNotArray["keyboard_key"] = new VariableInfo("keyboard_key", true, true);
-        GlobalNotArray["keyboard_lastkey"] = new VariableInfo("keyboard_lastkey", true, true);
-        GlobalNotArray["keyboard_lastchar"] = new VariableInfo("keyboard_lastchar", true, true);
-        GlobalNotArray["keyboard_string"] = new VariableInfo("keyboard_string", true, true);
-        GlobalNotArray["show_score"] = new VariableInfo("show_score", true, true);
-        GlobalNotArray["show_lives"] = new VariableInfo("show_lives", true, true);
-        GlobalNotArray["show_health"] = new VariableInfo("show_health", true, true);
-        GlobalNotArray["caption_score"] = new VariableInfo("caption_score", true, true);
-        GlobalNotArray["caption_lives"] = new VariableInfo("caption_lives", true, true);
-        GlobalNotArray["caption_health"] = new VariableInfo("caption_health", true, true);
-        GlobalNotArray["fps"] = new VariableInfo("fps", true, false);
-        GlobalNotArray["fps_real"] = new VariableInfo("fps_real", true, false);
-        GlobalNotArray["current_time"] = new VariableInfo("current_time", true, false);
-        GlobalNotArray["current_year"] = new VariableInfo("current_year", true, false);
-        GlobalNotArray["current_month"] = new VariableInfo("current_month", true, false);
-        GlobalNotArray["current_day"] = new VariableInfo("current_day", true, false);
-        GlobalNotArray["current_weekday"] = new VariableInfo("current_weekday", true, false);
-        GlobalNotArray["current_hour"] = new VariableInfo("current_hour", true, false);
-        GlobalNotArray["current_minute"] = new VariableInfo("current_minute", true, false);
-        GlobalNotArray["current_second"] = new VariableInfo("current_second", true, false);
-        GlobalNotArray["event_type"] = new VariableInfo("event_type", true, false);
-        GlobalNotArray["event_number"] = new VariableInfo("event_number", true, false);
-        GlobalNotArray["event_object"] = new VariableInfo("event_object", true, false);
-        GlobalNotArray["event_action"] = new VariableInfo("event_action", true, false);
-        GlobalNotArray["error_occurred"] = new VariableInfo("error_occurred", true, true);
-        GlobalNotArray["error_last"] = new VariableInfo("error_last", true, true);
-        GlobalNotArray["gamemaker_registered"] = new VariableInfo("gamemaker_registered", true, false);
-        GlobalNotArray["gamemaker_pro"] = new VariableInfo("gamemaker_pro", true, false);
-        GlobalNotArray["application_surface"] = new VariableInfo("application_surface", true, false);
-        if (data?.GeneralInfo?.Major >= 2)
-        {
-            GlobalNotArray["font_texture_page_size"] = new VariableInfo("font_texture_page_size", true, true);
-        }
-        GlobalNotArray["os_type"] = new VariableInfo("os_type", true, false);
-        GlobalNotArray["os_device"] = new VariableInfo("os_device", true, false);
-        GlobalNotArray["os_version"] = new VariableInfo("os_version", true, false);
-        GlobalNotArray["browser_width"] = new VariableInfo("browser_width", true, false);
-        GlobalNotArray["browser_height"] = new VariableInfo("browser_height", true, false);
-        GlobalNotArray["async_load"] = new VariableInfo("async_load", true, false);
-        GlobalNotArray["event_data"] = new VariableInfo("event_data", true, false);
-        GlobalNotArray["display_aa"] = new VariableInfo("display_aa", true, false);
-        GlobalNotArray["iap_data"] = new VariableInfo("iap_data", true, false);
-        GlobalNotArray["cursor_sprite"] = new VariableInfo("cursor_sprite", true, true);
-        GlobalNotArray["delta_time"] = new VariableInfo("delta_time", true, true);
-        GlobalNotArray["webgl_enabled"] = new VariableInfo("webgl_enabled", true, false);
 
-        // Now onto instance variables
-        Instance = new Dictionary<string, VariableInfo>
+        // Global variables
+        GlobalVars = new(128);
+        GlobalArrayVars = new(128);
+        DefineGlobal("argument_relative", false);
+        DefineGlobal("argument_count", false);
+        DefineGlobal("argument", true);
+        DefineGlobal("argument0", true);
+        DefineGlobal("argument1", true);
+        DefineGlobal("argument2", true);
+        DefineGlobal("argument3", true);
+        DefineGlobal("argument4", true);
+        DefineGlobal("argument5", true);
+        DefineGlobal("argument6", true);
+        DefineGlobal("argument7", true);
+        DefineGlobal("argument8", true);
+        DefineGlobal("argument9", true);
+        DefineGlobal("argument10", true);
+        DefineGlobal("argument11", true);
+        DefineGlobal("argument12", true);
+        DefineGlobal("argument13", true);
+        DefineGlobal("argument14", true);
+        DefineGlobal("argument15", true);
+        DefineGlobal("debug_mode", false);
+        DefineGlobal("pointer_invalid", false);
+        DefineGlobal("pointer_null", false);
+        DefineGlobal("undefined", false);
+        if (gms2)
         {
-            ["x"] = new VariableInfo("x", false, true),
-            ["y"] = new VariableInfo("y", false, true),
-            ["xprevious"] = new VariableInfo("xprevious", false, true),
-            ["yprevious"] = new VariableInfo("yprevious", false, true),
-            ["xstart"] = new VariableInfo("xstart", false, true),
-            ["ystart"] = new VariableInfo("ystart", false, true),
-            ["hspeed"] = new VariableInfo("hspeed", false, true),
-            ["vspeed"] = new VariableInfo("vspeed", false, true),
-            ["direction"] = new VariableInfo("direction", false, true),
-            ["speed"] = new VariableInfo("speed", false, true),
-            ["friction"] = new VariableInfo("friction", false, true),
-            ["gravity"] = new VariableInfo("gravity", false, true),
-            ["gravity_direction"] = new VariableInfo("gravity_direction", false, true),
-            ["object_index"] = new VariableInfo("object_index", false, false),
-            ["id"] = new VariableInfo("id", false, false),
-            ["alarm"] = new VariableInfo("alarm", false, true),
-            ["solid"] = new VariableInfo("solid", false, true),
-            ["visible"] = new VariableInfo("visible", false, true),
-            ["persistent"] = new VariableInfo("persistent", false, true),
-            ["depth"] = new VariableInfo("depth", false, true),
-            ["bbox_left"] = new VariableInfo("bbox_left", false, false),
-            ["bbox_right"] = new VariableInfo("bbox_right", false, false),
-            ["bbox_top"] = new VariableInfo("bbox_top", false, false),
-            ["bbox_bottom"] = new VariableInfo("bbox_bottom", false, false),
-            ["sprite_index"] = new VariableInfo("sprite_index", false, true),
-            ["image_index"] = new VariableInfo("image_index", false, true),
-            ["image_single"] = new VariableInfo("image_single", false, true),
-            ["image_number"] = new VariableInfo("image_number", false, false),
-            ["sprite_width"] = new VariableInfo("sprite_width", false, false),
-            ["sprite_height"] = new VariableInfo("sprite_height", false, false),
-            ["sprite_xoffset"] = new VariableInfo("sprite_xoffset", false, false),
-            ["sprite_yoffset"] = new VariableInfo("sprite_yoffset", false, false),
-            ["image_xscale"] = new VariableInfo("image_xscale", false, true),
-            ["image_yscale"] = new VariableInfo("image_yscale", false, true),
-            ["image_angle"] = new VariableInfo("image_angle", false, true),
-            ["image_alpha"] = new VariableInfo("image_alpha", false, true),
-            ["image_blend"] = new VariableInfo("image_blend", false, true),
-            ["image_speed"] = new VariableInfo("image_speed", false, true),
-            ["mask_index"] = new VariableInfo("mask_index", false, true),
-            ["path_index"] = new VariableInfo("path_index", false, false),
-            ["path_position"] = new VariableInfo("path_position", false, true),
-            ["path_positionprevious"] = new VariableInfo("path_positionprevious", false, true),
-            ["path_speed"] = new VariableInfo("path_speed", false, true),
-            ["path_scale"] = new VariableInfo("path_scale", false, true),
-            ["path_orientation"] = new VariableInfo("path_orientation", false, true),
-            ["path_endaction"] = new VariableInfo("path_endaction", false, true),
-            ["timeline_index"] = new VariableInfo("timeline_index", false, true),
-            ["timeline_position"] = new VariableInfo("timeline_position", false, true),
-            ["timeline_speed"] = new VariableInfo("timeline_speed", false, true),
-            ["timeline_running"] = new VariableInfo("timeline_running", false, true),
-            ["timeline_loop"] = new VariableInfo("timeline_loop", false, true),
-            ["phy_rotation"] = new VariableInfo("phy_rotation", false, true),
-            ["phy_position_x"] = new VariableInfo("phy_position_x", false, true),
-            ["phy_position_y"] = new VariableInfo("phy_position_y", false, true),
-            ["phy_angular_velocity"] = new VariableInfo("phy_angular_velocity", false, true),
-            ["phy_linear_velocity_x"] = new VariableInfo("phy_linear_velocity_x", false, true),
-            ["phy_linear_velocity_y"] = new VariableInfo("phy_linear_velocity_y", false, true),
-            ["phy_speed_x"] = new VariableInfo("phy_speed_x", false, true),
-            ["phy_speed_y"] = new VariableInfo("phy_speed_y", false, true),
-            ["phy_speed"] = new VariableInfo("phy_speed", false, false),
-            ["phy_angular_damping"] = new VariableInfo("phy_angular_damping", false, true),
-            ["phy_linear_damping"] = new VariableInfo("phy_linear_damping", false, true),
-            ["phy_bullet"] = new VariableInfo("phy_bullet", false, true),
-            ["phy_fixed_rotation"] = new VariableInfo("phy_fixed_rotation", false, true),
-            ["phy_active"] = new VariableInfo("phy_active", false, true),
-            ["phy_mass"] = new VariableInfo("phy_mass", false, false),
-            ["phy_inertia"] = new VariableInfo("phy_inertia", false, false),
-            ["phy_com_x"] = new VariableInfo("phy_com_x", false, false),
-            ["phy_com_y"] = new VariableInfo("phy_com_y", false, false),
-            ["phy_dynamic"] = new VariableInfo("phy_dynamic", false, false),
-            ["phy_kinematic"] = new VariableInfo("phy_kinematic", false, false),
-            ["phy_sleeping"] = new VariableInfo("phy_sleeping", false, false),
-            ["phy_position_xprevious"] = new VariableInfo("phy_position_xprevious", false, true),
-            ["phy_position_yprevious"] = new VariableInfo("phy_position_yprevious", false, true),
-            ["phy_collision_points"] = new VariableInfo("phy_collision_points", false, false)
-        };
+            DefineGlobal("infinity", false);
+            DefineGlobal("NaN", false);
+        }
+        DefineGlobal("room", true);
+        DefineGlobal("room_first", false);
+        DefineGlobal("room_last", false);
+        DefineGlobal("transition_kind", true);
+        DefineGlobal("transition_steps", true);
+        DefineGlobal("score", true);
+        DefineGlobal("lives", true);
+        DefineGlobal("health", true);
+        DefineGlobal("game_id", false);
+        DefineGlobal("game_display_name", false);
+        DefineGlobal("game_project_name", false);
+        DefineGlobal("game_save_id", false);
+        DefineGlobal("working_directory", false);
+        DefineGlobal("temp_directory", false);
+        DefineGlobal("program_directory", false);
+        DefineGlobal("instance_count", false);
+        DefineGlobal("instance_id", false);
+        DefineGlobal("room_width", true);
+        DefineGlobal("room_height", true);
+        DefineGlobal("room_caption", true);
+        DefineGlobal("room_speed", true);
+        DefineGlobal("room_persistent", true);
+        DefineGlobal("background_color", true);
+        DefineGlobal("background_showcolor", true);
+        DefineGlobal("background_colour", true);
+        DefineGlobal("background_showcolour", true);
+        if (!gms2)
+        {
+            DefineGlobalAutoArray("background_visible", true);
+            DefineGlobalAutoArray("background_foreground", true);
+            DefineGlobalAutoArray("background_index", true);
+            DefineGlobalAutoArray("background_x", true);
+            DefineGlobalAutoArray("background_y", true);
+            DefineGlobalAutoArray("background_width", false);
+            DefineGlobalAutoArray("background_height", false);
+            DefineGlobalAutoArray("background_htiled", true);
+            DefineGlobalAutoArray("background_vtiled", true);
+            DefineGlobalAutoArray("background_xscale", true);
+            DefineGlobalAutoArray("background_yscale", true);
+            DefineGlobalAutoArray("background_hspeed", true);
+            DefineGlobalAutoArray("background_vspeed", true);
+            DefineGlobalAutoArray("background_blend", true);
+            DefineGlobalAutoArray("background_alpha", true);
+        }
+        DefineGlobal("view_enabled", true);
+        DefineGlobal("view_current", false);
+        DefineGlobal("view_visible", true);
+        DefineGlobalAutoArray("view_xview", true);
+        DefineGlobalAutoArray("view_yview", true);
+        DefineGlobalAutoArray("view_wview", true);
+        DefineGlobalAutoArray("view_hview", true);
+        DefineGlobalAutoArray("view_angle", true);
+        DefineGlobalAutoArray("view_hborder", true);
+        DefineGlobalAutoArray("view_vborder", true);
+        DefineGlobalAutoArray("view_hspeed", true);
+        DefineGlobalAutoArray("view_vspeed", true);
+        DefineGlobalAutoArray("view_object", true);
+        DefineGlobalAutoArray("view_xport", true);
+        DefineGlobalAutoArray("view_yport", true);
+        DefineGlobalAutoArray("view_wport", true);
+        DefineGlobalAutoArray("view_hport", true);
+        DefineGlobalAutoArray("view_surface_id", true);
+        DefineGlobalAutoArray("view_camera", true);
+        DefineGlobal("mouse_x", false);
+        DefineGlobal("mouse_y", false);
+        DefineGlobal("mouse_button", true);
+        DefineGlobal("mouse_lastbutton", true);
+        DefineGlobal("keyboard_key", true);
+        DefineGlobal("keyboard_lastkey", true);
+        DefineGlobal("keyboard_lastchar", true);
+        DefineGlobal("keyboard_string", true);
+        DefineGlobal("show_score", true);
+        DefineGlobal("show_lives", true);
+        DefineGlobal("show_health", true);
+        DefineGlobal("caption_score", true);
+        DefineGlobal("caption_lives", true);
+        DefineGlobal("caption_health", true);
+        DefineGlobal("fps", false);
+        DefineGlobal("fps_real", false);
+        DefineGlobal("current_time", false);
+        DefineGlobal("current_year", false);
+        DefineGlobal("current_month", false);
+        DefineGlobal("current_day", false);
+        DefineGlobal("current_weekday", false);
+        DefineGlobal("current_hour", false);
+        DefineGlobal("current_minute", false);
+        DefineGlobal("current_second", false);
+        DefineGlobal("event_type", false);
+        DefineGlobal("event_number", false);
+        DefineGlobal("event_object", false);
+        DefineGlobal("event_action", false);
+        DefineGlobal("error_occurred", true);
+        DefineGlobal("error_last", true);
+        DefineGlobal("gamemaker_registered", false);
+        DefineGlobal("gamemaker_pro", false);
+        DefineGlobal("application_surface", false);
+        if (gms2)
+            DefineGlobal("font_texture_page_size", true);
 
-        // There are some of them that are only available in certain physics events
-        InstanceLimitedEvent = new Dictionary<string, VariableInfo>
+        if (major > 2022 || (major == 2022 && minor >= 11))
+            DefineGlobal("audio_bus_main", true);
+        DefineGlobal("os_type", false);
+        DefineGlobal("os_device", false);
+        DefineGlobal("os_version", false);
+        DefineGlobal("browser_width", false);
+        DefineGlobal("browser_height", false);
+        DefineGlobal("async_load", false);
+        DefineGlobal("event_data", false);
+        DefineGlobal("display_aa", false);
+        DefineGlobal("iap_data", false);
+        DefineGlobal("cursor_sprite", true);
+        DefineGlobal("delta_time", true);
+        DefineGlobal("webgl_enabled", false);
+
+        // Instance variables
+        InstanceVars = new(128);
+        DefineInstanceVar("x", true);
+        DefineInstanceVar("y", true);
+        DefineInstanceVar("xprevious", true);
+        DefineInstanceVar("yprevious", true);
+        DefineInstanceVar("xstart", true);
+        DefineInstanceVar("ystart", true);
+        DefineInstanceVar("hspeed", true);
+        DefineInstanceVar("vspeed", true);
+        DefineInstanceVar("direction", true);
+        DefineInstanceVar("speed", true);
+        DefineInstanceVar("friction", true);
+        DefineInstanceVar("gravity", true);
+        DefineInstanceVar("gravity_direction", true);
+        DefineInstanceVar("object_index", false);
+        DefineInstanceVar("id", false);
+        DefineInstanceVar("alarm", true);
+        DefineInstanceVar("solid", true);
+        DefineInstanceVar("visible", true);
+        DefineInstanceVar("persistent", true);
+        DefineInstanceVar("depth", true);
+        DefineInstanceVar("bbox_left", false);
+        DefineInstanceVar("bbox_right", false);
+        DefineInstanceVar("bbox_top", false);
+        DefineInstanceVar("bbox_bottom", false);
+        DefineInstanceVar("sprite_index", true);
+        DefineInstanceVar("image_index", true);
+        DefineInstanceVar("image_single", true);
+        DefineInstanceVar("image_number", false);
+        DefineInstanceVar("sprite_width", false);
+        DefineInstanceVar("sprite_height", false);
+        DefineInstanceVar("sprite_xoffset", false);
+        DefineInstanceVar("sprite_yoffset", false);
+        DefineInstanceVar("image_xscale", true);
+        DefineInstanceVar("image_yscale", true);
+        DefineInstanceVar("image_angle", true);
+        DefineInstanceVar("image_alpha", true);
+        DefineInstanceVar("image_blend", true);
+        DefineInstanceVar("image_speed", true);
+        DefineInstanceVar("mask_index", true);
+        DefineInstanceVar("path_index", false);
+        DefineInstanceVar("path_position", true);
+        DefineInstanceVar("path_positionprevious", true);
+        DefineInstanceVar("path_speed", true);
+        DefineInstanceVar("path_scale", true);
+        DefineInstanceVar("path_orientation", true);
+        DefineInstanceVar("path_endaction", true);
+        DefineInstanceVar("timeline_index", true);
+        DefineInstanceVar("timeline_position", true);
+        DefineInstanceVar("timeline_speed", true);
+        DefineInstanceVar("timeline_running", true);
+        DefineInstanceVar("timeline_loop", true);
+        DefineInstanceVar("phy_rotation", true);
+        DefineInstanceVar("phy_position_x", true);
+        DefineInstanceVar("phy_position_y", true);
+        DefineInstanceVar("phy_angular_velocity", true);
+        DefineInstanceVar("phy_linear_velocity_x", true);
+        DefineInstanceVar("phy_linear_velocity_y", true);
+        DefineInstanceVar("phy_speed_x", true);
+        DefineInstanceVar("phy_speed_y", true);
+        DefineInstanceVar("phy_speed", false);
+        DefineInstanceVar("phy_angular_damping", true);
+        DefineInstanceVar("phy_linear_damping", true);
+        DefineInstanceVar("phy_bullet", true);
+        DefineInstanceVar("phy_fixed_rotation", true);
+        DefineInstanceVar("phy_active", true);
+        DefineInstanceVar("phy_mass", false);
+        DefineInstanceVar("phy_inertia", false);
+        DefineInstanceVar("phy_com_x", false);
+        DefineInstanceVar("phy_com_y", false);
+        DefineInstanceVar("phy_dynamic", false);
+        DefineInstanceVar("phy_kinematic", false);
+        DefineInstanceVar("phy_sleeping", false);
+        DefineInstanceVar("phy_position_xprevious", true);
+        DefineInstanceVar("phy_position_yprevious", true);
+        DefineInstanceVar("phy_collision_points", false);
+
+        // Instance variables, limited to certain (physics) events
+        InstanceLimitedVars = new Dictionary<string, VariableInfo>
         {
             ["phy_collision_x"] = new VariableInfo("phy_collision_x", false, false, true),
             ["phy_collision_y"] = new VariableInfo("phy_collision_y", false, false, true),
             ["phy_col_normal_x"] = new VariableInfo("phy_col_normal_x", false, false, true),
-            ["phy_col_normal_y"] = new VariableInfo("phy_col_normal_y", false, false, true)
+            ["phy_col_normal_y"] = new VariableInfo("phy_col_normal_y", false, false, true),
         };
     }
 }

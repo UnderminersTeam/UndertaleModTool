@@ -2,28 +2,45 @@
 
 [![Underminers Discord](https://img.shields.io/discord/566861759210586112?label=Discord&logo=discord&logoColor=white)](https://discord.gg/hnyMDypMbN) [![GitHub](https://img.shields.io/github/license/UnderminersTeam/UndertaleModTool?logo=github)](https://github.com/UnderminersTeam/UndertaleModTool/blob/master/LICENSE.txt)
 
-(seeing such an amazing tool fills you with DETERMINATION.)
+The most complete tool for modding, decompiling and unpacking Undertale (and other GameMaker games!)
 
-Heya. I heard you like digging deep into GameMaker games like Undertale/Deltarune, so here's a tool just for you!
+> *\* (Seeing such a specialized tool, the culmination of work from many amazing contributors...)*
 
-![Flowey: Now YOU are the GOD of this world.](images/flowey.gif)
+> *\* (It fills you with determination.)*
 
+# Quick Start
+
+## Windows
+
+1. Find the latest stable (or nightly) release from the [Downloads](#downloads) section below
+2. Download the GUI version (e.g. `UndertaleModTool_v0.9.1.2-Windows.zip`), or the CLI version if you know what you're doing
+3. Extract the ZIP file to a folder (do not run from inside the archive!)
+4. Run `UndertaleModTool.exe` to start the tool
+5. Open your game's data file (e.g. `data.win`, `game.ios`, `game.unx`, etc.) via File → Open
+
+## macOS/Linux
+
+As of writing, there is no official method of running UndertaleModTool's GUI on macOS or Linux. However, there are some options available:
+- Use the CLI (command-line interface) version of the tool. This means there's no graphical interface, but it can be useful for automation and quick tasks.
+- Use a work-in-progress port of the GUI to a cross-platform framework, such as the one [currently available here](https://github.com/UnderminersTeam/UndertaleModTool/pull/2126). As of writing, this port is incomplete, but it has support for many features that are commonly used.
+- Run the tool via [Wine](https://winehq.org). This can be configured manually, or you can use an unofficial, community-maintained installer script such as [this one](https://github.com/YarTom/UndertaleModTool-linux-installer). **The Underminers team is not associated with these projects, so take care to ensure any scripts are safe before running them!**
 
 # Downloads
 
-Both the latest stable release and the most cutting edge version can be downloaded from the table below!
-Note, that you can update to the bleeding edge releases at any time from within the settings menu of UndertaleModTool.  
+Both the latest stable and nightly releases can be downloaded from the table below!
+The nightly releases are more likely to have issues, but contain the most recent features and fixes.
 
-| Releases 	| Status 	|
+| Release 	| Link / Status 	|
 |:---:	|----------	|
-| Stable 	| [![Latest Stable Release](https://img.shields.io/github/downloads/UnderminersTeam/UndertaleModTool/0.8.2.0/total)](https://github.com/UnderminersTeam/UndertaleModTool/releases/tag/0.8.2.0) |
-| Bleeding edge 	| [![Latest Bleeding Edge](https://img.shields.io/github/downloads/UnderminersTeam/UndertaleModTool/bleeding-edge/total)](https://github.com/UnderminersTeam/UndertaleModTool/releases/tag/bleeding-edge) |
+| Stable 	| [![Latest Stable Release](https://img.shields.io/github/downloads/UnderminersTeam/UndertaleModTool/latest/total)](https://github.com/UnderminersTeam/UndertaleModTool/releases/latest) |
+| Nightly 	| [![Latest Nightly](https://img.shields.io/github/downloads/UnderminersTeam/UndertaleModTool/nightly/total)](https://github.com/UnderminersTeam/UndertaleModTool/releases/tag/nightly) |
 
-It's worth noting that UndertaleModTool has different builds per release. The differences are as follows:
+UndertaleModTool has a few different versions to choose from. The differences are as follows:
 
-* `.NET bundled` - bundles the required .NET runtime version needed to run the tool alongside it. All stable releases are .NET bundled, so you don't have to worry about installing the necessary runtime.
-* `Single file` - the tool is only one executable, with all dependencies embedded within it. This does make your folders cleaner, however it also causes some unexpected stability issues.
-* `Non-single File` - all dependencies are not embedded within the executable, but are now located right next to it. Choose this if you don't care about finding the right executable in-between of ~300 dll's, or if the stability issues from the `Single file` build affect you.
+* `GUI` (default) - the tool has a full graphical interface, making data file viewing and manipulation convenient.
+* `CLI` - the tool is accessible only via a command-line interface, which is useful for automation and quick tasks, but is more difficult to use.
+* `Single file` - the tool is only one executable, with all dependencies embedded within it. This makes your folders cleaner, however it can also cause stability issues in certain cases.
+* `Non-single file` (default) - all dependencies are not embedded within the executable, and are now located right next to it. Choose this if you don't care about finding the right executable within ~300 DLL files, or if the stability issues from the `Single file` build affect you.
 
 # Main Features
 
@@ -52,18 +69,15 @@ For more information on them, consult the [SCRIPTS.md](https://github.com/Underm
 
 # Contributing
 
-All contributions are welcome! If you find a bug, a data file that does not load etc., please report it on the [issues page](https://github.com/UnderminersTeam/UndertaleModTool/issues). Pull requests are welcome too! Here is a current list of stuff that needs to be worked on:
+If you find a bug, a data file that does not load etc., please report it on the [issues page](https://github.com/UnderminersTeam/UndertaleModTool/issues).
 
-* Upgrading profile system to a better, more source-control friendly project system.
-* Continuing to improve support for a wider variety of GameMaker versions (especially recent ones).
-* Further GML compiler and decompiler work, mainly over on [Underanalyzer](https://github.com/UnderminersTeam/Underanalyzer).
-* Making structural changes to clean up the library (an incremental effort).
-* Eventually, making the GUI cross-platform if possible, and improving it in general.
-* General usability improvements, bugfixes, and so on.
+For more details on contributions, the project's AI policy (tl;dr: no), and what needs to be worked on, see the [CONTRIBUTING.md](https://github.com/UnderminersTeam/UndertaleModTool/blob/master/CONTRIBUTING.md) file.
 
 # Compilation Instructions
 
-In order to compile the repo yourself, the `.NET Core 8 SDK` or later is required.
+In order to compile the repo yourself, the `.NET Core 10 SDK` or later is required.
+
+When cloning using Git, make sure to recursively clone submodules (e.g. with `--recurse-submodules`), as a submodule is used for the `Underanalyzer` dependency.
 
 The following projects can be compiled:  
 - `UndertaleModLib`: The core library used by all other projects.
@@ -102,3 +116,5 @@ as well as all the other contributors:
 </p>
 
 And of course, special thanks to Toby Fox and the whole Undertale team for making the game(s) ;)
+
+![Flowey: Now YOU are the GOD of this world.](images/flowey.gif)

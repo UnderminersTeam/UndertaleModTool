@@ -19,14 +19,14 @@ if (displayName != "deltarune chapter 1 & 2" && displayName != "deltarune chapte
     }
 }
 
-string dataPath = Path.Combine(Path.GetDirectoryName(ScriptPath), "TouchControls_data");
+string dataPath = Path.Join(Path.GetDirectoryName(ScriptPath), "TouchControls_data");
 
 Dictionary<string, UndertaleEmbeddedTexture> textures = new Dictionary<string, UndertaleEmbeddedTexture>();
 
 UndertaleEmbeddedTexture controlsTexturePage = new UndertaleEmbeddedTexture();
-controlsTexturePage.TextureData.Image = GMImage.FromPng(File.ReadAllBytes(Path.Combine(dataPath, "controls.png"))); // TODO: generate other formats
+controlsTexturePage.TextureData.Image = GMImage.FromPng(File.ReadAllBytes(Path.Join(dataPath, "controls.png"))); // TODO: generate other formats
 Data.EmbeddedTextures.Add(controlsTexturePage);
-textures.Add(Path.GetFileName(Path.Combine(dataPath, "controls.png")), controlsTexturePage);
+textures.Add(Path.GetFileName(Path.Join(dataPath, "controls.png")), controlsTexturePage);
 
 UndertaleTexturePageItem AddNewTexturePageItem(ushort sourceX, ushort sourceY, ushort sourceWidth, ushort sourceHeight)
 {
@@ -133,19 +133,22 @@ int settingsnumx = 0;
 if(currentFont == "fnt_main") {settingsnumx = 477; }
 else if(currentFont == "fnt_mainbig") { settingsnumx = 502; }
 
-UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data);
+UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
+{
+    MainThreadAction = MainThreadAction
+};
 
-string mobileControlsCreate = File.ReadAllText(Path.Combine(dataPath, "gml_Object_obj_mobilecontrols_Create_0.gml"));
+string mobileControlsCreate = File.ReadAllText(Path.Join(dataPath, "gml_Object_obj_mobilecontrols_Create_0.gml"));
 StringBuilder builder = new StringBuilder(mobileControlsCreate);
 builder.Replace("{_font}", currentFont);
 builder.Replace("{_settingsnumx}", Convert.ToString(settingsnumx));
 mobileControlsCreate = builder.ToString();
 
 importGroup.QueueReplace("gml_Object_obj_mobilecontrols_Create_0", mobileControlsCreate);
-QueueGMLFile(Path.Combine(dataPath, "gml_Object_obj_mobilecontrols_Draw_64.gml"));
-QueueGMLFile(Path.Combine(dataPath, "gml_Object_obj_mobilecontrols_Other_4.gml"));
+QueueGMLFile(Path.Join(dataPath, "gml_Object_obj_mobilecontrols_Draw_64.gml"));
+QueueGMLFile(Path.Join(dataPath, "gml_Object_obj_mobilecontrols_Other_4.gml"));
 Data.Scripts.Add(new UndertaleScript() { Name = Data.Strings.MakeString("scr_add_keys"), Code = Data.Code.ByName("gml_Object_obj_mobilecontrols_Other_4") });
-QueueGMLFile(Path.Combine(dataPath, "gml_Object_obj_mobilecontrols_Step_0.gml"));
+QueueGMLFile(Path.Join(dataPath, "gml_Object_obj_mobilecontrols_Step_0.gml"));
 
 var mobileControls = Data.GameObjects.ByName("obj_mobilecontrols");
 mobileControls.Persistent = true;

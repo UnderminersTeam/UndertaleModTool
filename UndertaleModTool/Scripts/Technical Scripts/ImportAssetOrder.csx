@@ -17,8 +17,10 @@ if (Data.IsVersionAtLeast(2024, 11))
 }
 
 string assetNamePath = PromptLoadFile("txt", "Text files (.txt)|*.txt|All files|*");
-if (assetNamePath == null)
-    throw new ScriptException("The asset name text file was not chosen!");
+if (assetNamePath is null)
+{
+    throw new ScriptCancelledException("The asset name text file was not chosen!");
+}
 
 string[] lines = File.ReadAllLines(assetNamePath);
 

@@ -54,7 +54,7 @@ HashSet<string> spritesStartAt1 = new HashSet<string>();
 
 string importFolder = CheckValidity();
 
-string packDir = Path.Combine(ExePath, "Packager");
+string packDir = Path.Join(ExePath, "Packager");
 Directory.CreateDirectory(packDir);
 
 bool noMasksForBasicRectangles = Data.IsVersionAtLeast(2022, 9); // TODO: figure out the exact version, but this is pretty close
@@ -62,7 +62,7 @@ bool noMasksForBasicRectangles = Data.IsVersionAtLeast(2022, 9); // TODO: figure
 try
 {
     string sourcePath = importFolder;
-    string outName = Path.Combine(packDir, "atlas.txt");
+    string outName = Path.Join(packDir, "atlas.txt");
     int textureSize = 2048;
     int PaddingValue = 2;
     bool debug = false;
@@ -77,12 +77,12 @@ try
     Dictionary<UndertaleSprite, Node> maskNodes = new();
 
     // Import everything into UTMT
-    string prefix = outName.Replace(Path.GetExtension(outName), "");
+    string prefix = Path.Join(Path.GetDirectoryName(outName), Path.GetFileNameWithoutExtension(outName));
     int atlasCount = 0;
     OffsetResult();
     foreach (Atlas atlas in packer.Atlasses)
     {
-        string atlasName = Path.Combine(packDir, $"{prefix}{atlasCount:000}.png");
+        string atlasName = $"{prefix}{atlasCount:000}.png";
         using MagickImage atlasImage = TextureWorker.ReadBGRAImageFromFile(atlasName);
         IPixelCollection<byte> atlasPixels = atlasImage.GetPixels();
 
@@ -128,7 +128,7 @@ try
                 if (spriteType == SpriteType.Background)
                 {
                     UndertaleBackground background = Data.Backgrounds.ByName(stripped);
-                    if (background != null)
+                    if (background is not null)
                     {
                         background.Texture = texturePageItem;
                     }
@@ -136,13 +136,14 @@ try
                     {
                         // No background found, let's make one
                         UndertaleString backgroundUTString = Data.Strings.MakeString(stripped);
-                        UndertaleBackground newBackground = new UndertaleBackground();
-                        newBackground.Name = backgroundUTString;
-                        newBackground.Transparent = false;
-                        newBackground.Preload = false;
-                        newBackground.Texture = texturePageItem;
-                        Data.Backgrounds.Add(newBackground);
+                        background = new UndertaleBackground();
+                        background.Name = backgroundUTString;
+                        background.Transparent = false;
+                        background.Preload = false;
+                        background.Texture = texturePageItem;
+                        Data.Backgrounds.Add(background);
                     }
+                    Project?.MarkAssetForExport(background);
                 }
                 else if (spriteType == SpriteType.Sprite)
                 {
@@ -248,8 +249,12 @@ try
 
                         newSprite.Textures.Add(texentry);
                         Data.Sprites.Add(newSprite);
+                        Project?.MarkAssetForExport(newSprite);
                         continue;
                     }
+
+                    Project?.MarkAssetForExport(sprite);
+
                     if (frame > sprite.Textures.Count - 1)
                     {
                         while (frame > sprite.Textures.Count - 1)
@@ -258,6 +263,7 @@ try
                         }
                         continue;
                     }
+
                     sprite.Textures[frame] = texentry;
                     sprite.GMS2PlaybackSpeedType = (AnimSpeedType)playback;
                     sprite.GMS2PlaybackSpeed = animSpd;
@@ -915,12 +921,16 @@ Accepted sprite formats: separate frames starting at 0 or 1 (sprite_N.png), GM-s
 Accepted background formats: single image (bg.png), single-frame GIF (bg.gif).
 Do you want to continue?");
     if (!recursiveCheck)
-        throw new ScriptException("Script cancelled.");
+    {
+        throw new ScriptCancelledException("Script cancelled.");
+    }
 
     // Get import folder
     string importFolder = PromptChooseDirectory();
-    if (importFolder == null)
-        throw new ScriptException("The import folder was not set.");
+    if (importFolder is null)
+    {
+        throw new ScriptCancelledException("The import folder was not set.");
+    }
 
     //Stop the script if there's missing sprite entries or w/e.
     bool hadMessage = false;

@@ -6,6 +6,7 @@ using System.IO;
 using UndertaleModLib;
 using UndertaleModLib.Scripting;
 using UndertaleModLib.Models;
+using UndertaleModLib.Util;
 using System.Collections.Generic;
 
 string DonorDataPath = "";
@@ -74,7 +75,7 @@ foreach (UndertaleSound snd in soundsList)
             int audioGroupID = DonorData.AudioGroups.IndexOf(donorSND.AudioGroup);
             var audioGroupReadStream =
             (
-                new FileStream(Path.Combine(GetFolder(FilePath), "audiogroup" + audioGroupID.ToString() + ".dat"), FileMode.Open, FileAccess.Read)
+                new FileStream(Paths.JoinVerifyWithinDirectory(GetFolder(FilePath), "audiogroup" + audioGroupID.ToString() + ".dat"), FileMode.Open, FileAccess.Read)
             ); // Load the audiogroup dat into memory
             UndertaleData audioGroupDat = UndertaleIO.Read(audioGroupReadStream); // Load as UndertaleData
             audioGroupReadStream.Dispose();
@@ -82,7 +83,7 @@ foreach (UndertaleSound snd in soundsList)
             audioID = audioGroupDat.EmbeddedAudio.Count - 1;
             var audioGroupWriteStream =
             (
-                new FileStream(Path.Combine(GetFolder(FilePath), "audiogroup" + audioGroupID.ToString() + ".dat"), FileMode.Create)
+                new FileStream(Paths.JoinVerifyWithinDirectory(GetFolder(FilePath), "audiogroup" + audioGroupID.ToString() + ".dat"), FileMode.Create)
             );
             UndertaleIO.Write(audioGroupWriteStream, audioGroupDat); // Write it to the disk
             audioGroupWriteStream.Dispose();
@@ -93,13 +94,13 @@ foreach (UndertaleSound snd in soundsList)
     }
     else
     {
-        string source = Path.Combine(GetFolder(DonorDataPath), donorSND.Name.Content + ".ogg");
-        string dest = Path.Combine(GetFolder(FilePath), nativeSND.Name.Content + ".ogg");
-        string backupLocation = Path.Combine(GetFolder(FilePath), "OldExternalSounds_" + DateTime.Now.ToString("MM-dd-yyyy_HH-mm-ss"));
+        string source = Paths.JoinVerifyWithinDirectory(GetFolder(DonorDataPath), donorSND.Name.Content + ".ogg");
+        string dest = Paths.JoinVerifyWithinDirectory(GetFolder(FilePath), nativeSND.Name.Content + ".ogg");
+        string backupLocation = Paths.JoinVerifyWithinDirectory(GetFolder(FilePath), "OldExternalSounds_" + DateTime.Now.ToString("MM-dd-yyyy_HH-mm-ss"));
         if (File.Exists(dest))
         {
             Directory.CreateDirectory(backupLocation);
-            File.Copy(dest, Path.Combine(backupLocation, nativeSND.Name.Content + ".ogg"));
+            File.Copy(dest, Paths.JoinVerifyWithinDirectory(backupLocation, nativeSND.Name.Content + ".ogg"));
             File.Delete(dest);
         }
         if (File.Exists(source))
@@ -148,7 +149,7 @@ void HandleAudioGroups(UndertaleSound donorSND, UndertaleSound nativeSND)
                 {
                     throw new ScriptException("Count is non-zero but audiogroup_default does not exist.");
                 }
-                File.WriteAllBytes(Path.Combine(GetFolder(FilePath), "audiogroup" + Data.AudioGroups.Count.ToString() + ".dat"), Convert.FromBase64String("Rk9STQwAAABBVURPBAAAAAAAAAA="));
+                File.WriteAllBytes(Paths.JoinVerifyWithinDirectory(GetFolder(FilePath), "audiogroup" + Data.AudioGroups.Count.ToString() + ".dat"), Convert.FromBase64String("Rk9STQwAAABBVURPBAAAAAAAAAA="));
             }
             if (!(donorSND.AudioGroup.Name.Content == "audiogroup_default" && Data.AudioGroups.ByName("audiogroup_default") == null))
             {
@@ -169,8 +170,8 @@ UndertaleData LoadDonorDataFile()
     ScriptMessage("Select the file to copy from");
     UndertaleData DonorData = null;
     DonorDataPath = PromptLoadFile(null, null);
-    if (DonorDataPath == null)
-        throw new ScriptException("The donor data path was not set.");
+    if (DonorDataPath is null)
+        throw new ScriptCancelledException("The donor data path was not set.");
     using (var stream = new FileStream(DonorDataPath, FileMode.Open, FileAccess.Read))
         DonorData = UndertaleIO.Read(stream, (warning, _) => ScriptMessage("A warning occured while trying to load " + DonorDataPath + ":\n" + warning));
     return DonorData;
@@ -235,7 +236,7 @@ IList<UndertaleEmbeddedAudio> GetAudioGroupData(UndertaleSound sound, string win
     string audioGroupName = sound.AudioGroup != null ? sound.AudioGroup.Name.Content : null;
     if (loadedAudioGroups.ContainsKey(audioGroupName))
         return loadedAudioGroups[audioGroupName];
-    string groupFilePath = Path.Combine(winFolder, "audiogroup" + sound.GroupID + ".dat");
+    string groupFilePath = Paths.JoinVerifyWithinDirectory(winFolder, "audiogroup" + sound.GroupID + ".dat");
     if (!File.Exists(groupFilePath))
         return null; // Doesn't exist.
     try

@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -18,6 +19,7 @@ using NAudio.Vorbis;
 using NAudio.Wave;
 using UndertaleModLib;
 using UndertaleModLib.Models;
+using UndertaleModLib.Util;
 
 namespace UndertaleModTool
 {
@@ -38,13 +40,50 @@ namespace UndertaleModTool
         public UndertaleSoundEditor()
         {
             InitializeComponent();
-            this.Unloaded += Unload;
+            Unloaded += OnUnloaded;
+            DataContextChanged += OnDataContextChanged;
         }
 
-        public void Unload(object sender, RoutedEventArgs e)
+        private void OnUnloaded(object sender, RoutedEventArgs e)
         {
-            if (waveOut != null)
-                waveOut.Stop();
+            waveOut?.Stop();
+
+            if (DataContext is UndertaleSound oldObj)
+            {
+                oldObj.PropertyChanged -= OnPropertyChanged;
+            }
+        }
+
+        private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.OldValue is UndertaleSound oldObj)
+            {
+                oldObj.PropertyChanged -= OnPropertyChanged;
+            }
+            if (e.NewValue is UndertaleSound newObj)
+            {
+                newObj.PropertyChanged += OnPropertyChanged;
+            }
+        }
+
+        private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            OnAssetUpdated();
+        }
+
+        private void OnAssetUpdated()
+        {
+            if (mainWindow.Project is null || !mainWindow.IsSelectedProjectExportable)
+            {
+                return;
+            }
+            Dispatcher.BeginInvoke(() =>
+            {
+                if (DataContext is UndertaleSound obj)
+                {
+                    mainWindow.Project?.MarkAssetForExport(obj);
+                }
+            });
         }
 
         private void InitAudio()
@@ -69,7 +108,7 @@ namespace UndertaleModTool
                         filename = sound.File.Content + ".ogg";
                     else
                         filename = sound.File.Content;
-                    string audioPath = Path.Combine(Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath), filename);
+                    string audioPath = Paths.JoinVerifyWithinDirectory(Path.GetDirectoryName((Application.Current.MainWindow as MainWindow).FilePath), filename);
                     if (File.Exists(audioPath))
                     {
                         switch (Path.GetExtension(filename).ToLower())
@@ -121,7 +160,7 @@ namespace UndertaleModTool
                     {
                         relativePath = $"audiogroup{sound.GroupID}.dat";
                     }
-                    string path = Path.Combine(Path.GetDirectoryName(mainWindow.FilePath), relativePath);
+                    string path = Paths.JoinVerifyWithinDirectory(Path.GetDirectoryName(mainWindow.FilePath), relativePath);
                     if (File.Exists(path))
                     {
                         if (loadedPath != path)

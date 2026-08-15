@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using Underanalyzer.Decompiler;
@@ -20,6 +20,7 @@ namespace UndertaleModLib
     /// It includes all the data within it accessible by either the <see cref="FORM"/>-Chunk attribute,
     /// but also via already organized attributes such as <see cref="Backgrounds"/> or <see cref="GameObjects"/>.
     /// TODO: add more documentation about how a data file works at one point.</remarks>
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
     public class UndertaleData : IDisposable
     {
         /// <summary>
@@ -325,9 +326,17 @@ namespace UndertaleModLib
         public bool ArrayCopyOnWrite = false;
 
         /// <summary>
+        /// The last room particle system instance ID of the data file (incrementing).
+        /// </summary>
+        /// <remarks>
+        /// The first actual usable ID is 8388608.
+        /// </remarks>
+        public int LastParticleSystemInstanceID { get; set; } = 8388607;
+
+        /// <summary>
         /// Some info for the editor to store data on.
         /// </summary>
-        public readonly ToolInfo ToolInfo = new ToolInfo();
+        public readonly ToolInfo ToolInfo = new();
 
         /// <summary>
         /// Shows the current padding value. <c>-1</c> indicates a pre 1.4.9999 padding, where the default is 16.
@@ -368,13 +377,16 @@ namespace UndertaleModLib
         /// <summary>
         /// Get a resource from the data file by name.
         /// </summary>
+        /// <remarks>
+        /// This does a linear search, and will thus be slow if used many times. It's recommended to build lookup maps if many searches are required.
+        /// </remarks>
         /// <param name="name">The name of the desired resource.</param>
         /// <param name="ignoreCase">Whether to ignore casing while searching.</param>
-        /// <returns>The <see cref="UndertaleResource"/>.</returns>
+        /// <returns>The <see cref="UndertaleNamedResource"/>.</returns>
         public UndertaleNamedResource ByName(string name, bool ignoreCase = false)
         {
-            // TODO: Check if those are all possible types
-            return Sounds.ByName(name, ignoreCase) ??
+            return 
+                Sounds.ByName(name, ignoreCase) ??
                 Sprites.ByName(name, ignoreCase) ??
                 Backgrounds.ByName(name, ignoreCase) ??
                 Paths.ByName(name, ignoreCase) ??
@@ -392,11 +404,14 @@ namespace UndertaleModLib
         }
 
         /// <summary>
-        /// Reports the zero-based index of the first occurrence of the specified <see cref="UndertaleResource"/>.
+        /// Returns the zero-based index of the first occurrence of the specified <see cref="UndertaleResource"/>.
         /// </summary>
+        /// <remarks>
+        /// This does a linear search, and will thus be slow if used many times. It's recommended to build lookup maps if many searches are required.
+        /// </remarks>
         /// <param name="obj">The object to get the index of.</param>
         /// <param name="panicIfInvalid">Whether to throw if <paramref name="obj"/> is not a valid object.</param>
-        /// <returns>The zero-based index position of the <paramref name="obj"/> parameter if it is found or -2 if it is not.</returns>
+        /// <returns>The zero-based index position of the <paramref name="obj"/> parameter if it is found, or -1 if it is not found.</returns>
         /// <exception cref="InvalidOperationException"><paramref name="panicIfInvalid"/> is <see langword="true"/>
         /// and <paramref name="obj"/> could not be found.</exception>
         public int IndexOf(UndertaleResource obj, bool panicIfInvalid = true)
@@ -411,12 +426,61 @@ namespace UndertaleModLib
 
             if (panicIfInvalid)
                 throw new InvalidOperationException();
-            return -2;
+            return -1;
         }
 
-        internal int IndexOfByName(string line)
+
+        /// <summary>
+        /// Returns the zero-based index of the first occurrence of the specified <see cref="UndertaleNamedResource"/>.
+        /// </summary>
+        /// <remarks>
+        /// This does a linear search, and will thus be slow if used many times. It's recommended to build lookup maps if many searches are required.
+        /// </remarks>
+        /// <param name="name">The name of the desired resource.</param>
+        /// <param name="ignoreCase">Whether to ignore casing while searching.</param>
+        /// <returns>The zero-based index position of the <see cref="UndertaleNamedResource"/> if it is found, or -1 if it is not found.</returns>
+        public int IndexOfByName(string name, bool ignoreCase = false)
         {
-            throw new NotImplementedException();
+            int res = Sounds.IndexOfName(name, ignoreCase);
+            if (res >= 0) return res;
+            res = Sprites.IndexOfName(name, ignoreCase);
+            if (res >= 0) return res;
+            res = Backgrounds.IndexOfName(name, ignoreCase);
+            if (res >= 0) return res;
+            res = Paths.IndexOfName(name, ignoreCase);
+            if (res >= 0) return res;
+            res = Scripts.IndexOfName(name, ignoreCase);
+            if (res >= 0) return res;
+            res = Fonts.IndexOfName(name, ignoreCase);
+            if (res >= 0) return res;
+            res = GameObjects.IndexOfName(name, ignoreCase);
+            if (res >= 0) return res;
+            res = Rooms.IndexOfName(name, ignoreCase);
+            if (res >= 0) return res;
+            res = Extensions.IndexOfName(name, ignoreCase);
+            if (res >= 0) return res;
+            res = Shaders.IndexOfName(name, ignoreCase);
+            if (res >= 0) return res;
+            res = Timelines.IndexOfName(name, ignoreCase);
+            if (res >= 0) return res;
+
+            if (AnimationCurves is not null)
+            {
+                res = AnimationCurves.IndexOfName(name, ignoreCase);
+                if (res >= 0) return res;
+            }
+            if (Sequences is not null)
+            {
+                res = Sequences.IndexOfName(name, ignoreCase);
+                if (res >= 0) return res;
+            }
+            if (AudioGroups is not null)
+            {
+                res = AudioGroups.IndexOfName(name, ignoreCase);
+                if (res >= 0) return res;
+            }
+
+            return -1;
         }
 
         /// <summary>
@@ -437,6 +501,25 @@ namespace UndertaleModLib
             return (allowGMS2 || !IsGameMaker2()) && (IsVersionAtLeast(1, 0, 0, stableBuild) || (IsVersionAtLeast(1, 0, 0, betaBuild) && !IsVersionAtLeast(1, 0, 0, 1000)));
         }
 
+        // Helper for verifying valid major GMS2 versions
+        private static void VerifyMajorGMS2Version(uint major)
+        {
+            if (major != 2 && major != 2022 && major != 2023 && major != 2024 && major != 2026)
+            {
+                throw new NotSupportedException("Attempted to set a version of GameMaker " + major + " using SetGMS2Version");
+            }
+        }
+
+        /// <summary>
+        /// Sets the GMS2+ version flag in GeneralInfo.
+        /// </summary>
+        public void SetGMS2Version(UndertaleGeneralInfo.RuntimeVersion ver) 
+        {
+            VerifyMajorGMS2Version(ver.Major);
+            GeneralInfo.Version = ver;
+        }
+
+
         /// <summary>
         /// Sets the GMS2+ version flag in GeneralInfo.
         /// </summary>
@@ -447,8 +530,7 @@ namespace UndertaleModLib
         /// <param name="isLTS">If included, alter the data branch between LTS and non-LTS.</param>
         public void SetGMS2Version(uint major, uint minor = 0, uint release = 0, uint build = 0, bool? isLTS = null)
         {
-            if (major != 2 && major != 2022 && major != 2023 && major != 2024)
-                throw new NotSupportedException("Attempted to set a version of GameMaker " + major + " using SetGMS2Version");
+            VerifyMajorGMS2Version(major);
 
             GeneralInfo.Major = major;
             GeneralInfo.Minor = minor;
@@ -470,6 +552,11 @@ namespace UndertaleModLib
             // Insert additional logic as needed for new branches using IsVersionAtLeast
             GeneralInfo.Branch = isLTS ? UndertaleGeneralInfo.BranchType.LTS2022_0 : UndertaleGeneralInfo.BranchType.Post2022_0;
         }
+
+        /// <summary>
+        /// Reports whether the version of the data file is the same or higher than a specified version.
+        /// </summary>
+        public bool IsVersionAtLeast(UndertaleGeneralInfo.RuntimeVersion ver) => IsVersionAtLeast(ver.Major, ver.Minor, ver.Release, ver.Build);
 
         /// <summary>
         /// Reports whether the version of the data file is the same or higher than a specified version.
@@ -501,6 +588,12 @@ namespace UndertaleModLib
 
             return true; // The version is exactly what supplied.
         }
+
+        /// <summary>
+        /// Reports whether the version of the data file is the same or higher than a specified version, and off the LTS branch that lacks some features.
+        /// </summary>
+        /// <returns>Whether the version of the data file is the same or higher than a specified version. Always false for LTS.</returns>
+        public bool IsNonLTSVersionAtLeast(UndertaleGeneralInfo.RuntimeVersion ver) => IsNonLTSVersionAtLeast(ver.Major, ver.Minor, ver.Release, ver.Build);
 
         /// <summary>
         /// Reports whether the version of the data file is the same or higher than a specified version, and off the LTS branch that lacks some features.

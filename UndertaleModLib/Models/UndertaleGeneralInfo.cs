@@ -23,30 +23,37 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         /// Start the game as fullscreen.
         /// </summary>
         Fullscreen = 0x0001,
+
         /// <summary>
         /// Use synchronization to avoid tearing.
         /// </summary>
         SyncVertex1 = 0x0002,
+
         /// <summary>
         /// Use synchronization to avoid tearing. TODO: difference?
         /// </summary>
         SyncVertex2 = 0x0004,
+
         /// <summary>
         /// Interpolate colours between pixels.
         /// </summary>
         Interpolate = 0x0008,
+
         /// <summary>
         /// Keep aspect ratio during scaling.
         /// </summary>
         Scale = 0x0010,
+
         /// <summary>
         /// Display mouse cursor.
         /// </summary>
         ShowCursor = 0x0020,
+
         /// <summary>
         /// Allows window to be resized.
         /// </summary>
         Sizeable = 0x0040,
+
         /// <summary>
         /// Allows fullscreen switching TODO: ???
         /// </summary>
@@ -61,23 +68,47 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         /// studioVersion = (infoFlags &amp; InfoFlags.StudioVersionMask) >> 9
         /// </summary>
         StudioVersionMask = 0x0E00,
+
         /// <summary>
-        /// Whether Steam is enabled.
+        /// Whether Steam (or the YoYoPlayer) is enabled.
         /// </summary>
         SteamEnabled = 0x1000,
 
-        LocalDataEnabled = 0x2000,
+        /// <summary>
+        /// When enabled, the game will write save data to %appdata%\GameName, otherwise it will write to %localappdata%\GameName
+        /// </summary>
+        UseAppDataSaveLocation = 0x2000,
 
         /// <summary>
         /// Whether the game supports borderless window
         /// </summary>
         BorderlessWindow = 0x4000,
+
         /// <summary>
         /// Tells the runner to run Javascript code
         /// </summary>
         JavaScriptMode = 0x8000,
 
-        LicenseExclusions = 0x10000,
+        /// <summary>
+        /// This flag is set when a game is launched from the Gamemaker Studio 2 IDE using the 'Run' or 'Debug' options
+        /// </summary>
+        GameRunFromGMS2IDE = 0x10000,
+
+        /// <summary>
+        /// Obsolete version of <see cref="GameRunFromGMS2IDE"/>.
+        /// </summary>
+        [Obsolete("Old name of GameRunFromGMS2IDE")]
+        LicenseExclusions = GameRunFromGMS2IDE,
+
+        /// <summary>
+        /// For the GX.games runner, allows the browser canvas to be transparent where nothing is drawn.
+        /// </summary>
+        TransparentBackground = 0x20000,
+
+        /// <summary>
+        /// For the Windows runner, reverts the swapchain to an older/legacy swap effect.
+        /// </summary>
+        WindowsD3DSwapEffectDiscard = 0x40000
     }
 
     /// <summary>
@@ -151,7 +182,100 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         Steam = 0x2000000000000000UL,
         UNUSED5 = 2310346608841064448UL,
         Shaders = 0x4000000000000000UL,
-        VertexBuffers = 9223372036854775808UL
+        VertexBuffers = 0x8000000000000000UL
+    }
+
+    /// <summary>
+    /// Represents a GameMaker runtime version.
+    /// </summary>
+    /// <remarks>
+    /// Can be stored in the data file directly, or detected based on file format 
+    /// (as in many GMS2 games and above, where the stored version stopped getting updated).
+    /// </remarks>
+    public struct RuntimeVersion
+    {
+        /// <summary>
+        /// The most significant version part.
+        /// 
+        /// This can be 1, 2, 2022, 2023, 2024, or 2026.
+        /// </summary>
+        /// <remarks>
+        /// If greater than 1, serialization produces "2.0.0.0" due to the flag no longer being updated.
+        /// </remarks>
+        public uint Major;
+
+        /// <summary>
+        /// The second-most significant version part.
+        /// </summary>
+        public uint Minor;
+
+        /// <summary>
+        /// The third-most significant version part.
+        /// </summary>
+        public uint Release;
+
+        /// <summary>
+        /// The fourth-most (least) significant version part.
+        /// </summary>
+        public uint Build;
+
+        /// <summary>
+        /// The GameMaker release branch of the data file. May be set to <see cref="BranchType.Post2022_0"/> when features exempted from LTS are detected.
+        /// </summary>
+        public BranchType Branch;
+
+        /// <summary>
+        /// Creates a new runtime version with the specified parts and branch type.
+        /// </summary>
+        public RuntimeVersion(uint major, uint minor = 0, uint release = 0, uint build = 0, BranchType branch = BranchType.Pre2022_0)
+        {
+            Major = major;
+            Minor = minor;
+            Release = release;
+            Build = build;
+            Branch = branch;
+        }
+
+        /// <summary>
+        /// Returns a default runtime version of 1.0.0.1337 (not a real version).
+        /// </summary>
+        public RuntimeVersion()
+        {
+            Major = 1;
+            Build = 1337;
+        }
+
+        /// <summary>
+        /// Serializes the version to the given <see cref="UndertaleWriter"/>.
+        /// </summary>
+        public readonly void Serialize(UndertaleWriter writer)
+        {
+            writer.Write(Major);
+            writer.Write(Minor);
+            writer.Write(Release);
+            writer.Write(Build);
+        }
+
+        /// <summary>
+        /// Reads the version from the given <see cref="UndertaleReader"/> into this object.
+        /// </summary>
+        public void Unserialize(UndertaleReader reader)
+        {
+            Major = reader.ReadUInt32();
+            Minor = reader.ReadUInt32();
+            Release = reader.ReadUInt32();
+            Build = reader.ReadUInt32();
+        }
+    }
+
+    /// <summary>
+    /// Different GameMaker release branches. 2022 LTS has some but not all features of equivalent newer versions.
+    /// </summary>
+    public enum BranchType
+    {
+        Pre2022_0,
+        LTS2022_0,
+        Post2022_0
     }
 
     /// <summary>
@@ -160,14 +284,19 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     public bool IsDebuggerDisabled { get; set; } = true;
 
     /// <summary>
-    /// The bytecode version of the data file.
+    /// The "bytecode" (actually "WAD") version of the data file, indicating the data file format version, to an extent.
     /// </summary>
+    /// <remarks>
+    /// This value has been stuck on 17 since early GMS2 versions, and this library uses 
+    /// the runtime version (via file format checks) for those modern versions instead.
+    /// </remarks>
     public byte BytecodeVersion { get; set; } = 0x10;
 
     /// <summary>
-    /// TODO: currently unknown value.
+    /// Likely padding, IsDebuggerDisabled and BytecodeVersion are written together as a 32-bit integer
     /// </summary>
-    public ushort Unknown { get; set; } = 0;
+    // TODO: this can probably be removed
+    public ushort Padding { get; set; } = 0;
 
     /// <summary>
     /// The file name of the runner.
@@ -180,17 +309,17 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     public UndertaleString Config { get; set; }
 
     /// <summary>
-    /// The last object id of the data file.
+    /// The last object ID of the data file.
     /// </summary>
     public uint LastObj { get; set; } = 100000;
 
     /// <summary>
-    /// The last tile id of the data file.
+    /// The last tile ID of the data file.
     /// </summary>
     public uint LastTile { get; set; } = 10000000;
 
     /// <summary>
-    /// The game id of the data file.
+    /// The game ID of the data file.
     /// </summary>
     public uint GameID { get; set; } = 13371337;
 
@@ -206,40 +335,35 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     public UndertaleString Name { get; set; }
 
     /// <summary>
-    /// Different GameMaker release branches. LTS has some but not all features of equivalent newer versions.
+    /// The GameMaker runtime version this game was made in, either as stored by the data file, or as detected by file format. (This can be inaccurate!)
     /// </summary>
-    public enum BranchType
-    {
-        Pre2022_0,
-        LTS2022_0,
-        Post2022_0
-    }
-
-    /// <summary>
-    /// The GameMaker release branch of the data file. May be set to <see cref="BranchType.Post2022_0"/> when features exempted from LTS are detected.
-    /// </summary>
-    public BranchType Branch = BranchType.Pre2022_0;
+    public RuntimeVersion Version;
 
     /// <summary>
     /// The major version of the data file.
     /// If greater than 1, serialization produces "2.0.0.0" due to the flag no longer updating in data.win
     /// </summary>
-    public uint Major { get; set; } = 1;
+    public uint Major { get => Version.Major; set { Version.Major = value; } }
 
     /// <summary>
     /// The minor version of the data file.
     /// </summary>
-    public uint Minor { get; set; } = 0;
+    public uint Minor { get => Version.Minor; set { Version.Minor = value; } }
 
     /// <summary>
     /// The Release version of the data file.
     /// </summary>
-    public uint Release { get; set; } = 0;
+    public uint Release { get => Version.Release; set { Version.Release = value; } }
 
     /// <summary>
     /// The build version of the data file.
     /// </summary>
-    public uint Build { get; set; } = 1337;
+    public uint Build { get => Version.Build; set { Version.Build = value; } }
+
+    /// <summary>
+    /// The GameMaker release branch of the data file. May be set to <see cref="BranchType.Post2022_0"/> when features exempted from LTS are detected.
+    /// </summary>
+    public BranchType Branch { get => Version.Branch; set { Version.Branch = value; } }
 
     /// <summary>
     /// The default window width of the game.
@@ -275,7 +399,6 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     /// The name that gets displayed in the window.
     /// </summary>
     public UndertaleString DisplayName { get; set; }
-
 
     public ulong ActiveTargets { get; set; } = 0;
 
@@ -324,24 +447,23 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     /// </summary>
     public bool InfoTimestampOffset { get; set; } = true;
 
-    public static (uint, uint, uint, uint, BranchType) TestForCommonGMSVersions(UndertaleReader reader,
-                                                                    (uint, uint, uint, uint, BranchType) readVersion)
+    public static RuntimeVersion TestForCommonGMSVersions(UndertaleReader reader, RuntimeVersion readVersion)
     {
-        (uint Major, uint Minor, uint Release, uint Build, BranchType Branch) detectedVer = readVersion;
+        RuntimeVersion detectedVer = readVersion;
 
         // Some GMS2+ version detection. The rest is spread around, mostly in UndertaleChunks.cs
         if (reader.AllChunkNames.Contains("UILR"))      // 2024.13, not present on LTS
-            detectedVer = (2024, 13, 0, 0, BranchType.Post2022_0);
+            detectedVer = new(2024, 13, 0, 0, BranchType.Post2022_0);
         else if (reader.AllChunkNames.Contains("PSEM")) // 2023.2, not present on LTS
-            detectedVer = (2023, 2, 0, 0, BranchType.Post2022_0);
+            detectedVer = new(2023, 2, 0, 0, BranchType.Post2022_0);
         else if (reader.AllChunkNames.Contains("FEAT")) // 2022.8
-            detectedVer = (2022, 8, 0, 0, BranchType.Pre2022_0);
+            detectedVer = new(2022, 8, 0, 0, BranchType.Pre2022_0);
         else if (reader.AllChunkNames.Contains("FEDS")) // 2.3.6
-            detectedVer = (2, 3, 6, 0, BranchType.Pre2022_0);
+            detectedVer = new(2, 3, 6, 0, BranchType.Pre2022_0);
         else if (reader.AllChunkNames.Contains("SEQN")) // 2.3
-            detectedVer = (2, 3, 0, 0, BranchType.Pre2022_0);
+            detectedVer = new(2, 3, 0, 0, BranchType.Pre2022_0);
         else if (reader.AllChunkNames.Contains("TGIN")) // 2.2.1
-            detectedVer = (2, 2, 1, 0, BranchType.Pre2022_0);
+            detectedVer = new(2, 2, 1, 0, BranchType.Pre2022_0);
 
         return detectedVer;
     }
@@ -352,7 +474,7 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     {
         writer.Write(IsDebuggerDisabled ? (byte)1 : (byte)0);
         writer.Write(BytecodeVersion);
-        writer.Write(Unknown);
+        writer.Write(Padding);
         writer.WriteUndertaleString(FileName);
         writer.WriteUndertaleString(Config);
         writer.Write(LastObj);
@@ -360,28 +482,18 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         writer.Write(GameID);
         writer.Write(DirectPlayGuid.ToByteArray());
         writer.WriteUndertaleString(Name);
-        if (Major == 1)
-        {
-            writer.Write(Major);
-            writer.Write(Minor);
-            writer.Write(Release);
-            writer.Write(Build);
-        }
-        else
-        {
-            // The version number here is no longer updated,
-            // but it's still useful for the tool
-            writer.Write((uint)2);
-            writer.Write((uint)0);
-            writer.Write((uint)0);
-            writer.Write((uint)0);
-        }
+
+        // The version number here is no longer updated,
+        // but it's still useful for the tool
+        RuntimeVersion ver = Major < 2 ? Version : new(2);
+        ver.Serialize(writer);
+
         writer.Write(DefaultWindowWidth);
         writer.Write(DefaultWindowHeight);
         writer.Write((uint)Info);
         writer.Write(LicenseCRC32);
         if (LicenseMD5.Length != 16)
-            throw new IOException("LicenseMD5 has invalid length");
+            throw new InvalidOperationException("LicenseMD5 has invalid length");
         writer.Write(LicenseMD5);
         writer.Write(Timestamp);
         writer.WriteUndertaleString(DisplayName);
@@ -424,7 +536,7 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
             }
             writer.Write(GMS2FPS);
             if (GMS2GameGUID.Length != 16)
-                throw new IOException("GMS2GameGUID has invalid length");
+                throw new InvalidOperationException("GMS2GameGUID has invalid length");
             writer.Write(GMS2AllowStatistics);
             writer.Write(GMS2GameGUID);
         }
@@ -435,6 +547,7 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
     {
         Func<UndertaleString> readFileNameDelegate;
         if (reader.ReadOnlyGEN8)
+        {
             readFileNameDelegate = () =>
             {
                 UndertaleString res = reader.ReadUndertaleString();
@@ -450,12 +563,15 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
 
                 return res;
             };
+        }
         else
+        {
             readFileNameDelegate = reader.ReadUndertaleString;
+        }
 
         IsDebuggerDisabled = reader.ReadByte() != 0;
         BytecodeVersion = reader.ReadByte();
-        Unknown = reader.ReadUInt16();
+        Padding = reader.ReadUInt16();
         FileName = readFileNameDelegate();
         Config = reader.ReadUndertaleString();
         LastObj = reader.ReadUInt32();
@@ -464,21 +580,13 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         byte[] guidData = reader.ReadBytes(16);
         DirectPlayGuid = new Guid(guidData);
         Name = reader.ReadUndertaleString();
-        Major = reader.ReadUInt32();
-        Minor = reader.ReadUInt32();
-        Release = reader.ReadUInt32();
-        Build = reader.ReadUInt32();
+        Version.Unserialize(reader);
 
         if (reader.ReadOnlyGEN8)
             return;
 
         // TestForCommonGMSVersions is run during the object counting phase, so the previous general info is always accurate.
-        var prevGenInfo = reader.undertaleData.GeneralInfo;
-        Major = prevGenInfo.Major;
-        Minor = prevGenInfo.Minor;
-        Release = prevGenInfo.Release;
-        Build = prevGenInfo.Build;
-        Branch = prevGenInfo.Branch;
+        Version = reader.undertaleData.GeneralInfo.Version;
 
         DefaultWindowWidth = reader.ReadUInt32();
         DefaultWindowHeight = reader.ReadUInt32();
@@ -700,18 +808,19 @@ public class UndertaleOptions : UndertaleObject, IDisposable
         LegacyNumberConversion = 0x80000000,
         LegacyOtherBehavior = 0x100000000,
         AudioErrorBehavior = 0x200000000,
-        AllowInstanceChange = 0x400000000
+        AllowInstanceChange = 0x400000000,
+        LegacyPrimitiveDrawing = 0x800000000
     }
 
     /// <summary>
-    /// TODO: unknown value, needs research. Tends to be 2^31?
+    /// Shader extension flag. Always set to int.MinValue
     /// </summary>
-    public uint Unknown1 { get; set; } = 0x80000000;
+    public int ShaderExtensionFlag { get; set; } = int.MinValue;
 
     /// <summary>
-    /// TODO: another unknown value, also needs research.
+    /// Shader extension version. Always set to 2
     /// </summary>
-    public uint Unknown2 { get; set; } = 0x00000002;
+    public int ShaderExtensionVersion { get; set; } = 2;
 
     /// <summary>
     /// Option flags the data file uses.
@@ -744,7 +853,7 @@ public class UndertaleOptions : UndertaleObject, IDisposable
     public uint Frequency { get; set; } = 0;
 
     /// <summary>
-    /// Whether the game uses V-Sync. Used only in Game Maker 8 and earlier.
+    /// Whether the game uses V-Sync.
     /// </summary>
     public uint VertexSync { get; set; } = 0;
 
@@ -827,8 +936,8 @@ public class UndertaleOptions : UndertaleObject, IDisposable
     {
         if (NewFormat)
         {
-            writer.Write(Unknown1);
-            writer.Write(Unknown2);
+            writer.Write(ShaderExtensionFlag);
+            writer.Write(ShaderExtensionVersion);
             writer.Write((ulong)Info);
             writer.Write(Scale);
             writer.Write(WindowColor);
@@ -891,8 +1000,8 @@ public class UndertaleOptions : UndertaleObject, IDisposable
         reader.Position -= 4;
         if (NewFormat)
         {
-            Unknown1 = reader.ReadUInt32();
-            Unknown2 = reader.ReadUInt32();
+            ShaderExtensionFlag = reader.ReadInt32();
+            ShaderExtensionVersion = reader.ReadInt32();
             Info = (OptionsFlags)reader.ReadUInt64();
             Scale = reader.ReadInt32();
             WindowColor = reader.ReadUInt32();

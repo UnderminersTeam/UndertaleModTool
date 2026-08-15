@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -15,6 +17,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using UndertaleModLib;
 using UndertaleModLib.Models;
 
 namespace UndertaleModTool
@@ -24,9 +27,75 @@ namespace UndertaleModTool
     /// </summary>
     public partial class UndertalePathEditor : DataUserControl
     {
+        private static readonly MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+
         public UndertalePathEditor()
         {
             InitializeComponent();
+            DataContextChanged += OnDataContextChanged;
+            Unloaded += OnUnloaded;
+        }
+
+        private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is UndertalePath oldObj)
+            {
+                oldObj.PropertyChanged -= OnPropertyChanged;
+                if (oldObj.Points is UndertaleObservableList<UndertalePath.PathPoint> points)
+                {
+                    points.CollectionChanged -= CollectionChanged;
+                }
+            }
+        }
+
+        private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.OldValue is UndertalePath oldObj)
+            {
+                oldObj.PropertyChanged -= OnPropertyChanged;
+                if (oldObj.Points is UndertaleObservableList<UndertalePath.PathPoint> points)
+                {
+                    points.CollectionChanged -= CollectionChanged;
+                }
+            }
+            if (e.NewValue is UndertalePath newObj)
+            {
+                newObj.PropertyChanged += OnPropertyChanged;
+                if (newObj.Points is UndertaleObservableList<UndertalePath.PathPoint> points)
+                {
+                    points.CollectionChanged += CollectionChanged;
+                }
+            }
+        }
+
+        private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            OnAssetUpdated();
+        }
+
+        private void OnAssetUpdated()
+        {
+            if (mainWindow.Project is null || !mainWindow.IsSelectedProjectExportable)
+            {
+                return;
+            }
+            Dispatcher.BeginInvoke(() =>
+            {
+                if (DataContext is UndertalePath obj)
+                {
+                    mainWindow.Project?.MarkAssetForExport(obj);
+                }
+            });
+        }
+
+        private void PathPoint_ValueUpdated(object sender, DataTransferEventArgs e)
+        {
+            OnAssetUpdated();
+        }
+
+        private void CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            OnAssetUpdated();
         }
 
         public class LineData

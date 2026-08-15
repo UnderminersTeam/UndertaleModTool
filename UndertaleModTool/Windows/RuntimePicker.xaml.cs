@@ -16,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using UndertaleModLib;
+using UndertaleModLib.Util;
 
 namespace UndertaleModTool
 {
@@ -68,7 +69,7 @@ namespace UndertaleModTool
             if (gameExeName == null)
                 return;
 
-            string gameExePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(dataFilePath), gameExeName + ".exe");
+            string gameExePath = Paths.JoinVerifyWithinDirectory(System.IO.Path.GetDirectoryName(dataFilePath), gameExeName + ".exe");
             if (!File.Exists(gameExePath))
                 return;
 
@@ -77,11 +78,11 @@ namespace UndertaleModTool
 
         private void DiscoverGMS1()
         {
-            string studioRunner = System.IO.Path.Combine(Environment.ExpandEnvironmentVariables(SettingsWindow.GameMakerStudioPath), "Runner.exe");
+            string studioRunner = System.IO.Path.Join(Environment.ExpandEnvironmentVariables(SettingsWindow.GameMakerStudioPath), "Runner.exe");
             if (!File.Exists(studioRunner))
                 return;
 
-            string studioDebugger = System.IO.Path.Combine(Environment.ExpandEnvironmentVariables(SettingsWindow.GameMakerStudioPath), @"GMDebug\GMDebug.exe");
+            string studioDebugger = System.IO.Path.Join(Environment.ExpandEnvironmentVariables(SettingsWindow.GameMakerStudioPath), @"GMDebug\GMDebug.exe");
             if (!File.Exists(studioDebugger))
                 studioDebugger = null;
 
@@ -101,8 +102,8 @@ namespace UndertaleModTool
                 if (!m.Success)
                     continue;
 
-                string runtimeRunner = System.IO.Path.Combine(runtimePath, @"windows\Runner.exe");
-                string runtimeRunnerX64 = System.IO.Path.Combine(runtimePath, @"windows\x64\Runner.exe");
+                string runtimeRunner = System.IO.Path.Join(runtimePath, @"windows\Runner.exe");
+                string runtimeRunnerX64 = System.IO.Path.Join(runtimePath, @"windows\x64\Runner.exe");
                 if (Environment.Is64BitOperatingSystem && File.Exists(runtimeRunnerX64))
                     runtimeRunner = runtimeRunnerX64;
                 if (!File.Exists(runtimeRunner))
