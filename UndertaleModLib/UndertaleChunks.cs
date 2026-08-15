@@ -1268,19 +1268,19 @@ namespace UndertaleModLib
     {
         public override string Name => "OBJT";
 
-        private bool checkedFor2022_5 = false;
+        private bool checkedForManagedField = false;
 
-        // Simple chunk parser to check for 2022.5, assumes old format until shown otherwise
-        private void CheckFor2022_5(UndertaleReader reader)
+        // Simple chunk parser to check for the "Managed" field being present, assumes not present until shown otherwise
+        private void CheckForManagedField(UndertaleReader reader)
         {
-            if (!reader.undertaleData.IsVersionAtLeast(2, 3) || reader.undertaleData.IsVersionAtLeast(2022, 5))
+            if (!reader.undertaleData.IsVersionAtLeast(2, 3) || (reader.undertaleData.IsVersionAtLeast(2022, 5) && !reader.undertaleData.IsVersionAtLeast(2024, 13)))
             {
-                checkedFor2022_5 = true;
+                checkedForManagedField = true;
                 return;
             }
 
             long positionToReturn = reader.Position;
-            bool GM2022_5 = false;
+            bool managedFieldPresent = false;
 
             if (reader.ReadUInt32() > 0) // Object count
             {
@@ -1288,8 +1288,9 @@ namespace UndertaleModLib
                 reader.AbsPosition = firstObjectPointer + 64;
                 uint vertexCount = reader.ReadUInt32();
 
-                // If any of these checks fail, it's 2022.5
-                GM2022_5 = true;
+                // If any of these checks fail, the managed field is probably present
+                managedFieldPresent = true;
+
                 // Bounds check on vertex data
                 if (reader.Position + 12 + vertexCount * 8 < positionToReturn + this.Length)
                 {
@@ -1300,16 +1301,25 @@ namespace UndertaleModLib
                         uint subEventPointer = reader.ReadUInt32();
                         // Should start right after the list
                         if (reader.AbsPosition + 56 == subEventPointer)
-                            GM2022_5 = false;
+                            managedFieldPresent = false;
                     }
                 }
             }
-            if (GM2022_5)
-                reader.undertaleData.SetGMS2Version(2022, 5);
+            if (managedFieldPresent)
+            {
+                if (!reader.undertaleData.IsVersionAtLeast(2022, 5))
+                {
+                    reader.undertaleData.SetGMS2Version(2022, 5);
+                }
+            }
+            else if (reader.undertaleData.IsVersionAtLeast(2024, 13))
+            {
+                reader.undertaleData.SetGMS2Version(2026, 1);
+            }
 
             reader.Position = positionToReturn;
 
-            checkedFor2022_5 = true;
+            checkedForManagedField = true;
         }
 
         internal override void SerializeChunk(UndertaleWriter writer)
@@ -1319,17 +1329,17 @@ namespace UndertaleModLib
 
         internal override void UnserializeChunk(UndertaleReader reader)
         {
-            if (!checkedFor2022_5)
-                CheckFor2022_5(reader);
+            if (!checkedForManagedField)
+                CheckForManagedField(reader);
 
             base.UnserializeChunk(reader);
         }
 
         internal override uint UnserializeObjectCount(UndertaleReader reader)
         {
-            checkedFor2022_5 = false;
+            checkedForManagedField = false;
 
-            CheckFor2022_5(reader);
+            CheckForManagedField(reader);
 
             return base.UnserializeObjectCount(reader);
         }

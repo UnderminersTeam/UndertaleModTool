@@ -1936,8 +1936,13 @@ namespace UndertaleModTool
                             codeResource.WeirdLocalFlag = true;
                         }
                     }
-                    else if (obj is UndertaleExtension && IsExtProductIDEligible == Visibility.Visible)
+                    else if (obj is UndertaleExtension extension && IsExtProductIDEligible == Visibility.Visible)
                     {
+                        // Provide some reasonable defaults that won't crash upon load
+                        extension.FolderName = Data.Strings.MakeString("");
+                        extension.ClassName = Data.Strings.MakeString("");
+                        extension.Version = Data.Strings.MakeString("1.0.0");
+
                         var newProductID = new byte[] { 0xBA, 0x5E, 0xBA, 0x11, 0xBA, 0xDD, 0x06, 0x60, 0xBE, 0xEF, 0xED, 0xBA, 0x0B, 0xAB, 0xBA, 0xBE };
                         Data.FORM.EXTN.productIdData.Add(newProductID);
                     }

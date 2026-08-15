@@ -16,7 +16,7 @@
     <PackageReference Include="MSTest.TestFramework">
       <Version>4.3.3</Version>
     </PackageReference>
-    <PackageReference Include="System.ComponentModel.Composition" Version="10.0.10" />
+    <PackageReference Include="System.ComponentModel.Composition" Version="10.0.11" />
     <PackageReference Include="MSTest.TestAdapter" Version="4.3.3" />
   </ItemGroup>
 </Project>

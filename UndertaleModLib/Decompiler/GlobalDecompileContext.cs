@@ -59,6 +59,7 @@ public class GlobalDecompileContext : IGameContext
     public bool UsingModernTemplateStrings => Data?.IsVersionAtLeast(2024, 14) ?? false;
     public bool UsingStructAnyNonemptyString => Data?.IsVersionAtLeast(2024, 14) ?? false;
     public bool UsingFixedDefaultArgumentFunctionDecls => Data?.IsVersionAtLeast(2024, 14) ?? false;
+    public bool UsingNewNullishAssignSideEffects => Data?.IsVersionAtLeast(2026, 1) ?? false;
     public GameSpecificRegistry GameSpecificRegistry => Data?.GameSpecificRegistry;
     public IBuiltins Builtins { get; private set; } = null;
     public ICodeBuilder CodeBuilder { get; private set; } = null;

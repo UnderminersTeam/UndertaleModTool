@@ -54,7 +54,9 @@ public class UndertaleGameObject : UndertaleNamedResource, IProjectAsset, INotif
     /// </summary>
     public bool Visible { get; set; } = true;
 
-    // TODO: This summary
+    /// <summary>
+    /// Field present for rollback multiplayer, starting in GameMaker 2022.5, and removed in GameMaker 2026.1 (non-initial LTS).
+    /// </summary>
     public bool Managed { get; set; }
 
     /// <summary>
@@ -177,7 +179,7 @@ public class UndertaleGameObject : UndertaleNamedResource, IProjectAsset, INotif
         writer.WriteUndertaleString(Name);
         writer.WriteUndertaleObject(_sprite);
         writer.Write(Visible);
-        if (writer.undertaleData.IsVersionAtLeast(2022, 5))
+        if (writer.undertaleData.IsVersionAtLeast(2022, 5) && !writer.undertaleData.IsVersionAtLeast(2026, 1))
             writer.Write(Managed);
         writer.Write(Solid);
         writer.Write(Depth);
@@ -219,7 +221,7 @@ public class UndertaleGameObject : UndertaleNamedResource, IProjectAsset, INotif
         Name = reader.ReadUndertaleString();
         _sprite = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>>();
         Visible = reader.ReadBoolean();
-        if (reader.undertaleData.IsVersionAtLeast(2022, 5))
+        if (reader.undertaleData.IsVersionAtLeast(2022, 5) && !reader.undertaleData.IsVersionAtLeast(2026, 1))
             Managed = reader.ReadBoolean();
         Solid = reader.ReadBoolean();
         Depth = reader.ReadInt32();
@@ -287,7 +289,7 @@ public class UndertaleGameObject : UndertaleNamedResource, IProjectAsset, INotif
     {
         uint count = 0;
 
-        if (reader.undertaleData.IsVersionAtLeast(2022, 5))
+        if (reader.undertaleData.IsVersionAtLeast(2022, 5) && !reader.undertaleData.IsVersionAtLeast(2026, 1))
             reader.Position += 64 + 4; // + "Managed"
         else
             reader.Position += 64;
