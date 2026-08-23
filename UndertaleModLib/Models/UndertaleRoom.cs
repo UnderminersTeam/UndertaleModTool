@@ -2023,7 +2023,7 @@ public class UndertaleRoom : UndertaleNamedResource, IProjectAsset, INotifyPrope
             public bool TiledHorizontally { get => _tiledHorizontally; set { _tiledHorizontally = value; OnPropertyChanged(); } }
             public bool TiledVertically { get => _tiledVertically; set { _tiledVertically = value; OnPropertyChanged(); } }
             public bool Stretch { get => _stretch; set { _stretch = value; OnPropertyChanged(); } }
-            public uint Color { get; set; } = 0xFF000000;
+            public uint Color { get; set; } = 0xFFFFFFFF;
             public float FirstFrame { get; set; }
             public float AnimationSpeed { get; set; }
             public AnimationSpeedType AnimationSpeedType { get; set; }
