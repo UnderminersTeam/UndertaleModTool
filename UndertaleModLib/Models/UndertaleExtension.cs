@@ -401,6 +401,10 @@ public class UndertaleExtension : UndertaleNamedResource, IDisposable
     /// <inheritdoc />
     public void Serialize(UndertaleWriter writer)
     {
+        if (FolderName is null)
+        {
+            throw new UndertaleSerializationException($"{nameof(FolderName)} on {nameof(UndertaleExtension)} is null; this causes crashes upon loading");
+        }
         writer.WriteUndertaleString(FolderName);
         writer.WriteUndertaleString(Name);
         if (writer.undertaleData.IsVersionAtLeast(2023, 4))

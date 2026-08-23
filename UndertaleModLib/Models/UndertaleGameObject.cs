@@ -54,7 +54,9 @@ public class UndertaleGameObject : UndertaleNamedResource, IProjectAsset, INotif
     /// </summary>
     public bool Visible { get; set; } = true;
 
-    // TODO: This summary
+    /// <summary>
+    /// Field present for rollback multiplayer, starting in GameMaker 2022.5, and removed in GameMaker 2026.1 (non-initial LTS).
+    /// </summary>
     public bool Managed { get; set; }
 
     /// <summary>
@@ -177,7 +179,7 @@ public class UndertaleGameObject : UndertaleNamedResource, IProjectAsset, INotif
         writer.WriteUndertaleString(Name);
         writer.WriteUndertaleObject(_sprite);
         writer.Write(Visible);
-        if (writer.undertaleData.IsVersionAtLeast(2022, 5))
+        if (writer.undertaleData.IsVersionAtLeast(2022, 5) && !writer.undertaleData.IsVersionAtLeast(2026, 1))
             writer.Write(Managed);
         writer.Write(Solid);
         writer.Write(Depth);
@@ -209,6 +211,7 @@ public class UndertaleGameObject : UndertaleNamedResource, IProjectAsset, INotif
         {
             v.Serialize(writer);
         }
+        FixBrokenEvents();
         writer.WriteUndertaleObject(Events);
     }
 
@@ -218,7 +221,7 @@ public class UndertaleGameObject : UndertaleNamedResource, IProjectAsset, INotif
         Name = reader.ReadUndertaleString();
         _sprite = reader.ReadUndertaleObject<UndertaleResourceById<UndertaleSprite, UndertaleChunkSPRT>>();
         Visible = reader.ReadBoolean();
-        if (reader.undertaleData.IsVersionAtLeast(2022, 5))
+        if (reader.undertaleData.IsVersionAtLeast(2022, 5) && !reader.undertaleData.IsVersionAtLeast(2026, 1))
             Managed = reader.ReadBoolean();
         Solid = reader.ReadBoolean();
         Depth = reader.ReadInt32();
@@ -259,12 +262,34 @@ public class UndertaleGameObject : UndertaleNamedResource, IProjectAsset, INotif
         Events = reader.ReadUndertaleObject<UndertalePointerList<UndertalePointerList<Event>>>();
     }
 
+    /// <summary>
+    /// It is possible to create a new event in the UndertaleModTool GUI that has no actions.
+    /// Events with zero actions will lead to a segfault in the runner when loading chunk OBJT,
+    /// because it assumes there is at least one action per event.
+    /// This has been tested on Undertale 1.001; modern runners may not be affected.
+    ///
+    /// This method removes these empty events.
+    /// </summary>
+    private void FixBrokenEvents() 
+    {
+        foreach (UndertalePointerList<Event> events in Events) 
+        {
+            for (int i = events.Count - 1; i >= 0; i--) 
+            {
+                if (events[i].Actions.Count == 0) 
+                {
+                    events.RemoveAt(i);
+                }
+            }
+        }
+    }
+
     /// <inheritdoc cref="UndertaleObject.UnserializeChildObjectCount(UndertaleReader)"/>
     public static uint UnserializeChildObjectCount(UndertaleReader reader)
     {
         uint count = 0;
 
-        if (reader.undertaleData.IsVersionAtLeast(2022, 5))
+        if (reader.undertaleData.IsVersionAtLeast(2022, 5) && !reader.undertaleData.IsVersionAtLeast(2026, 1))
             reader.Position += 64 + 4; // + "Managed"
         else
             reader.Position += 64;
@@ -403,6 +428,36 @@ public class UndertaleGameObject : UndertaleNamedResource, IProjectAsset, INotif
         return EventHandlerFor(type, (uint)subtype, data);
     }
     #endregion
+
+    /// <summary>
+    /// Returns children game objects of this game object.
+    /// </summary>
+    /// <param name="data">The game data instance, used for searching.</param>
+    /// <returns>
+    /// The children of this game object.
+    /// </returns>
+    /// <remarks>
+    /// "Children" are game objects with this game object as its <see cref="ParentId"/>.
+    /// </remarks>
+    public IEnumerable<UndertaleGameObject> FindChildren(UndertaleData data)
+    {
+        if ((data?.GameObjects.Count ?? 0) == 0)
+        {
+            yield break;
+        }
+
+        foreach (UndertaleGameObject gameObj in data.GameObjects)
+        {
+            if (gameObj is null)
+            {
+                continue;
+            }
+            if (gameObj._parentId.Resource == this)
+            {
+                yield return gameObj;
+            }
+        }
+    }
 
     /// <inheritdoc />
     public override string ToString()

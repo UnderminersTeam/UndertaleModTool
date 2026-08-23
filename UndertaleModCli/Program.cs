@@ -161,6 +161,7 @@ public partial class Program : IScriptInterface
         // Setup load command
         Option<FileInfo[]> scriptRunnerOption = new("-s", "--scripts") { Description = "Scripts to apply to the <datafile>. Ex. a.csx b.csx" };
         Option<FileInfo> loadOutputOption = new("-o", "--output") { Description = "Where to save the modified data file" };
+        Option<bool> loadOverwriteOption = new("-f", "--overwrite") { Description = "Overwrite destination file if it already exists" };
         Option<string> loadLineOption = new("-l", "--line") { Description = "Run C# string. Runs AFTER everything else" };
         Option<bool> loadInteractiveOption = new("-i", "--interactive") { Description = "Interactive menu launch" };
         Command loadCommand = new("load", "Load a data file and perform actions on it")
@@ -168,7 +169,7 @@ public partial class Program : IScriptInterface
             dataFileArgument,
             scriptRunnerOption,
             verboseOption,
-            // TODO: why no force overwrite here, but needed for new?
+            loadOverwriteOption,
             loadOutputOption,
             loadLineOption,
             // TODO: make interactive another Command
@@ -181,6 +182,7 @@ public partial class Program : IScriptInterface
                 Datafile = parseResult.GetValue(dataFileArgument),
                 Scripts = parseResult.GetValue(scriptRunnerOption),
                 Line = parseResult.GetValue(loadLineOption),
+                Overwrite = parseResult.GetValue(loadOverwriteOption),
                 Output = parseResult.GetValue(loadOutputOption),
                 Interactive = parseResult.GetValue(loadInteractiveOption),
                 Verbose = parseResult.GetValue(verboseOption)
@@ -446,7 +448,14 @@ public partial class Program : IScriptInterface
 
         // If parameter to save file was given, save the data file
         if (options.Output != null)
+        {
+            if (options.Output.Exists && !options.Overwrite)
+            {
+                Console.Error.WriteLine($"'{options.Output}' already exists. Pass --overwrite to overwrite");
+                return EXIT_FAILURE;
+            }
             program.SaveDataFile(options.Output.FullName);
+        }
 
         return EXIT_SUCCESS;
     }

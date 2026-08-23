@@ -235,48 +235,66 @@ public class BuiltinList : IBuiltins
     /// </summary>
     private void InitializeMain(UndertaleData data)
     {
+        // Some of these versions are taken from https://github.com/BioTomateDE/GameMakerRunnerFunctionsExistence
         var gen8 = data?.GeneralInfo;
         uint major = gen8?.Major ?? 0;
         uint minor = gen8?.Minor ?? 0;
         uint release = gen8?.Release ?? 0;
         uint build = gen8?.Build ?? 0;
 
+        byte wad = gen8?.BytecodeVersion ?? 0;
         bool gms2 = major >= 2;
         bool gms2_3 = major > 2 || (gms2 && minor >= 3);
+        bool gm2022_1 = major > 2022 || (major == 2022 && minor >= 1);
 
         // Functions
         Functions = new(4096);
-        DefineFunction("@@This@@", 0);
-        DefineFunction("@@Other@@", 0);
-        DefineFunction("@@Global@@", 0);
-        DefineFunction("@@GetInstance@@", 1);
-        DefineFunction("@@NullObject@@", 0);
-        DefineFunction("@@NewGMLObject@@");
-        DefineFunction("@@NewGMLArray@@");
-        DefineFunction("@@SetStatic@@", 0);
-        DefineFunction("@@CopyStatic@@", 1);
-        DefineFunction("static_get", 1);
-        DefineFunction("@@throw@@", 1);
-        DefineFunction("@@try_hook@@", 2);
-        DefineFunction("@@try_unhook@@", 0);
-        DefineFunction("@@finish_catch@@", 0);
-        DefineFunction("@@finish_finally@@", 0);
+        if (wad >= 15)
+        {
+            DefineFunction("@@This@@", 0);
+            DefineFunction("@@throw@@", 1);
+            DefineFunction("@@try_hook@@", 2);
+            DefineFunction("@@try_unhook@@", 0);
+            DefineFunction("@@finish_catch@@", 0);
+            DefineFunction("@@finish_finally@@", 0);
+        }
+        if (wad >= 16)
+        {
+            DefineFunction("@@Other@@", 0);
+            DefineFunction("@@NewGMLArray@@");
+        }
+        if (gms2_3)
+        {
+            DefineFunction("@@Global@@", 0);
+            DefineFunction("@@GetInstance@@", 1);
+            DefineFunction("@@NullObject@@", 0);
+            DefineFunction("@@NewGMLObject@@");
+            DefineFunction("@@SetStatic@@", 0);
+            DefineFunction("@@CopyStatic@@", 1);
+            DefineFunction("static_get", 1);
+        }
         DefineFunction("matrix_get", 1);
         DefineFunction("matrix_set", 2);
         DefineFunction("matrix_build", 9);
-        DefineFunction("matrix_build_lookat", 9);
-        DefineFunction("matrix_build_identity", 0);
-        DefineFunction("matrix_build_projection_ortho", 4);
-        DefineFunction("matrix_build_projection_perspective", 4);
-        DefineFunction("matrix_build_projection_perspective_fov", 4);
+        if (wad >= 16)
+        {
+            DefineFunction("matrix_build_lookat", 9);
+            DefineFunction("matrix_build_identity", 0);
+            DefineFunction("matrix_build_projection_ortho", 4);
+            DefineFunction("matrix_build_projection_perspective", 4);
+            DefineFunction("matrix_build_projection_perspective_fov", 4);
+            DefineFunction("matrix_transform_vertex", 4);
+        }
         DefineFunction("matrix_multiply", 2);
-        DefineFunction("matrix_transform_vertex", 4);
-        DefineFunction("matrix_stack_push");
-        DefineFunction("matrix_stack_pop", 0);
-        DefineFunction("matrix_stack_set", 1);
-        DefineFunction("matrix_stack_clear", 0);
-        DefineFunction("matrix_stack_top", 0);
-        DefineFunction("matrix_stack_is_empty", 0);
+        if (gms2)
+        {
+            DefineFunction("matrix_stack_push");
+            DefineFunction("matrix_stack_pop", 0);
+            DefineFunction("matrix_stack_set", 1);
+            DefineFunction("matrix_stack_clear", 0);
+            DefineFunction("matrix_stack_top", 0);
+            DefineFunction("matrix_stack_is_empty", 0);
+        }
         if (!gms2)
         {
             DefineFunction("d3d_start", 0);
@@ -338,8 +356,11 @@ public class BuiltinList : IBuiltins
             DefineFunction("d3d_model_clear", 1);
             DefineFunction("d3d_model_load", 2);
             DefineFunction("d3d_model_save", 2);
-            DefineFunction("d3d_model_load_buffer", 2);
-            DefineFunction("d3d_model_save_buffer", 2);
+            if (wad >= 16)
+            {
+                DefineFunction("d3d_model_load_buffer", 2);
+                DefineFunction("d3d_model_save_buffer", 2);
+            }
             DefineFunction("d3d_model_draw", 5);
             DefineFunction("d3d_model_primitive_begin", 2);
             DefineFunction("d3d_model_primitive_end", 1);
@@ -366,6 +387,9 @@ public class BuiltinList : IBuiltins
             DefineFunction("d3d_light_define_point", 6);
             DefineFunction("d3d_light_enable", 2);
             DefineFunction("d3d_set_lighting", 1);
+        }
+        if (!gms2_3) 
+        {
             DefineFunction("action_path_old", 3);
             DefineFunction("action_set_sprite", 2);
             DefineFunction("action_draw_font", 1);
@@ -573,8 +597,11 @@ public class BuiltinList : IBuiltins
         DefineFunction("ds_map_read");
         DefineFunction("ds_map_secure_save", 2);
         DefineFunction("ds_map_secure_load", 1);
-        DefineFunction("ds_map_secure_load_buffer", 1);
-        DefineFunction("ds_map_secure_save_buffer", 2);
+        if (wad >= 16)
+        {
+            DefineFunction("ds_map_secure_load_buffer", 1);
+            DefineFunction("ds_map_secure_save_buffer", 2);
+        }
         DefineFunction("ds_map_set", 3);
         DefineFunction("ds_map_set_pre", 3);
         DefineFunction("ds_map_set_post", 3);
@@ -655,17 +682,20 @@ public class BuiltinList : IBuiltins
         DefineFunction("file_text_write_string", 2);
         DefineFunction("file_text_write_real", 2);
         DefineFunction("file_text_writeln", 1);
-        DefineFunction("file_open_read", 1);
-        DefineFunction("file_open_write", 1);
-        DefineFunction("file_open_append", 1);
-        DefineFunction("file_close", 0);
-        DefineFunction("file_read_string", 0);
-        DefineFunction("file_read_real", 0);
-        DefineFunction("file_readln", 0);
-        DefineFunction("file_eof", 0);
-        DefineFunction("file_write_string", 1);
-        DefineFunction("file_write_real", 1);
-        DefineFunction("file_writeln", 0);
+        if (!gms2_3)
+        {
+            DefineFunction("file_open_read", 1);
+            DefineFunction("file_open_write", 1);
+            DefineFunction("file_open_append", 1);
+            DefineFunction("file_close", 0);
+            DefineFunction("file_read_string", 0);
+            DefineFunction("file_read_real", 0);
+            DefineFunction("file_readln", 0);
+            DefineFunction("file_eof", 0);
+            DefineFunction("file_write_string", 1);
+            DefineFunction("file_write_real", 1);
+            DefineFunction("file_writeln", 0);
+        }
         DefineFunction("file_exists", 1);
         DefineFunction("file_delete", 1);
         DefineFunction("file_rename", 2);
@@ -704,7 +734,10 @@ public class BuiltinList : IBuiltins
         DefineFunction("json_encode", 1);
         DefineFunction("json_decode", 1);
         DefineFunction("zip_unzip", 2);
-        DefineFunction("load_csv", 1);
+        if (wad >= 16)
+        {
+            DefineFunction("load_csv", 1);
+        }
         DefineFunction("move_random", 2);
         DefineFunction("place_free", 2);
         DefineFunction("place_empty");
@@ -712,12 +745,18 @@ public class BuiltinList : IBuiltins
         DefineFunction("place_snapped", 2);
         DefineFunction("move_snap", 2);
         DefineFunction("move_towards_point", 3);
-        DefineFunction("move_contact", 1);
+        if (!gms2_3)
+        {
+            DefineFunction("move_contact", 1);
+        }
         DefineFunction("move_contact_solid", 2);
         DefineFunction("move_contact_all", 2);
         DefineFunction("move_outside_solid", 2);
         DefineFunction("move_outside_all", 2);
-        DefineFunction("move_bounce", 1);
+        if (!gms2_3)
+        {
+            DefineFunction("move_bounce", 1);
+        }
         DefineFunction("move_bounce_solid", 1);
         DefineFunction("move_bounce_all", 1);
         DefineFunction("move_wrap", 3);
@@ -749,16 +788,22 @@ public class BuiltinList : IBuiltins
         DefineFunction("mp_grid_draw", 1);
         DefineFunction("mp_grid_to_ds_grid", 2);
         DefineFunction("collision_point", 5);
-        DefineFunction("collision_point_list", 7);
         DefineFunction("collision_rectangle", 7);
-        DefineFunction("collision_rectangle_list", 9);
         DefineFunction("collision_circle", 6);
-        DefineFunction("collision_circle_list", 8);
         DefineFunction("collision_ellipse", 7);
-        DefineFunction("collision_ellipse_list", 9);
         DefineFunction("collision_line", 7);
-        DefineFunction("collision_line_list", 9);
-        DefineFunction("collision_shape", 9);
+        if (gms2) 
+        {
+            DefineFunction("collision_point_list", 7);
+            DefineFunction("collision_rectangle_list", 9);
+            DefineFunction("collision_circle_list", 8);
+            DefineFunction("collision_ellipse_list", 9);
+            DefineFunction("collision_line_list", 9);
+        }
+        if (wad >= 16 && !gms2_3)
+        {
+            DefineFunction("collision_shape", 9);
+        }
         DefineFunction("point_in_rectangle", 6);
         DefineFunction("point_in_triangle", 8);
         DefineFunction("point_in_circle", 5);
@@ -769,35 +814,47 @@ public class BuiltinList : IBuiltins
         DefineFunction("instance_exists", 1);
         DefineFunction("instance_number", 1);
         DefineFunction("instance_position", 3);
-        DefineFunction("instance_position_list", 5);
+        if (gms2)
+        {
+            DefineFunction("instance_position_list", 5);
+            DefineFunction("instance_place_list", 5);
+        }
         DefineFunction("instance_nearest", 3);
         DefineFunction("instance_furthest", 3);
         DefineFunction("instance_place", 3);
-        DefineFunction("instance_place_list", 5);
         if (!gms2)
         {
             DefineFunction("instance_create", 3);
         }
-        DefineFunction("instance_create_depth", 4);
-        DefineFunction("instance_create_layer", 4);
+        if (wad >= 16)
+        {
+            DefineFunction("instance_create_depth", 4);
+            DefineFunction("instance_create_layer", 4);
+            DefineFunction("instance_id_get", 1);
+            DefineFunction("instance_activate_layer", 1);
+            if (!gms2_3) 
+            {
+                DefineFunction("instance_deactivate_region_special", 8);
+            }
+        }
         DefineFunction("instance_copy", 1);
         DefineFunction("instance_change", 2);
         DefineFunction("instance_destroy");
-        DefineFunction("instance_sprite", 1);
+        if (!gms2_3)
+        {
+            DefineFunction("instance_sprite", 1);
+        }
         DefineFunction("position_empty", 2);
         DefineFunction("position_meeting", 3);
         DefineFunction("position_destroy", 2);
         DefineFunction("position_change", 4);
-        DefineFunction("instance_id_get", 1);
         DefineFunction("instance_deactivate_all", 1);
         DefineFunction("instance_deactivate_object", 1);
         DefineFunction("instance_deactivate_region", 6);
-        DefineFunction("instance_deactivate_region_special", 8);
         DefineFunction("instance_deactivate_layer", 1);
         DefineFunction("instance_activate_all", 0);
         DefineFunction("instance_activate_object", 1);
         DefineFunction("instance_activate_region", 5);
-        DefineFunction("instance_activate_layer", 1);
         DefineFunction("room_goto", 1);
         DefineFunction("room_goto_previous", 0);
         DefineFunction("room_goto_next", 0);
@@ -822,15 +879,27 @@ public class BuiltinList : IBuiltins
         DefineFunction("draw_enable_drawevent", 1);
         DefineFunction("device_mouse_x_to_gui", 1);
         DefineFunction("device_mouse_y_to_gui", 1);
-        DefineFunction("display_get_windows_vertex_buffer_method", 0);
-        DefineFunction("display_get_windows_alternate_sync", 0);
-        DefineFunction("display_set_windows_vertex_buffer_method", 1);
-        DefineFunction("display_set_windows_alternate_sync", 1);
-        DefineFunction("display_set_ui_visibility", 1);
-        DefineFunction("display_set_timing_method", 1);
-        DefineFunction("display_get_timing_method", 0);
-        DefineFunction("display_set_sleep_margin", 1);
-        DefineFunction("display_get_sleep_margin", 0);
+        if (wad >= 15)
+        {
+            DefineFunction("display_set_windows_alternate_sync", 1);
+            if (!gms2_3)
+            {
+                DefineFunction("display_get_windows_vertex_buffer_method", 0);
+                DefineFunction("display_get_windows_alternate_sync", 0);
+                DefineFunction("display_set_windows_vertex_buffer_method", 1);
+            }
+        }
+        if (wad >= 16)
+        {
+            DefineFunction("display_set_ui_visibility", 1);
+        }
+        if (gms2)
+        {
+            DefineFunction("display_set_timing_method", 1);
+            DefineFunction("display_get_timing_method", 0);
+            DefineFunction("display_set_sleep_margin", 1);
+            DefineFunction("display_get_sleep_margin", 0);
+        }
         DefineFunction("window_set_fullscreen", 1);
         DefineFunction("window_get_fullscreen", 0);
         DefineFunction("window_set_caption", 1);
@@ -872,7 +941,11 @@ public class BuiltinList : IBuiltins
         DefineFunction("draw_get_colour", 0);
         DefineFunction("draw_get_alpha", 0);
         DefineFunction("merge_color", 3);
-        DefineFunction("make_color", 3);
+        if (!gms2_3)
+        {
+            DefineFunction("make_color", 3);
+            DefineFunction("make_colour", 3);
+        }
         DefineFunction("make_color_rgb", 3);
         DefineFunction("make_color_hsv", 3);
         DefineFunction("color_get_red", 1);
@@ -882,7 +955,6 @@ public class BuiltinList : IBuiltins
         DefineFunction("color_get_saturation", 1);
         DefineFunction("color_get_value", 1);
         DefineFunction("merge_colour", 3);
-        DefineFunction("make_colour", 3);
         DefineFunction("make_colour_rgb", 3);
         DefineFunction("make_colour_hsv", 3);
         DefineFunction("colour_get_red", 1);
@@ -891,7 +963,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("colour_get_hue", 1);
         DefineFunction("colour_get_saturation", 1);
         DefineFunction("colour_get_value", 1);
-        if (!gms2)
+        if (!gms2_3)
         {
             DefineFunction("draw_set_blend_mode", 1);
             DefineFunction("draw_set_blend_mode_ext", 2);
@@ -946,7 +1018,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("draw_vertex_texture_color", 6);
         DefineFunction("draw_vertex_texture_colour", 6);
         DefineFunction("sprite_get_uvs", 2);
-        if (!gms2)
+        if (!gms2_3)
         {
             DefineFunction("background_get_uvs", 1);
             DefineFunction("background_get_texture", 1);
@@ -959,12 +1031,18 @@ public class BuiltinList : IBuiltins
         DefineFunction("font_get_uvs", 1);
         DefineFunction("sprite_get_texture", 2);
         DefineFunction("font_get_texture", 1);
-        DefineFunction("texture_exists", 1);
+        if (!gms2_3)
+        {
+            DefineFunction("texture_exists", 1);
+        }
         DefineFunction("texture_get_width", 1);
         DefineFunction("texture_get_height", 1);
-        DefineFunction("texture_global_scale", 1);
-        DefineFunction("texture_get_uvs", 1);
-        if (gms2)
+        if (wad >= 16)
+        {
+            DefineFunction("texture_global_scale", 1);
+            DefineFunction("texture_get_uvs", 1);
+        }
+        if (gms2_3)
         {
             DefineFunction("texture_prefetch", 1);
             DefineFunction("texture_flush", 1);
@@ -1004,8 +1082,11 @@ public class BuiltinList : IBuiltins
         DefineFunction("draw_self", 0);
         DefineFunction("draw_sprite", 4);
         DefineFunction("draw_sprite_pos", 11);
-        DefineFunction("draw_shape", 12);
-        DefineFunction("draw_shape_string", 11);
+        if (wad >= 16 && !gms2_3)
+        {
+            DefineFunction("draw_shape", 12);
+            DefineFunction("draw_shape_string", 11);
+        }
         DefineFunction("draw_sprite_ext", 9);
         DefineFunction("draw_sprite_stretched", 6);
         DefineFunction("draw_sprite_stretched_ext", 8);
@@ -1014,7 +1095,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("draw_sprite_general", 16);
         DefineFunction("draw_sprite_tiled", 4);
         DefineFunction("draw_sprite_tiled_ext", 8);
-        if (!gms2)
+        if (!gms2) // (runner accepts until gms2_3)
         {
             DefineFunction("draw_background", 3);
             DefineFunction("draw_background_ext", 8);
@@ -1025,9 +1106,6 @@ public class BuiltinList : IBuiltins
             DefineFunction("draw_background_general", 15);
             DefineFunction("draw_background_tiled", 3);
             DefineFunction("draw_background_tiled_ext", 7);
-        }
-        if (!gms2)
-        {
             DefineFunction("tile_get_x", 1);
             DefineFunction("tile_get_y", 1);
             DefineFunction("tile_get_left", 1);
@@ -1068,7 +1146,10 @@ public class BuiltinList : IBuiltins
         }
         DefineFunction("surface_create", 2);
         DefineFunction("surface_create_ext", 3);
-        DefineFunction("surface_create_special", 3);
+        if (wad >= 16 && !gms2_3)
+        {
+            DefineFunction("surface_create_special", 3);
+        }
         DefineFunction("surface_resize", 3);
         DefineFunction("surface_free", 1);
         DefineFunction("surface_exists", 1);
@@ -1121,7 +1202,10 @@ public class BuiltinList : IBuiltins
         DefineFunction("get_integer_async", 2);
         DefineFunction("get_string_async", 2);
         DefineFunction("get_login_async", 2);
-        DefineFunction("get_color", 1);
+        if (!gms2_3)
+        {
+            DefineFunction("get_color", 1);
+        }
         DefineFunction("get_open_filename", 2);
         DefineFunction("get_save_filename", 2);
         DefineFunction("get_open_filename_ext", 4);
@@ -1170,10 +1254,13 @@ public class BuiltinList : IBuiltins
         DefineFunction("mouse_clear", 1);
         DefineFunction("io_clear", 0);
         DefineFunction("device_mouse_dbclick_enable", 1);
-        DefineFunction("gpio_set", 2);
-        DefineFunction("gpio_clear", 1);
-        DefineFunction("gpio_get", 1);
-        DefineFunction("gpio_set_mode", 2);
+        if (wad >= 16 && !gms2_3)
+        {
+            DefineFunction("gpio_set", 2);
+            DefineFunction("gpio_clear", 1);
+            DefineFunction("gpio_get", 1);
+            DefineFunction("gpio_set_mode", 2);
+        }
         if (gms2)
         {
             DefineFunction("gesture_drag_time", 1);
@@ -1199,7 +1286,10 @@ public class BuiltinList : IBuiltins
             DefineFunction("gesture_get_rotate_angle", 0);
             DefineFunction("gesture_get_tap_count", 0);
         }
-        DefineFunction("is_bool", 1);
+        if (wad >= 15)
+        {
+            DefineFunction("is_bool", 1);
+        }
         DefineFunction("is_real", 1);
         DefineFunction("is_string", 1);
         DefineFunction("is_array", 1);
@@ -1232,9 +1322,13 @@ public class BuiltinList : IBuiltins
         DefineFunction("array_set_2D_pre", 4);
         DefineFunction("array_set_2D_post", 4);
         DefineFunction("array_get_2D", 3);
-        DefineFunction("array_equals", 2);
-        DefineFunction("array_create");
-        DefineFunction("array_copy", 5);
+        if (wad >= 16) 
+        {
+            DefineFunction("array_equals", 2);
+            DefineFunction("array_create");
+            DefineFunction("array_copy", 5);
+            DefineFunction("typeof", 1);
+        }
         if (gms2_3)
         {
             DefineFunction("array_length", 1);
@@ -1277,14 +1371,16 @@ public class BuiltinList : IBuiltins
             DefineFunction("instanceof", 1);
             DefineFunction("exception_unhandled_handler", 1);
         }
-        DefineFunction("typeof", 1);
         DefineFunction("variable_global_exists", 1);
         DefineFunction("variable_global_get", 1);
         DefineFunction("variable_global_set", 2);
-        DefineFunction("variable_instance_exists", 2);
-        DefineFunction("variable_instance_get", 2);
-        DefineFunction("variable_instance_set", 3);
-        DefineFunction("variable_instance_get_names", 1);
+        if (wad >= 16)
+        {
+            DefineFunction("variable_instance_exists", 2);
+            DefineFunction("variable_instance_get", 2);
+            DefineFunction("variable_instance_set", 3);
+            DefineFunction("variable_instance_get_names", 1);
+        }
         if (gms2_3)
         {
             DefineFunction("variable_instance_names_count", 1);
@@ -1306,8 +1402,14 @@ public class BuiltinList : IBuiltins
         DefineFunction("random_set_seed", 1);
         DefineFunction("random_get_seed", 0);
         DefineFunction("randomize", 0);
-        DefineFunction("randomise", 0);
-        DefineFunction("random_use_old_version", 1);
+        if (wad >= 16)
+        {
+            DefineFunction("randomise", 0);
+        }
+        if (wad >= 15 && !gms2_3)
+        {
+            DefineFunction("random_use_old_version", 1);
+        }
         DefineFunction("abs", 1);
         DefineFunction("round", 1);
         DefineFunction("floor", 1);
@@ -1340,8 +1442,11 @@ public class BuiltinList : IBuiltins
         DefineFunction("logn", 2);
         DefineFunction("min");
         DefineFunction("max");
-        DefineFunction("min3", 3);
-        DefineFunction("max3", 3);
+        if (!gms2_3)
+        {
+            DefineFunction("min3", 3);
+            DefineFunction("max3", 3);
+        }
         DefineFunction("mean");
         DefineFunction("median");
         DefineFunction("choose");
@@ -1351,13 +1456,19 @@ public class BuiltinList : IBuiltins
         DefineFunction("dot_product_3d", 6);
         DefineFunction("dot_product_normalised", 4);
         DefineFunction("dot_product_3d_normalised", 6);
-        DefineFunction("dot_product_normalized", 4);
-        DefineFunction("dot_product_3d_normalized", 6);
+        if (wad >= 16)
+        {
+            DefineFunction("dot_product_normalized", 4);
+            DefineFunction("dot_product_3d_normalized", 6);
+        }
         DefineFunction("math_set_epsilon", 1);
         DefineFunction("math_get_epsilon", 0);
         DefineFunction("angle_difference", 2);
         DefineFunction("real", 1);
-        DefineFunction("bool", 1);
+        if (gms2)
+        {
+            DefineFunction("bool", 1);
+        }
         DefineFunction("string", 1);
         DefineFunction("int64", 1);
         DefineFunction("ptr", 1);
@@ -1384,7 +1495,10 @@ public class BuiltinList : IBuiltins
         DefineFunction("string_replace", 3);
         DefineFunction("string_replace_all", 3);
         DefineFunction("string_count", 2);
-        DefineFunction("string_hash_to_newline", 1);
+        if (wad >= 16)
+        {
+            DefineFunction("string_hash_to_newline", 1);
+        }
         if (gms2_3)
         {
             DefineFunction("string_pos_ext", 3);
@@ -1416,33 +1530,42 @@ public class BuiltinList : IBuiltins
         DefineFunction("external_define");
         DefineFunction("external_call");
         DefineFunction("external_free", 1);
-        DefineFunction("external_define0", 3);
-        DefineFunction("external_call0", 1);
-        DefineFunction("external_define1", 4);
-        DefineFunction("external_call1", 2);
-        DefineFunction("external_define2", 5);
-        DefineFunction("external_call2", 3);
-        DefineFunction("external_define3", 6);
-        DefineFunction("external_call3", 4);
-        DefineFunction("external_define4", 7);
-        DefineFunction("external_call4", 5);
-        DefineFunction("external_define5", 3);
-        DefineFunction("external_call5", 6);
-        DefineFunction("external_define6", 3);
-        DefineFunction("external_call6", 7);
-        DefineFunction("external_define7", 3);
-        DefineFunction("external_call7", 8);
-        DefineFunction("external_define8", 3);
-        DefineFunction("external_call8", 9);
+        if (!gms2_3)
+        {
+            DefineFunction("external_define0", 3);
+            DefineFunction("external_call0", 1);
+            DefineFunction("external_define1", 4);
+            DefineFunction("external_call1", 2);
+            DefineFunction("external_define2", 5);
+            DefineFunction("external_call2", 3);
+            DefineFunction("external_define3", 6);
+            DefineFunction("external_call3", 4);
+            DefineFunction("external_define4", 7);
+            DefineFunction("external_call4", 5);
+            DefineFunction("external_define5", 3);
+            DefineFunction("external_call5", 6);
+            DefineFunction("external_define6", 3);
+            DefineFunction("external_call6", 7);
+            DefineFunction("external_define7", 3);
+            DefineFunction("external_call7", 8);
+            DefineFunction("external_define8", 3);
+            DefineFunction("external_call8", 9);
+        }
         DefineFunction("window_handle", 0);
         DefineFunction("window_device", 0);
         DefineFunction("logical_xor", 2);
-        DefineFunction("debug_get_callstack");
+        if (wad >= 16)
+        {
+            DefineFunction("debug_get_callstack");
+            DefineFunction("debug_event", 1);
+        }
         DefineFunction("show_debug_message", 1);
         DefineFunction("show_debug_overlay", 1);
-        DefineFunction("debug_event", 1);
-        DefineFunction("alarm_get", 1);
-        DefineFunction("alarm_set", 2);
+        if (wad >= 15)
+        {
+            DefineFunction("alarm_get", 1);
+            DefineFunction("alarm_set", 2);
+        }
         DefineFunction("clipboard_has_text", 0);
         DefineFunction("clipboard_set_text", 1);
         DefineFunction("clipboard_get_text", 0);
@@ -1489,8 +1612,11 @@ public class BuiltinList : IBuiltins
         DefineFunction("date_is_today", 1);
         DefineFunction("date_set_timezone", 1);
         DefineFunction("date_get_timezone", 0);
-        DefineFunction("game_set_speed", 2);
-        DefineFunction("game_get_speed", 1);
+        if (wad >= 16)
+        {
+            DefineFunction("game_set_speed", 2);
+            DefineFunction("game_get_speed", 1);
+        }
         DefineFunction("part_type_create", 0);
         DefineFunction("part_type_destroy", 1);
         DefineFunction("part_type_exists", 1);
@@ -1512,18 +1638,21 @@ public class BuiltinList : IBuiltins
         DefineFunction("part_type_color1", 2);
         DefineFunction("part_type_color2", 3);
         DefineFunction("part_type_color3", 4);
-        DefineFunction("part_type_color", 4);
+        if (!gms2_3) 
+        {
+            DefineFunction("part_type_color", 4);
+            DefineFunction("part_type_colour", 4);
+            DefineFunction("part_type_alpha", 4);
+        }
         DefineFunction("part_type_colour_mix", 3);
         DefineFunction("part_type_colour_rgb", 7);
         DefineFunction("part_type_colour_hsv", 7);
         DefineFunction("part_type_colour1", 2);
         DefineFunction("part_type_colour2", 3);
         DefineFunction("part_type_colour3", 4);
-        DefineFunction("part_type_colour", 4);
         DefineFunction("part_type_alpha1", 2);
         DefineFunction("part_type_alpha2", 3);
         DefineFunction("part_type_alpha3", 4);
-        DefineFunction("part_type_alpha", 4);
         DefineFunction("part_type_blend", 2);
         DefineFunction("part_system_create", 0);
         DefineFunction("part_system_destroy", 1);
@@ -1558,15 +1687,23 @@ public class BuiltinList : IBuiltins
         DefineFunction("effect_create_below", 5);
         DefineFunction("effect_create_above", 5);
         DefineFunction("effect_clear", 0);
-        DefineFunction("sprite_name", 1);
+        if (!gm2022_1)
+        {
+            DefineFunction("sprite_name", 1);
+        }
         DefineFunction("sprite_exists", 1);
         DefineFunction("sprite_get_name", 1);
         DefineFunction("sprite_get_number", 1);
         DefineFunction("sprite_get_width", 1);
         DefineFunction("sprite_get_height", 1);
-        DefineFunction("sprite_get_transparent", 1);
-        DefineFunction("sprite_get_smooth", 1);
-        DefineFunction("sprite_get_preload", 1);
+        if (!gms2_3)
+        {
+            DefineFunction("sprite_get_transparent", 1);
+            DefineFunction("sprite_get_smooth", 1);
+            DefineFunction("sprite_get_preload", 1);
+            DefineFunction("sprite_get_precise", 1);
+            DefineFunction("sprite_set_precise", 2);
+        }
         DefineFunction("sprite_get_xoffset", 1);
         DefineFunction("sprite_get_yoffset", 1);
         DefineFunction("sprite_get_bbox_mode", 1);
@@ -1574,13 +1711,11 @@ public class BuiltinList : IBuiltins
         DefineFunction("sprite_get_bbox_right", 1);
         DefineFunction("sprite_get_bbox_top", 1);
         DefineFunction("sprite_get_bbox_bottom", 1);
-        DefineFunction("sprite_get_precise", 1);
         DefineFunction("sprite_collision_mask", 9);
         DefineFunction("sprite_get_tpe", 2);
         DefineFunction("sprite_set_offset", 3);
         DefineFunction("sprite_set_bbox_mode", 2);
         DefineFunction("sprite_set_bbox", 5);
-        DefineFunction("sprite_set_precise", 2);
         DefineFunction("sprite_set_alpha_from_sprite", 2);
         DefineFunction("sprite_add", 6);
         DefineFunction("sprite_replace", 7);
@@ -1597,17 +1732,23 @@ public class BuiltinList : IBuiltins
         DefineFunction("sprite_set_cache_size", 2);
         DefineFunction("sprite_set_cache_size_ext", 3);
         DefineFunction("font_set_cache_size", 2);
-        DefineFunction("sprite_prefetch", 1);
-        DefineFunction("sprite_prefetch_multi", 1);
-        DefineFunction("sprite_flush", 1);
-        DefineFunction("sprite_flush_multi", 1);
+        if (wad >= 15)
+        {
+            DefineFunction("sprite_prefetch", 1);
+            DefineFunction("sprite_prefetch_multi", 1);
+        }
+        if (wad >= 16)
+        {
+            DefineFunction("sprite_flush", 1);
+            DefineFunction("sprite_flush_multi", 1);
+        }
         if (gms2)
         {
             DefineFunction("sprite_set_speed", 3);
             DefineFunction("sprite_get_speed_type", 1);
             DefineFunction("sprite_get_speed", 1);
         }
-        if (!gms2)
+        if (!gms2_3)
         {
             DefineFunction("background_name", 1);
             DefineFunction("background_exists", 1);
@@ -1630,12 +1771,18 @@ public class BuiltinList : IBuiltins
             DefineFunction("background_duplicate", 1);
             DefineFunction("background_assign", 2);
             DefineFunction("background_save", 2);
-            DefineFunction("background_prefetch", 1);
-            DefineFunction("background_prefetch_multi", 1);
-            DefineFunction("background_flush", 1);
-            DefineFunction("background_flush_multi", 1);
+            if (wad >= 15)
+            {
+                DefineFunction("background_prefetch", 1);
+                DefineFunction("background_prefetch_multi", 1);
+            }
+            if (wad >= 16)
+            {
+                DefineFunction("background_flush", 1);
+                DefineFunction("background_flush_multi", 1);
+            }
         }
-        if (!gms2)
+        if (!gms2) // (runner accepts until gms2_3)
         {
             DefineFunction("sound_name", 1);
             DefineFunction("sound_exists", 1);
@@ -1739,8 +1886,16 @@ public class BuiltinList : IBuiltins
         DefineFunction("audio_sync_group_debug", 1);
         DefineFunction("audio_sync_group_is_playing", 1);
         DefineFunction("audio_debug", 1);
-        DefineFunction("audio_delete", 1);
-        DefineFunction("font_name", 1);
+        if (wad >= 16 && !gms2_3)
+        {
+            DefineFunction("audio_delete", 1);
+            DefineFunction("font_set_dynamic_texture_size", 1);
+            DefineFunction("font_get_dynamic_texture_size", 0);
+        }
+        if (!gm2022_1)
+        {
+            DefineFunction("font_name", 1);
+        }
         DefineFunction("font_exists", 1);
         DefineFunction("font_get_name", 1);
         DefineFunction("font_get_fontname", 1);
@@ -1749,10 +1904,11 @@ public class BuiltinList : IBuiltins
         DefineFunction("font_get_italic", 1);
         DefineFunction("font_get_first", 1);
         DefineFunction("font_get_last", 1);
-        DefineFunction("font_set_dynamic_texture_size", 1);
-        DefineFunction("font_get_dynamic_texture_size", 0);
-        DefineFunction("font_add_enable_aa", 1);
-        DefineFunction("font_add_get_enable_aa", 0);
+        if (gms2)
+        {
+            DefineFunction("font_add_enable_aa", 1);
+            DefineFunction("font_add_get_enable_aa", 0);
+        }
         DefineFunction("font_add", 6);
         DefineFunction("font_add_sprite", 4);
         DefineFunction("font_add_sprite_ext", 4);
@@ -1762,11 +1918,17 @@ public class BuiltinList : IBuiltins
         DefineFunction("script_exists", 1);
         DefineFunction("script_get_name", 1);
         DefineFunction("script_execute");
-        DefineFunction("path_name", 1);
+        if (!gm2022_1) 
+        {
+            DefineFunction("path_name", 1);
+        }
         DefineFunction("path_exists", 1);
         DefineFunction("path_get_name", 1);
         DefineFunction("path_get_length", 1);
-        DefineFunction("path_get_time", 2);
+        if (wad >= 15 && !gms2_3)
+        {
+            DefineFunction("path_get_time", 2);
+        }
         DefineFunction("path_get_kind", 1);
         DefineFunction("path_get_closed", 1);
         DefineFunction("path_get_precision", 1);
@@ -1796,7 +1958,10 @@ public class BuiltinList : IBuiltins
         DefineFunction("path_rotate", 2);
         DefineFunction("path_rescale", 3);
         DefineFunction("path_shift", 3);
-        DefineFunction("timeline_name", 1);
+        if (!gm2022_1)
+        {
+            DefineFunction("timeline_name", 1);
+        }
         DefineFunction("timeline_exists", 1);
         DefineFunction("timeline_get_name", 1);
         DefineFunction("timeline_add", 0);
@@ -1806,7 +1971,10 @@ public class BuiltinList : IBuiltins
         DefineFunction("timeline_moment_add_script", 3);
         DefineFunction("timeline_size", 1);
         DefineFunction("timeline_max_moment", 1);
-        DefineFunction("object_name", 1);
+        if (!gm2022_1)
+        {
+            DefineFunction("object_name", 1);
+        }
         DefineFunction("object_exists", 1);
         DefineFunction("object_get_name", 1);
         DefineFunction("object_get_sprite", 1);
@@ -1827,8 +1995,14 @@ public class BuiltinList : IBuiltins
         DefineFunction("object_set_visible", 2);
         DefineFunction("object_set_persistent", 2);
         DefineFunction("object_set_mask", 2);
-        DefineFunction("object_set_collisions", 2);
-        DefineFunction("room_name", 1);
+        if (wad >= 16 && !gms2_3)
+        {
+            DefineFunction("object_set_collisions", 2);
+        }
+        if (!gms2_3)
+        {
+            DefineFunction("room_name", 1);
+        }
         DefineFunction("room_exists", 1);
         DefineFunction("room_get_name", 1);
         DefineFunction("room_set_width", 2);
@@ -1836,9 +2010,12 @@ public class BuiltinList : IBuiltins
         DefineFunction("room_set_persistent", 2);
         DefineFunction("room_set_background_color", 3);
         DefineFunction("room_set_background_colour", 3);
-        if (!gms2)
+        if (!gms2) // (runner accepts until gms2_3)
         {
             DefineFunction("room_set_background", 12);
+        }
+        if (!gms2)
+        {
             DefineFunction("room_set_view", 16);
         }
         if (gms2)
@@ -1854,7 +2031,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("room_instance_clear", 1);
         DefineFunction("asset_get_index", 1);
         DefineFunction("asset_get_type", 1);
-        if (!gms2)
+        if (!gms2) // (runner accepts until gms2_3)
         {
             DefineFunction("room_tile_add", 9);
             DefineFunction("room_tile_add_ext", 12);
@@ -1865,7 +2042,7 @@ public class BuiltinList : IBuiltins
             DefineFunction("room_get_camera", 2);
             DefineFunction("room_set_camera", 3);
         }
-        if (!gms2)
+        if (!gms2) // (runner accepts until gms2_3)
         {
             DefineFunction("sound_play", 1);
             DefineFunction("sound_loop", 1);
@@ -1907,23 +2084,26 @@ public class BuiltinList : IBuiltins
         DefineFunction("url_open", 1);
         DefineFunction("url_open_ext", 2);
         DefineFunction("url_open_full", 3);
-        DefineFunction("ads_setup", 2);
-        DefineFunction("ads_engagement_launch", 0);
-        DefineFunction("ads_engagement_available", 0);
-        DefineFunction("ads_engagement_active", 0);
-        DefineFunction("ads_get_display_height", 1);
-        DefineFunction("ads_get_display_width", 1);
-        DefineFunction("ads_move", 3);
-        DefineFunction("ads_interstitial_available", 0);
-        DefineFunction("ads_interstitial_display", 0);
-        DefineFunction("ads_enable", 3);
-        DefineFunction("ads_disable", 1);
-        DefineFunction("ads_event", 1);
-        DefineFunction("ads_event_preload", 1);
+        if (!gm2022_1)
+        {
+            DefineFunction("ads_setup", 2);
+            DefineFunction("ads_engagement_launch", 0);
+            DefineFunction("ads_engagement_available", 0);
+            DefineFunction("ads_engagement_active", 0);
+            DefineFunction("ads_get_display_height", 1);
+            DefineFunction("ads_get_display_width", 1);
+            DefineFunction("ads_move", 3);
+            DefineFunction("ads_interstitial_available", 0);
+            DefineFunction("ads_interstitial_display", 0);
+            DefineFunction("ads_enable", 3);
+            DefineFunction("ads_disable", 1);
+            DefineFunction("ads_event", 1);
+            DefineFunction("ads_event_preload", 1);
+            DefineFunction("ads_set_reward_callback", 1);
+        }
         DefineFunction("shop_leave_rating", 4);
         DefineFunction("analytics_event", 1);
         DefineFunction("analytics_event_ext");
-        DefineFunction("ads_set_reward_callback", 1);
         if (!gms2)
         {
             DefineFunction("draw_enable_alphablend", 1);
@@ -1932,6 +2112,11 @@ public class BuiltinList : IBuiltins
         DefineFunction("draw_flush", 0);
         if (gms2)
         {
+            if (!gms2_3) 
+            {
+                DefineFunction("gpu_get_alphatestfunc", 0);
+                DefineFunction("gpu_set_alphatestfunc", 1);
+            }
             DefineFunction("gpu_set_blendenable", 1);
             DefineFunction("gpu_set_ztestenable", 1);
             DefineFunction("gpu_set_zfunc", 1);
@@ -1945,7 +2130,6 @@ public class BuiltinList : IBuiltins
             DefineFunction("gpu_set_colourwriteenable");
             DefineFunction("gpu_set_alphatestenable", 1);
             DefineFunction("gpu_set_alphatestref", 1);
-            DefineFunction("gpu_set_alphatestfunc", 1);
             DefineFunction("gpu_set_texfilter", 1);
             DefineFunction("gpu_set_texfilter_ext", 2);
             DefineFunction("gpu_set_texrepeat", 1);
@@ -1983,7 +2167,6 @@ public class BuiltinList : IBuiltins
             DefineFunction("gpu_get_colourwriteenable", 0);
             DefineFunction("gpu_get_alphatestenable", 0);
             DefineFunction("gpu_get_alphatestref", 0);
-            DefineFunction("gpu_get_alphatestfunc", 0);
             DefineFunction("gpu_get_texfilter", 0);
             DefineFunction("gpu_get_texfilter_ext", 1);
             DefineFunction("gpu_get_texrepeat", 0);
@@ -2022,13 +2205,19 @@ public class BuiltinList : IBuiltins
         DefineFunction("os_get_info", 0);
         DefineFunction("os_get_language", 0);
         DefineFunction("os_get_region", 0);
-        DefineFunction("os_check_permission", 1);
-        DefineFunction("os_request_permission", 1);
+        if (wad >= 16)
+        {
+            DefineFunction("os_check_permission", 1);
+            DefineFunction("os_request_permission", 1);
+        }
         DefineFunction("display_get_dpi_x", 0);
         DefineFunction("display_get_dpi_y", 0);
         DefineFunction("display_set_gui_size", 2);
         DefineFunction("display_set_gui_maximise");
-        DefineFunction("display_set_gui_maximize");
+        if (gms2)
+        {
+            DefineFunction("display_set_gui_maximize");
+        }
         DefineFunction("device_get_tilt_x", 0);
         DefineFunction("device_get_tilt_y", 0);
         DefineFunction("device_get_tilt_z", 0);
@@ -2045,31 +2234,37 @@ public class BuiltinList : IBuiltins
         DefineFunction("iap_status", 0);
         DefineFunction("iap_acquire", 2);
         DefineFunction("iap_consume", 1);
-        DefineFunction("iap_is_purchased", 1);
+        if (!gms2_3)
+        {
+            DefineFunction("iap_is_purchased", 1);
+        }
         DefineFunction("iap_enumerate_products", 1);
         DefineFunction("iap_restore_all", 0);
         DefineFunction("iap_product_details", 2);
         DefineFunction("iap_purchase_details", 2);
-        DefineFunction("iap_store_status", 0);
-        DefineFunction("iap_product_status", 1);
-        DefineFunction("iap_is_downloaded", 1);
-        DefineFunction("iap_event_queue", 0);
-        DefineFunction("iap_files_purchased", 0);
-        DefineFunction("iap_product_files", 2);
-        DefineFunction("facebook_init", 0);
-        DefineFunction("facebook_login", 2);
-        DefineFunction("facebook_status", 0);
-        DefineFunction("facebook_graph_request", 4);
-        DefineFunction("facebook_dialog", 3);
-        DefineFunction("facebook_logout", 0);
-        DefineFunction("facebook_launch_offerwall", 1);
-        DefineFunction("facebook_post_message", 7);
-        DefineFunction("facebook_send_invite", 5);
-        DefineFunction("facebook_user_id", 0);
-        DefineFunction("facebook_accesstoken", 0);
-        DefineFunction("facebook_check_permission", 1);
-        DefineFunction("facebook_request_read_permissions", 1);
-        DefineFunction("facebook_request_publish_permissions", 1);
+        if (!gms2_3)
+        {
+            DefineFunction("iap_store_status", 0);
+            DefineFunction("iap_product_status", 1);
+            DefineFunction("iap_is_downloaded", 1);
+            DefineFunction("iap_event_queue", 0);
+            DefineFunction("iap_files_purchased", 0);
+            DefineFunction("iap_product_files", 2);
+            DefineFunction("facebook_init", 0);
+            DefineFunction("facebook_login", 2);
+            DefineFunction("facebook_status", 0);
+            DefineFunction("facebook_graph_request", 4);
+            DefineFunction("facebook_dialog", 3);
+            DefineFunction("facebook_logout", 0);
+            DefineFunction("facebook_launch_offerwall", 1);
+            DefineFunction("facebook_post_message", 7);
+            DefineFunction("facebook_send_invite", 5);
+            DefineFunction("facebook_user_id", 0);
+            DefineFunction("facebook_accesstoken", 0);
+            DefineFunction("facebook_check_permission", 1);
+            DefineFunction("facebook_request_read_permissions", 1);
+            DefineFunction("facebook_request_publish_permissions", 1);
+        }
         DefineFunction("gamepad_is_supported", 0, FunctionClassification.Gamepad);
         DefineFunction("gamepad_get_device_count", 0, FunctionClassification.Gamepad);
         DefineFunction("gamepad_is_connected", 1, FunctionClassification.Gamepad);
@@ -2091,7 +2286,10 @@ public class BuiltinList : IBuiltins
         DefineFunction("gamepad_add_mapping_from_string", 1, FunctionClassification.Gamepad);
         DefineFunction("gamepad_add_mapping_from_file", 1, FunctionClassification.Gamepad);
         DefineFunction("gamepad_get_database", 0, FunctionClassification.Gamepad);
-        DefineFunction("YoYo_OSPauseEvent", 0);
+        if (!gms2_3)
+        {
+            DefineFunction("YoYo_OSPauseEvent", 0);
+        }
         DefineFunction("os_is_paused", 0);
         DefineFunction("window_has_focus", 0);
         DefineFunction("base64_encode", 1);
@@ -2260,9 +2458,12 @@ public class BuiltinList : IBuiltins
         DefineFunction("gml_pragma");
         DefineFunction("buffer_create", 3);
         DefineFunction("buffer_delete", 1);
-        DefineFunction("buffer_get_type", 1);
-        DefineFunction("buffer_get_alignment", 1);
-        DefineFunction("buffer_exists", 1);
+        if (wad >= 16)
+        {
+            DefineFunction("buffer_get_type", 1);
+            DefineFunction("buffer_get_alignment", 1);
+            DefineFunction("buffer_exists", 1);
+        }
         DefineFunction("buffer_write", 3);
         DefineFunction("buffer_read", 2);
         DefineFunction("buffer_poke", 4);
@@ -2299,8 +2500,11 @@ public class BuiltinList : IBuiltins
         DefineFunction("buffer_create_from_vertex_buffer", 3);
         DefineFunction("buffer_create_from_vertex_buffer_ext", 5);
         DefineFunction("buffer_copy_from_vertex_buffer", 5);
-        DefineFunction("buffer_compress", 3);
-        DefineFunction("buffer_decompress", 1);
+        if (gms2)
+        {
+            DefineFunction("buffer_compress", 3);
+            DefineFunction("buffer_decompress", 1);
+        }
         DefineFunction("network_create_socket", 1);
         DefineFunction("network_create_socket_ext", 2);
         DefineFunction("network_create_server", 3);
@@ -2313,7 +2517,10 @@ public class BuiltinList : IBuiltins
         DefineFunction("network_send_udp", 5);
         DefineFunction("network_send_udp_raw", 5);
         DefineFunction("network_resolve", 1);
-        DefineFunction("network_receive_packet", 3);
+        if (wad < 16)
+        {
+            DefineFunction("network_receive_packet", 3);
+        }
         DefineFunction("network_destroy", 1);
         DefineFunction("network_set_timeout", 3);
         DefineFunction("network_get_address", 1);
@@ -2335,7 +2542,10 @@ public class BuiltinList : IBuiltins
         DefineFunction("steam_file_exists", 1);
         DefineFunction("steam_file_size", 1);
         DefineFunction("steam_file_share", 1);
-        DefineFunction("steam_publish_workshop_file", 4);
+        if (!gms2_3)
+        {
+            DefineFunction("steam_publish_workshop_file", 4);
+        }
         DefineFunction("steam_is_screenshot_requested", 0);
         DefineFunction("steam_send_screenshot", 3);
         DefineFunction("steam_is_user_logged_on", 0);
@@ -2356,9 +2566,12 @@ public class BuiltinList : IBuiltins
         DefineFunction("steam_stats_ready", 0);
         DefineFunction("steam_create_leaderboard", 3);
         DefineFunction("steam_upload_score", 2);
-        DefineFunction("steam_upload_score_ext", 3);
         DefineFunction("steam_upload_score_buffer", 3);
-        DefineFunction("steam_upload_score_buffer_ext", 4);
+        if (wad >= 16)
+        {
+            DefineFunction("steam_upload_score_buffer_ext", 4);
+            DefineFunction("steam_upload_score_ext", 3);
+        }
         DefineFunction("steam_download_scores_around_user", 3);
         DefineFunction("steam_download_scores", 3);
         DefineFunction("steam_download_friends_scores", 1);
@@ -2403,9 +2616,15 @@ public class BuiltinList : IBuiltins
         DefineFunction("steam_ugc_query_set_allow_cached_response", 2);
         DefineFunction("steam_ugc_send_query", 1);
         DefineFunction("shader_set", 1);
-        DefineFunction("shader_get_name", 1);
+        if (gms2)
+        {
+            DefineFunction("shader_get_name", 1);
+        }
         DefineFunction("shader_reset", 0);
-        DefineFunction("shader_current", 0);
+        if (wad >= 16)
+        {
+            DefineFunction("shader_current", 0);
+        }
         DefineFunction("shader_is_compiled", 1);
         DefineFunction("shader_get_sampler_index", 2);
         DefineFunction("shader_get_uniform", 2);
@@ -2426,10 +2645,13 @@ public class BuiltinList : IBuiltins
         DefineFunction("vertex_format_add_position", 0);
         DefineFunction("vertex_format_add_position_3d", 0);
         DefineFunction("vertex_format_add_colour", 0);
-        DefineFunction("vertex_format_add_color", 0);
-        DefineFunction("vertex_format_add_normal", 0);
-        DefineFunction("vertex_format_add_texcoord", 0);
+        if (wad >= 16)
+        {
+            DefineFunction("vertex_format_add_color", 0);
+            DefineFunction("vertex_format_add_texcoord", 0);
+        }
         DefineFunction("vertex_format_add_textcoord", 0);
+        DefineFunction("vertex_format_add_normal", 0);
         DefineFunction("vertex_format_add_custom", 2);
         DefineFunction("vertex_create_buffer", 0);
         DefineFunction("vertex_create_buffer_ext", 1);
@@ -2439,7 +2661,10 @@ public class BuiltinList : IBuiltins
         DefineFunction("vertex_position", 3);
         DefineFunction("vertex_position_3d", 4);
         DefineFunction("vertex_colour", 3);
-        DefineFunction("vertex_color", 3);
+        if (wad >= 16)
+        {
+            DefineFunction("vertex_color", 3);
+        }
         DefineFunction("vertex_argb", 2);
         DefineFunction("vertex_texcoord", 3);
         DefineFunction("vertex_normal", 4);
@@ -2464,7 +2689,16 @@ public class BuiltinList : IBuiltins
         DefineFunction("skeleton_animation_set_ext", 2);
         DefineFunction("skeleton_animation_get_ext", 1);
         DefineFunction("skeleton_animation_get_duration", 1);
-        DefineFunction("skeleton_animation_get_frames", 1);
+        if (wad >= 16)
+        {
+            DefineFunction("skeleton_animation_get_frames", 1);
+            DefineFunction("skeleton_animation_get_frame", 1);
+            DefineFunction("skeleton_animation_set_frame", 2);
+            DefineFunction("skeleton_get_minmax", 0);
+            DefineFunction("skeleton_get_num_bounds", 0);
+            DefineFunction("skeleton_get_bounds", 1);
+            DefineFunction("draw_skeleton_instance", 11);
+        }
         DefineFunction("skeleton_animation_clear", 1);
         DefineFunction("skeleton_skin_set", 1);
         DefineFunction("skeleton_skin_get", 0);
@@ -2478,89 +2712,122 @@ public class BuiltinList : IBuiltins
         DefineFunction("skeleton_bone_state_set", 2);
         DefineFunction("draw_skeleton", 11);
         DefineFunction("draw_skeleton_time", 11);
-        DefineFunction("draw_skeleton_instance", 11);
         DefineFunction("draw_skeleton_collision", 9);
         DefineFunction("skeleton_animation_list", 2);
         DefineFunction("skeleton_skin_list", 2);
         DefineFunction("skeleton_slot_data", 2);
-        DefineFunction("skeleton_animation_get_frame", 1);
-        DefineFunction("skeleton_animation_set_frame", 2);
-        DefineFunction("skeleton_get_minmax", 0);
-        DefineFunction("skeleton_get_num_bounds", 0);
-        DefineFunction("skeleton_get_bounds", 1);
-        DefineFunction("yyg_player_run", 4);
-        DefineFunction("yyg_player_restarted", 0);
-        DefineFunction("yyg_player_launch_args", 0);
+        if (!gms2_3)
+        {
+            DefineFunction("yyg_player_run", 4);
+            DefineFunction("yyg_player_restarted", 0);
+            DefineFunction("yyg_player_launch_args", 0);
+        }
         DefineFunction("extension_stubfunc_real");
         DefineFunction("extension_stubfunc_string");
         DefineFunction("ps4_share_screenshot_enable", 1);
         DefineFunction("ps4_share_video_enable", 1);
-        DefineFunction("ps4_gamepad_reset_colour", 1);
-        DefineFunction("video_open", 1);
-        DefineFunction("video_close", 0);
-        DefineFunction("video_draw", 0);
-        DefineFunction("video_set_volume", 1);
-        DefineFunction("psn_get_leaderboard_score_range", 4);
-        DefineFunction("psn_default_user_name", 0);
-        DefineFunction("psn_name_for_pad", 1);
-        DefineFunction("psn_unlock_trophy", 2);
-        DefineFunction("psn_init_np_libs");
-        DefineFunction("psn_exit_np_libs", 0);
-        DefineFunction("psn_get_leaderboard_score", 2);
-        DefineFunction("psn_post_leaderboard_score", 3);
-        DefineFunction("psn_post_leaderboard_score_comment", 4);
-        DefineFunction("psn_check_np_availability", 2);
-        DefineFunction("psn_tick_error_dialog", 0);
-        DefineFunction("psn_get_friends_scores", 4);
-        DefineFunction("psn_name_for_user", 1);
-        DefineFunction("psn_default_user", 0);
-        DefineFunction("psn_user_for_pad", 1);
-        DefineFunction("psn_tick", 0);
-        DefineFunction("psn_np_status", 1);
-        DefineFunction("psn_show_error_dialog", 1);
-        DefineFunction("psn_check_free_space", 2);
-        DefineFunction("psn_init_leaderboard", 1);
-        DefineFunction("psn_np_check_plus", 3);
-        DefineFunction("psn_np_commerce_dialog_open", 3);
-        DefineFunction("psn_np_commerce_dialog_open_on_product", 3);
-        DefineFunction("psn_np_commerce_dialog_tick", 0);
-        DefineFunction("psn_np_notify_plus_feature", 3);
-        DefineFunction("psn_set_content_restriction", 1);
-        DefineFunction("psn_load_modules", 0);
-        DefineFunction("psn_get_avatar_url", 1);
-        DefineFunction("psn_get_tus_data", 2);
-        DefineFunction("psn_set_tus_data", 4);
-        DefineFunction("psn_get_tus_variable", 2);
-        DefineFunction("psn_set_tus_variable", 3);
-        DefineFunction("psn_delete_tus_data", 2);
-        DefineFunction("psn_get_entitlement_list", 0);
-        DefineFunction("matchmaking_reset_create_params", 0);
-        DefineFunction("matchmaking_add_create_param", 2);
-        DefineFunction("matchmaking_session_create", 2);
-        DefineFunction("matchmaking_session_get_users", 1);
-        DefineFunction("matchmaking_session_get_owner", 1);
-        DefineFunction("matchmaking_session_get_ping_info", 1);
-        DefineFunction("matchmaking_session_set_hidden", 2);
-        DefineFunction("matchmaking_session_set_closed", 1);
-        DefineFunction("matchmaking_session_set_open", 1);
-        DefineFunction("matchmaking_reset_find_params", 0);
-        DefineFunction("matchmaking_add_find_param", 3);
-        DefineFunction("matchmaking_session_find", 0);
-        DefineFunction("matchmaking_session_join", 1);
-        DefineFunction("matchmaking_session_leave", 1);
-        DefineFunction("matchmaking_session_update", 1);
-        DefineFunction("matchmaking_start");
-        DefineFunction("matchmaking_stop", 0);
-        DefineFunction("matchmaking_session_invite_start", 1);
-        DefineFunction("matchmaking_send_invites_no_ui", 4);
-        DefineFunction("matchmaking_send_invites", 3);
-        DefineFunction("matchmaking_tick_invites", 0);
-        DefineFunction("matchmaking_join_invite", 1);
-        DefineFunction("psn_content_restriction_add", 2);
-        DefineFunction("psn_net_check", 1);
-        DefineFunction("psn_setup_trophies", 0);
-        DefineFunction("psn_init_trophy");
-        DefineFunction("psn_get_trophy_unlock_state", 1);
+        if (gms2_3)
+        {
+            DefineFunction("ps4_gamepad_reset_colour", 1);
+        }
+        if (wad >= 16)
+        {
+            DefineFunction("video_open", 1);
+            DefineFunction("video_close", 0);
+            DefineFunction("video_draw", 0);
+            DefineFunction("video_set_volume", 1);
+        }
+        if (wad >= 15)
+        {
+            DefineFunction("psn_get_leaderboard_score_range", 4);
+            DefineFunction("psn_default_user_name", 0);
+            DefineFunction("psn_name_for_pad", 1);
+            DefineFunction("psn_unlock_trophy", 2);
+            DefineFunction("psn_init_np_libs");
+            DefineFunction("psn_exit_np_libs", 0);
+            DefineFunction("psn_get_leaderboard_score", 2);
+            DefineFunction("psn_post_leaderboard_score", 3);
+            if (wad >= 16)
+            {
+                DefineFunction("psn_post_leaderboard_score_comment", 4);
+            }
+            DefineFunction("psn_check_np_availability", 2);
+            DefineFunction("psn_tick_error_dialog", 0);
+            DefineFunction("psn_get_friends_scores", 4);
+            DefineFunction("psn_name_for_user", 1);
+            DefineFunction("psn_default_user", 0);
+            DefineFunction("psn_user_for_pad", 1);
+            DefineFunction("psn_tick", 0);
+            DefineFunction("psn_np_status", 1);
+            if (wad >= 16)
+            {
+                DefineFunction("psn_show_error_dialog", 1);
+                if (!gms2_3)
+                {
+                    DefineFunction("psn_check_free_space", 2);
+                }
+            }
+            if (gms2_3)
+            {
+                DefineFunction("psn_init_leaderboard", 1);
+            }
+            DefineFunction("psn_np_check_plus", 3);
+            DefineFunction("psn_np_commerce_dialog_open", 3);
+            DefineFunction("psn_np_commerce_dialog_open_on_product", 3);
+            DefineFunction("psn_np_commerce_dialog_tick", 0);
+            DefineFunction("psn_np_notify_plus_feature", 3);
+            DefineFunction("psn_set_content_restriction", 1);
+            DefineFunction("psn_load_modules", 0);
+            if (wad >= 16)
+            {
+                DefineFunction("psn_get_avatar_url", 1);
+                DefineFunction("psn_get_tus_data", 2);
+                DefineFunction("psn_set_tus_data", 4);
+                DefineFunction("psn_get_tus_variable", 2);
+                DefineFunction("psn_set_tus_variable", 3);
+                DefineFunction("psn_delete_tus_data", 2);
+                DefineFunction("psn_get_entitlement_list", 0);
+            }
+            DefineFunction("psn_content_restriction_add", 2);
+            if (gms2_3)
+            {
+                DefineFunction("psn_net_check", 1);
+                DefineFunction("psn_setup_trophies", 0);
+            }
+            DefineFunction("psn_init_trophy");
+            if (wad >= 16)
+            {
+                DefineFunction("psn_get_trophy_unlock_state", 1);
+            }
+            DefineFunction("matchmaking_reset_create_params", 0);
+            DefineFunction("matchmaking_add_create_param", 2);
+            DefineFunction("matchmaking_session_create", 2);
+            DefineFunction("matchmaking_session_get_users", 1);
+            DefineFunction("matchmaking_session_get_owner", 1);
+            DefineFunction("matchmaking_session_get_ping_info", 1);
+            if (wad >= 16)
+            {
+                DefineFunction("matchmaking_session_set_hidden", 2);
+            }
+            DefineFunction("matchmaking_session_set_closed", 1);
+            DefineFunction("matchmaking_session_set_open", 1);
+            DefineFunction("matchmaking_reset_find_params", 0);
+            DefineFunction("matchmaking_add_find_param", 3);
+            DefineFunction("matchmaking_session_find", 0);
+            DefineFunction("matchmaking_session_join", 1);
+            DefineFunction("matchmaking_session_leave", 1);
+            DefineFunction("matchmaking_session_update", 1);
+            DefineFunction("matchmaking_start");
+            DefineFunction("matchmaking_stop", 0);
+            if (wad >= 16)
+            {
+                DefineFunction("matchmaking_session_invite_start", 1);
+                DefineFunction("matchmaking_send_invites_no_ui", 4);
+            }
+            DefineFunction("matchmaking_send_invites", 3);
+            DefineFunction("matchmaking_tick_invites", 0);
+            DefineFunction("matchmaking_join_invite", 1);
+        }
         DefineFunction("xboxone_get_user_count", 0);
         DefineFunction("xboxone_get_user", 1);
         DefineFunction("xboxone_get_activating_user", 0);
@@ -2597,18 +2864,21 @@ public class BuiltinList : IBuiltins
         DefineFunction("xboxone_fire_event");
         DefineFunction("xboxone_get_stats_for_user");
         DefineFunction("xboxone_stats_setup", 3);
-        DefineFunction("xboxone_stats_set_stat_real", 3);
-        DefineFunction("xboxone_stats_set_stat_int", 3);
-        DefineFunction("xboxone_stats_set_stat_string", 3);
-        DefineFunction("xboxone_stats_delete_stat", 2);
-        DefineFunction("xboxone_stats_get_stat", 2);
-        DefineFunction("xboxone_stats_get_stat_names", 1);
-        DefineFunction("xboxone_stats_add_user", 1);
-        DefineFunction("xboxone_stats_remove_user", 1);
-        DefineFunction("xboxone_stats_flush_user", 2);
-        DefineFunction("xboxone_stats_get_leaderboard", 6);
-        DefineFunction("xboxone_stats_get_social_leaderboard", 7);
-        DefineFunction("xboxone_achievements_set_progress", 3);
+        if (gms2)
+        {
+            DefineFunction("xboxone_stats_set_stat_real", 3);
+            DefineFunction("xboxone_stats_set_stat_int", 3);
+            DefineFunction("xboxone_stats_set_stat_string", 3);
+            DefineFunction("xboxone_stats_delete_stat", 2);
+            DefineFunction("xboxone_stats_get_stat", 2);
+            DefineFunction("xboxone_stats_get_stat_names", 1);
+            DefineFunction("xboxone_stats_add_user", 1);
+            DefineFunction("xboxone_stats_remove_user", 1);
+            DefineFunction("xboxone_stats_flush_user", 2);
+            DefineFunction("xboxone_stats_get_leaderboard", 6);
+            DefineFunction("xboxone_stats_get_social_leaderboard", 7);
+            DefineFunction("xboxone_achievements_set_progress", 3);
+        }
         DefineFunction("xboxone_set_rich_presence");
         DefineFunction("xboxone_read_player_leaderboard", 4);
         DefineFunction("xboxone_matchmaking_create");
@@ -2620,54 +2890,82 @@ public class BuiltinList : IBuiltins
         DefineFunction("xboxone_matchmaking_send_invites", 3);
         DefineFunction("xboxone_matchmaking_set_joinable_session", 2);
         DefineFunction("xboxone_matchmaking_join_invite", 4);
-        DefineFunction("xboxone_matchmaking_join_session", 3);
-        DefineFunction("xboxone_matchmaking_set_find_timeout", 1);
+        if (gms2)
+        {
+            DefineFunction("xboxone_matchmaking_join_session", 3);
+            DefineFunction("xboxone_matchmaking_set_find_timeout", 1);
+        }
         DefineFunction("xboxone_debug", 2);
         DefineFunction("xboxone_chat_add_user_to_channel", 2);
         DefineFunction("xboxone_chat_remove_user_from_channel", 2);
         DefineFunction("xboxone_chat_set_muted", 2);
         DefineFunction("xboxone_product_show_details", 2);
-        DefineFunction("xboxone_set_service_configuration_id", 1);
-        DefineFunction("xboxone_generate_player_session_id", 0);
-        DefineFunction("xboxone_package_check_license", 1);
-        DefineFunction("xboxlive_get_user_count", 0);
-        DefineFunction("xboxlive_get_user", 1);
-        DefineFunction("xboxlive_get_activating_user", 0);
-        DefineFunction("xboxlive_user_is_active", 1);
-        DefineFunction("xboxlive_user_is_guest", 1);
-        DefineFunction("xboxlive_user_is_signed_in");
-        DefineFunction("xboxlive_user_is_signing_in");
-        DefineFunction("xboxlive_user_is_remote", 1);
-        DefineFunction("xboxlive_gamedisplayname_for_user");
-        DefineFunction("xboxlive_appdisplayname_for_user");
-        DefineFunction("xboxlive_gamertag_for_user");
-        DefineFunction("xboxlive_agegroup_for_user", 1);
-        DefineFunction("xboxlive_gamerscore_for_user", 1);
-        DefineFunction("xboxlive_reputation_for_user", 1);
-        DefineFunction("xboxlive_user_for_pad", 1);
-        DefineFunction("xboxlive_pad_count_for_user", 1);
-        DefineFunction("xboxlive_sponsor_for_user", 1);
-        DefineFunction("xboxlive_pad_for_user", 2);
-        DefineFunction("xboxlive_show_account_picker");
-        DefineFunction("xboxlive_sprite_add_from_gamerpicture", 4);
-        DefineFunction("xboxlive_show_profile_card_for_user", 2);
-        DefineFunction("xboxlive_set_savedata_user", 1);
-        DefineFunction("xboxlive_get_savedata_user", 0);
-        DefineFunction("xboxlive_get_file_error", 0);
-        DefineFunction("uwp_was_terminated", 0);
-        DefineFunction("uwp_was_closed_by_user", 0);
-        DefineFunction("uwp_is_suspending", 0);
-        DefineFunction("uwp_is_constrained", 0);
-        DefineFunction("uwp_suspend", 0);
-        DefineFunction("uwp_show_help", 1);
-        DefineFunction("uwp_license_trial_version", 0);
-        DefineFunction("uwp_license_trial_user", 0);
-        DefineFunction("uwp_license_trial_time_remaining", 0);
-        DefineFunction("uwp_check_privilege", 3);
-        DefineFunction("xboxlive_user_id_for_user", 1);
-        DefineFunction("xboxlive_fire_event");
-        DefineFunction("xboxlive_get_stats_for_user");
-        DefineFunction("xboxlive_stats_setup", 3);
+        if (wad >= 16)
+        {
+            DefineFunction("xboxone_generate_player_session_id", 0);
+            DefineFunction("xboxone_package_check_license", 1);
+        }
+        if (wad >= 15)
+        {
+            DefineFunction("xboxone_set_service_configuration_id", 1);
+            DefineFunction("xboxlive_get_user_count", 0);
+            DefineFunction("xboxlive_get_user", 1);
+            DefineFunction("xboxlive_get_activating_user", 0);
+            DefineFunction("xboxlive_user_is_active", 1);
+            DefineFunction("xboxlive_user_is_guest", 1);
+            DefineFunction("xboxlive_user_is_signed_in");
+            if (wad >= 16)
+            {
+                DefineFunction("xboxlive_user_is_signing_in");
+                DefineFunction("xboxlive_gamertag_for_user");
+            }
+            DefineFunction("xboxlive_user_is_remote", 1);
+            DefineFunction("xboxlive_gamedisplayname_for_user");
+            DefineFunction("xboxlive_appdisplayname_for_user");
+            DefineFunction("xboxlive_agegroup_for_user", 1);
+            DefineFunction("xboxlive_gamerscore_for_user", 1);
+            DefineFunction("xboxlive_reputation_for_user", 1);
+            DefineFunction("xboxlive_user_for_pad", 1);
+            DefineFunction("xboxlive_pad_count_for_user", 1);
+            DefineFunction("xboxlive_sponsor_for_user", 1);
+            DefineFunction("xboxlive_pad_for_user", 2);
+            DefineFunction("xboxlive_show_account_picker");
+            DefineFunction("xboxlive_sprite_add_from_gamerpicture", 4);
+            DefineFunction("xboxlive_show_profile_card_for_user", 2);
+            DefineFunction("xboxlive_set_savedata_user", 1);
+            DefineFunction("xboxlive_get_savedata_user", 0);
+            DefineFunction("xboxlive_get_file_error", 0);
+            DefineFunction("uwp_was_terminated", 0);
+            DefineFunction("uwp_was_closed_by_user", 0);
+            DefineFunction("uwp_is_suspending", 0);
+            DefineFunction("uwp_is_constrained", 0);
+            DefineFunction("uwp_suspend", 0);
+            DefineFunction("uwp_show_help", 1);
+            DefineFunction("uwp_license_trial_version", 0);
+            DefineFunction("uwp_license_trial_user", 0);
+            DefineFunction("uwp_license_trial_time_remaining", 0);
+            DefineFunction("uwp_check_privilege", 3);
+            DefineFunction("xboxlive_user_id_for_user", 1);
+            DefineFunction("xboxlive_fire_event");
+            DefineFunction("xboxlive_get_stats_for_user");
+            DefineFunction("xboxlive_stats_setup", 3);
+            DefineFunction("xboxlive_set_rich_presence");
+            DefineFunction("xboxlive_matchmaking_create");
+            DefineFunction("xboxlive_matchmaking_find");
+            DefineFunction("xboxlive_matchmaking_start", 1);
+            DefineFunction("xboxlive_matchmaking_stop", 1);
+            DefineFunction("xboxlive_matchmaking_session_get_users", 1);
+            DefineFunction("xboxlive_matchmaking_session_leave", 1);
+            DefineFunction("xboxlive_matchmaking_send_invites", 3);
+            DefineFunction("xboxlive_matchmaking_set_joinable_session", 2);
+            DefineFunction("xboxlive_matchmaking_join_invite", 3);
+            DefineFunction("xboxlive_matchmaking_join_session", 3);
+            DefineFunction("xboxlive_chat_add_user_to_channel", 2);
+            DefineFunction("xboxlive_chat_remove_user_from_channel", 2);
+            DefineFunction("xboxlive_chat_set_muted", 2);
+            DefineFunction("xboxlive_set_service_configuration_id", 1);
+            DefineFunction("xboxlive_generate_player_session_id", 0);
+        }
         DefineFunction("xboxlive_stats_set_stat_real", 3);
         DefineFunction("xboxlive_stats_set_stat_int", 3);
         DefineFunction("xboxlive_stats_set_stat_string", 3);
@@ -2680,26 +2978,13 @@ public class BuiltinList : IBuiltins
         DefineFunction("xboxlive_stats_get_leaderboard", 6);
         DefineFunction("xboxlive_stats_get_social_leaderboard", 7);
         DefineFunction("xboxlive_achievements_set_progress", 3);
-        DefineFunction("xboxlive_set_rich_presence");
-        DefineFunction("xboxlive_read_player_leaderboard", 4);
-        DefineFunction("xboxlive_matchmaking_create");
-        DefineFunction("xboxlive_matchmaking_find");
-        DefineFunction("xboxlive_matchmaking_start", 1);
-        DefineFunction("xboxlive_matchmaking_stop", 1);
-        DefineFunction("xboxlive_matchmaking_session_get_users", 1);
-        DefineFunction("xboxlive_matchmaking_session_leave", 1);
-        DefineFunction("xboxlive_matchmaking_send_invites", 3);
-        DefineFunction("xboxlive_matchmaking_set_joinable_session", 2);
-        DefineFunction("xboxlive_matchmaking_join_invite", 3);
-        DefineFunction("xboxlive_matchmaking_join_session", 3);
+        if (wad >= 16)
+        {
+            DefineFunction("xboxlive_read_player_leaderboard", 4);
+        }
         DefineFunction("xboxlive_matchmaking_set_find_timeout", 1);
-        DefineFunction("xboxlive_chat_add_user_to_channel", 2);
-        DefineFunction("xboxlive_chat_remove_user_from_channel", 2);
-        DefineFunction("xboxlive_chat_set_muted", 2);
-        DefineFunction("xboxlive_set_service_configuration_id", 1);
-        DefineFunction("xboxlive_generate_player_session_id", 0);
         DefineFunction("browser_input_capture", 1);
-        if (gms2)
+        if (gms2) // (runner accepts wad >= 16)
         {
             DefineFunction("layer_get_id", 1);
             DefineFunction("layer_get_id_at_depth", 1);
@@ -2804,8 +3089,11 @@ public class BuiltinList : IBuiltins
             DefineFunction("tilemap_get_tile_height", 1);
             DefineFunction("tilemap_get_width", 1);
             DefineFunction("tilemap_get_height", 1);
-            DefineFunction("tilemap_set_width", 2);
-            DefineFunction("tilemap_set_height", 2);
+            if (gms2)
+            {
+                DefineFunction("tilemap_set_width", 2);
+                DefineFunction("tilemap_set_height", 2);
+            }
             DefineFunction("tilemap_get_x", 1);
             DefineFunction("tilemap_get_y", 1);
             DefineFunction("tilemap_get", 3);
@@ -2925,8 +3213,11 @@ public class BuiltinList : IBuiltins
         DefineFunction("switch_controller_support_set_show_explain_text", 1);
         DefineFunction("switch_controller_support_set_show_identification_colours", 1);
         DefineFunction("switch_controller_support_set_show_identification_colors", 1);
-        DefineFunction("switch_controller_support_set_identification_colour", 2);
-        DefineFunction("switch_controller_support_set_identification_color", 2);
+        if (gms2_3)
+        {
+            DefineFunction("switch_controller_support_set_identification_colour", 2);
+            DefineFunction("switch_controller_support_set_identification_color", 2);
+        }
         DefineFunction("switch_controller_support_set_left_justify", 1);
         DefineFunction("switch_controller_support_set_permit_joycon_dual", 1);
         DefineFunction("switch_controller_support_set_singleplayer_only", 1);
@@ -2957,32 +3248,35 @@ public class BuiltinList : IBuiltins
         DefineFunction("switch_recording_enable", 0);
         DefineFunction("switch_recording_disable", 0);
         DefineFunction("switch_irsensor_set_mode", 2);
-        DefineFunction("switch_irsensor_common_config_set_all", 5);
-        DefineFunction("switch_irsensor_common_config_set_exposure_time", 2);
-        DefineFunction("switch_irsensor_common_config_set_light_target", 2);
-        DefineFunction("switch_irsensor_common_config_set_gain", 2);
-        DefineFunction("switch_irsensor_common_config_is_negative_image_used", 2);
-        DefineFunction("switch_irsensor_cluster_config_set_defaults", 1);
-        DefineFunction("switch_irsensor_cluster_config_set_window_of_interest", 5);
-        DefineFunction("switch_irsensor_cluster_config_set_object_pixel_count_min", 2);
-        DefineFunction("switch_irsensor_cluster_config_set_object_pixel_count_max", 2);
-        DefineFunction("switch_irsensor_cluster_config_set_object_intensity_min", 2);
-        DefineFunction("switch_irsensor_cluster_config_set_external_light_filtering", 2);
-        DefineFunction("switch_irsensor_cluster_create_state_buffer", 1);
-        DefineFunction("switch_irsensor_moment_config_set_defaults", 1);
-        DefineFunction("switch_irsensor_moment_config_set_window_of_interest", 5);
-        DefineFunction("switch_irsensor_moment_config_set_preprocess", 2);
-        DefineFunction("switch_irsensor_moment_config_set_preprocess_intensity_threshold", 2);
-        DefineFunction("switch_irsensor_moment_create_state_buffer", 1);
-        DefineFunction("switch_irsensor_image_config_set_defaults", 1);
-        DefineFunction("switch_irsensor_image_config_set_format", 2);
-        DefineFunction("switch_irsensor_image_config_set_orig_format", 2);
-        DefineFunction("switch_irsensor_image_config_set_trimming_format", 2);
-        DefineFunction("switch_irsensor_image_config_set_trimming_start", 3);
-        DefineFunction("switch_irsensor_image_config_set_external_light_filtering", 2);
-        DefineFunction("switch_irsensor_image_create_state_buffers", 1);
-        DefineFunction("switch_irsensor_hand_config_set_mode", 2);
-        DefineFunction("switch_irsensor_hand_create_state_buffers", 1);
+        if (major > 2 || (major == 2 && minor > 3))  // TODO: which version was this added?
+        {
+            DefineFunction("switch_irsensor_common_config_set_all", 5);
+            DefineFunction("switch_irsensor_common_config_set_exposure_time", 2);
+            DefineFunction("switch_irsensor_common_config_set_light_target", 2);
+            DefineFunction("switch_irsensor_common_config_set_gain", 2);
+            DefineFunction("switch_irsensor_common_config_is_negative_image_used", 2);
+            DefineFunction("switch_irsensor_cluster_config_set_defaults", 1);
+            DefineFunction("switch_irsensor_cluster_config_set_window_of_interest", 5);
+            DefineFunction("switch_irsensor_cluster_config_set_object_pixel_count_min", 2);
+            DefineFunction("switch_irsensor_cluster_config_set_object_pixel_count_max", 2);
+            DefineFunction("switch_irsensor_cluster_config_set_object_intensity_min", 2);
+            DefineFunction("switch_irsensor_cluster_config_set_external_light_filtering", 2);
+            DefineFunction("switch_irsensor_cluster_create_state_buffer", 1);
+            DefineFunction("switch_irsensor_moment_config_set_defaults", 1);
+            DefineFunction("switch_irsensor_moment_config_set_window_of_interest", 5);
+            DefineFunction("switch_irsensor_moment_config_set_preprocess", 2);
+            DefineFunction("switch_irsensor_moment_config_set_preprocess_intensity_threshold", 2);
+            DefineFunction("switch_irsensor_moment_create_state_buffer", 1);
+            DefineFunction("switch_irsensor_image_config_set_defaults", 1);
+            DefineFunction("switch_irsensor_image_config_set_format", 2);
+            DefineFunction("switch_irsensor_image_config_set_orig_format", 2);
+            DefineFunction("switch_irsensor_image_config_set_trimming_format", 2);
+            DefineFunction("switch_irsensor_image_config_set_trimming_start", 3);
+            DefineFunction("switch_irsensor_image_config_set_external_light_filtering", 2);
+            DefineFunction("switch_irsensor_image_create_state_buffers", 1);
+            DefineFunction("switch_irsensor_hand_config_set_mode", 2);
+            DefineFunction("switch_irsensor_hand_create_state_buffers", 1);
+        }
         DefineFunction("switch_bnvib_load", 1);
         DefineFunction("switch_bnvib_unload", 1);
         DefineFunction("switch_bnvib_get_value", 2);
@@ -2992,7 +3286,7 @@ public class BuiltinList : IBuiltins
         DefineFunction("switch_bnvib_get_loop_start_position", 1);
         DefineFunction("switch_bnvib_get_length", 1);
         DefineFunction("switch_bnvib_get_sampling_rate", 1);
-        if (major == 1 && build <= 1763)
+        if (major == 1 && build <= 1763 /* wad < 16 */)
         {
             DefineFunction("immersion_play_effect", 1, FunctionClassification.Immersion);
             DefineFunction("immersion_stop", 0, FunctionClassification.Immersion);
@@ -3023,6 +3317,23 @@ public class BuiltinList : IBuiltins
             DefineFunction("dbg_button");
             DefineFunction("dbg_same_line", 0);
             DefineFunction("dbg_add_font_glyphs");
+        }
+        if (gm2022_1) 
+        {
+            DefineFunction("fx_create", 1);
+            DefineFunction("fx_get_name", 1);
+            DefineFunction("fx_get_parameter_names", 1);
+            DefineFunction("fx_get_parameter", 2);
+            DefineFunction("fx_get_parameters", 1);
+            DefineFunction("fx_get_single_layer", 1);
+            DefineFunction("fx_set_parameter");
+            DefineFunction("fx_set_parameters", 2);
+            DefineFunction("fx_set_single_layer", 2);
+            DefineFunction("layer_set_fx", 2);
+            DefineFunction("layer_get_fx", 1);
+            DefineFunction("layer_clear_fx", 1);
+            DefineFunction("layer_enable_fx", 2);
+            DefineFunction("layer_fx_is_enabled", 1);
         }
         if (gms2_3)
         {
@@ -3254,20 +3565,6 @@ public class BuiltinList : IBuiltins
             DefineFunction("animcurve_exists", 1);
             DefineFunction("animcurve_channel_new", 0);
             DefineFunction("animcurve_point_new", 0);
-            DefineFunction("fx_create", 1);
-            DefineFunction("fx_get_name", 1);
-            DefineFunction("fx_get_parameter_names", 1);
-            DefineFunction("fx_get_parameter", 2);
-            DefineFunction("fx_get_parameters", 1);
-            DefineFunction("fx_get_single_layer", 1);
-            DefineFunction("fx_set_parameter");
-            DefineFunction("fx_set_parameters", 2);
-            DefineFunction("fx_set_single_layer", 2);
-            DefineFunction("layer_set_fx", 2);
-            DefineFunction("layer_get_fx", 1);
-            DefineFunction("layer_clear_fx", 1);
-            DefineFunction("layer_enable_fx", 2);
-            DefineFunction("layer_fx_is_enabled", 1);
             DefineFunction("gc_collect", 0);
             DefineFunction("gc_enable", 1);
             DefineFunction("gc_is_enabled", 0);

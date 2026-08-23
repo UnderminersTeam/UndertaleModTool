@@ -1254,6 +1254,8 @@ namespace UndertaleModTool
                                 possibleObjects.Add(data.Sequences[id]);
                             if (id < (data.ParticleSystems?.Count ?? 0))
                                 possibleObjects.Add(data.ParticleSystems[id]);
+                            if (id < (data.AudioGroups?.Count ?? 0))
+                                possibleObjects.Add(data.AudioGroups[id]);
                         }
 
                         ContextMenuDark contextMenu = new();
