@@ -1280,7 +1280,6 @@ namespace UndertaleModLib
             }
 
             long positionToReturn = reader.Position;
-            bool managedFieldPresent = false;
 
             if (reader.ReadUInt32() > 0) // Object count
             {
@@ -1289,7 +1288,7 @@ namespace UndertaleModLib
                 uint vertexCount = reader.ReadUInt32();
 
                 // If any of these checks fail, the managed field is probably present
-                managedFieldPresent = true;
+                bool managedFieldPresent = true;
 
                 // Bounds check on vertex data
                 if (reader.Position + 12 + vertexCount * 8 < positionToReturn + this.Length)
@@ -1304,17 +1303,18 @@ namespace UndertaleModLib
                             managedFieldPresent = false;
                     }
                 }
-            }
-            if (managedFieldPresent)
-            {
-                if (!reader.undertaleData.IsVersionAtLeast(2022, 5))
+
+                if (managedFieldPresent)
                 {
-                    reader.undertaleData.SetGMS2Version(2022, 5);
+                    if (!reader.undertaleData.IsVersionAtLeast(2022, 5))
+                    {
+                        reader.undertaleData.SetGMS2Version(2022, 5);
+                    }
                 }
-            }
-            else if (reader.undertaleData.IsVersionAtLeast(2024, 13))
-            {
-                reader.undertaleData.SetGMS2Version(2026, 1);
+                else if (reader.undertaleData.IsVersionAtLeast(2024, 13))
+                {
+                    reader.undertaleData.SetGMS2Version(2026, 1);
+                }
             }
 
             reader.Position = positionToReturn;
