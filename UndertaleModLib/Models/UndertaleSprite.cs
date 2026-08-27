@@ -419,7 +419,7 @@ public class UndertaleSprite : UndertaleNamedResource, IProjectAsset, PrePaddedO
                     break;
                 case SpriteType.SWF:
                     writer.Write(SWFVersion);
-                    if (SWFVersion == 8) writer.WriteUndertaleObject(Textures);
+                    if (SWFVersion >= 8) writer.WriteUndertaleObject(Textures);
                     writer.WriteUndertaleObject(YYSWF);
                     break;
                 case SpriteType.Spine:
@@ -641,9 +641,9 @@ public class UndertaleSprite : UndertaleNamedResource, IProjectAsset, PrePaddedO
                     //// TODO: This code does not work all the time for some reason. ////
 
                     SWFVersion = reader.ReadInt32();
-                    Util.DebugUtil.Assert(SWFVersion == 8 || SWFVersion == 7, "Invalid SWF sprite format, expected 7 or 8, got " + SWFVersion);
+                    Util.DebugUtil.Assert(SWFVersion >= 7 && SWFVersion <= 9, "Invalid SWF sprite format, expected 7-9, got " + SWFVersion);
 
-                    if (SWFVersion == 8)
+                    if (SWFVersion >= 8)
                     {
                         Textures = reader.ReadUndertaleObject<UndertaleSimpleList<TextureEntry>>();
                     }
@@ -828,7 +828,7 @@ public class UndertaleSprite : UndertaleNamedResource, IProjectAsset, PrePaddedO
 
                 case SpriteType.SWF:
                     int swfVersion = reader.ReadInt32();
-                    if (swfVersion == 8)
+                    if (swfVersion >= 8)
                         count += 1 + UndertaleSimpleList<TextureEntry>.UnserializeChildObjectCount(reader);
 
                     // If we have a sequence, jump directly to its offset (not worth parsing effort to count everything not included in the pool)
@@ -1669,6 +1669,7 @@ public class UndertaleYYSWFSubShapeData : UndertaleObject
     public int LineStyle { get; set; }
 
     public UndertaleObservableList<UndertaleVector2F> Points { get; set; }
+    public UndertaleObservableList<uint> PointColors { get; set; }
     public UndertaleObservableList<UndertaleVector2> Lines { get; set; }
     public UndertaleObservableList<int> Triangles { get; set; }
 
@@ -1688,6 +1689,10 @@ public class UndertaleYYSWFSubShapeData : UndertaleObject
         writer.Write(FillStyleTwo);
         writer.Write(LineStyle);
         writer.Write(Points.Count);
+        if (writer.YYSWFVersion >= 9)
+        {
+            writer.Write(PointColors.Count);
+        }
         writer.Write(Lines.Count);
         writer.Write(Triangles.Count / 3);
         writer.Write(LinePoints.Count);
@@ -1700,6 +1705,14 @@ public class UndertaleYYSWFSubShapeData : UndertaleObject
         foreach (var vec in Points)
         {
             writer.WriteUndertaleObject(vec);
+        }
+
+        if (writer.YYSWFVersion >= 9)
+        {
+            foreach (uint color in PointColors)
+            {
+                writer.Write(color);
+            }
         }
 
         foreach (var vec in Lines)
@@ -1751,6 +1764,7 @@ public class UndertaleYYSWFSubShapeData : UndertaleObject
         LineStyle = reader.ReadInt32();
 
         int points = reader.ReadInt32();
+        int pointcolors = reader.YYSWFVersion >= 9 ? reader.ReadInt32() : 0;
         int lines = reader.ReadInt32();
         int triangles = reader.ReadInt32() * 3;
         int linepoints = reader.ReadInt32();
@@ -1764,6 +1778,12 @@ public class UndertaleYYSWFSubShapeData : UndertaleObject
         for (int i = 0; i < points; i++)
         {
             Points.InternalAdd(reader.ReadUndertaleObjectNoPool<UndertaleVector2F>());
+        }
+
+        PointColors = new UndertaleObservableList<uint>(pointcolors);
+        for (int i = 0; i < pointcolors; i++)
+        {
+            PointColors.InternalAdd(reader.ReadUInt32());
         }
 
         Lines = new UndertaleObservableList<UndertaleVector2>(lines);
@@ -2288,6 +2308,7 @@ public class UndertaleYYSWF : UndertaleObject
     public void Serialize(UndertaleWriter writer)
     {
         writer.Align(4);
+        writer.YYSWFVersion = Version;
         int len = (JPEGTable?.Length ?? 0) | Int32.MinValue;
 
         writer.Write(len);
@@ -2307,7 +2328,8 @@ public class UndertaleYYSWF : UndertaleObject
         reader.Align(4);
         int jpeglen = reader.ReadInt32() & (~Int32.MinValue); // the length is ORed with int.MinValue.
         Version = reader.ReadInt32();
-        Util.DebugUtil.Assert(Version == 8 || Version == 7, "Invalid YYSWF version data! Expected 7 or 8, got " + Version);
+        Util.DebugUtil.Assert(Version >= 7 && Version <= 9, "Invalid YYSWF version data! Expected 7-9, got " + Version);
+        reader.YYSWFVersion = Version;
 
         if (jpeglen > 0)
         {
