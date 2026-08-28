@@ -210,6 +210,7 @@ namespace UndertaleModLib
         internal string LastChunkName;
         internal List<string> AllChunkNames;
         internal bool Bytecode14OrLower = false;
+        internal int YYSWFVersion = 0;
 
         public UndertaleReader(Stream input,
                                WarningHandlerDelegate warningHandler = null, MessageHandlerDelegate messageHandler = null,
@@ -766,6 +767,7 @@ namespace UndertaleModLib
         public string LastChunkName;
         public uint LastBytecodeAddress = 0;
         public bool Bytecode14OrLower;
+        internal int YYSWFVersion = 0;
 
         public delegate void MessageHandlerDelegate(string message);
         private MessageHandlerDelegate MessageHandler;
