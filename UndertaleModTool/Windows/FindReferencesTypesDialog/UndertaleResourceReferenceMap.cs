@@ -7,31 +7,59 @@ using UndertaleModLib.Models;
 
 namespace UndertaleModTool.Windows
 {
-    public record GameVersion(uint Major, uint Minor, uint Release) : IComparable<GameVersion>
+    public readonly record struct GameVersion((uint Major, uint Minor, uint Release)? GameMakerVersion = null,
+                                              byte? BytecodeVersion = null)
+        : IComparable<GameVersion>
     {
+        public GameVersion() : this(null, null)
+        {
+            throw new InvalidOperationException("At least one version (GameMaker or bytecode) must be specified.");
+        }
+        public GameVersion(byte bytecodeVersion) : this(null, bytecodeVersion)
+        {
+        }
+        public GameVersion(UndertaleGeneralInfo gameInfo)
+            : this((gameInfo.Major, gameInfo.Minor, gameInfo.Release), gameInfo.BytecodeVersion)
+        {
+            // The asset types that were introduced in GM 2023+ are not available in LTS 2022.
+            // It seems obvious, but the general info says that it's a GM 2023+ for a LTS 2022 game.
+            // For example, particle systems - they are missing in LTS 2022, even if the general info says it's GM 2023.6.
+            // So we treat that version as GM 2022.9, as it should be
+            if (gameInfo.Branch == UndertaleGeneralInfo.BranchType.LTS2022_0)
+                GameMakerVersion = (2022, 9, 0);
+        }
+
+        public bool HasGMVersion => GameMakerVersion.HasValue;
+        public bool HasBytecodeVersion => BytecodeVersion.HasValue;
+
         public static implicit operator GameVersion((uint, uint, uint) verTuple)
         {
-            return new(verTuple.Item1, verTuple.Item2, verTuple.Item3);
+            return new(verTuple);
         }
 
         public int CompareTo(GameVersion other)
-		{
-			int cmp = Major.CompareTo(other.Major);
-			if (cmp != 0)
-                return cmp;
+        {
+            bool compareGMVer = HasGMVersion && other.HasGMVersion;
+            bool compareBytecodeVer = HasBytecodeVersion && other.HasBytecodeVersion;
 
-			cmp = Minor.CompareTo(other.Minor);
-			if (cmp != 0)
-                return cmp;
+            if (!compareGMVer && !compareBytecodeVer)
+                throw new InvalidOperationException("No common version to compare (GameMaker or bytecode)");
 
-			return Release.CompareTo(other.Release);
-		}
+            if (compareGMVer)
+            {
+                int gmCompare = GameMakerVersion.Value.CompareTo(other.GameMakerVersion.Value);
+                if (gmCompare != 0 || !compareBytecodeVer)
+                    return gmCompare;
+            }
+
+            return BytecodeVersion.Value.CompareTo(other.BytecodeVersion.Value);
+        }
     }
 
     public class TypesForVersion
     {
         public GameVersion Version { get; set; }
-        public GameVersion BeforeVersion { get; set; } = new(uint.MaxValue, uint.MaxValue, uint.MaxValue);
+        public GameVersion BeforeVersion { get; set; } = new((uint.MaxValue, uint.MaxValue, uint.MaxValue), byte.MaxValue);
         public (Type, string)[] Types { get; set; }
     }
 
@@ -87,6 +115,7 @@ namespace UndertaleModTool.Windows
                     new TypesForVersion
                     {
                         Version = (1, 0, 0),
+                        BeforeVersion = (2, 0, 0),
                         Types = new[]
                         {
                             (typeof(UndertaleRoom.Background), "Room backgrounds"),
@@ -98,8 +127,6 @@ namespace UndertaleModTool.Windows
                         Version = (2, 0, 0),
                         Types = new[]
                         {
-                            (typeof(UndertaleRoom.Background), null),
-                            (typeof(UndertaleRoom.Tile), null),
                             (typeof(UndertaleRoom.Layer), "Room tile layers")
                         }
                     },
@@ -188,7 +215,6 @@ namespace UndertaleModTool.Windows
                             (typeof(UndertaleVariable), "Variables"),
                             (typeof(UndertaleFunction), "Functions"),
                             (typeof(UndertaleSound), "Sounds"),
-                            (typeof(UndertaleAudioGroup), "Audio groups"),
                             (typeof(UndertaleSprite), "Sprites"),
                             (typeof(UndertaleExtension), "Extensions"),
                             (typeof(UndertaleExtensionFile), "Extension files"),
@@ -207,8 +233,17 @@ namespace UndertaleModTool.Windows
                     },
                     new TypesForVersion
                     {
+                        // Bytecode version 14
+                        Version = new(14),
+                        Types = new[]
+                        {
+                            (typeof(UndertaleAudioGroup), "Audio groups")
+                        }
+                    },
+                    new TypesForVersion
+                    {
                         // Bytecode version 15
-                        Version = (15, uint.MaxValue, uint.MaxValue),
+                        Version = new(15),
                         BeforeVersion = (2024, 8, 0),
                         Types = new[]
                         {
@@ -218,7 +253,7 @@ namespace UndertaleModTool.Windows
                     new TypesForVersion
                     {
                         // Bytecode version 16
-                        Version = (16, uint.MaxValue, uint.MaxValue),
+                        Version = new(16),
                         Types = new[]
                         {
                             (typeof(UndertaleLanguage), "Languages"),
@@ -336,7 +371,7 @@ namespace UndertaleModTool.Windows
                     new TypesForVersion()
                     {
                         // Bytecode version 16
-                        Version = (16, uint.MaxValue, uint.MaxValue),
+                        Version = new(16),
                         Types = new[]
                         {
                             (typeof(UndertaleRoom.GameObject), "Room object instances (creation or pre create code)")
@@ -364,7 +399,8 @@ namespace UndertaleModTool.Windows
                 {
                     new TypesForVersion()
                     {
-                        Version = (1, 0, 0),
+                        // Bytecode version 14
+                        Version = new(14),
                         Types = new[]
                         {
                             (typeof(UndertaleSound), "Sounds")
@@ -459,12 +495,12 @@ namespace UndertaleModTool.Windows
             { typeof(UndertaleFunction), ("Functions", (1, 0, 0)) },
             { typeof(UndertaleVariable), ("Variables", (1, 0, 0)) },
             { typeof(UndertaleEmbeddedAudio), ("Embedded audio", (1, 0, 0)) },
-            { typeof(UndertaleAudioGroup), ("Audio groups", (1, 0, 0)) },
+            { typeof(UndertaleAudioGroup), ("Audio groups", new(14)) }, // Bytecode version 14
             { typeof(UndertaleParticleSystem), ("Particle systems", (2023, 2, 0)) },
             { typeof(UndertaleParticleSystemEmitter), ("Particle system emitters", (2023, 2, 0)) }
         };
         private static Dictionary<Type, string> referenceableTypes;
-        private static GameVersion currVersion;
+        private static (GameVersion Version, bool IsYYC) currVerState;
         
         public static readonly HashSet<Type> CodeTypes = new()
         {
@@ -480,27 +516,13 @@ namespace UndertaleModTool.Windows
             if (!typeMap.TryGetValue(type, out TypesForVersion[] typesForVer))
                 return null;
 
-            GameVersion version;
-            if (data.GeneralInfo.Branch == UndertaleGeneralInfo.BranchType.LTS2022_0)
-                version = (2022, 0, 0);
-            else
-                version = (data.GeneralInfo.Major, data.GeneralInfo.Minor, data.GeneralInfo.Release);
-            byte bytecodeVersion = data.GeneralInfo.BytecodeVersion;
+            GameVersion version = new(data.GeneralInfo);
 
             IEnumerable<(Type, string)> outTypes = Enumerable.Empty<(Type, string)>();
             foreach (var typeForVer in typesForVer)
             {
-                bool isAtLeast = false;
-                if (typeForVer.Version.Minor == uint.MaxValue)
-                    isAtLeast = typeForVer.Version.Major <= bytecodeVersion;
-                else
-                    isAtLeast = typeForVer.Version.CompareTo(version) <= 0;
-
-                bool isAboveMost = false;
-                if (typeForVer.BeforeVersion.Minor == uint.MaxValue)
-                    isAboveMost = typeForVer.BeforeVersion.Major <= bytecodeVersion;
-                else
-                    isAboveMost = typeForVer.BeforeVersion.CompareTo(version) <= 0;
+                bool isAtLeast = version.CompareTo(typeForVer.Version) >= 0;
+                bool isAboveMost = version.CompareTo(typeForVer.BeforeVersion) >= 0;
 
                 if (isAtLeast && !isAboveMost)
                     outTypes = typeForVer.Types.UnionBy(outTypes, x => x.Item1);
@@ -514,14 +536,22 @@ namespace UndertaleModTool.Windows
                            .ToArray();
         }
 
-        public static Dictionary<Type, string> GetReferenceableTypes(GameVersion version)
+        public static Dictionary<Type, string> GetReferenceableTypes(GameVersion version, bool isYYC)
         {
-            if (version == currVersion && currVersion != default)
+            if (version == currVerState.Version && currVerState != default
+                && isYYC == currVerState.IsYYC)
                 return referenceableTypes;
 
-            referenceableTypes = referenceableTypesOrig.Where(x => x.Value.Item2.CompareTo(version) <= 0)
-                                                       .ToDictionary(x => x.Key, x => x.Value.Item1);
-            currVersion = version;
+            // Filter out code-related types, because YYC game = no code in "data.win"
+            IEnumerable<KeyValuePair<Type, (string, GameVersion)>> typesOrigSrc;
+            if (isYYC)
+                typesOrigSrc = referenceableTypesOrig.ExceptBy(CodeTypes, x => x.Key);
+            else
+                typesOrigSrc = referenceableTypesOrig;
+
+            referenceableTypes = typesOrigSrc.Where(x => x.Value.Item2.CompareTo(version) <= 0)
+                                             .ToDictionary(x => x.Key, x => x.Value.Item1);
+            currVerState = (version, isYYC);
 
             if (referenceableTypes.Count == 0)
                 return referenceableTypes;
@@ -538,6 +568,40 @@ namespace UndertaleModTool.Windows
                 return false;
 
             return typeMap.ContainsKey(type);
+        }
+
+        public static HashSet<Type> GetSupportedReferenceTypes(GameVersion version, bool isYYC)
+        {
+            HashSet<Type> supportedTypes = new();
+
+            // Filter out code-related input types, because YYC game = no code in "data.win"
+            IEnumerable<TypesForVersion[]> typeMapSrc;
+            if (isYYC)
+                typeMapSrc = typeMap.ExceptBy(CodeTypes, x => x.Key).Select(x => x.Value);
+            else
+                typeMapSrc = typeMap.Values;
+
+            foreach (var versions in typeMapSrc)
+            {
+                foreach (var typesForVersion in versions)
+                {
+                    bool isAtLeast = version.CompareTo(typesForVersion.Version) >= 0;
+                    bool isAboveMost = version.CompareTo(typesForVersion.BeforeVersion) >= 0;
+
+                    if (!isAtLeast || isAboveMost)
+                        continue;
+
+                    foreach ((Type type, string displayName) in typesForVersion.Types)
+                    {
+                        if (isYYC && CodeTypes.Contains(type))
+                            continue;
+
+                        supportedTypes.Add(type);
+                    }
+                }
+            }
+
+            return supportedTypes;
         }
     }
 }
