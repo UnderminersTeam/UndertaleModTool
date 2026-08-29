@@ -2130,6 +2130,11 @@ namespace UndertaleModTool
         {
             scriptDialog?.TryHide();
         }
+        public void CloseProgressBar()
+        {
+            scriptDialog?.TryClose();
+            scriptDialog = null;
+        }
 
         public void AddProgress(int amount)
         {
@@ -2302,13 +2307,14 @@ namespace UndertaleModTool
             ScriptExecutionSuccess = true;
             ScriptErrorMessage = "";
             ScriptErrorType = "";
+
             InitializeScriptDialog();
-            this.IsEnabled = false; // Prevent interaction while the script is running.
+            this.IsEnabled = false;   // Prevent interaction while the script is running.
 
             await RunScriptNow(path); // Runs the script now.
-            HideProgressBar(); // Hide the progress bar.
-            scriptDialog = null;
-            this.IsEnabled = true; // Allow interaction again.
+
+            CloseProgressBar();       // Closes the progress bar entirely.
+            this.IsEnabled = true;    // Allow interaction again.
         }
 
         private async Task RunScriptNow(string path)
@@ -3112,12 +3118,12 @@ result in loss of work.");
             // Try to get index
             int foundIndex = obj is UndertaleResource res ? Data.IndexOf(res, false) : -1;
 
-			// Determine ID
-			string idString;
+            // Determine ID
+            string idString;
             if (foundIndex == -2)
-			{	
+            {	
                 idString = "None";
-        	}
+            }
             else if (foundIndex == -1)
             {
                 idString = "N/A";

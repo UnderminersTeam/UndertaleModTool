@@ -1732,7 +1732,7 @@ namespace UndertaleModTool.Windows
             finally
             {
                 await mainWindow.StopProgressBarUpdater();
-                mainWindow.HideProgressBar();
+                mainWindow.CloseProgressBar();
 
                 mainWindow.IsEnabled = true;
                 stringReferences = null;
