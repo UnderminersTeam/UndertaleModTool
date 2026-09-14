@@ -2306,7 +2306,7 @@ namespace UndertaleModLib
                 {
                     isGM2022_9 = true;
                     if (!reader.undertaleData.IsVersionAtLeast(2022, 9))
-                        reader.undertaleData.SetGMS2Version(2022, 9);
+                        reader.undertaleData.SetGMS2Version(2022, 0, 1, 30, true);
                 }
             }
 
