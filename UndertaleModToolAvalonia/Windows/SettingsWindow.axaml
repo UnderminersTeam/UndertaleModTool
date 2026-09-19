@@ -83,15 +83,15 @@
 
                     <Grid ColumnDefinitions="Auto,Auto,*">
                         <Label VerticalAlignment="Center">Indent style:</Label>
-                        <ComboBox Grid.Column="1" x:Name="IndentComboBox" SelectedIndex="{Binding MainVM.Settings.IndentStyle}">
+                        <ComboBox Grid.Column="1" SelectedIndex="{Binding IndentStyle}">
                             <ComboBoxItem>4 spaces</ComboBoxItem>
                             <ComboBoxItem>2 spaces</ComboBoxItem>
                             <ComboBoxItem>Tabs</ComboBoxItem>
                             <ComboBoxItem>Custom</ComboBoxItem>
                         </ComboBox>
-                        <TextBox x:Name="IndentTextBox"
-                                 Grid.Column="2"
+                        <TextBox Grid.Column="2"
                                  AcceptsTab="True"
+                                 IsVisible="{Binding IsCustomIndentStyle}"
                                  Text="{Binding MainVM.Settings.DecompileSettings.IndentString}"/>
                     </Grid>
 
