@@ -89,31 +89,6 @@
         </Style.Resources>
     </Style>
 
-    <!-- Expander for settings window-->
-    <Style Selector="Expander.tree">
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Padding" Value="0"/>
-        <Setter Property="HorizontalAlignment" Value="Stretch"/>
-    </Style>
-
-    <Style Selector="Expander.tree /template/ ToggleButton#ExpanderHeader">
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Padding" Value="0,2"/>
-        <Setter Property="HorizontalAlignment" Value="Stretch"/>
-    </Style>
-
-    <Style Selector="Expander.tree /template/ Border#ExpanderContent">
-        <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Padding" Value="20,2,0,6"/>
-        <Setter Property="Background" Value="Transparent"/>
-    </Style>
-
-    <Style Selector="Expander.tree /template/ ToggleButton#ExpanderHeader TextBlock">
-        <Setter Property="FontWeight" Value="SemiBold"/>
-    </Style>
-
     <!-- AvaloniaEdit -->
     <Style Selector="AvaloniaEdit|TextEditor">
         <Setter Property="Background" Value="{DynamicResource AvaloniaEditBackground}" />
@@ -203,6 +178,20 @@
 
     <Style Selector="TextBox#FilterTextBox">
         <Setter Property="Margin" Value="0,4,0,0" />
+    </Style>
+
+    <Style Selector="TextBlock.Header">
+        <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+
+    <Style Selector="StackPanel.Section">
+        <Setter Property="Margin" Value="0,0,0,12" />
+        <Setter Property="Spacing" Value="4" />
+    </Style>
+    
+    <Style Selector="Grid.SpacedGrid">
+        <Setter Property="ColumnSpacing" Value="4" />
+        <Setter Property="RowSpacing" Value="4" />
     </Style>
 
     <Style Selector=":is(Control).PaddedProperties">
