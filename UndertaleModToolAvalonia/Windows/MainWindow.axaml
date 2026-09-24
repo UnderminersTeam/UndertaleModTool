@@ -20,8 +20,9 @@
                     <NativeMenuItem Header="_Save" Command="{Binding FileSave}" Gesture="{OnPlatform 'Ctrl+S', macOS='Meta+S'}"/>
                     <NativeMenuItem Header="_Close" Command="{Binding FileClose}"/>
                     <NativeMenuItemSeparator Header="-" />
-                    <NativeMenuItem Header="_Run with data/project runner" Command="{Binding FileRun}" Gesture="F5"/>
-                    <NativeMenuItem Header="_Run with other runner" Command="{Binding FileRunWithOther}" Gesture="Alt+F5"/>
+                    <NativeMenuItem Header="_Temp run" Command="{Binding FileTempRun}" Gesture="F5"/>
+                    <NativeMenuItem Header="_Run with data/project runner" Command="{Binding FileRun}" Gesture="Alt+F5"/>
+                    <NativeMenuItem Header="_Run with other runner" Command="{Binding FileRunWithOther}"/>
                     <NativeMenuItemSeparator Header="-" />
                     <NativeMenuItem Header="Clear audio group cache" Command="{Binding FileClearAudioGroupCache}"/>
                     <NativeMenuItemSeparator Header="-" />
@@ -72,8 +73,8 @@
         <KeyBinding Gesture="{OnPlatform 'Ctrl+N', macOS='Meta+N'}" Command="{Binding FileNew}" />
         <KeyBinding Gesture="{OnPlatform 'Ctrl+O', macOS='Meta+O'}" Command="{Binding FileOpen}" />
         <KeyBinding Gesture="{OnPlatform 'Ctrl+S', macOS='Meta+S'}" Command="{Binding FileSave}" />
-        <KeyBinding Gesture="F5" Command="{Binding FileRun}" />
-        <KeyBinding Gesture="Alt+F5" Command="{Binding FileRunWithOther}" />
+        <KeyBinding Gesture="F5" Command="{Binding FileTempRun}" />
+        <KeyBinding Gesture="Alt+F5" Command="{Binding FileRun}" />
         <KeyBinding Gesture="F4" Command="{Binding FileSettings}" />
         <KeyBinding Gesture="{OnPlatform 'Ctrl+Q', macOS='Meta+Q'}" Command="{Binding FileExit}" />
         <KeyBinding Gesture="{OnPlatform 'Ctrl+Shift+F', macOS='Meta+Shift+F'}" Command="{Binding ToolsSearchInCode}" />

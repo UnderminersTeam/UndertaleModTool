@@ -411,15 +411,15 @@ public partial class MainViewModel : ObservableObject
         {
             await Task.Run(() =>
             {
-            // TODO: RecompileAllCodeSourcesOnProjectSave setting
-            if (Project is not null)
-            {
-                Project.RecompileAllCodeSources();
-            }
+                // TODO: RecompileAllCodeSourcesOnProjectSave setting
+                if (Project is not null)
+                {
+                    Project.RecompileAllCodeSources();
+                }
 
                 UndertaleIO.Write(stream, Data, message =>
-            {
-                Dispatcher.UIThread.Post(() => w.SetText($"Saving data file... {message}"));
+                {
+                    Dispatcher.UIThread.Post(() => w.SetText($"Saving data file... {message}"));
                 });
             });
 
@@ -539,9 +539,9 @@ public partial class MainViewModel : ObservableObject
 
             if (!Settings.AlwaysSaveDataInProjectDestination)
             {
-            var result = await View!.MessageDialog("Save to the project's designated data file for saving?", buttons: MessageWindow.Buttons.YesNoCancel);
-            if (result == MessageWindow.Result.Yes)
-            {
+                var result = await View!.MessageDialog("Save to the project's designated data file for saving?", buttons: MessageWindow.Buttons.YesNoCancel);
+                if (result == MessageWindow.Result.Yes)
+                {
                     saveInProjectDestination = true;
                 }
                 else if (result == MessageWindow.Result.No)
@@ -551,19 +551,19 @@ public partial class MainViewModel : ObservableObject
                 }
                 else
                 {
-                return false;
-            }
+                    return false;
+                }
             }
 
             if (saveInProjectDestination)
             {
                 if (!await SaveDataToFilePath(Project.SaveDataPath, useTempFile: false))
                 {
-                return false;
-            }
+                    return false;
+                }
                 DataPath = Project.SaveDataPath;
                 return true;
-        }
+            }
         }
 
         IStorageFile? file = await View!.SaveFileDialog(new FilePickerSaveOptions()
@@ -607,8 +607,8 @@ public partial class MainViewModel : ObservableObject
 
                 if (useTempFile)
                 {
-                stream.Flush(flushToDisk: true);
-            }
+                    stream.Flush(flushToDisk: true);
+                }
             }
 
             if (useTempFile)
@@ -617,7 +617,7 @@ public partial class MainViewModel : ObservableObject
             }
         }
         catch (IOException ex)
-            {
+        {
             // Delete file only if it was created right now, not if it was pre-existing.
             if (writeFileCreated)
             {
@@ -638,6 +638,51 @@ public partial class MainViewModel : ObservableObject
             return;
 
         CloseData();
+    }
+
+    public async void FileTempRun()
+    {
+        // TODO: Ideally, if the project system is being used, this would actually not use a temp file, but instead just save it to the destination file.
+        if (Data is null)
+            return;
+
+        string? runnerName = Data.GeneralInfo?.FileName?.Content;
+        if (runnerName is null)
+        {
+            await View!.MessageDialog($"Error: File name in general info not set.");
+            return;
+        }
+
+        if (DataPath is null)
+            return;
+
+        // Save to temp
+
+        string tempFileName = Path.GetTempFileName();
+
+        if (!await SaveDataToFilePath(tempFileName, useTempFile: false))
+        {
+            return;
+        }
+
+        string? runnerPath;
+
+        if (Project is not null)
+        {
+            runnerPath = Paths.TryJoinVerifyWithinDirectory(Project.SaveDirectory, $"{runnerName}.exe");
+        }
+        else
+        {
+            runnerPath = Paths.TryJoinVerifyWithinDirectory(Path.GetDirectoryName(DataPath), $"{runnerName}.exe");
+        }
+
+        if (runnerPath is null || !File.Exists(runnerPath))
+        {
+            await View!.MessageDialog($"Error: Invalid or non-existent runner. ({runnerPath})");
+            return;
+        }
+
+        StartRunnerProcess(runnerPath, dataPath: tempFileName, workingDirectory: Path.GetDirectoryName(DataPath));
     }
 
     public async void FileRun()
@@ -716,11 +761,13 @@ public partial class MainViewModel : ObservableObject
         StartRunnerProcess(runnerPath);
     }
 
-    void StartRunnerProcess(string runnerPath, string? dataPath = null)
+    void StartRunnerProcess(string runnerPath, string? dataPath = null, string? workingDirectory = null)
     {
         dataPath ??= DataPath;
+        workingDirectory ??= Path.GetDirectoryName(dataPath);
+
         // "launcher" allows game_change data files to still access files above the data path.
-        Process.Start(new ProcessStartInfo(runnerPath, $"-game \"{dataPath}\" launcher") { WorkingDirectory = Path.GetDirectoryName(dataPath) });
+        Process.Start(new ProcessStartInfo(runnerPath, $"-game \"{dataPath}\" launcher") { WorkingDirectory = workingDirectory });
     }
 
     public void FileClearAudioGroupCache()
