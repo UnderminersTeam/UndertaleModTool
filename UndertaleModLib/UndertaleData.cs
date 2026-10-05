@@ -349,7 +349,8 @@ namespace UndertaleModLib
         public BuiltinList BuiltinList;
 
         /// <summary>
-        /// Cache for 2.3-style functions defined in global scripts. Can be re-built by setting this to null.
+        /// Cache for GMLv2 functions defined in global scripts. 
+        /// Can be updated by <see cref="Decompiler.GlobalDecompileContext"/>, if no <see cref="IGlobalFunctions"/> is provided to it.
         /// </summary>
         public GlobalFunctions GlobalFunctions;
 
@@ -782,5 +783,18 @@ namespace UndertaleModLib
         /// resolving instance ID references in the compiler and decompiler.
         /// </summary>
         public Func<string> InstanceIdPrefix = () => "inst_";
+    }
+
+    public static class ListExtensions
+    {
+        /// <summary>
+        /// Returns an enumerable that filters <see langword="null"/> items.
+        /// </summary>
+        /// <typeparam name="T">The type of the elements of <paramref name="list" />.</typeparam>
+        /// <returns>An <see cref="IEnumerable{T}"/> without <see langword="null"/> items.</returns>
+        public static IEnumerable<T> SkipNullItems<T>(this IList<T> list)
+        {
+            return list.Where(x => x is not null);
+        }
     }
 }

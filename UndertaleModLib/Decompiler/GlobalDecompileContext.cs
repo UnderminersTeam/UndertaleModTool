@@ -31,7 +31,6 @@ public class GlobalDecompileContext : IGameContext
     public bool UsingGMS2OrLater => Data?.IsVersionAtLeast(2) ?? false;
     public bool UsingStringRealOptimizations => (Data?.GeneralInfo.Major is >= 2 || Data?.GeneralInfo.Build is 1539 or >= 1763);
     public bool UsingFinallyBeforeThrow => !(Data?.IsVersionAtLeast(2024, 6) ?? false);
-    public IGlobalFunctions GlobalFunctions => Data?.GlobalFunctions;
     public bool UsingTypedBooleans => Data?.IsVersionAtLeast(2, 3, 7) ?? false;
     public bool UsingNullishOperator => Data?.IsVersionAtLeast(2, 3, 7) ?? false;
     public bool UsingAssetReferences => Data?.IsVersionAtLeast(2023, 8) ?? false;
@@ -60,9 +59,11 @@ public class GlobalDecompileContext : IGameContext
     public bool UsingModernTemplateStrings => Data?.IsVersionAtLeast(2024, 14) ?? false;
     public bool UsingStructAnyNonemptyString => Data?.IsVersionAtLeast(2024, 14) ?? false;
     public bool UsingFixedDefaultArgumentFunctionDecls => Data?.IsVersionAtLeast(2024, 14) ?? false;
+    public bool UsingNewNullishAssignSideEffects => Data?.IsVersionAtLeast(2026, 1) ?? false;
     public GameSpecificRegistry GameSpecificRegistry => Data?.GameSpecificRegistry;
     public IBuiltins Builtins { get; private set; } = null;
     public ICodeBuilder CodeBuilder { get; private set; } = null;
+    public IGlobalFunctions GlobalFunctions { get; }
 
     /// <summary>
     /// The current compile group being used for main compile, and for linking.
@@ -79,13 +80,15 @@ public class GlobalDecompileContext : IGameContext
     private readonly string _instanceIdPrefix;
 
     /// <summary>
-    /// Instantiates and initializes a global decompile context for the given <see cref="UndertaleData"/>.
+    /// Instantiates and initializes a global decompile context for the given <see cref="UndertaleData"/> and an optional
+    /// <see cref="IGlobalFunctions"/>.
     /// </summary>
     /// <remarks>
-    /// Note: This will recalculate the global functions belonging to the given <see cref="UndertaleData"/>,
-    /// mutating its state. Therefore, this initialization operation is not thread-safe on its own.
+    /// Note: If an <see cref="IGlobalFunctions"/> instance is not given, this will recalculate the global functions
+    /// belonging to the given <see cref="UndertaleData"/>, mutating its state. Therefore, this initialization operation
+    /// is not thread-safe on its own.
     /// </remarks>
-    public GlobalDecompileContext(UndertaleData data)
+    public GlobalDecompileContext(UndertaleData data, IGlobalFunctions globalFunctions = null)
     {
         Data = data;
         if (Data.ToolInfo?.InstanceIdPrefix is Func<string> prefixGetter)
@@ -96,7 +99,16 @@ public class GlobalDecompileContext : IGameContext
         {
             _instanceIdPrefix = "inst_";
         }
-        BuildGlobalFunctionCache(data);
+
+        if (globalFunctions is null)
+        {
+           BuildGlobalFunctionCache(data);
+           GlobalFunctions = data.GlobalFunctions;
+        }
+        else
+        {
+           GlobalFunctions = globalFunctions;
+        }
     }
 
     /// <summary>

@@ -30,7 +30,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <TextBlock Grid.Row="0" Name="label" Text="The search results for the game object&#x0a;&quot;&quot;." HorizontalAlignment="Left" Padding="5" Margin="10,10,0,0"
+        <TextBlock Grid.Row="0" Name="label" Text="Results for game object&#x0a;&quot;&quot;." HorizontalAlignment="Left" Padding="5" Margin="10,10,0,0"
                    FontSize="22" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxHeight="70"/>
         <Rectangle Grid.Row="1" Margin="10,0,20,0" Height="2" Fill="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
 
@@ -85,7 +85,7 @@
             </TreeView.Resources>
         </TreeView>
 
-        <TextBlock Grid.Row="4" Text="Note: the results may be not 100% complete.&#x0a;Use one of the search scripts in the &quot;Find&quot; menu if necessary."
+        <TextBlock Grid.Row="4" Text="Note: the results may be not 100% correct and/or comprehensive.&#x0a;Search in code as well via the &quot;Find&quot; menu if necessary.&#x0a;(You may need to directly search for asset IDs, too.)"
                    Margin="10,0,20,0" FontStyle="Italic" Foreground="Gray"/>
 
         <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,20">
