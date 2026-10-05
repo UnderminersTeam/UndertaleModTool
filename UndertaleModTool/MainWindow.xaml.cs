@@ -1233,15 +1233,20 @@ namespace UndertaleModTool
                 }
 
                 bool saveSucceeded = true;
+                bool tempFileCreated = false;
 
                 try
                 {
-                    using (var stream = new FileStream(filename + "temp", FileMode.Create, FileAccess.Write))
+                    using (var stream = new FileStream(filename + "temp", FileMode.CreateNew, FileAccess.Write))
                     {
+                        tempFileCreated = true;
                         UndertaleIO.Write(stream, Data, message =>
                         {
                             FileMessageEvent?.Invoke(message);
                         });
+
+                        // Make sure it's on disk before overwriting the final file.
+                        stream.Flush(flushToDisk: true);
                     }
 
                     if (debugMode != DebugDataDialog.DebugDataMode.NoDebug)
@@ -1352,8 +1357,11 @@ namespace UndertaleModTool
                     {
                         // It failed, but since we made a temp file for saving, no data was overwritten or destroyed (hopefully)
                         // We need to delete the temp file though (if it exists).
-                        if (File.Exists(filename + "temp"))
-                            File.Delete(filename + "temp");
+                        if (tempFileCreated)
+                        {
+                            if (File.Exists(filename + "temp"))
+                                File.Delete(filename + "temp");
+                        }
                     }
                 }
                 catch (Exception exc)
