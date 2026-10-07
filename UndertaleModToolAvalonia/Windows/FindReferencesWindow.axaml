@@ -1,0 +1,44 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:l="clr-namespace:UndertaleModToolAvalonia"
+        xmlns:undertale="clr-namespace:UndertaleModLib;assembly=UndertaleModLib"
+        mc:Ignorable="d"
+        x:Class="UndertaleModToolAvalonia.FindReferencesWindow"
+        x:DataType="l:FindReferencesViewModel"
+        Title="Find references"
+        IsEnabled="{Binding IsEnabled}"
+        Width="800"
+        Height="400"
+        WindowStartupLocation="CenterOwner"
+        Classes="FindReferencesWindow">
+    <Grid RowDefinitions="Auto,1*">
+        <StackPanel Grid.Row="0">
+            <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                <Label>Asset</Label>
+                <l:UndertaleResourceReferenceView Reference="{Binding Resource}" ReferenceType="undertale:UndertaleResource"/>
+            </Grid>
+            <Button Command="{Binding FindReferences}" IsDefault="True" HorizontalAlignment="Right">Find references</Button>
+        </StackPanel>
+        <DataGrid Grid.Row="1" Name="ResultsDataGrid" ItemsSource="{Binding Results}" IsReadOnly="True" CanUserResizeColumns="True"
+                  DoubleTapped="DataGrid_DoubleTapped"
+                  PointerReleased="DataGrid_PointerReleased">
+            <DataGrid.Styles>
+                <Style Selector="DataGridRow">
+                    <Setter Property="ContextMenu">
+                        <ContextMenu>
+                            <MenuItem Header="Open" Click="DataGridRow_Open_Click"/>
+                            <MenuItem Header="Open in new tab" Click="DataGridRow_OpenInNewTab_Click"/>
+                        </ContextMenu>
+                    </Setter>
+                </Style>
+            </DataGrid.Styles>
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Asset type" Binding="{Binding AssetType}" Width="Auto" />
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="Auto" />
+                <DataGridTextColumn Header="Property" Binding="{Binding Property}" Width="Auto" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</Window>

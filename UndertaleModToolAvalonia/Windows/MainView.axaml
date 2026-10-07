@@ -1,0 +1,53 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:l="clr-namespace:UndertaleModToolAvalonia"
+             xmlns:undertale="clr-namespace:UndertaleModLib;assembly=UndertaleModLib"
+             xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="UndertaleModToolAvalonia.MainView"
+             x:DataType="l:MainViewModel"
+             Background="Transparent">
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+         to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <l:MainViewModel />
+    </Design.DataContext>
+
+    <Interaction.Behaviors>
+        <FilesDropBehavior Command="{Binding OpenDroppedFilesCommand}" />
+    </Interaction.Behaviors>
+
+    <DockPanel>
+        <NativeMenuBar DockPanel.Dock="Top" />
+        
+        <Grid DockPanel.Dock="Bottom" ColumnDefinitions="*,Auto,Auto">
+            <TextBox Grid.Column="0" Name="CommandTextBox" Text="{Binding CommandTextBoxText}" AcceptsReturn="True" />
+            <CheckBox Grid.Column="1" Content="Marked for export" IsChecked="{Binding TabIsMarkedForExport}" IsEnabled="{Binding TabCanMarkedForExport}" />
+            <Label Grid.Column="2" Content="{Binding TabSelectedResourceIdString}" MinWidth="100" HorizontalContentAlignment="Right"
+                   ToolTip.Tip="This is an ID (index) of the currently open asset, item, or object. It starts from 0."/>
+        </Grid>
+        
+        <Grid ColumnDefinitions="1*,Auto,3*">
+            <Grid Grid.Column="0" Name="LeftPanel" RowDefinitions="Auto,1*">
+                <StackPanel Grid.Row="0">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Command="{Binding Tabs.TabGoBack}" IsEnabled="{Binding Tabs.TabSelected.CanGoBack, FallbackValue=False}">←</Button>
+                        <Button Command="{Binding Tabs.TabGoForward}" IsEnabled="{Binding Tabs.TabSelected.CanGoForward, FallbackValue=False}">→</Button>
+                    </StackPanel>
+                    <Grid ColumnDefinitions="1*,Auto">
+                        <TextBox Grid.Column="0" Name="FilterTextBox" PlaceholderText="Filter by name..." Text="{Binding FilterText, Delay=300}"/>
+                        <ToggleButton Grid.Column="1" IsChecked="{Binding IsSorted}">Sort</ToggleButton>
+                    </Grid>
+                </StackPanel>
+
+                <l:DataExplorerView Grid.Row="1" Name="DataExplorer" DataContext="{Binding DataExplorer}"/>
+            </Grid>
+            
+            <GridSplitter Grid.Column="1" ResizeDirection="Columns"/>
+
+            <l:TabsView Grid.Column="2" DataContext="{Binding Tabs}" />
+        </Grid>
+    </DockPanel>
+</UserControl>

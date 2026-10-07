@@ -1,0 +1,18 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:l="clr-namespace:UndertaleModToolAvalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="UndertaleModToolAvalonia.UndertaleFunctionView"
+             x:DataType="l:UndertaleFunctionViewModel">
+    <ScrollViewer>
+        <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*" Classes="PaddedProperties">
+            <Label>Name</Label>
+            <l:UndertaleStringReferenceView Reference="{Binding Function.Name}" />
+
+            <Label>Name string ID</Label>
+            <TextBox Text="{Binding Function.NameStringID}" />
+        </Grid>
+    </ScrollViewer>
+</UserControl>
