@@ -6,9 +6,9 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Xml;
 using Avalonia;
-using Avalonia.Interactivity;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Media.TextFormatting;
 using Avalonia.Platform;
@@ -43,8 +43,8 @@ public partial class UndertaleCodeView : UserControl
 
     (TextLocation, TextLocation) lastCaretLocations;
 
-    private static double LastZoomFontSize = 12;
-    public double ZoomFontSize = LastZoomFontSize;
+    // TODO: Don't use static variable
+    private static double ZoomFontSize = -1;
 
     public UndertaleCodeView()
     {
@@ -62,12 +62,6 @@ public partial class UndertaleCodeView : UserControl
 
         GMLTextEditor.TextArea.LostFocus += GMLTextEditor_LostFocus;
         ASMTextEditor.TextArea.LostFocus += ASMTextEditor_LostFocus;
-
-        GMLTextEditor.AddHandler(PointerWheelChangedEvent, TextEditor_MouseWheelChanged, RoutingStrategies.Tunnel);
-        ASMTextEditor.AddHandler(PointerWheelChangedEvent, TextEditor_MouseWheelChanged, RoutingStrategies.Tunnel);
-        
-        GMLTextEditor.AddHandler(KeyDownEvent, TextEditor_KeyDown, RoutingStrategies.Tunnel);                                                                                                                                   
-        ASMTextEditor.AddHandler(KeyDownEvent, TextEditor_KeyDown, RoutingStrategies.Tunnel);
     }
 
     protected override async void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -270,11 +264,13 @@ public partial class UndertaleCodeView : UserControl
         ASMTextEditor.TextArea.TextView.Redraw();
     }
 
-    static void InitializeTextEditor(TextEditor textEditor)
+    void InitializeTextEditor(TextEditor textEditor)
     {
+        textEditor.AddHandler(PointerWheelChangedEvent, TextEditor_MouseWheelChanged, RoutingStrategies.Tunnel);
+        textEditor.AddHandler(KeyDownEvent, TextEditor_KeyDown, RoutingStrategies.Tunnel);
+
         textEditor.Options.ConvertTabsToSpaces = true;
         textEditor.Options.HighlightCurrentLine = true;
-        textEditor.FontSize = LastZoomFontSize;
     }
 
     public async Task GoToLastGoToLocation()
@@ -378,6 +374,72 @@ public partial class UndertaleCodeView : UserControl
         if (!vm.IsCodeProcessing)
         {
             vm.ASMTabState = TabState.NeedsCompile;
+        }
+    }
+
+    private void TextEditor_MouseWheelChanged(object? sender, PointerWheelEventArgs e)
+    {
+        if (e.KeyModifiers.HasFlag(KeyModifiers.Control))
+        {
+            e.Handled = true;
+            AddZoomFontSize(Math.Sign(e.Delta.Y));
+        }
+    }
+
+    private void TextEditor_KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.KeyModifiers.HasFlag(KeyModifiers.Control))
+        {
+            if (e.PhysicalKey is PhysicalKey.Equal or PhysicalKey.NumPadAdd)
+            {
+                e.Handled = true;
+                AddZoomFontSize(1);
+            }
+            else if (e.PhysicalKey is PhysicalKey.Minus or PhysicalKey.NumPadSubtract)
+            {
+                e.Handled = true;
+                AddZoomFontSize(-1);
+            }
+        }
+    }
+
+    private void AddZoomFontSize(double zoomValue)
+    {
+        if (ZoomFontSize == -1)
+        {
+            // NOTE: Bad
+            ZoomFontSize = GMLTextEditor.FontSize;
+        }
+
+        ZoomFontSize = Math.Clamp(Math.Floor(ZoomFontSize + zoomValue), 1, double.PositiveInfinity);
+
+        IEnumerable<TextEditor> list = [GMLTextEditor, ASMTextEditor];
+        foreach (TextEditor textEditor in list)
+        {
+            TextView view = textEditor.TextArea.TextView;
+
+            var line1 = view.GetDocumentLineByVisualTop(view.ScrollOffset.Y);
+            var lineToScrollTo = line1.LineNumber;
+
+            var line2 = line1.NextLine;
+
+            if (line2 != null)
+            {
+                var line1Top = view.GetVisualTopByDocumentLine(line1.LineNumber);
+                var line2Top = view.GetVisualTopByDocumentLine(line2.LineNumber);
+
+                var height = (line2Top - line1Top);
+
+                var yAboveScrollOffset = view.ScrollOffset.Y - line1Top;
+
+                // If more than halfway above the scroll offset, jump to next line
+                if (yAboveScrollOffset > height / 2)
+                    lineToScrollTo = line2.LineNumber;
+            }
+
+            textEditor.FontSize = ZoomFontSize;
+
+            textEditor.ScrollTo(lineToScrollTo, 1, VisualYPosition.LineTop, 0, 0);
         }
     }
 
@@ -871,56 +933,6 @@ public partial class UndertaleCodeView : UserControl
             ClickVisualLineText res = new(Text, ParentVisualLine, length);
             res.Clicked += Clicked;
             return res;
-        }
-    }
-
-    private void ZoomChange(double zoomValue)
-    {
-        TextView view1 = GMLTextEditor.TextArea.TextView;
-        TextViewPosition? position1 = view1.GetPosition(new Point(0.0, view1.ScrollOffset.Y + 0.5));
-        TextView view2 = ASMTextEditor.TextArea.TextView;
-        TextViewPosition? position2 = view2.GetPosition(new Point(0.0, view2.ScrollOffset.Y + 0.5));
-        
-        ZoomFontSize = Math.Clamp(ZoomFontSize + zoomValue, 1, 100);
-
-        GMLTextEditor.FontSize = ZoomFontSize;
-        ASMTextEditor.FontSize = ZoomFontSize;
-        LastZoomFontSize = ZoomFontSize;
-        if (position1.HasValue)
-        {
-            GMLTextEditor.UpdateLayout();
-            GMLTextEditor.ScrollTo(position1.Value.Line, -1, VisualYPosition.LineTop, 0.0, 0.0);
-        }
-        if (position2.HasValue)
-        {
-            ASMTextEditor.UpdateLayout();
-            ASMTextEditor.ScrollTo(position2.Value.Line, -1, VisualYPosition.LineTop, 0.0, 0.0);
-        }
-    }
-
-    private void TextEditor_MouseWheelChanged(object? sender, PointerWheelEventArgs e)
-    {
-        if (e.KeyModifiers.HasFlag(KeyModifiers.Control))
-        {
-            e.Handled = true;
-            ZoomChange(e.Delta.Y);
-        }
-    }
-
-    private void TextEditor_KeyDown(object? sender, KeyEventArgs e)
-    {
-        if (e.KeyModifiers.HasFlag(KeyModifiers.Control))
-        {
-            if (e.Key is Key.OemPlus or Key.Add)
-            {
-                e.Handled = true;
-                ZoomChange(1);
-            }
-            else if (e.Key is Key.OemMinus or Key.Subtract)
-            {
-                e.Handled = true;
-                ZoomChange(-1);
-            }
         }
     }
 }
