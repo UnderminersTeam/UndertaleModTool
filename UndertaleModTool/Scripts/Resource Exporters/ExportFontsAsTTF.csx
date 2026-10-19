@@ -707,7 +707,7 @@ class PixelTtfBuilder
         return s.ToArray();
     }
 
-    static byte[] MakeOS2(List<Glyph> glyphs, bool bold)
+    static byte[] MakeOS2(List<Glyph> glyphs, bool italic, bool bold)
     {
         using var s = new MemoryStream();
 
@@ -841,7 +841,7 @@ class PixelTtfBuilder
 
         var tables = new List<(string Tag, byte[] Data)>
         {
-            ("OS/2", MakeOS2(Glyphs, Bold)),
+            ("OS/2", MakeOS2(Glyphs, Italic, Bold)),
             ("cmap", MakeCmap(Glyphs)),
             ("glyf", glyf),
             ("head", MakeHead(Glyphs, UnitsPerEm, Bold, Italic)),
