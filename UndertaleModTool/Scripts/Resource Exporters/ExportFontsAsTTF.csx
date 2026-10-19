@@ -112,8 +112,7 @@ void DumpFont(UndertaleFont font)
 
     lock (fileWriteLock)
     {
-        if (!File.Exists(path))
-            File.WriteAllBytes(path, data);
+        File.WriteAllBytes(path, data);
     }
     
     IncrementProgressParallel();
