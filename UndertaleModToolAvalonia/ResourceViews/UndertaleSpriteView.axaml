@@ -76,6 +76,7 @@
 
             <StackPanel Orientation="Horizontal">
                 <Button Command="{Binding ExportAllTexturesAsPNGs}">Export all textures as PNGs</Button>
+                <Button Command="{Binding ExportSpineData}">Export spine data</Button>
             </StackPanel>
 
             <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
