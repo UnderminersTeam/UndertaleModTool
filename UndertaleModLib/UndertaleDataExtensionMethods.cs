@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UndertaleModLib.Models;
+using static UndertaleModLib.Models.UndertaleInstruction;
 
 namespace UndertaleModLib;
 
@@ -11,53 +12,60 @@ namespace UndertaleModLib;
 public static class UndertaleDataExtensionMethods
 {
     /// <summary>
-    /// An extension method, that returns the element in a <see cref="IList{T}"/> of <see cref="UndertaleNamedResource"/>s
-    /// that has a specified <paramref name="name"/>.
+    /// Returns the element (or <see langword="null"/>) in a <see cref="IList{T}"/> of
+    /// <see cref="UndertaleNamedResource"/>s that has a specified <paramref name="name"/>.
     /// </summary>
-    /// <param name="list">The <see cref="IList{T}"/> of <see cref="UndertaleNamedResource"/>s to search in.</param>
-    /// <param name="name">The name of the <see cref="UndertaleNamedResource"/> to find.</param>
-    /// <param name="ignoreCase">Whether casing should be ignored for searching.</param>
-    /// <typeparam name="T">A type of <see cref="UndertaleNamedResource"/>.</typeparam>
-    /// <returns>The element that has the specified name.</returns>
+    /// <param name="list">The <see cref="IList{T}"/> of <see cref="UndertaleNamedResource"/>s to search in</param>
+    /// <param name="name">The name of the <see cref="UndertaleNamedResource"/> to find</param>
+    /// <param name="ignoreCase">Whether casing should be ignored for searching (ordinal)</param>
+    /// <typeparam name="T">A type of <see cref="UndertaleNamedResource"/></typeparam>
+    /// <returns>The element that has the specified name or <see langword="null"/> if nothing was found</returns>
     public static T ByName<T>(this IList<T> list, string name, bool ignoreCase = false) where T : UndertaleNamedResource
     {
         StringComparison comparisonType = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
-
-        foreach (T item in list)
-        {
-            if (item is null)
-            {
-                continue;
-            }
-            if (item.Name.Content.Equals(name, comparisonType))
-            {
-                return item;
-            }
-        }
-
-        return default;
+        return list.FirstOrDefault(e => e?.Name?.Content is { } s && s.Equals(name, comparisonType));
     }
 
     /// <summary>
-    /// An extension method, that returns the index of an element in a <see cref="IList{T}"/> of <see cref="UndertaleNamedResource"/>s
-    /// that has a specified <paramref name="name"/>.
+    /// Returns the element in a <see cref="IList{T}"/> of <see cref="UndertaleNamedResource"/>s that has a specified <paramref name="name"/>.
     /// </summary>
-    /// <param name="list">The <see cref="IList{T}"/> of <see cref="UndertaleNamedResource"/>s to search in.</param>
-    /// <param name="name">The name of the <see cref="UndertaleNamedResource"/> to find.</param>
-    /// <param name="ignoreCase">Whether casing should be ignored for searching.</param>
-    /// <typeparam name="T">A type of <see cref="UndertaleNamedResource"/>.</typeparam>
-    /// <returns>The index of the element that has the specified name, or -1 if none is found.</returns>
+    /// <param name="list">The <see cref="IList{T}"/> of <see cref="UndertaleNamedResource"/>s to search in</param>
+    /// <param name="name">The name of the <see cref="UndertaleNamedResource"/> to find</param>
+    /// <param name="ignoreCase">Whether casing should be ignored for searching (ordinal)</param>
+    /// <typeparam name="T">A type of <see cref="UndertaleNamedResource"/></typeparam>
+    /// <returns>The element that has the specified name</returns>
+    /// <exception cref="KeyNotFoundException">if no element was found</exception>
+    public static T RequireByName<T>(this IList<T> list, string name, bool ignoreCase = false) where T : UndertaleNamedResource
+    {
+        if (ByName(list, name, ignoreCase) is { } result)
+        {
+            return result;
+        }
+        string ex = $"Could not find {nameof(T)} with name `{name}`";
+        if (ignoreCase)
+        {
+            ex += " (case-insensitive)";
+        }
+        throw new KeyNotFoundException(ex);
+    }
+
+
+    /// <summary>
+    /// Returns the index of an element (or -1) in a <see cref="IList{T}"/> of
+    /// <see cref="UndertaleNamedResource"/>s that has a specified <paramref name="name"/>.
+    /// </summary>
+    /// <param name="list">The <see cref="IList{T}"/> of <see cref="UndertaleNamedResource"/>s to search in</param>
+    /// <param name="name">The name of the <see cref="UndertaleNamedResource"/> to find</param>
+    /// <param name="ignoreCase">Whether casing should be ignored for searching</param>
+    /// <typeparam name="T">A type of <see cref="UndertaleNamedResource"/></typeparam>
+    /// <returns>The index of the element that has the specified name, or -1 if none is found</returns>
     public static int IndexOfName<T>(this IList<T> list, string name, bool ignoreCase = false) where T : UndertaleNamedResource
     {
         StringComparison comparisonType = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
 
         for (int i = 0; i < list.Count; i++)
         {
-            if (list[i] is not T item)
-            {
-                continue;
-            }
-            if (item.Name.Content.Equals(name, comparisonType))
+            if (list[i]?.Name?.Content is { } s && s.Equals(name, comparisonType))
             {
                 return i;
             }
@@ -67,27 +75,48 @@ public static class UndertaleDataExtensionMethods
     }
 
     /// <summary>
-    /// An extension method, that returns the element in a <see cref="IList{T}"/> of <see cref="UndertaleNamedResource"/>s
-    /// that has a specified <paramref name="name"/>.
+    /// Returns the index of an element in a <see cref="IList{T}"/> of
+    /// <see cref="UndertaleNamedResource"/>s that has a specified <paramref name="name"/>.
     /// </summary>
-    /// <param name="list">The <see cref="IList{T}"/> of <see cref="UndertaleNamedResource"/>s to search in.</param>
-    /// <param name="name">The name of the <see cref="UndertaleNamedResource"/> to find.</param>
-    /// <param name="ignoreCase">Whether casing should be ignored for searching.</param>
-    /// <typeparam name="T">A type of <see cref="UndertaleNamedResource"/>.</typeparam>
-    /// <returns>The element that has the specified name.</returns>
+    /// <param name="list">The <see cref="IList{T}"/> of <see cref="UndertaleNamedResource"/>s to search in</param>
+    /// <param name="name">The name of the <see cref="UndertaleNamedResource"/> to find</param>
+    /// <param name="ignoreCase">Whether casing should be ignored for searching</param>
+    /// <typeparam name="T">A type of <see cref="UndertaleNamedResource"/></typeparam>
+    /// <returns>The index of the element that has the specified name</returns>
+    /// <exception cref="KeyNotFoundException">if no element was found</exception>
+    public static int RequireIndexOfName<T>(this IList<T> list, string name, bool ignoreCase = false) where T : UndertaleNamedResource
+    {
+        int idx = IndexOfName(list, name, ignoreCase);
+        if (idx != -1)
+        {
+            return idx;
+        }
+        string ex = $"Could not find index of {nameof(T)} with name `{name}`";
+        if (ignoreCase)
+        {
+            ex += " (case-insensitive)";
+        }
+        throw new KeyNotFoundException(ex);
+    }
+
+    /// <summary>
+    /// Returns the element or <see langword="null"/> in a <see cref="IList{T}"/> of
+    /// <see cref="UndertaleNamedResource"/>s that has a specified <paramref name="name"/>.
+    /// </summary>
+    /// <param name="list">The <see cref="IList{T}"/> of <see cref="UndertaleNamedResource"/>s to search in</param>
+    /// <param name="name">The name of the <see cref="UndertaleNamedResource"/> to find</param>
+    /// <param name="ignoreCase">Whether casing should be ignored for searching (ordinal)</param>
+    /// <typeparam name="T">A type of <see cref="UndertaleNamedResource"/></typeparam>
+    /// <returns>The element that has the specified name or <see langword="null"/> if nothing was found</returns>
     public static T ByName<T>(this IList<T> list, ReadOnlySpan<char> name, bool ignoreCase = false) where T : UndertaleNamedResource
     {
         StringComparison comparisonType = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
 
-        foreach (T item in list)
+        foreach (T element in list)
         {
-            if (item is null)
+            if (element?.Name?.Content is { } s && s.AsSpan().Equals(name, comparisonType))
             {
-                continue;
-            }
-            if (item.Name.Content.AsSpan().Equals(name, comparisonType))
-            {
-                return item;
+                return element;
             }
         }
 
@@ -109,17 +138,13 @@ public static class UndertaleDataExtensionMethods
 
         for (int i = 0; i < list.Count; i++)
         {
-            if (list[i] is not T item)
-            {
-                continue;
-            }
-            if (item.Name.Content.AsSpan().Equals(name, comparisonType))
+            if (list[i]?.Name?.Content is { } s && s.AsSpan().Equals(name, comparisonType))
             {
                 return i;
             }
         }
 
-        return -1;
+        return default;
     }
 
     public static UndertaleCodeLocals For(this IList<UndertaleCodeLocals> list, UndertaleCode code)
@@ -171,8 +196,7 @@ public static class UndertaleDataExtensionMethods
     /// <exception cref="ArgumentNullException"><paramref name="content"/> is null.</exception>
     public static UndertaleString MakeString(this IList<UndertaleString> list, string content, out int index)
     {
-        if (content == null)
-            throw new ArgumentNullException(nameof(content));
+        ArgumentNullException.ThrowIfNull(content);
 
         // TODO: without reference counting the strings, this may leave unused strings in the array
         for (int i = 0; i < list.Count; i++)
@@ -185,7 +209,7 @@ public static class UndertaleDataExtensionMethods
             }
         }
 
-        UndertaleString newString = new UndertaleString(content);
+        UndertaleString newString = new(content);
         index = list.Count;
         list.Add(newString);
         return newString;
@@ -213,10 +237,11 @@ public static class UndertaleDataExtensionMethods
         return func;
     }
 
-    public static UndertaleInstruction.InstanceType CalculateInstType(this IList<UndertaleVariable> list, UndertaleInstruction.InstanceType inst, bool isBuiltin, UndertaleData data)
+    // TODO: param `list` unused. can it be removed?
+    public static InstanceType CalculateInstType(this IList<UndertaleVariable> list, InstanceType inst, bool isBuiltin, UndertaleData data)
     {
         // Local variables are defined distinctly
-        if (inst == UndertaleInstruction.InstanceType.Local)
+        if (inst == InstanceType.Local)
         {
             throw new InvalidOperationException("Use DefineLocal instead");
         }
@@ -224,21 +249,20 @@ public static class UndertaleDataExtensionMethods
         // Handle builtin variables always using "self"
         if (isBuiltin)
         {
-            inst = UndertaleInstruction.InstanceType.Self;
+            inst = InstanceType.Self;
         }
 
         // Handle bytecode 14 differences
-        bool bytecode14 = data.GeneralInfo.BytecodeVersion <= 14;
-        if (bytecode14)
+        if (data.GeneralInfo.BytecodeVersion <= 14)
         {
             // In bytecode 14, instance types are always undefined for some reason
-            inst = UndertaleInstruction.InstanceType.Undefined;
+            inst = InstanceType.Undefined;
         }
 
         return inst;
     }
 
-    public static UndertaleVariable Define(this IList<UndertaleVariable> list, UndertaleString nameString, int nameStringId, UndertaleInstruction.InstanceType inst, bool isBuiltin, UndertaleData data)
+    public static UndertaleVariable Define(this IList<UndertaleVariable> list, UndertaleString nameString, int nameStringId, InstanceType inst, bool isBuiltin, UndertaleData data)
     {
         // Update variables counts first
         uint oldId = data.VarCount1;
@@ -264,12 +288,12 @@ public static class UndertaleDataExtensionMethods
             else
             {
                 // Bytecode 15
-                if (inst == UndertaleInstruction.InstanceType.Self && !isBuiltin)
+                if (inst == InstanceType.Self && !isBuiltin)
                 {
                     oldId = data.VarCount2;
                     data.VarCount2++;
                 }
-                else if (inst == UndertaleInstruction.InstanceType.Global)
+                else if (inst == InstanceType.Global)
                 {
                     data.VarCount1++;
                 }
@@ -281,7 +305,7 @@ public static class UndertaleDataExtensionMethods
         {
             Name = nameString,
             InstanceType = inst,
-            VarID = bytecode14 ? 0 : (isBuiltin ? (int)UndertaleInstruction.InstanceType.Builtin : (int)oldId),
+            VarID = bytecode14 ? 0 : (isBuiltin ? (int)InstanceType.Builtin : (int)oldId),
             NameStringID = nameStringId
         };
         list.Add(newVariable);
@@ -289,7 +313,7 @@ public static class UndertaleDataExtensionMethods
         return newVariable;
     }
 
-    public static UndertaleVariable EnsureDefined(this IList<UndertaleVariable> list, UndertaleString nameString, int nameStringId, UndertaleInstruction.InstanceType inst, bool isBuiltin, UndertaleData data)
+    public static UndertaleVariable EnsureDefined(this IList<UndertaleVariable> list, UndertaleString nameString, int nameStringId, InstanceType inst, bool isBuiltin, UndertaleData data)
     {
         // Calculate correct instance type
         inst = list.CalculateInstType(inst, isBuiltin, data);
@@ -315,7 +339,8 @@ public static class UndertaleDataExtensionMethods
         {
             foreach (UndertaleVariable variable in list)
             {
-                if (variable.Name == nameString && (bytecode14 || variable.InstanceType == UndertaleInstruction.InstanceType.Local))
+                // TODO: rhs of && is always true since this only runs if bytecode14 is true
+                if (variable.Name == nameString && (bytecode14 || variable.InstanceType == InstanceType.Local))
                 {
                     return variable;
                 }
@@ -326,7 +351,7 @@ public static class UndertaleDataExtensionMethods
         UndertaleVariable vari = new()
         {
             Name = nameString,
-            InstanceType = bytecode14 ? UndertaleInstruction.InstanceType.Undefined : UndertaleInstruction.InstanceType.Local,
+            InstanceType = bytecode14 ? InstanceType.Undefined : InstanceType.Local,
             VarID = bytecode14 ? 0 : varId,
             NameStringID = nameStringId
         };
@@ -334,19 +359,30 @@ public static class UndertaleDataExtensionMethods
         return vari;
     }
 
-    public static UndertaleExtensionFunction DefineExtensionFunction(this IList<UndertaleExtensionFunction> extfuncs, IList<UndertaleFunction> funcs, IList<UndertaleString> strg, uint id, uint kind, string name, UndertaleExtensionVarType rettype, string extname, params UndertaleExtensionVarType[] args)
+    public static UndertaleExtensionFunction DefineExtensionFunction(
+        this IList<UndertaleExtensionFunction> extFuncs,
+        IList<UndertaleFunction> funcs,
+        IList<UndertaleString> strg,
+        uint id,
+        uint kind,
+        string name,
+        UndertaleExtensionVarType retType,
+        string extName,
+        params UndertaleExtensionVarType[] args)
     {
-        var func = new UndertaleExtensionFunction()
+        UndertaleExtensionFunction func = new()
         {
             ID = id,
             Name = strg.MakeString(name),
-            ExtName = strg.MakeString(extname),
+            ExtName = strg.MakeString(extName),
             Kind = kind,
-            RetType = rettype
+            RetType = retType
         };
-        foreach(var a in args)
-            func.Arguments.Add(new UndertaleExtensionFunctionArg() { Type = a });
-        extfuncs.Add(func);
+        foreach (var arg in args)
+        {
+            func.Arguments.Add(new UndertaleExtensionFunctionArg() { Type = arg });
+        }
+        extFuncs.Add(func);
         funcs.EnsureDefined(name, strg);
         return func;
     }
