@@ -168,7 +168,7 @@ public static partial class Assembler
                             instr.ComparisonKind = (UndertaleInstruction.ComparisonType)(spec | 0x80);
                             line = line[..space];
                         }
-                    }   
+                    }
 
                     // Parse regular (first) parameter
                     instr.Extra = byte.Parse(line);
@@ -209,7 +209,7 @@ public static partial class Assembler
                     // Nothing was valid
                     throw new Exception($"Unknown goto target \"{line}\"");
                 }
-                
+
                 line = "";
                 break;
 
@@ -321,7 +321,7 @@ public static partial class Assembler
 
                 // Find function being referenced
                 string funcName = match.Groups[1].Value;
-                UndertaleFunction func = data.Functions.ByName(funcName) ?? 
+                UndertaleFunction func = data.Functions.ByName(funcName) ??
                     throw new Exception($"Could not find function with name \"{funcName}\"");
                 instr.ValueFunction = func;
 
@@ -349,7 +349,7 @@ public static partial class Assembler
                         else
                         {
                             // Or alternatively parse function!
-                            UndertaleFunction extFunc = data.Functions.ByName(line) ?? 
+                            UndertaleFunction extFunc = data.Functions.ByName(line) ??
                                 throw new Exception($"Could not find function specified by extended pushref instruction: \"{line}\"");
                             instr.ValueFunction = extFunc;
                         }
@@ -380,12 +380,7 @@ public static partial class Assembler
     private static int ParseResourceName(string line, UndertaleData data)
     {
         // TODO: have the option of building lookup maps instead of performing this linear search...
-        int id = data.IndexOfByName(line);
-        if (id < 0)
-        {
-            throw new FormatException($"Unable to parse \"{line}\" as a number or resource name");
-        }
-        return id;
+        return data.RequireIndexOfName(line);
     }
 
     /// <summary>
@@ -425,8 +420,7 @@ public static partial class Assembler
                 line = line[2..].Trim();
                 int space = line.IndexOf(' ', StringComparison.InvariantCulture);
                 string codeName = line[..space];
-                UndertaleCode code = data.Code.ByName(codeName) ?? 
-                    throw new Exception($"Failed to find code entry with name \"{codeName}\"");
+                UndertaleCode code = data.Code.RequireByName(codeName);
 
                 // Parse additional info (local/argument count), using a regular expression
                 string info = line[(space + 1)..];
@@ -510,7 +504,7 @@ public static partial class Assembler
             instructions.Add(instr);
             address += instr.CalculateInstructionSize();
         }
-        
+
         // Resolve jump offsets for instructions that reference labels
         foreach ((UndertaleInstruction instr, uint instrAddress, string label) in labelTargets)
         {
@@ -622,7 +616,7 @@ public static partial class Assembler
             // Set up for parsing after the dot
             strPosition = instanceTypeDot + 1;
         }
-        
+
         // Parse variable type, if present here, as well as the alternate location of the instance type, if present (directly after it)
         if (strPosition < str.Length && str[strPosition] == '[')
         {

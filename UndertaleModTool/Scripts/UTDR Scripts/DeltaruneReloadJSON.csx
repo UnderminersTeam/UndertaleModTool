@@ -13,7 +13,7 @@ else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter
 
 ScriptMessage("Press F12 to reload the current JSON");
 
-var code = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f12, Data);
+var code = Data.GameObjects.RequireByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f12, Data);
 
 UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
 {

@@ -89,13 +89,13 @@ else
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-importGroup.QueueReplace(Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f11, Data), @"
+importGroup.QueueReplace(Data.GameObjects.RequireByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f11, Data), @"
 scr_change_language();
 ");
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-importGroup.QueueReplace(Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f12, Data), @"
+importGroup.QueueReplace(Data.GameObjects.RequireByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f12, Data), @"
 if (global.language == ""en"")
     textdata_en();
 else
@@ -134,7 +134,7 @@ ScriptMessage("Complete.");
 
 void MakeJSON(string language)
 {
-    UndertaleCode code = Data.Code.ByName("gml_Script_textdata_" + language);
+    UndertaleCode code = Data.Code.RequireByName("gml_Script_textdata_" + language);
     Dictionary<string, string> contents = new();
 
     var context = new DecompileContext(globalDecompileContext, code, decompilerSettings);

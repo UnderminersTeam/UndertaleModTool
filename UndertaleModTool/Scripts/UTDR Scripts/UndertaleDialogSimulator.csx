@@ -164,10 +164,10 @@ public void HandleAddingNewRoom()
     newRoom.Width = (uint)(isDeltarune ? 640 : 320);
     newRoom.Height = (uint)(isDeltarune ? 480 : 240);
 
-    if (Data.GameObjects.ByName("obj_mainchara") != null && (!isDeltarune))
-        newRoom.Views[0].ObjectId = Data.GameObjects.ByName("obj_mainchara");
+    if (!isDeltarune && Data.GameObjects.ByName("obj_mainchara") is not null)
+        newRoom.Views[0].ObjectId = Data.GameObjects.RequireByName("obj_mainchara");
     UndertaleRoom.Layer newInstancesLayer = new UndertaleRoom.Layer();
-    if (!(GMS1_mode))
+    if (!GMS1_mode)
     {
         newInstancesLayer.LayerName = Data.Strings.MakeString(newRoomName + "_GameObjects_Layer");
         newInstancesLayer.LayerId = last_layer_id++;
@@ -182,7 +182,7 @@ public void HandleAddingNewRoom()
 
     if (Data.GameObjects.ByName("obj_mainchara") != null)
     {
-        UndertaleRoom.GameObject newPlayerObj = new UndertaleRoom.GameObject();
+        UndertaleRoom.GameObject newPlayerObj = new();
         newPlayerObj.X = 160;
         newPlayerObj.Y = 120;
         newPlayerObj.ObjectDefinition = Data.GameObjects.ByName("obj_mainchara");
@@ -198,10 +198,10 @@ public void HandleAddingNewRoom()
 
     if (Data.GameObjects.ByName("obj_overworldcontroller") != null)
     {
-        UndertaleRoom.GameObject newControllerObj = new UndertaleRoom.GameObject();
+        UndertaleRoom.GameObject newControllerObj = new();
         newControllerObj.X = 0;
         newControllerObj.Y = 0;
-        newControllerObj.ObjectDefinition = Data.GameObjects.ByName("obj_overworldcontroller");
+        newControllerObj.ObjectDefinition = Data.GameObjects.RequireByName("obj_overworldcontroller");
         newControllerObj.InstanceID = Data.GeneralInfo.LastObj++;
         UndertaleRoom.GameObject obj = newControllerObj;
         newRoom.GameObjects.Add(obj);
@@ -214,10 +214,10 @@ public void HandleAddingNewRoom()
 
     if (Data.GameObjects.ByName("obj_dialog_sim") != null)
     {
-        UndertaleRoom.GameObject newPlayerObj = new UndertaleRoom.GameObject();
+        UndertaleRoom.GameObject newPlayerObj = new();
         newPlayerObj.X = 160;
         newPlayerObj.Y = 120;
-        newPlayerObj.ObjectDefinition = Data.GameObjects.ByName("obj_dialog_sim");
+        newPlayerObj.ObjectDefinition = Data.GameObjects.RequireByName("obj_dialog_sim");
         newPlayerObj.InstanceID = Data.GeneralInfo.LastObj++;
         UndertaleRoom.GameObject obj = newPlayerObj;
         newRoom.GameObjects.Add(obj);
@@ -230,10 +230,10 @@ public void HandleAddingNewRoom()
 
     if (Data.GameObjects.ByName("obj_darkcontroller") != null && !GMS1_mode)
     {
-        UndertaleRoom.GameObject newControllerObj = new UndertaleRoom.GameObject();
+        UndertaleRoom.GameObject newControllerObj = new();
         newControllerObj.X = 0;
         newControllerObj.Y = 0;
-        newControllerObj.ObjectDefinition = Data.GameObjects.ByName("obj_darkcontroller");
+        newControllerObj.ObjectDefinition = Data.GameObjects.RequireByName("obj_darkcontroller");
         newControllerObj.InstanceID = Data.GeneralInfo.LastObj++;
         UndertaleRoom.GameObject obj = newControllerObj;
         newRoom.GameObjects.Add(obj);

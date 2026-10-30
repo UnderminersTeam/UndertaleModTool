@@ -2,7 +2,7 @@
 
 ScriptMessage("Select the MILK that you prefer\nReplace every non-background sprite with milk (for Deltarune)\nby krzys_h");
 
-var milk = Data.Sprites.ByName("spr_checkers_milk").Textures[0].Texture;
+var milk = Data.Sprites.RequireByName("spr_checkers_milk").Textures[0].Texture;
 foreach (var sprite in Data.Sprites)
 {
     if (sprite is null)

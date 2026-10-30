@@ -761,8 +761,8 @@ namespace UndertaleModTool
                 bool openSaveDialog = false;
 
                 UndertaleCode gettextCode = null;
-                if (gettext == null)
-                    gettextCode = mainWindow.Data.Code.ByName("gml_Script_textdata_en");
+                if (gettext is null)
+                    gettextCode = mainWindow.Data.Code.RequireByName("gml_Script_textdata_en");
 
                 string dataPath = Path.GetDirectoryName(mainWindow.FilePath);
                 string gettextJsonPath = null;

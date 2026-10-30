@@ -16,7 +16,7 @@ else if (Data?.GeneralInfo?.DisplayName?.Content.ToLower() == "deltarune chapter
 // TODO: Japanese fonts won't work at all because I didn't add support for that
 Data.Fonts.Clear();
 
-var obj_time = Data.GameObjects.ByName("obj_time");
+var obj_time = Data.GameObjects.RequireByName("obj_time");
 
 Data.Functions.EnsureDefined("font_add", Data.Strings);
 

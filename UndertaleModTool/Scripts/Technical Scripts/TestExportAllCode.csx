@@ -172,7 +172,7 @@ if (File.Exists(path_error2))
         for (int i = 0; i < errored_code_arr.Count; i++)
         {
             string codename = errored_code_arr[i].ToString();
-            UndertaleCode code = Data.Code.ByName(codename);
+            UndertaleCode code = Data.Code.RequireByName(codename);
             string asmPath = Paths.JoinVerifyWithinDirectory(asmFolder, code.Name.Content + ".asm");
             try
             {

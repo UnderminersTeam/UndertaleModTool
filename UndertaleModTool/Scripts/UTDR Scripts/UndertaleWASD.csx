@@ -12,7 +12,7 @@ if (Data.GeneralInfo.Name.Content == "NXTALE" || Data.GeneralInfo.Name.Content.S
     {
         MainThreadAction = MainThreadAction
     };
-    importGroup.QueueAppend(Data.Code.ByName("gml_Object_obj_time_Step_1"), @"
+    importGroup.QueueAppend(Data.Code.RequireByName("gml_Object_obj_time_Step_1"), @"
     if (global.debug == 0)
     {
         if keyboard_check(ord(""W""))
@@ -42,5 +42,5 @@ else
 }
 
 // Done.
-ChangeSelection(Data.Code.ByName("gml_Object_obj_time_Step_1")); // Show.
+ChangeSelection(Data.Code.RequireByName("gml_Object_obj_time_Step_1")); // Show.
 ScriptMessage("WASD is now enabled.");

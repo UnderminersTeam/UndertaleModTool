@@ -147,16 +147,16 @@ mobileControlsCreate = builder.ToString();
 importGroup.QueueReplace("gml_Object_obj_mobilecontrols_Create_0", mobileControlsCreate);
 QueueGMLFile(Path.Join(dataPath, "gml_Object_obj_mobilecontrols_Draw_64.gml"));
 QueueGMLFile(Path.Join(dataPath, "gml_Object_obj_mobilecontrols_Other_4.gml"));
-Data.Scripts.Add(new UndertaleScript() { Name = Data.Strings.MakeString("scr_add_keys"), Code = Data.Code.ByName("gml_Object_obj_mobilecontrols_Other_4") });
+Data.Scripts.Add(new UndertaleScript() { Name = Data.Strings.MakeString("scr_add_keys"), Code = Data.Code.RequireByName("gml_Object_obj_mobilecontrols_Other_4") });
 QueueGMLFile(Path.Join(dataPath, "gml_Object_obj_mobilecontrols_Step_0.gml"));
 
-var mobileControls = Data.GameObjects.ByName("obj_mobilecontrols");
+var mobileControls = Data.GameObjects.RequireByName("obj_mobilecontrols");
 mobileControls.Persistent = true;
 
 var obj_gamecontroller = Data.GameObjects.ByName("obj_gamecontroller");
 if (obj_gamecontroller is not null)
 {
-    importGroup.QueueAppend(Data.Code.ByName("gml_Object_obj_gamecontroller_Create_0"), 
+    importGroup.QueueAppend(Data.Code.RequireByName("gml_Object_obj_gamecontroller_Create_0"), 
                             "instance_create(0, 0, obj_mobilecontrols);");
     importGroup.Import();
     return;
@@ -165,7 +165,7 @@ if (obj_gamecontroller is not null)
 var obj_time = Data.GameObjects.ByName("obj_time");
 if (obj_time is not null)
 {
-    importGroup.QueueAppend(Data.Code.ByName("gml_Object_obj_time_Create_0"),
+    importGroup.QueueAppend(Data.Code.RequireByName("gml_Object_obj_time_Create_0"),
                             "instance_create(0, 0, obj_mobilecontrols);");
     importGroup.Import();
     return;
