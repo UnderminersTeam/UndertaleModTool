@@ -180,7 +180,7 @@ public partial class UndertaleRoomViewModel : ObservableObject, IUndertaleResour
             foreach (UndertaleRoom.GameObject? instance in layer.InstancesData.Instances)
             {
                 Room.GameObjects.Remove(instance);
-                Room.InstanceCreationOrderIDs.InstanceIDs.Remove(instance.InstanceID);
+                Room.InstanceCreationOrderIDs?.InstanceIDs.Remove(instance.InstanceID);
             }
         }
 
@@ -205,7 +205,7 @@ public partial class UndertaleRoomViewModel : ObservableObject, IUndertaleResour
     {
         layer?.InstancesData.Instances.Remove(instance);
         Room.GameObjects.Remove(instance);
-        Room.InstanceCreationOrderIDs.InstanceIDs.Remove(instance.InstanceID);
+        Room.InstanceCreationOrderIDs?.InstanceIDs.Remove(instance.InstanceID);
     }
 
     public Tile AddTile()
