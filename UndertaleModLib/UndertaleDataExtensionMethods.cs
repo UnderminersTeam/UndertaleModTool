@@ -144,7 +144,7 @@ public static class UndertaleDataExtensionMethods
             }
         }
 
-        return default;
+        return -1;
     }
 
     public static UndertaleCodeLocals For(this IList<UndertaleCodeLocals> list, UndertaleCode code)
