@@ -1281,39 +1281,50 @@ namespace UndertaleModLib
 
             long positionToReturn = reader.Position;
 
-            if (reader.ReadUInt32() > 0) // Object count
+            uint remainingObjects = reader.ReadUInt32(); // Object count
+
+            if (remainingObjects > 0)
             {
-                uint firstObjectPointer = reader.ReadUInt32();
-                reader.AbsPosition = firstObjectPointer + 64;
-                uint vertexCount = reader.ReadUInt32();
-
-                // If any of these checks fail, the managed field is probably present
-                bool managedFieldPresent = true;
-
-                // Bounds check on vertex data
-                if (reader.Position + 12 + vertexCount * 8 < positionToReturn + this.Length)
+                uint firstNonNullObjectPointer = reader.ReadUInt32();
+                while (remainingObjects > 0 && firstNonNullObjectPointer == 0)
                 {
-                    reader.Position += 12 + vertexCount * 8;
-                    // A pointer list of events
-                    if (reader.ReadUInt32() == UndertaleGameObject.EventTypeCount)
-                    {
-                        uint subEventPointer = reader.ReadUInt32();
-                        // Should start right after the list
-                        if (reader.AbsPosition + 56 == subEventPointer)
-                            managedFieldPresent = false;
-                    }
+                    firstNonNullObjectPointer = reader.ReadUInt32();
+                    remainingObjects--;
                 }
 
-                if (managedFieldPresent)
+                if (firstNonNullObjectPointer != 0)
                 {
-                    if (!reader.undertaleData.IsVersionAtLeast(2022, 5))
+                    reader.AbsPosition = firstNonNullObjectPointer + 64;
+                    uint vertexCount = reader.ReadUInt32();
+
+                    // If any of these checks fail, the managed field is probably present
+                    bool managedFieldPresent = true;
+
+                    // Bounds check on vertex data
+                    if (reader.Position + 12 + vertexCount * 8 < positionToReturn + this.Length)
                     {
-                        reader.undertaleData.SetGMS2Version(2022, 5);
+                        reader.Position += 12 + vertexCount * 8;
+                        // A pointer list of events
+                        if (reader.ReadUInt32() == UndertaleGameObject.EventTypeCount)
+                        {
+                            uint subEventPointer = reader.ReadUInt32();
+                            // Should start right after the list
+                            if (reader.AbsPosition + 56 == subEventPointer)
+                                managedFieldPresent = false;
+                        }
                     }
-                }
-                else if (reader.undertaleData.IsVersionAtLeast(2024, 13))
-                {
-                    reader.undertaleData.SetGMS2Version(2026, 1);
+
+                    if (managedFieldPresent)
+                    {
+                        if (!reader.undertaleData.IsVersionAtLeast(2022, 5))
+                        {
+                            reader.undertaleData.SetGMS2Version(2022, 5);
+                        }
+                    }
+                    else if (reader.undertaleData.IsVersionAtLeast(2024, 13))
+                    {
+                        reader.undertaleData.SetGMS2Version(2026, 1);
+                    }
                 }
             }
 
