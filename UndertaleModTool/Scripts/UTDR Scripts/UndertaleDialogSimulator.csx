@@ -21,7 +21,7 @@ else if (GameName == "deltarune chapter 1&2")
     ScriptError("Error 1: Incompatible with the new Deltarune Chapter 1 & 2 demo");
     return;
 }
-if (Data.GeneralInfo.Name.Content == "NXTALE" || Data.GeneralInfo.Name.Content.StartsWith("UNDERTALE")) 
+if (Data.GeneralInfo.Name.Content == "NXTALE" || Data.GeneralInfo.Name.Content.StartsWith("UNDERTALE"))
 {
     if (!ScriptQuestion("Would you like to apply this mod?"))
     {
@@ -47,7 +47,7 @@ bool isDeltarune = false;
 if (Data.GeneralInfo.Name.ToString() == "\"DELTARUNE\"")
     isDeltarune = true;
 
-string newRoomName = "room_dialoguer";    
+string newRoomName = "room_dialoguer";
 var roomCheck = Data.Rooms.ByName(newRoomName);
 if (roomCheck != null)
 {
@@ -174,9 +174,9 @@ public void HandleAddingNewRoom()
         newInstancesLayer.LayerType = UndertaleRoom.LayerType.Instances;
         newInstancesLayer.IsVisible = true;
         newInstancesLayer.Data = Activator.CreateInstance<UndertaleRoom.Layer.LayerInstancesData>();
-        
+
         newRoom.Layers.Add(newInstancesLayer);
-        
+
         newRoom.SetupRoom();
     }
 
@@ -257,16 +257,16 @@ public void HandleAddingNewRoom()
         newBackgroundLayer.LayerDepth = 2147483600;
         newBackgroundLayer.LayerType = UndertaleRoom.LayerType.Background;
         newBackgroundLayer.IsVisible = true;
-        
+
         var newBGLayerData = Activator.CreateInstance<UndertaleRoom.Layer.LayerBackgroundData>();
         newBGLayerData.Visible = true;
         newBGLayerData.Color = (uint)4278190080;
         newBGLayerData.AnimationSpeed = 15;
-        
+
         newBackgroundLayer.Data = newBGLayerData;
-        
+
         newRoom.Layers.Add(newBackgroundLayer);
-        
+
         newRoom.SetupRoom();
     }
 
@@ -275,7 +275,7 @@ public void HandleAddingNewRoom()
     ChangeSelection(newRoom);
 
     //ScriptMessage(newRoomName + " has been added successfully!");
-    
+
 }
 
 private UndertaleRoom.Layer AddNewTileLayer(string layername, int layerdepth, UndertaleRoom layerroom)
@@ -291,20 +291,20 @@ private UndertaleRoom.Layer AddNewTileLayer(string layername, int layerdepth, Un
     layerroom.Layers.Add(newAssetsLayer);
 
     layerroom.SetupRoom();
-    
+
     return newAssetsLayer;
 }
 
 public uint GetLastLayerID()
 {
     uint a_last_layer_id = 0;
-    foreach (UndertaleRoom Room in Data.Rooms) 
+    foreach (UndertaleRoom Room in Data.Rooms)
     {
         if (Room is null)
             continue;
-        foreach (UndertaleRoom.Layer Layer in Room.Layers) 
+        foreach (UndertaleRoom.Layer Layer in Room.Layers)
         {
-            if (Layer.LayerId > a_last_layer_id) 
+            if (Layer.LayerId > a_last_layer_id)
                 a_last_layer_id = Layer.LayerId;
         }
     }
@@ -316,7 +316,7 @@ public void SetUpDialogueObject()
 UndertaleGameObject nativeOBJ = new UndertaleGameObject();
 nativeOBJ.Name = Data.Strings.MakeString("obj_dialog_sim");
 Data.GameObjects.Add(nativeOBJ);
-    
+
 importGroup.QueueReplace("gml_Object_obj_dialog_sim_Create_0", @"
 getstr = """"
 global.interact = 1
@@ -1065,4 +1065,3 @@ if (help == 0)
 }
 ");
 }
-
