@@ -116,7 +116,7 @@ if (unknownFunctions.Count > 0)
             if (!exists)
             {
                 removed += (unknownFunctions[i] + "\r\n");
-                Data.Functions.Remove(Data.Functions.ByName(unknownFunctions[i]));
+                Data.Functions.Remove(Data.Functions.RequireByName(unknownFunctions[i]));
             }
         }
         if (removed.Length < 1)

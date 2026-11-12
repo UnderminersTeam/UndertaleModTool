@@ -82,7 +82,7 @@ await Task.Run(() =>
             if (splitStringsList[j].ToLower() == bg.Name.Content.ToLower())
             {
                 UndertaleBackground nativeBG = Data.Backgrounds.ByName(bg.Name.Content);
-                UndertaleBackground donorBG = DonorData.Backgrounds.ByName(bg.Name.Content);
+                UndertaleBackground donorBG = DonorData.Backgrounds.RequireByName(bg.Name.Content);
                 MainThreadAction(() =>
                 {
                     if (nativeBG == null)
@@ -116,7 +116,7 @@ await Task.Run(() =>
             if (splitStringsList[j].ToLower() == sprite.Name.Content.ToLower())
             {
                 UndertaleSprite nativeSPR = Data.Sprites.ByName(sprite.Name.Content);
-                UndertaleSprite donorSPR = DonorData.Sprites.ByName(sprite.Name.Content);
+                UndertaleSprite donorSPR = DonorData.Sprites.RequireByName(sprite.Name.Content);
                 MainThreadAction(() =>
                 {
                     if (nativeSPR != null)
@@ -175,7 +175,7 @@ await Task.Run(() =>
             if (splitStringsList[j].ToLower() == fnt.Name.Content.ToLower())
             {
                 UndertaleFont nativeFNT = Data.Fonts.ByName(fnt.Name.Content);
-                UndertaleFont donorFNT = DonorData.Fonts.ByName(fnt.Name.Content);
+                UndertaleFont donorFNT = DonorData.Fonts.RequireByName(fnt.Name.Content);
                 MainThreadAction(() =>
                 {
                     if (nativeFNT == null)
@@ -235,18 +235,18 @@ await Task.Run(() =>
                 texturePageItem.Name = new UndertaleString("PageItem " + Data.TexturePageItems.IndexOf(texturePageItem).ToString());
                 if (tex_Type[i].Equals("bg"))
                 {
-                    UndertaleBackground background = Data.Backgrounds.ByName(tex_Name[i]);
+                    UndertaleBackground background = Data.Backgrounds.RequireByName(tex_Name[i]);
                     background.Texture = texturePageItem;
                 }
                 else if (tex_Type[i].Equals("fnt"))
                 {
-                    UndertaleFont font = Data.Fonts.ByName(tex_Name[i]);
+                    UndertaleFont font = Data.Fonts.RequireByName(tex_Name[i]);
                     font.Texture = texturePageItem;
                 }
                 else
                 {
                     int frame = tex_Frame[i];
-                    UndertaleSprite sprite = Data.Sprites.ByName(tex_Name[i]);
+                    UndertaleSprite sprite = Data.Sprites.RequireByName(tex_Name[i]);
                     UndertaleSprite.TextureEntry texentry = new UndertaleSprite.TextureEntry();
                     texentry.Texture = texturePageItem;
                     if (frame > sprite.Textures.Count - 1)
@@ -269,17 +269,17 @@ await Task.Run(() =>
             {
                 UndertaleSprite.TextureEntry texentry = new UndertaleSprite.TextureEntry();
                 texentry.Texture = null;
-                UndertaleSprite spr = Data.Sprites.ByName(tex_Name[i]);
+                UndertaleSprite spr = Data.Sprites.RequireByName(tex_Name[i]);
                 MainThreadAction(() => spr.Textures.Add(texentry));
             }
             if (tex_Type[i] == "bg")
             {
-                UndertaleBackground bg = Data.Backgrounds.ByName(tex_Name[i]);
+                UndertaleBackground bg = Data.Backgrounds.RequireByName(tex_Name[i]);
                 MainThreadAction(() => { bg.Texture = null; });
             }
             if (tex_Type[i] == "fnt")
             {
-                UndertaleFont fnt = Data.Fonts.ByName(tex_Name[i]);
+                UndertaleFont fnt = Data.Fonts.RequireByName(tex_Name[i]);
                 MainThreadAction(() => { fnt.Texture = null; });
             }
         }
@@ -483,7 +483,7 @@ void UpdateSpriteSheetsCopyNeeded()
 {
     for (var j = 0; j < sprCandidates.Count; j++)
     {
-        UndertaleSprite sprite = Data.Sprites.ByName(sprCandidates[j]);
+        UndertaleSprite sprite = Data.Sprites.RequireByName(sprCandidates[j]);
         for (int i = 0; i < sprite.Textures.Count; i++)
         {
             if (sprite.Textures[i]?.Texture != null)
@@ -495,7 +495,7 @@ void UpdateSpriteSheetsCopyNeeded()
     }
     for (var j = 0; j < bgCandidates.Count; j++)
     {
-        UndertaleBackground bg = Data.Backgrounds.ByName(bgCandidates[j]);
+        UndertaleBackground bg = Data.Backgrounds.RequireByName(bgCandidates[j]);
         if (bg.Texture != null)
         {
             SpriteSheetsCopyNeeded[Data.EmbeddedTextures.IndexOf(bg.Texture.TexturePage)] = true;
@@ -504,7 +504,7 @@ void UpdateSpriteSheetsCopyNeeded()
     }
     for (var j = 0; j < fntCandidates.Count; j++)
     {
-        UndertaleFont fnt = Data.Fonts.ByName(fntCandidates[j]);
+        UndertaleFont fnt = Data.Fonts.RequireByName(fntCandidates[j]);
         if (fnt.Texture != null)
         {
             SpriteSheetsCopyNeeded[Data.EmbeddedTextures.IndexOf(fnt.Texture.TexturePage)] = true;

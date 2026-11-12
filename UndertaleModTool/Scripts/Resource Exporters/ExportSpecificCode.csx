@@ -78,7 +78,7 @@ for (var j = 0; j < gameObjectCandidates.Count; j++)
 {
     try
     {
-        UndertaleGameObject obj = Data.GameObjects.ByName(gameObjectCandidates[j]);
+        UndertaleGameObject obj = Data.GameObjects.RequireByName(gameObjectCandidates[j]);
         for (var i = 0; i < obj.Events.Count; i++)
         {
             foreach (UndertaleGameObject.Event evnt in obj.Events[i])

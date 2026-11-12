@@ -21,7 +21,7 @@ else if (GameName == "deltarune chapter 1&2")
     ScriptError("Error 1: Incompatible with the new Deltarune Chapter 1 & 2 demo");
     return;
 }
-if (Data.GeneralInfo.Name.Content == "NXTALE" || Data.GeneralInfo.Name.Content.StartsWith("UNDERTALE")) 
+if (Data.GeneralInfo.Name.Content == "NXTALE" || Data.GeneralInfo.Name.Content.StartsWith("UNDERTALE"))
 {
     if (!ScriptQuestion("Would you like to apply this mod?"))
     {
@@ -47,7 +47,7 @@ bool isDeltarune = false;
 if (Data.GeneralInfo.Name.ToString() == "\"DELTARUNE\"")
     isDeltarune = true;
 
-string newRoomName = "room_dialoguer";    
+string newRoomName = "room_dialoguer";
 var roomCheck = Data.Rooms.ByName(newRoomName);
 if (roomCheck != null)
 {
@@ -164,25 +164,25 @@ public void HandleAddingNewRoom()
     newRoom.Width = (uint)(isDeltarune ? 640 : 320);
     newRoom.Height = (uint)(isDeltarune ? 480 : 240);
 
-    if (Data.GameObjects.ByName("obj_mainchara") != null && (!isDeltarune))
-        newRoom.Views[0].ObjectId = Data.GameObjects.ByName("obj_mainchara");
+    if (!isDeltarune && Data.GameObjects.ByName("obj_mainchara") is UndertaleGameObject obj)
+        newRoom.Views[0].ObjectId = obj;
     UndertaleRoom.Layer newInstancesLayer = new UndertaleRoom.Layer();
-    if (!(GMS1_mode))
+    if (!GMS1_mode)
     {
         newInstancesLayer.LayerName = Data.Strings.MakeString(newRoomName + "_GameObjects_Layer");
         newInstancesLayer.LayerId = last_layer_id++;
         newInstancesLayer.LayerType = UndertaleRoom.LayerType.Instances;
         newInstancesLayer.IsVisible = true;
         newInstancesLayer.Data = Activator.CreateInstance<UndertaleRoom.Layer.LayerInstancesData>();
-        
+
         newRoom.Layers.Add(newInstancesLayer);
-        
+
         newRoom.SetupRoom();
     }
 
     if (Data.GameObjects.ByName("obj_mainchara") != null)
     {
-        UndertaleRoom.GameObject newPlayerObj = new UndertaleRoom.GameObject();
+        UndertaleRoom.GameObject newPlayerObj = new();
         newPlayerObj.X = 160;
         newPlayerObj.Y = 120;
         newPlayerObj.ObjectDefinition = Data.GameObjects.ByName("obj_mainchara");
@@ -198,10 +198,10 @@ public void HandleAddingNewRoom()
 
     if (Data.GameObjects.ByName("obj_overworldcontroller") != null)
     {
-        UndertaleRoom.GameObject newControllerObj = new UndertaleRoom.GameObject();
+        UndertaleRoom.GameObject newControllerObj = new();
         newControllerObj.X = 0;
         newControllerObj.Y = 0;
-        newControllerObj.ObjectDefinition = Data.GameObjects.ByName("obj_overworldcontroller");
+        newControllerObj.ObjectDefinition = Data.GameObjects.RequireByName("obj_overworldcontroller");
         newControllerObj.InstanceID = Data.GeneralInfo.LastObj++;
         UndertaleRoom.GameObject obj = newControllerObj;
         newRoom.GameObjects.Add(obj);
@@ -214,10 +214,10 @@ public void HandleAddingNewRoom()
 
     if (Data.GameObjects.ByName("obj_dialog_sim") != null)
     {
-        UndertaleRoom.GameObject newPlayerObj = new UndertaleRoom.GameObject();
+        UndertaleRoom.GameObject newPlayerObj = new();
         newPlayerObj.X = 160;
         newPlayerObj.Y = 120;
-        newPlayerObj.ObjectDefinition = Data.GameObjects.ByName("obj_dialog_sim");
+        newPlayerObj.ObjectDefinition = Data.GameObjects.RequireByName("obj_dialog_sim");
         newPlayerObj.InstanceID = Data.GeneralInfo.LastObj++;
         UndertaleRoom.GameObject obj = newPlayerObj;
         newRoom.GameObjects.Add(obj);
@@ -230,10 +230,10 @@ public void HandleAddingNewRoom()
 
     if (Data.GameObjects.ByName("obj_darkcontroller") != null && !GMS1_mode)
     {
-        UndertaleRoom.GameObject newControllerObj = new UndertaleRoom.GameObject();
+        UndertaleRoom.GameObject newControllerObj = new();
         newControllerObj.X = 0;
         newControllerObj.Y = 0;
-        newControllerObj.ObjectDefinition = Data.GameObjects.ByName("obj_darkcontroller");
+        newControllerObj.ObjectDefinition = Data.GameObjects.RequireByName("obj_darkcontroller");
         newControllerObj.InstanceID = Data.GeneralInfo.LastObj++;
         UndertaleRoom.GameObject obj = newControllerObj;
         newRoom.GameObjects.Add(obj);
@@ -257,16 +257,16 @@ public void HandleAddingNewRoom()
         newBackgroundLayer.LayerDepth = 2147483600;
         newBackgroundLayer.LayerType = UndertaleRoom.LayerType.Background;
         newBackgroundLayer.IsVisible = true;
-        
+
         var newBGLayerData = Activator.CreateInstance<UndertaleRoom.Layer.LayerBackgroundData>();
         newBGLayerData.Visible = true;
         newBGLayerData.Color = (uint)4278190080;
         newBGLayerData.AnimationSpeed = 15;
-        
+
         newBackgroundLayer.Data = newBGLayerData;
-        
+
         newRoom.Layers.Add(newBackgroundLayer);
-        
+
         newRoom.SetupRoom();
     }
 
@@ -275,7 +275,7 @@ public void HandleAddingNewRoom()
     ChangeSelection(newRoom);
 
     //ScriptMessage(newRoomName + " has been added successfully!");
-    
+
 }
 
 private UndertaleRoom.Layer AddNewTileLayer(string layername, int layerdepth, UndertaleRoom layerroom)
@@ -291,20 +291,20 @@ private UndertaleRoom.Layer AddNewTileLayer(string layername, int layerdepth, Un
     layerroom.Layers.Add(newAssetsLayer);
 
     layerroom.SetupRoom();
-    
+
     return newAssetsLayer;
 }
 
 public uint GetLastLayerID()
 {
     uint a_last_layer_id = 0;
-    foreach (UndertaleRoom Room in Data.Rooms) 
+    foreach (UndertaleRoom Room in Data.Rooms)
     {
         if (Room is null)
             continue;
-        foreach (UndertaleRoom.Layer Layer in Room.Layers) 
+        foreach (UndertaleRoom.Layer Layer in Room.Layers)
         {
-            if (Layer.LayerId > a_last_layer_id) 
+            if (Layer.LayerId > a_last_layer_id)
                 a_last_layer_id = Layer.LayerId;
         }
     }
@@ -316,7 +316,7 @@ public void SetUpDialogueObject()
 UndertaleGameObject nativeOBJ = new UndertaleGameObject();
 nativeOBJ.Name = Data.Strings.MakeString("obj_dialog_sim");
 Data.GameObjects.Add(nativeOBJ);
-    
+
 importGroup.QueueReplace("gml_Object_obj_dialog_sim_Create_0", @"
 getstr = """"
 global.interact = 1
@@ -1065,4 +1065,3 @@ if (help == 0)
 }
 ");
 }
-

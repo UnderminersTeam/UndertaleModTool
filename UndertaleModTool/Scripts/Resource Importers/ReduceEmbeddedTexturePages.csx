@@ -174,7 +174,7 @@ foreach (Atlas atlas in packer.Atlasses)
             {
                 if (stripped.Equals("background0") || stripped.Equals("background1"))
                 {
-                    UndertaleBackground background = Data.Backgrounds.ByName(stripped); //Use stripped instead of sprite name or else the last index calculation gives us a bad string.
+                    UndertaleBackground background = Data.Backgrounds.RequireByName(stripped); //Use stripped instead of sprite name or else the last index calculation gives us a bad string.
                     background.Texture = texturePageItem;
                     setTextureTargetBounds(texturePageItem, stripped, n);
                     continue;
@@ -189,12 +189,12 @@ foreach (Atlas atlas in packer.Atlasses)
             // Special Cases for backgrounds and fonts
             if (spriteType.Equals("bg"))
             {
-                UndertaleBackground background = Data.Backgrounds.ByName(stripped); // Use stripped instead of sprite name or else the last index calculation gives us a bad string.
+                UndertaleBackground background = Data.Backgrounds.RequireByName(stripped); // Use stripped instead of sprite name or else the last index calculation gives us a bad string.
                 background.Texture = texturePageItem;
             }
             else if (spriteType.Equals("fnt"))
             {
-                UndertaleFont font = Data.Fonts.ByName(stripped); // Use stripped instead of sprite name or else the last index calculation gives us a bad string.
+                UndertaleFont font = Data.Fonts.RequireByName(stripped); // Use stripped instead of sprite name or else the last index calculation gives us a bad string.
                 font.Texture = texturePageItem;
             }
             else
@@ -214,7 +214,7 @@ foreach (Atlas atlas in packer.Atlasses)
                     continue;
                 }
                 UndertaleSprite sprite = null;
-                sprite = Data.Sprites.ByName(spriteName);
+                sprite = Data.Sprites.RequireByName(spriteName);
 
                 // Create TextureEntry object
                 UndertaleSprite.TextureEntry texentry = new UndertaleSprite.TextureEntry();

@@ -151,14 +151,7 @@ else // Undertale Switch/Probs other consoles (GMS2)
 // delay = floor((other.delay / 3)) <--- This number
 //
 
-var obj_whtpxlgrav = Data.GameObjects.ByName("obj_whtpxlgrav");
-
-if (obj_whtpxlgrav == null)
-{
-    ScriptError("This script only works with Undertale!", "Not Undertale");
-    return;
-}
-
+var obj_whtpxlgrav = Data.GameObjects.RequireByName("obj_whtpxlgrav");
 importGroup.QueueReplace(obj_whtpxlgrav.EventHandlerFor(EventType.Create, Data), @"
 image_speed = 0
 delay = 0
@@ -187,8 +180,7 @@ else
 }
 ");
 
-var obj_vaporized = Data.GameObjects.ByName("obj_vaporized");
-
+var obj_vaporized = Data.GameObjects.RequireByName("obj_vaporized");
 importGroup.QueueReplace(obj_vaporized.EventHandlerFor(EventType.Create, Data), @"
 sprite_index = global.monstersprite
 snd_play(snd_vaporized)
@@ -204,16 +196,14 @@ importGroup.QueueReplace(obj_vaporized.EventHandlerFor(EventType.Alarm, (uint)0u
 
 ");
 
-var obj_vaporized_new = Data.GameObjects.ByName("obj_vaporized_new");
-
+var obj_vaporized_new = Data.GameObjects.RequireByName("obj_vaporized_new");
 importGroup.QueueReplace(obj_vaporized_new.EventHandlerFor(EventType.Create, Data), @"
 snd_play(snd_vaporized)
 ");
 
 importGroup.QueueReplace(obj_vaporized_new.EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data), bepisCode);
 
-var obj_vaporized_old = Data.GameObjects.ByName("obj_vaporized_old");
-
+var obj_vaporized_old = Data.GameObjects.RequireByName("obj_vaporized_old");
 importGroup.QueueReplace(obj_vaporized_old.EventHandlerFor(EventType.Create, Data), @"
 sprite_index = global.monstersprite
 line = 0

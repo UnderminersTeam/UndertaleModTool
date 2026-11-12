@@ -19,20 +19,20 @@ for (var j = 0; j < splitStringsList.Count; j++)
         UndertaleGameObject obj = Data.GameObjects[k];
         if (splitStringsList[j].ToLower() == obj.Name.Content.ToLower())
         {
-            UndertaleGameObject donorOBJ = Data.GameObjects.ByName(obj.Name.Content);
+            UndertaleGameObject donorOBJ = Data.GameObjects.RequireByName(obj.Name.Content);
             UndertaleGameObject nativeOBJ = new UndertaleGameObject();
             nativeOBJ.Name = Data.Strings.MakeString(obj.Name.Content + "_Copy");
             Data.GameObjects.Add(nativeOBJ);
             if (donorOBJ.Sprite != null)
-                nativeOBJ.Sprite = Data.Sprites.ByName(donorOBJ.Sprite.Name.Content);
+                nativeOBJ.Sprite = Data.Sprites.RequireByName(donorOBJ.Sprite.Name.Content);
             nativeOBJ.Visible = donorOBJ.Visible;
             nativeOBJ.Solid = donorOBJ.Solid;
             nativeOBJ.Depth = donorOBJ.Depth;
             nativeOBJ.Persistent = donorOBJ.Persistent;
             if (donorOBJ.ParentId != null)
-                nativeOBJ.ParentId = Data.GameObjects.ByName(donorOBJ.ParentId.Name.Content);
+                nativeOBJ.ParentId = Data.GameObjects.RequireByName(donorOBJ.ParentId.Name.Content);
             if (donorOBJ.TextureMaskId != null)
-                nativeOBJ.TextureMaskId = Data.Sprites.ByName(donorOBJ.TextureMaskId.Name.Content);
+                nativeOBJ.TextureMaskId = Data.Sprites.RequireByName(donorOBJ.TextureMaskId.Name.Content);
             nativeOBJ.UsesPhysics = donorOBJ.UsesPhysics;
             nativeOBJ.IsSensor = donorOBJ.IsSensor;
             nativeOBJ.CollisionShape = donorOBJ.CollisionShape;
@@ -106,14 +106,14 @@ for (var j = 0; j < splitStringsList.Count; j++)
                                 {
                                     ScriptError("Uh oh, " + NewGMLName + " has an error: " + ec.Message);
                                 }
-                                nativeACT.CodeId = Data.Code.ByName(NewGMLName);
+                                nativeACT.CodeId = Data.Code.RequireByName(NewGMLName);
                                 nativeACT.CodeId.LocalsCount = donorACT.CodeId.LocalsCount;
                                 nativeACT.CodeId.ArgumentsCount = donorACT.CodeId.ArgumentsCount;
                                 nativeACT.CodeId.Offset = donorACT.CodeId.Offset;
                                 nativeACT.CodeId.WeirdLocalFlag = donorACT.CodeId.WeirdLocalFlag;
                                 if (Data.CodeLocals is not null)
                                 {
-                                    UndertaleCodeLocals donorlocals = Data.CodeLocals.ByName(donorACT.CodeId?.Name?.Content);
+                                    UndertaleCodeLocals donorlocals = Data.CodeLocals.RequireByName(donorACT.CodeId?.Name?.Content);
                                     UndertaleCodeLocals nativelocals = new UndertaleCodeLocals();
                                     nativelocals.Name = Data.Strings.MakeString(NewGMLName);
                                     nativelocals.Locals.Clear();

@@ -761,7 +761,7 @@ namespace UndertaleModTool
                 bool openSaveDialog = false;
 
                 UndertaleCode gettextCode = null;
-                if (gettext == null)
+                if (gettext is null)
                     gettextCode = mainWindow.Data.Code.ByName("gml_Script_textdata_en");
 
                 string dataPath = Path.GetDirectoryName(mainWindow.FilePath);
@@ -988,10 +988,10 @@ namespace UndertaleModTool
             };
             try
             {
-                _ = Dispatcher.BeginInvoke(() => 
-                { 
-                    if (!dialog.IsClosed) 
-                        dialog.TryShowDialog(); 
+                _ = Dispatcher.BeginInvoke(() =>
+                {
+                    if (!dialog.IsClosed)
+                        dialog.TryShowDialog();
                 });
             }
             catch
@@ -1168,7 +1168,7 @@ namespace UndertaleModTool
                 {
                     int line = docLine.LineNumber;
                     var highlighter = highlighterInst;
-                    
+
                     HighlightedLine highlighted;
                     try
                     {
@@ -1214,10 +1214,10 @@ namespace UndertaleModTool
                     return null;
 
                 var doc = CurrentContext.Document;
-                string numText = doc.GetText(offset, numLength); 
+                string numText = doc.GetText(offset, numLength);
 
                 var line = new ClickVisualLineText(numText, CurrentContext.VisualLine, numLength);
-                
+
                 line.Clicked += (text, inNewTab) =>
                 {
                     if (int.TryParse(text, out int id))
@@ -1277,7 +1277,7 @@ namespace UndertaleModTool
                                 {
                                     mainWindow.Focus();
                                     mainWindow.ChangeSelection(obj, true);
-                                    
+
                                 }
                                 else if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
                                     mainWindow.ChangeSelection(obj);
@@ -1478,7 +1478,7 @@ namespace UndertaleModTool
                 {
                     NamedObjDict.TryGetValue(nameText, out val);
                     if (data.IsVersionAtLeast(2, 3))
-                    { 
+                    {
                         if (val is UndertaleScript)
                             val = null; // in GMS2.3 scripts are never referenced directly
 

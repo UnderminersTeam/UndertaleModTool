@@ -57,7 +57,7 @@ importGroup.QueueFindReplace("gml_Object_obj_time_Step_1", "global.osflavor >= 4
 
 // Also resize the window so that the border can be seen without going fullscreen
 Data.Functions.EnsureDefined("window_set_size", Data.Strings);
-importGroup.QueueAppend(Data.Code.ByName("gml_Object_obj_time_Create_0"), "window_set_size(960, 540);");
+importGroup.QueueAppend(Data.Code.RequireByName("gml_Object_obj_time_Create_0"), "window_set_size(960, 540);");
 
 importGroup.Import();
 

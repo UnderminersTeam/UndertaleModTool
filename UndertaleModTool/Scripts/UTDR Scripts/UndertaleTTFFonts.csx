@@ -13,7 +13,7 @@ Data.Fonts.Clear();
 
 Data.Functions.EnsureDefined("font_add", Data.Strings); // Allow font_add.
 
-var obj_time_Create_0 = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Create, Data);
+var obj_time_Create_0 = Data.GameObjects.RequireByName("obj_time").EventHandlerFor(EventType.Create, Data);
 
 UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
 {

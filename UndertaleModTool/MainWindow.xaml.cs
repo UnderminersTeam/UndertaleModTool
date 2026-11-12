@@ -2245,53 +2245,52 @@ namespace UndertaleModTool
         {
             UndertaleCode code = Data.Code.ByName(name);
 
-            if (code is not null)
+            if (code is null)
             {
-                Focus();
-
-                if (Selected == code)
+                this.ShowError($"Can't find code entry \"{name}\".\n(probably, different game data was loaded)");
+                return;
+            }
+            
+            Focus();
+            if (Selected == code)
+            {
+                var codeEditor = FindVisualChild<UndertaleCodeEditor>(DataEditor);
+                if (codeEditor is null)
                 {
-                    var codeEditor = FindVisualChild<UndertaleCodeEditor>(DataEditor);
-                    if (codeEditor is null)
-                    {
-                        Debug.WriteLine("Cannot select the code editor mode tab - the instance is not found.");
-                    }
-                    else
-                    {
-                        if (editorTab == UndertaleCodeEditor.CodeEditorTab.Decompiled
-                            && !codeEditor.DecompiledTab.IsSelected)
-                        {
-                            codeEditor.CodeModeTabs.SelectedItem = codeEditor.DecompiledTab;
-                        }
-                        else if (editorTab == UndertaleCodeEditor.CodeEditorTab.Disassembly
-                            && !codeEditor.DisassemblyTab.IsSelected)
-                        {
-                            codeEditor.CodeModeTabs.SelectedItem = codeEditor.DisassemblyTab;
-                        }
-
-                        var editor = editorTab == UndertaleCodeEditor.CodeEditorTab.Decompiled
-                                     ? codeEditor.DecompiledEditor : codeEditor.DisassemblyEditor;
-                        CurrentTab?.SaveTabContentState();
-                        UndertaleCodeEditor.ChangeLineNumber(lineNum, editor);
-                    }
+                    Debug.WriteLine("Cannot select the code editor mode tab - the instance is not found.");
                 }
                 else
                 {
-                    if (CurrentTab?.CurrentObject is UndertaleCode)
-                        CurrentTab.SaveTabContentState();
+                    if (editorTab == UndertaleCodeEditor.CodeEditorTab.Decompiled
+                        && !codeEditor.DecompiledTab.IsSelected)
+                    {
+                        codeEditor.CodeModeTabs.SelectedItem = codeEditor.DecompiledTab;
+                    }
+                    else if (editorTab == UndertaleCodeEditor.CodeEditorTab.Disassembly
+                        && !codeEditor.DisassemblyTab.IsSelected)
+                    {
+                        codeEditor.CodeModeTabs.SelectedItem = codeEditor.DisassemblyTab;
+                    }
 
-                    UndertaleCodeEditor.EditorTab = editorTab;
-                    UndertaleCodeEditor.ChangeLineNumber(lineNum, editorTab);
+                    var editor = editorTab == UndertaleCodeEditor.CodeEditorTab.Decompiled
+                                    ? codeEditor.DecompiledEditor : codeEditor.DisassemblyEditor;
+                    CurrentTab?.SaveTabContentState();
+                    UndertaleCodeEditor.ChangeLineNumber(lineNum, editor);
                 }
-
-                HighlightObject(code);
-                ChangeSelection(code, inNewTab);
             }
             else
             {
-                this.ShowError($"Can't find code entry \"{name}\".\n(probably, different game data was loaded)");
+                if (CurrentTab?.CurrentObject is UndertaleCode)
+                    CurrentTab.SaveTabContentState();
+
+                UndertaleCodeEditor.EditorTab = editorTab;
+                UndertaleCodeEditor.ChangeLineNumber(lineNum, editorTab);
             }
+
+            HighlightObject(code);
+            ChangeSelection(code, inNewTab);
         }
+        
 
         public void InitializeProgressDialog(string title, string msg)
         {

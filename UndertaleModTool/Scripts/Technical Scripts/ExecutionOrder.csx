@@ -195,7 +195,7 @@ void SetUpCustomGML()
     ";
     importGroup.QueueReplace("gml_Object___obj_executionorder___Draw_64" /* draw gui */, str);
 
-    var objt = Data.GameObjects.ByName("__obj_executionorder__");
+    var objt = Data.GameObjects.RequireByName("__obj_executionorder__");
     objt.Persistent = true;
     Data.GeneralInfo.RoomOrder.First().Resource.GameObjects.Insert(0, new UndertaleRoom.GameObject()
     {
