@@ -164,8 +164,8 @@ public void HandleAddingNewRoom()
     newRoom.Width = (uint)(isDeltarune ? 640 : 320);
     newRoom.Height = (uint)(isDeltarune ? 480 : 240);
 
-    if (!isDeltarune && Data.GameObjects.ByName("obj_mainchara") is not null)
-        newRoom.Views[0].ObjectId = Data.GameObjects.RequireByName("obj_mainchara");
+    if (!isDeltarune && Data.GameObjects.ByName("obj_mainchara") is UndertaleGameObject obj)
+        newRoom.Views[0].ObjectId = obj;
     UndertaleRoom.Layer newInstancesLayer = new UndertaleRoom.Layer();
     if (!GMS1_mode)
     {
