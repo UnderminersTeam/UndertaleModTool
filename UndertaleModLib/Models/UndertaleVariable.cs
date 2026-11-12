@@ -1,5 +1,6 @@
 ﻿using System;
 using Underanalyzer;
+using static UndertaleModLib.Models.UndertaleInstruction;
 
 namespace UndertaleModLib.Models;
 
@@ -7,7 +8,7 @@ namespace UndertaleModLib.Models;
 /// A variable entry in a GameMaker data file.
 /// </summary>
 // TODO: INotifyPropertyChanged
-public class UndertaleVariable : UndertaleNamedResource, ISearchable, UndertaleInstruction.IReferencedObject, IDisposable, IGMVariable
+public class UndertaleVariable : UndertaleNamedResource, ISearchable, IReferencedObject, IDisposable, IGMVariable
 {
     /// The name of the Variable.
     public UndertaleString Name { get; set; }
@@ -15,7 +16,7 @@ public class UndertaleVariable : UndertaleNamedResource, ISearchable, UndertaleI
     /// <summary>
     /// The type of the variable.
     /// </summary>
-    public UndertaleInstruction.InstanceType InstanceType { get; set; }
+    public InstanceType InstanceType { get; set; }
 
     /// <summary>
     /// TODO: some id?
@@ -60,14 +61,14 @@ public class UndertaleVariable : UndertaleNamedResource, ISearchable, UndertaleI
         Name = reader.ReadUndertaleString();
         if (reader.undertaleData.GeneralInfo?.BytecodeVersion >= 15)
         {
-            InstanceType = (UndertaleInstruction.InstanceType)reader.ReadInt32();
+            InstanceType = (InstanceType)reader.ReadInt32();
             VarID = reader.ReadInt32();
         }
         Occurrences = reader.ReadUInt32();
         if (Occurrences > 0)
         {
             FirstAddress = reader.ReadUndertaleObjectPointer<UndertaleInstruction>();
-            UndertaleInstruction.ParseReferenceChain(reader, this);
+            ParseReferenceChain(reader, this);
         }
         else
         {
@@ -75,6 +76,30 @@ public class UndertaleVariable : UndertaleNamedResource, ISearchable, UndertaleI
                 throw new Exception("Variable with no occurrences, but still has a first occurrence address");
             FirstAddress = null;
         }
+    }
+
+    public static InstanceType CalculateInstType(InstanceType inst, bool isBuiltin, UndertaleData data)
+    {
+        // Local variables are defined distinctly
+        if (inst == InstanceType.Local)
+        {
+            throw new InvalidOperationException("Use DefineLocal instead");
+        }
+
+        // Handle builtin variables always using "self"
+        if (isBuiltin)
+        {
+            inst = InstanceType.Self;
+        }
+
+        // Handle bytecode 14 differences
+        if (data.GeneralInfo.BytecodeVersion <= 14)
+        {
+            // In bytecode 14, instance types are always undefined for some reason
+            inst = InstanceType.Undefined;
+        }
+
+        return inst;
     }
 
     /// <inheritdoc />

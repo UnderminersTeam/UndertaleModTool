@@ -279,7 +279,7 @@ internal class CodeBuilder : ICodeBuilder
                 _globalContext.CurrentCompileGroup.RegisterNonLocalVariable(variableName);
                 UndertaleString nameString = _globalContext.CurrentCompileGroup.MakeString(variableName, out int nameStringId);
                 UndertaleInstruction.InstanceType actualInstType =
-                    _globalContext.Data.Variables.CalculateInstType((UndertaleInstruction.InstanceType)variableInstanceType, isBuiltin, _globalContext.Data);
+                    UndertaleVariable.CalculateInstType((UndertaleInstruction.InstanceType)variableInstanceType, isBuiltin, _globalContext.Data);
                 if (_variableLookup.TryGetValue((nameString, actualInstType), out UndertaleVariable existingVariable))
                 {
                     utInstruction.ValueVariable = existingVariable;
@@ -378,7 +378,7 @@ internal class CodeBuilder : ICodeBuilder
             UndertaleString str = _globalContext.CurrentCompileGroup.MakeString(stringContent, out int strIndex);
 
             // Update instruction
-            utInstruction.ValueString = new UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>(str, strIndex); 
+            utInstruction.ValueString = new UndertaleResourceById<UndertaleString, UndertaleChunkSTRG>(str, strIndex);
         }
     }
 

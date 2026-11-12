@@ -244,30 +244,6 @@ public static class UndertaleDataExtensionMethods
         return func;
     }
 
-    public static InstanceType CalculateInstType(InstanceType inst, bool isBuiltin, UndertaleData data)
-    {
-        // Local variables are defined distinctly
-        if (inst == InstanceType.Local)
-        {
-            throw new InvalidOperationException("Use DefineLocal instead");
-        }
-
-        // Handle builtin variables always using "self"
-        if (isBuiltin)
-        {
-            inst = InstanceType.Self;
-        }
-
-        // Handle bytecode 14 differences
-        if (data.GeneralInfo.BytecodeVersion <= 14)
-        {
-            // In bytecode 14, instance types are always undefined for some reason
-            inst = InstanceType.Undefined;
-        }
-
-        return inst;
-    }
-
     public static UndertaleVariable Define(this IList<UndertaleVariable> list, UndertaleString nameString, int nameStringId, InstanceType inst, bool isBuiltin, UndertaleData data)
     {
         // Update variables counts first
@@ -322,7 +298,7 @@ public static class UndertaleDataExtensionMethods
     public static UndertaleVariable EnsureDefined(this IList<UndertaleVariable> list, UndertaleString nameString, int nameStringId, InstanceType inst, bool isBuiltin, UndertaleData data)
     {
         // Calculate correct instance type
-        inst = CalculateInstType(inst, isBuiltin, data);
+        inst = UndertaleVariable.CalculateInstType(inst, isBuiltin, data);
 
         // Search for existing variable that can be used
         foreach (UndertaleVariable variable in list)
