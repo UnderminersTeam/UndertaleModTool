@@ -23,7 +23,14 @@ public static class UndertaleDataExtensionMethods
     public static T ByName<T>(this IList<T> list, string name, bool ignoreCase = false) where T : UndertaleNamedResource
     {
         StringComparison comparisonType = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
-        return list.FirstOrDefault(e => e?.Name?.Content is { } s && s.Equals(name, comparisonType));
+        foreach (T elem in list)
+        {
+            if (elem?.Name?.Content is { } str && str.Equals(name, comparisonType))
+            {
+                return elem;
+            }
+        }
+        return default;
     }
 
     /// <summary>
