@@ -345,8 +345,7 @@ public static class UndertaleDataExtensionMethods
         {
             foreach (UndertaleVariable variable in list)
             {
-                // TODO: rhs of && is always true since this only runs if bytecode14 is true
-                if (variable.Name == nameString && (bytecode14 || variable.InstanceType == InstanceType.Local))
+                if (variable.Name == nameString)
                 {
                     return variable;
                 }
