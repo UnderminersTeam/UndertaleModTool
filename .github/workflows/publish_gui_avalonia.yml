@@ -1,0 +1,78 @@
+name: Publish UndertaleModToolAvalonia
+
+on:
+  push:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build_gui:
+    defaults:
+      run:
+        shell: bash
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, macos-26-intel, windows-latest]
+        configuration: [Release]
+        bundled: [true]
+        singlefile: [false]
+        include:
+          - os: ubuntu-latest
+            rid: linux-x64
+          - os: macos-latest
+            rid: osx-arm64
+          - os: macos-26-intel
+            rid: osx-x64
+          - os: windows-latest
+            rid: win-x64
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        submodules: true
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v6
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Publish ${{ matrix.rid }}
+      run: |
+        dotnet publish UndertaleModToolAvalonia -c ${{ matrix.configuration }} -r ${{ matrix.rid }} --self-contained ${{ matrix.bundled }} -p:PublishSingleFile=${{ matrix.singlefile }} --output Publish/${{ matrix.rid }}
+        cp ./README.md ./Publish/${{ matrix.rid }}
+        cp ./SCRIPTS.md ./Publish/${{ matrix.rid }}
+        cp ./LICENSE.txt ./Publish/${{ matrix.rid }}
+
+    - name: linux-x64 specific
+      if: ${{ matrix.rid == 'linux-x64' }}
+      run: |
+        echo "artifact_location=Publish/linux-x64/" >> "$GITHUB_ENV"
+
+    - name: win-x64 specific
+      if: ${{ matrix.rid == 'win-x64' }}
+      run: |
+        echo "artifact_location=Publish/win-x64/" >> "$GITHUB_ENV"
+
+    - name: osx-arm64 and osx-x64 specific
+      if: ${{ matrix.rid == 'osx-arm64' || matrix.rid == 'osx-x64' }}
+      run: |
+        APP_NAME="./Publish/${{ matrix.rid }}-app/UndertaleModToolAvalonia.app"
+        
+        mkdir -p "$APP_NAME/Contents/MacOS"
+
+        cp "./.github/workflows/Info.plist" "$APP_NAME/Contents/Info.plist"
+        cp -a "./Publish/${{ matrix.rid }}/." "$APP_NAME/Contents/MacOS"
+
+        echo "artifact_location=Publish/${{ matrix.rid }}-app/" >> "$GITHUB_ENV"
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v7
+      with:
+          name: UndertaleModToolAvalonia-${{ matrix.os }}-${{ github.sha }}
+          path: ${{ env.artifact_location }}

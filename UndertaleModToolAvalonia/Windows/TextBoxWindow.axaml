@@ -1,0 +1,23 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:l="clr-namespace:UndertaleModToolAvalonia"
+        mc:Ignorable="d"
+        x:Class="UndertaleModToolAvalonia.TextBoxWindow"
+        x:DataType="l:TextBoxWindow"
+        DataContext="{Binding $self}"
+        Title="{Binding TitleText}"
+        Width="400"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        Classes="TextBoxWindow">
+    <Grid RowDefinitions="Auto,1*,Auto">
+        <TextBlock Grid.Row="0" Name="MessageTextBlock" Text="{Binding Message}" TextWrapping="Wrap" />
+        <TextBox Grid.Row="1" Name="TextTextBox" />
+        <StackPanel Grid.Row="2" Name="ButtonsStackPanel" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Command="{Binding OkClick}" IsDefault="True">OK</Button>
+            <Button Command="{Binding CancelClick}">Cancel</Button>
+        </StackPanel>
+    </Grid>
+</Window>

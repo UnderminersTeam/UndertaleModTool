@@ -1,0 +1,593 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:l="clr-namespace:UndertaleModToolAvalonia"
+             xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="UndertaleModToolAvalonia.UndertaleUIRootNodeView"
+             x:DataType="l:UndertaleUIRootNodeViewModel"
+             x:Name="Root">
+    <UserControl.Resources>
+        <l:EnumTypeToValuesConverter x:Key="EnumTypeToValuesConverter" />
+        <l:UndertaleColorToColorConverter x:Key="UndertaleColorToColorConverter" />
+    </UserControl.Resources>
+    
+    <Grid RowDefinitions="Auto,1*" Classes="PaddedProperties">
+        <Grid Grid.Row="0" l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+            <Label>Name</Label>
+            <l:UndertaleStringReferenceView Reference="{Binding UIRootNode.Name}" />
+        </Grid>
+
+        <Grid Grid.Row="1" RowDefinitions="1*,Auto,1*">
+            <Grid Grid.Row="0" RowDefinitions="1*,Auto">
+                <TreeView Grid.Row="0" x:Name="NodesTreeView" ItemsSource="{Binding Nodes}">
+                    <TreeView.Styles>
+                        <Style Selector="TreeViewItem /template/ StackPanel > Border#PART_LayoutRoot.TreeViewItemLayoutRoot">
+                            <Setter Property="ContextMenu">
+                                <ContextMenu>
+                                    <MenuItem Header="_Add flex panel" Click="ContextMenu_AddFlexPanel_Click"/>
+                                    <MenuItem Header="_Add game object" Click="ContextMenu_AddGameObject_Click"/>
+                                    <MenuItem Header="_Add sequence instance" Click="ContextMenu_AddSequenceInstance_Click"/>
+                                    <MenuItem Header="_Add sprite instance" Click="ContextMenu_AddSpriteInstance_Click"/>
+                                    <MenuItem Header="_Add text item instance" Click="ContextMenu_AddTextItemInstance_Click"/>
+                                    <MenuItem Header="_Add effect layer" Click="ContextMenu_AddEffectLayer_Click"/>
+                                    <MenuItem Header="_Remove" Click="ContextMenu_Remove_Click"/>
+                                </ContextMenu>
+                            </Setter>
+                        </Style>
+                    </TreeView.Styles>
+
+                    <TreeView.DataTemplates>
+                        <l:UINodeTemplateSelector>
+                            <!-- This complicated DataType-ing is needed because ItemsSource still has the UndertaleUINode as the DataContext. -->
+                            <l:UINodeTemplateSelector.LayerTemplate>
+                                <TreeDataTemplate DataType="undertalem:UndertaleUILayer"
+                                                  x:DataType="undertalem:UndertaleUINode" ItemsSource="{Binding ((undertalem:UndertaleUILayer)Node).Children}">
+                                    <TextBlock x:DataType="undertalem:UndertaleUILayer" Text="{Binding Name.Content}" />
+                                </TreeDataTemplate>
+                            </l:UINodeTemplateSelector.LayerTemplate>
+                            <l:UINodeTemplateSelector.FlexPanelTemplate>
+                                <TreeDataTemplate DataType="undertalem:UndertaleUIFlexPanel"
+                                                  x:DataType="undertalem:UndertaleUINode" ItemsSource="{Binding ((undertalem:UndertaleUIFlexPanel)Node).Children}">
+                                    <TextBlock x:DataType="undertalem:UndertaleUIFlexPanel" Text="{Binding Name.Content}" />
+                                </TreeDataTemplate>
+                            </l:UINodeTemplateSelector.FlexPanelTemplate>
+                            <l:UINodeTemplateSelector.GameObjectTemplate>
+                                <TreeDataTemplate DataType="undertalem:UndertaleUIGameObject">
+                                    <TextBlock Text="{Binding .}" />
+                                </TreeDataTemplate>
+                            </l:UINodeTemplateSelector.GameObjectTemplate>
+                            <l:UINodeTemplateSelector.SequenceInstanceTemplate>
+                                <TreeDataTemplate DataType="undertalem:UndertaleUISequenceInstance">
+                                    <TextBlock Text="{Binding .}" />
+                                </TreeDataTemplate>
+                            </l:UINodeTemplateSelector.SequenceInstanceTemplate>
+                            <l:UINodeTemplateSelector.SpriteInstanceTemplate>
+                                <TreeDataTemplate DataType="undertalem:UndertaleUISpriteInstance">
+                                    <TextBlock Text="{Binding .}" />
+                                </TreeDataTemplate>
+                            </l:UINodeTemplateSelector.SpriteInstanceTemplate>
+                            <l:UINodeTemplateSelector.TextItemInstanceTemplate>
+                                <TreeDataTemplate DataType="undertalem:UndertaleUITextItemInstance">
+                                    <TextBlock Text="{Binding .}" />
+                                </TreeDataTemplate>
+                            </l:UINodeTemplateSelector.TextItemInstanceTemplate>
+                            <l:UINodeTemplateSelector.EffectLayerTemplate>
+                                <TreeDataTemplate DataType="undertalem:UndertaleUIEffectLayer">
+                                    <TextBlock Text="{Binding EffectType.Content}" />
+                                </TreeDataTemplate>
+                            </l:UINodeTemplateSelector.EffectLayerTemplate>
+                        </l:UINodeTemplateSelector>
+                    </TreeView.DataTemplates>
+                </TreeView>
+
+                <StackPanel Grid.Row="1" Orientation="Horizontal">
+                    <RepeatButton Click="MoveUp_Click">↑</RepeatButton>
+                    <RepeatButton Click="MoveDown_Click" >↓</RepeatButton>
+                </StackPanel>
+            </Grid>
+
+            <GridSplitter Grid.Row="1"/>
+
+            <Grid Grid.Row="2">
+                <ScrollViewer>
+                    <StackPanel>
+                        <ContentControl Content="{Binding #NodesTreeView.((undertalem:UndertaleUINode)SelectedItem).Node}">
+                            <ContentControl.DataTemplates>
+                                <DataTemplate DataType="undertalem:UndertaleUILayer">
+                                    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                                        <Label>Name</Label>
+                                        <l:UndertaleStringReferenceView Reference="{Binding Name}" />
+
+                                        <Label>Draw space</Label>
+                                        <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleUILayer+DrawSpaceKind}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                    SelectedItem="{Binding DrawSpace}" />
+
+                                        <Label>Visible</Label>
+                                        <CheckBox IsChecked="{Binding Visible}" />
+                                    </Grid>
+                                </DataTemplate>
+                                    
+                                <DataTemplate DataType="undertalem:UndertaleUIFlexPanel">
+                                    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                                        <Label>Name</Label>
+                                        <l:UndertaleStringReferenceView Reference="{Binding Name}" />
+
+                                        <Label>Width</Label>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox Text="{Binding Width.Value}" />
+                                            <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleFlexValue+UnitKind}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                        SelectedItem="{Binding Width.Unit}" />
+                                        </StackPanel>
+
+                                        <Label>Height</Label>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox Text="{Binding Height.Value}" />
+                                            <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleFlexValue+UnitKind}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                        SelectedItem="{Binding Height.Unit}" />
+                                        </StackPanel>
+
+                                        <Label>Minimum width</Label>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox Text="{Binding MinimumWidth.Value}" />
+                                            <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleFlexValue+UnitKind}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                        SelectedItem="{Binding MinimumWidth.Unit}" />
+                                        </StackPanel>
+
+                                        <Label>Minimum height</Label>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox Text="{Binding MinimumHeight.Value}" />
+                                            <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleFlexValue+UnitKind}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                        SelectedItem="{Binding MinimumHeight.Unit}" />
+                                        </StackPanel>
+
+                                        <Label>Maximum width</Label>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox Text="{Binding MaximumWidth.Value}" />
+                                            <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleFlexValue+UnitKind}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                        SelectedItem="{Binding MaximumWidth.Unit}" />
+                                        </StackPanel>
+
+                                        <Label>Maximum height</Label>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox Text="{Binding MaximumHeight.Value}" />
+                                            <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleFlexValue+UnitKind}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                        SelectedItem="{Binding MaximumHeight.Unit}" />
+                                        </StackPanel>
+
+                                        <Label>Offset left</Label>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox Text="{Binding OffsetLeft.Value}" />
+                                            <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleFlexValue+UnitKind}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                        SelectedItem="{Binding OffsetLeft.Unit}" />
+                                        </StackPanel>
+
+                                        <Label>Offset right</Label>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox Text="{Binding OffsetRight.Value}" />
+                                            <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleFlexValue+UnitKind}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                        SelectedItem="{Binding OffsetRight.Unit}" />
+                                        </StackPanel>
+
+                                        <Label>Offset top</Label>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox Text="{Binding OffsetTop.Value}" />
+                                            <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleFlexValue+UnitKind}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                        SelectedItem="{Binding OffsetTop.Unit}" />
+                                        </StackPanel>
+
+                                        <Label>Offset bottom</Label>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox Text="{Binding OffsetBottom.Value}" />
+                                            <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleFlexValue+UnitKind}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                        SelectedItem="{Binding OffsetBottom.Unit}" />
+                                        </StackPanel>
+
+                                        <Label>Clips contents</Label>
+                                        <CheckBox IsChecked="{Binding ClipsContents}" />
+
+                                        <Label>Position type</Label>
+                                        <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleUIFlexPanel+PositionTypeKind}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                    SelectedItem="{Binding PositionType}" />
+
+                                        <Label>Align self</Label>
+                                        <ComboBox ItemsSource="{Binding Source={x:Type undertalem:IUndertaleFlexProperties+AlignmentKind}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                    SelectedItem="{Binding AlignSelf}" />
+
+                                        <Label>Margin left</Label>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox Text="{Binding MarginLeft.Value}" />
+                                            <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleFlexValue+UnitKind}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                        SelectedItem="{Binding MarginLeft.Unit}" />
+                                        </StackPanel>
+
+                                        <Label>Margin right</Label>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox Text="{Binding MarginRight.Value}" />
+                                            <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleFlexValue+UnitKind}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                        SelectedItem="{Binding MarginRight.Unit}" />
+                                        </StackPanel>
+
+                                        <Label>Margin top</Label>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox Text="{Binding MarginTop.Value}" />
+                                            <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleFlexValue+UnitKind}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                        SelectedItem="{Binding MarginTop.Unit}" />
+                                        </StackPanel>
+
+                                        <Label>Margin bottom</Label>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox Text="{Binding MarginBottom.Value}" />
+                                            <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleFlexValue+UnitKind}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                        SelectedItem="{Binding MarginBottom.Unit}" />
+                                        </StackPanel>
+
+                                        <Label>Flex grow</Label>
+                                        <TextBox Text="{Binding FlexGrow}" />
+
+                                        <Label>Flex shrink</Label>
+                                        <TextBox Text="{Binding FlexShrink}" />
+                                    </Grid>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="undertalem:UndertaleUIGameObject">
+                                    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                                        <Label>Visible</Label>
+                                        <CheckBox IsChecked="{Binding Visible}" />
+
+                                        <Label>Anchor</Label>
+                                        <TextBox Text="{Binding Anchor}" />
+
+                                        <Label>Stretch width</Label>
+                                        <CheckBox IsChecked="{Binding StretchWidth}" />
+
+                                        <Label>Stretch height</Label>
+                                        <CheckBox IsChecked="{Binding StretchHeight}" />
+
+                                        <Label>Tile H</Label>
+                                        <CheckBox IsChecked="{Binding TileH}" />
+
+                                        <Label>Tile V</Label>
+                                        <CheckBox IsChecked="{Binding TileV}" />
+
+                                        <Label>Keep aspect</Label>
+                                        <CheckBox IsChecked="{Binding KeepAspect}" />
+
+                                        <!-- Inherited from UndertaleRoom.GameObject - copied from UndertaleRoomView.axaml -->
+                                        
+                                        <Label>Position X/Y</Label>
+                                        <Grid ColumnDefinitions="1*,1*">
+                                            <TextBox Grid.Column="0" Text="{Binding X}" />
+                                            <TextBox Grid.Column="1" Text="{Binding Y}" />
+                                        </Grid>
+
+                                        <!-- TODO: Nonexistent? -->
+                                        <Label>Definition</Label>
+                                        <l:UndertaleResourceReferenceView Reference="{Binding ObjectDefinition}" ReferenceType="undertalem:UndertaleGameObject" />
+
+                                        <Label>Instance ID</Label>
+                                        <TextBox Text="{Binding InstanceID}" />
+
+                                        <Label>Creation code</Label>
+                                        <l:UndertaleResourceReferenceView Reference="{Binding CreationCode}" ReferenceType="undertalem:UndertaleCode" />
+
+                                        <Label>Scale X/Y</Label>
+                                        <Grid ColumnDefinitions="1*,1*">
+                                            <TextBox Grid.Column="0" Text="{Binding ScaleX}" />
+                                            <TextBox Grid.Column="1" Text="{Binding ScaleY}" />
+                                        </Grid>
+
+                                        <Label>Color</Label>
+                                        <ColorPicker Color="{Binding Color, Converter={StaticResource UndertaleColorToColorConverter}}" />
+
+                                        <Label>Rotation</Label>
+                                        <TextBox Text="{Binding Rotation}" />
+
+                                        <Label>Frame index</Label>
+                                        <TextBox Text="{Binding ImageIndex}" />
+
+                                        <Label>Image speed</Label>
+                                        <TextBox Text="{Binding ImageSpeed}" />
+
+                                        <Label>Pre Create code</Label>
+                                        <l:UndertaleResourceReferenceView Reference="{Binding PreCreateCode}" ReferenceType="undertalem:UndertaleCode" />
+                                    </Grid>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="undertalem:UndertaleUISequenceInstance">
+                                    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                                        <Label>Visible</Label>
+                                        <CheckBox IsChecked="{Binding Visible}" />
+
+                                        <Label>Anchor</Label>
+                                        <TextBox Text="{Binding Anchor}" />
+
+                                        <Label>Stretch width</Label>
+                                        <CheckBox IsChecked="{Binding StretchWidth}" />
+
+                                        <Label>Stretch height</Label>
+                                        <CheckBox IsChecked="{Binding StretchHeight}" />
+
+                                        <Label>Tile H</Label>
+                                        <CheckBox IsChecked="{Binding TileH}" />
+
+                                        <Label>Tile V</Label>
+                                        <CheckBox IsChecked="{Binding TileV}" />
+
+                                        <Label>Keep aspect</Label>
+                                        <CheckBox IsChecked="{Binding KeepAspect}" />
+
+                                        <!-- Inherited from UndertaleRoom.SequenceInstance - copied from UndertaleRoomView.axaml -->
+                                        
+                                        <!-- TODO: Add all sequence properties -->
+                                    </Grid>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="undertalem:UndertaleUISpriteInstance">
+                                    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                                        <Label>Visible</Label>
+                                        <CheckBox IsChecked="{Binding Visible}" />
+
+                                        <Label>Anchor</Label>
+                                        <TextBox Text="{Binding Anchor}" />
+
+                                        <Label>Stretch width</Label>
+                                        <CheckBox IsChecked="{Binding StretchWidth}" />
+
+                                        <Label>Stretch height</Label>
+                                        <CheckBox IsChecked="{Binding StretchHeight}" />
+
+                                        <Label>Tile H</Label>
+                                        <CheckBox IsChecked="{Binding TileH}" />
+
+                                        <Label>Tile V</Label>
+                                        <CheckBox IsChecked="{Binding TileV}" />
+
+                                        <Label>Keep aspect</Label>
+                                        <CheckBox IsChecked="{Binding KeepAspect}" />
+
+                                        <!-- Inherited from UndertaleRoom.SpriteInstance - copied from UndertaleRoomView.axaml -->
+                                        
+                                        <Label>Name</Label>
+                                        <l:UndertaleStringReferenceView Reference="{Binding Name}" />
+
+                                        <Label>Definition</Label>
+                                        <l:UndertaleResourceReferenceView Reference="{Binding Sprite}" ReferenceType="undertalem:UndertaleSprite"/>
+
+                                        <Label>Position X/Y</Label>
+                                        <Grid ColumnDefinitions="1*,1*">
+                                            <TextBox Grid.Column="0" Text="{Binding X}" />
+                                            <TextBox Grid.Column="1" Text="{Binding Y}" />
+                                        </Grid>
+
+                                        <Label>Scale</Label>
+                                        <Grid ColumnDefinitions="1*,1*">
+                                            <TextBox Grid.Column="0" Text="{Binding ScaleX}" />
+                                            <TextBox Grid.Column="1" Text="{Binding ScaleY}" />
+                                        </Grid>
+
+                                        <Label>Color</Label>
+                                        <ColorPicker Color="{Binding Color, Converter={StaticResource UndertaleColorToColorConverter}}" />
+
+                                        <Label>Rotation</Label>
+                                        <TextBox Text="{Binding Rotation}" />
+
+                                        <Label>Frame index</Label>
+                                        <TextBox Text="{Binding FrameIndex}" />
+
+                                        <Label>Animation speed</Label>
+                                        <Grid ColumnDefinitions="1*,1*">
+                                            <TextBox Grid.Column="0" Text="{Binding AnimationSpeed}" />
+                                            <ComboBox Grid.Column="1"
+                                                      ItemsSource="{Binding Source={x:Type undertalem:AnimationSpeedType}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                      SelectedItem="{Binding AnimationSpeedType}" />
+                                        </Grid>
+                                    </Grid>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="undertalem:UndertaleUITextItemInstance">
+                                    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                                        <Label>Visible</Label>
+                                        <CheckBox IsChecked="{Binding Visible}" />
+
+                                        <Label>Anchor</Label>
+                                        <TextBox Text="{Binding Anchor}" />
+
+                                        <Label>Stretch width</Label>
+                                        <CheckBox IsChecked="{Binding StretchWidth}" />
+
+                                        <Label>Stretch height</Label>
+                                        <CheckBox IsChecked="{Binding StretchHeight}" />
+
+                                        <Label>Tile H</Label>
+                                        <CheckBox IsChecked="{Binding TileH}" />
+
+                                        <Label>Tile V</Label>
+                                        <CheckBox IsChecked="{Binding TileV}" />
+
+                                        <Label>Keep aspect</Label>
+                                        <CheckBox IsChecked="{Binding KeepAspect}" />
+
+                                        <!-- Inherited from UndertaleRoom.TextItemInstance - copied from UndertaleRoomView.axaml -->
+
+                                        <Label>Name</Label>
+                                        <l:UndertaleStringReferenceView Reference="{Binding Name}" />
+
+                                        <Label>X</Label>
+                                        <TextBox Text="{Binding X}" />
+
+                                        <Label>Y</Label>
+                                        <TextBox Text="{Binding Y}" />
+
+                                        <Label>Font</Label>
+                                        <l:UndertaleResourceReferenceView Reference="{Binding Font}" ReferenceType="undertalem:UndertaleFont" />
+
+                                        <Label>Scale X</Label>
+                                        <TextBox Text="{Binding ScaleX}" />
+
+                                        <Label>Scale Y</Label>
+                                        <TextBox Text="{Binding ScaleY}" />
+
+                                        <Label>Rotation</Label>
+                                        <TextBox Text="{Binding Rotation}" />
+
+                                        <Label>Color</Label>
+                                        <ColorPicker Color="{Binding Color, Converter={StaticResource UndertaleColorToColorConverter}}" />
+
+                                        <Label>Origin X</Label>
+                                        <TextBox Text="{Binding OriginX}" />
+
+                                        <Label>Origin Y</Label>
+                                        <TextBox Text="{Binding OriginY}" />
+
+                                        <Label>Text</Label>
+                                        <l:UndertaleStringReferenceView Reference="{Binding Text}" />
+
+                                        <Label>Alignment</Label>
+                                        <TextBox Text="{Binding Alignment}" />
+
+                                        <Label>Char spacing</Label>
+                                        <TextBox Text="{Binding CharSpacing}" />
+
+                                        <Label>Line spacing</Label>
+                                        <TextBox Text="{Binding LineSpacing}" />
+
+                                        <Label>Frame width</Label>
+                                        <TextBox Text="{Binding FrameWidth}" />
+
+                                        <Label>Frame height</Label>
+                                        <TextBox Text="{Binding FrameHeight}" />
+
+                                        <Label>Wrap</Label>
+                                        <CheckBox IsChecked="{Binding Wrap}" />
+
+                                        <Label>Paragraph spacing</Label>
+                                        <TextBox Text="{Binding ParagraphSpacing}" />
+
+                                        <Label>Wrap mode</Label>
+                                        <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleSequence+TextKeyframes+WrapMode}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                  SelectedItem="{Binding WrapMode}" />
+
+                                        <Label>Origin</Label>
+                                        <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleSequence+TextKeyframes+Origin}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                  SelectedItem="{Binding Origin}" />
+                                    </Grid>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="undertalem:UndertaleUIEffectLayer">
+                                    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                                        <Label>Enabled</Label>
+                                        <CheckBox IsChecked="{Binding Enabled}" />
+
+                                        <Label>Effect type</Label>
+                                        <l:UndertaleStringReferenceView Reference="{Binding EffectType}" />
+
+                                        <Label>Effect properties</Label>
+                                        <l:EditableDataGrid ItemsSource="{Binding Properties}" ItemFactory="{Binding #Root.DataContext.CreateEffectProperty}">
+                                            <l:EditableDataGrid.Columns>
+                                                <DataGridTemplateColumn Header="Kind" Width="1*">
+                                                    <DataGridTemplateColumn.CellTemplate>
+                                                        <DataTemplate x:DataType="undertalem:UndertaleRoom+EffectProperty">
+                                                            <ComboBox
+                                                                ItemsSource="{Binding Source={x:Type undertalem:UndertaleRoom+EffectProperty+PropertyType}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                                SelectedItem="{Binding Kind}" />
+                                                        </DataTemplate>
+                                                    </DataGridTemplateColumn.CellTemplate>
+                                                </DataGridTemplateColumn>
+                                                <DataGridTemplateColumn Header="Name" Width="1*">
+                                                    <DataGridTemplateColumn.CellTemplate>
+                                                        <DataTemplate x:DataType="undertalem:UndertaleRoom+EffectProperty">
+                                                            <l:UndertaleStringReferenceView Reference="{Binding Name}" />
+                                                        </DataTemplate>
+                                                    </DataGridTemplateColumn.CellTemplate>
+                                                </DataGridTemplateColumn>
+                                                <DataGridTemplateColumn Header="Value" Width="1*">
+                                                    <DataGridTemplateColumn.CellTemplate>
+                                                        <DataTemplate x:DataType="undertalem:UndertaleRoom+EffectProperty">
+                                                            <l:UndertaleStringReferenceView Reference="{Binding Value}" />
+                                                        </DataTemplate>
+                                                    </DataGridTemplateColumn.CellTemplate>
+                                                </DataGridTemplateColumn>
+                                            </l:EditableDataGrid.Columns>
+                                        </l:EditableDataGrid>
+                                    </Grid>
+                                </DataTemplate>
+                            </ContentControl.DataTemplates>
+                        </ContentControl>
+
+                        <ContentControl Content="{Binding #NodesTreeView.((undertalem:UndertaleUINode)SelectedItem).Node}">
+                            <ContentControl.DataTemplates>
+                                <DataTemplate DataType="undertalem:UndertaleUIContainer">
+                                    <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                                        <Label>Align items</Label>
+                                        <ComboBox ItemsSource="{Binding Source={x:Type undertalem:IUndertaleFlexProperties+AlignmentKind}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                    SelectedItem="{Binding AlignItems}" />
+
+                                        <Label>Flex direction</Label>
+                                        <ComboBox ItemsSource="{Binding Source={x:Type undertalem:IUndertaleFlexProperties+FlexDirectionKind}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                    SelectedItem="{Binding FlexDirection}" />
+
+                                        <Label>Flex wrap</Label>
+                                        <ComboBox ItemsSource="{Binding Source={x:Type undertalem:IUndertaleFlexProperties+WrapKind}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                    SelectedItem="{Binding FlexWrap}" />
+
+                                        <Label>Align content</Label>
+                                        <ComboBox ItemsSource="{Binding Source={x:Type undertalem:IUndertaleFlexProperties+AlignmentKind}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                    SelectedItem="{Binding AlignContent}" />
+
+                                        <Label>Gap row</Label>
+                                        <TextBox Text="{Binding GapRow}" />
+
+                                        <Label>Gap column</Label>
+                                        <TextBox Text="{Binding GapColumn}" />
+
+                                        <Label>Padding left</Label>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox Text="{Binding PaddingLeft.Value}" />
+                                            <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleFlexValue+UnitKind}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                        SelectedItem="{Binding PaddingLeft.Unit}" />
+                                        </StackPanel>
+
+                                        <Label>Padding right</Label>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox Text="{Binding PaddingRight.Value}" />
+                                            <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleFlexValue+UnitKind}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                        SelectedItem="{Binding PaddingRight.Unit}" />
+                                        </StackPanel>
+
+                                        <Label>Padding top</Label>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox Text="{Binding PaddingTop.Value}" />
+                                            <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleFlexValue+UnitKind}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                        SelectedItem="{Binding PaddingTop.Unit}" />
+                                        </StackPanel>
+
+                                        <Label>Padding bottom</Label>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBox Text="{Binding PaddingBottom.Value}" />
+                                            <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleFlexValue+UnitKind}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                        SelectedItem="{Binding PaddingBottom.Unit}" />
+                                        </StackPanel>
+
+                                        <Label>Justify content</Label>
+                                        <ComboBox ItemsSource="{Binding Source={x:Type undertalem:IUndertaleFlexProperties+JustifyKind}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                    SelectedItem="{Binding JustifyContent}" />
+
+                                        <Label>Layout direction</Label>
+                                        <ComboBox ItemsSource="{Binding Source={x:Type undertalem:IUndertaleFlexProperties+LayoutDirectionKind}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                                    SelectedItem="{Binding LayoutDirection}" />
+                                    </Grid>
+                                </DataTemplate>
+
+                                <DataTemplate DataType="undertalem:IUndertaleUINodeData">
+                                    <!-- Empty -->
+                                </DataTemplate>
+                            </ContentControl.DataTemplates>
+                        </ContentControl>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -1,0 +1,47 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:l="clr-namespace:UndertaleModToolAvalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="UndertaleModToolAvalonia.DataExplorerView"
+             x:DataType="l:DataExplorerViewModel">
+    <UserControl.Resources>
+        <ContextMenu x:Key="ListMenu">
+            <MenuItem Header="_Add" Click="ContextMenu_Add_Click"/>
+        </ContextMenu>
+        <ContextMenu x:Key="SingleMenu">
+            <MenuItem Header="_Open" Click="ContextMenu_Open_Click"/>
+            <MenuItem Header="Open in _new tab" Click="ContextMenu_OpenInNewTab_Click"/>
+        </ContextMenu>
+        <ContextMenu x:Key="ResourceMenu">
+            <MenuItem Header="_Open" Click="ContextMenu_Open_Click"/>
+            <MenuItem Header="Open in _new tab" Click="ContextMenu_OpenInNewTab_Click"/>
+            <MenuItem Header="_Copy name" Click="ContextMenu_CopyName_Click"/>
+            <MenuItem Header="_Find references to resource" Click="ContextMenu_FindReferences_Click"/>
+            <MenuItem Header="_Swap to position" Click="ContextMenu_Move_Click"/>
+            <MenuItem Header="_Remove" Click="ContextMenu_Remove_Click"/>
+        </ContextMenu>
+        <l:DataExplorerItemToContextMenuConverter x:Key="DataExplorerItemToContextMenuConverter"
+                                                  ListMenu="{StaticResource ListMenu}"
+                                                  SingleMenu="{StaticResource SingleMenu}"
+                                                  ResourceMenu="{StaticResource ResourceMenu}"/>
+    </UserControl.Resources>
+    
+    <TreeDataGrid Name="MainTreeDataGrid" ShowColumnHeaders="False"
+                  DoubleTapped="MainTreeDataGrid_DoubleTapped"
+                  KeyDown="MainTreeDataGrid_KeyDown" >
+        <TreeDataGrid.Styles>
+            <Style Selector="TreeDataGridRow TreeDataGridExpanderCell" x:DataType="l:DataExplorerViewModel+Item">
+                <Setter Property="(Interaction.Behaviors)">
+                    <BehaviorCollectionTemplate>
+                        <BehaviorCollection>
+                            <ContextDragBehavior />
+                        </BehaviorCollection>
+                    </BehaviorCollectionTemplate>
+                </Setter>
+                <Setter Property="ContextMenu" Value="{Binding ., Converter={StaticResource DataExplorerItemToContextMenuConverter}}"/>
+            </Style>
+        </TreeDataGrid.Styles>
+    </TreeDataGrid>
+</UserControl>
