@@ -520,6 +520,49 @@ namespace UndertaleModLib
             GeneralInfo.Version = ver;
         }
 
+        /// <summary>
+        /// Known exact RUNTIME builds for coarse format-level detections.
+        /// data.win stores 2.0.0.0 for all GMS2+, so UTMT only detects the format level
+        /// (e.g. 2022.3), which alone gives nonexistent versions like 2022.3.0.0.
+        /// Map to real runtimes (NOT IDE versions, e.g. 2022.3 IDE 625 vs Runtime 497).
+        /// Sources: local installs (matching.runtime), YoYo release notes/FAQ,
+        /// gmclan runtime history, community reports (e.g. Pizza Tower 2022.0.1.30).
+        /// </summary>
+        private static readonly Dictionary<(uint Major, uint Minor), (uint Release, uint Build)> LatestRuntimeForMinor = new()
+        {
+            { (2022, 2), (1, 491) }, // runtime 2022.2.1.491 (gmclan runtime history)
+            { (2022, 3), (0, 497) }, // runtime 2022.3.0.497 (IDE 625); single 2022.3 release
+            { (2022, 5), (2, 13) }, // runtime 2022.5.2.13 (gmclan runtime history; post may 2022 build reset)
+            { (2022, 8), (0, 50) }, // runtime 2022.8.0.50 (YoYo FAQ: IDE 34 / Runtime 50)
+            { (2023, 1), (1, 81) }, // runtime 2023.1.1.81 (matching.runtime; IDE 62)
+            { (2023, 2), (0, 87) }, // runtime 2023.2.0.87
+            { (2023, 4), (0, 113) }, // runtime 2023.4.0.113
+            { (2023, 6), (0, 139) }, // runtime 2023.6.0.139
+            { (2023, 8), (2, 152) }, // runtime 2023.8.2.152 (latest Patch 2)
+            { (2023, 11), (1, 160) }, // runtime 2023.11.1.160
+            { (2024, 2), (0, 163) }, // runtime 2024.2.0.163 (IDE 132)
+            { (2024, 4), (1, 202) }, // runtime 2024.4.1.202 (latest optional fix; matching is 201)
+            { (2024, 6), (2, 208) }, // runtime 2024.6.2.208
+            { (2024, 8), (1, 218) }, // runtime 2024.8.1.218
+            { (2024, 11), (0, 226) }, // runtime 2024.11.0.226
+            { (2024, 13), (1, 242) }, // runtime 2024.13.1.242
+
+            // TODO: (2022,1), (2022,6), (2024,14), exact runtime builds not yet confirmed.
+        };
+
+        /// <summary>
+        /// Exact runtime builds for detections that already specify a Release
+        /// (i.e. format differences between patches, e.g. 2024.14.4 vs 2024.14.1).
+        /// </summary>
+        private static readonly Dictionary<(uint Major, uint Minor, uint Release), uint> ExactBuildForRelease = new()
+        {
+            { (2, 0, 6), 96 }, // oldest runtime 2.0.6.96 (code comment)
+            { (2, 3, 2), 423 }, // runtime 2.3.2.423 (gmclan runtime history, "since runtime 420")
+            { (2, 3, 7), 474 }, // runtime 2.3.7.474 (IDE 606)
+            { (2024, 14, 4), 268 }, // runtime 2024.14.4.268 (releases page; IDE 222)
+
+            // TODO: (2,2,1), (2,3,1), (2,3,6), (2024,14,1),  exact runtime builds not yet confirmed.
+        };
 
         /// <summary>
         /// Sets the GMS2+ version flag in GeneralInfo.
@@ -532,6 +575,21 @@ namespace UndertaleModLib
         public void SetGMS2Version(uint major, uint minor = 0, uint release = 0, uint build = 0, bool? isLTS = null)
         {
             VerifyMajorGMS2Version(major);
+            if (build == 0)
+            {
+                if (release == 0)
+                {
+                    if (LatestRuntimeForMinor.TryGetValue((major, minor), out var exact))
+                    {
+                        release = exact.Release;
+                        build = exact.Build;
+                    }
+                }
+                else if (ExactBuildForRelease.TryGetValue((major, minor, release), out uint exactBuild))
+                {
+                    build = exactBuild;
+                }
+            }
 
             GeneralInfo.Major = major;
             GeneralInfo.Minor = minor;
@@ -575,17 +633,29 @@ namespace UndertaleModLib
                 return false;
             }
 
-            if (GeneralInfo.Major != major)
-                return (GeneralInfo.Major > major);
+            uint effectiveMajor = GeneralInfo.Major;
+            uint effectiveMinor = GeneralInfo.Minor;
+            uint effectiveRelease = GeneralInfo.Release;
+            uint effectiveBuild = GeneralInfo.Build;
 
-            if (GeneralInfo.Minor != minor)
-                return (GeneralInfo.Minor > minor);
+            if (GeneralInfo.Branch == UndertaleGeneralInfo.BranchType.LTS2022_0 && effectiveMajor == 2022 && effectiveMinor == 0)
+            {
+                effectiveMinor = 9;
+                if (effectiveRelease == 0 && effectiveBuild == 0)
+                    effectiveRelease = 1;
+            }
 
-            if (GeneralInfo.Release != release)
-                return (GeneralInfo.Release > release);
+            if (effectiveMajor != major)
+                return (effectiveMajor > major);
 
-            if (GeneralInfo.Build != build)
-                return (GeneralInfo.Build > build);
+            if (effectiveMinor != minor)
+                return (effectiveMinor > minor);
+
+            if (effectiveRelease != release)
+                return (effectiveRelease > release);
+
+            if (effectiveBuild != build)
+                return (effectiveBuild > build);
 
             return true; // The version is exactly what supplied.
         }
