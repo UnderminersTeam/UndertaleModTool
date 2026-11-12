@@ -244,8 +244,7 @@ public static class UndertaleDataExtensionMethods
         return func;
     }
 
-    // TODO: param `list` unused. can it be removed?
-    public static InstanceType CalculateInstType(this IList<UndertaleVariable> list, InstanceType inst, bool isBuiltin, UndertaleData data)
+    public static InstanceType CalculateInstType(InstanceType inst, bool isBuiltin, UndertaleData data)
     {
         // Local variables are defined distinctly
         if (inst == InstanceType.Local)
@@ -323,7 +322,7 @@ public static class UndertaleDataExtensionMethods
     public static UndertaleVariable EnsureDefined(this IList<UndertaleVariable> list, UndertaleString nameString, int nameStringId, InstanceType inst, bool isBuiltin, UndertaleData data)
     {
         // Calculate correct instance type
-        inst = list.CalculateInstType(inst, isBuiltin, data);
+        inst = CalculateInstType(inst, isBuiltin, data);
 
         // Search for existing variable that can be used
         foreach (UndertaleVariable variable in list)
