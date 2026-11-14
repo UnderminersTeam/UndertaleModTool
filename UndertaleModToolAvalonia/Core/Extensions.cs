@@ -5,6 +5,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Threading;
+using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia;
 
@@ -61,6 +62,21 @@ public static class Extensions
             WindowsDllImports.SetDarkTitleBar(window, isDark);
             window.Activate();
         }
+    }
+
+    /// <summary>
+    /// Whether the glyph has no rectangle on the font texture yet.
+    /// </summary>
+    public static bool IsEmpty(this UndertaleFont.Glyph glyph) => glyph.SourceWidth == 0 || glyph.SourceHeight == 0;
+
+    /// <summary>
+    /// Whether this point of the font texture, in texture pixels, is inside the glyph's rectangle.
+    /// </summary>
+    public static bool Contains(this UndertaleFont.Glyph glyph, double x, double y)
+    {
+        bool isInsideX = x >= glyph.SourceX && x < glyph.SourceX + glyph.SourceWidth;
+        bool isInsideY = y >= glyph.SourceY && y < glyph.SourceY + glyph.SourceHeight;
+        return isInsideX && isInsideY;
     }
 }
 

@@ -80,16 +80,36 @@
                 <TextBox Text="{Binding Font.LineHeight}" />
             </Grid>
 
+            <TextBlock HorizontalAlignment="Center" FontStyle="Italic" Foreground="Gray" TextWrapping="Wrap"
+                       Text="Hint: click a glyph on the texture to select it in &quot;Glyphs&quot;." />
+
             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center"
                           MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
-                <l:SKImageViewer Image="{Binding Font.Texture}" />
+                <Panel Cursor="Hand" Background="Transparent" PointerPressed="TextureImage_PointerPressed" PointerReleased="TextureImage_PointerReleased"
+                       HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <l:SKImageViewer Name="TextureImage" Image="{Binding Font.Texture}" />
+                    <!-- Exactly the image's size, so the overlay's zoom matches the image's and the click mapping. -->
+                    <l:FontGlyphsOverlay Font="{Binding Font}" SelectedGlyph="{Binding GlyphsSelected}"
+                                         HorizontalAlignment="Left" VerticalAlignment="Top"
+                                         Width="{Binding #TextureImage.Bounds.Width}" Height="{Binding #TextureImage.Bounds.Height}" />
+                </Panel>
             </ScrollViewer>
 
-            <!-- TODO: Click and edit glyphs -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Click="EditRectangleButton_Click" IsEnabled="{Binding GlyphsSelected, Converter={x:Static ObjectConverters.IsNotNull}}">
+                    <Button.Content>
+                        <MultiBinding Converter="{x:Static l:UndertaleFontView.EditRectangleButtonText}">
+                            <Binding Path="GlyphsSelected.SourceWidth" />
+                            <Binding Path="GlyphsSelected.SourceHeight" />
+                        </MultiBinding>
+                    </Button.Content>
+                </Button>
+                <Button Click="CreateGlyphButton_Click">Create an empty glyph</Button>
+            </StackPanel>
 
-            <Expander Header="Glyphs">
+            <Expander Name="GlyphsExpander" Header="Glyphs">
                 <StackPanel>
-                    <l:EditableDataGrid ItemsSource="{Binding Font.Glyphs}" ItemFactory="{Binding CreateGlyph}" SelectionChanged="{Binding GlyphsSelectedChanged}">
+                    <l:EditableDataGrid Name="GlyphsGrid" ItemsSource="{Binding Font.Glyphs}" ItemFactory="{Binding CreateGlyph}" SelectionChanged="{Binding GlyphsSelectedChanged}">
                         <l:EditableDataGrid.Columns>
                             <DataGridTemplateColumn Header="Code point" Width="3*">
                                 <DataGridTemplateColumn.CellTemplate>
