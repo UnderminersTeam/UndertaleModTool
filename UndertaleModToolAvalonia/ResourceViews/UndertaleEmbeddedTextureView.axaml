@@ -45,7 +45,7 @@
                     <l:SKImageViewer Name="TextureImage" Image="{Binding EmbeddedTexture.TextureData.Image}" />
                     <Canvas IsHitTestVisible="False">
                         <Border Name="HoveredItemBorder" IsVisible="False"
-                                Background="LightBlue" BorderBrush="Blue" BorderThickness="2" Opacity="0.65" />
+                                BorderBrush="{DynamicResource SystemControlHighlightAccentBrush}" BorderThickness="1" Opacity="0.5" />
                     </Canvas>
                 </Panel>
             </ScrollViewer>
