@@ -9,6 +9,9 @@ public partial class UndertaleEmbeddedTextureView : UserControl
 {
     UndertaleTexturePageItem? hoveredItem;
 
+    // Only a click that also started on the texture opens an item, not a drag (e.g. from the scrollbar) that ends over it.
+    bool isPressedOnTexture;
+
     public UndertaleEmbeddedTextureView()
     {
         InitializeComponent();
@@ -48,9 +51,17 @@ public partial class UndertaleEmbeddedTextureView : UserControl
         HoveredItemBorder.IsVisible = false;
     }
 
+    private void TextureImage_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        PointerPointProperties properties = e.GetCurrentPoint(TextureImage).Properties;
+        isPressedOnTexture = properties.IsLeftButtonPressed || properties.IsMiddleButtonPressed;
+    }
+
     private void TextureImage_PointerReleased(object? sender, PointerReleasedEventArgs e)
     {
-        if (hoveredItem is null || DataContext is not UndertaleEmbeddedTextureViewModel vm)
+        bool isClick = isPressedOnTexture;
+        isPressedOnTexture = false;
+        if (!isClick || hoveredItem is null || DataContext is not UndertaleEmbeddedTextureViewModel vm)
             return;
 
         if (e.InitialPressMouseButton == MouseButton.Left)

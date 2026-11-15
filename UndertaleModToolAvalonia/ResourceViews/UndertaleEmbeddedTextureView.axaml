@@ -41,7 +41,7 @@
             <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center"
                           MaxHeight="{Binding $parent[ScrollViewer].Viewport.Height}">
                 <Panel Cursor="Hand" Background="Transparent"
-                       PointerMoved="TextureImage_PointerMoved" PointerExited="TextureImage_PointerExited" PointerReleased="TextureImage_PointerReleased">
+                       PointerPressed="TextureImage_PointerPressed" PointerMoved="TextureImage_PointerMoved" PointerExited="TextureImage_PointerExited" PointerReleased="TextureImage_PointerReleased">
                     <l:SKImageViewer Name="TextureImage" Image="{Binding EmbeddedTexture.TextureData.Image}" />
                     <Canvas IsHitTestVisible="False">
                         <Border Name="HoveredItemBorder" IsVisible="False"
