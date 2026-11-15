@@ -20,30 +20,30 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="12.1.4" />
+        <PackageReference Include="Avalonia" Version="12.1.6" />
         <PackageReference Include="Avalonia.AvaloniaEdit" Version="12.0.0" />
-        <PackageReference Include="Avalonia.Controls.ColorPicker" Version="12.1.4" />
+        <PackageReference Include="Avalonia.Controls.ColorPicker" Version="12.1.6" />
         <PackageReference Include="Avalonia.Controls.DataGrid" Version="12.1.2" />
-        <PackageReference Include="Avalonia.Desktop" Version="12.1.4" />
-        <PackageReference Include="Avalonia.Markup.Xaml.Loader" Version="12.1.4" />
-        <PackageReference Include="Avalonia.Skia" Version="12.1.4" />
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.4" />
+        <PackageReference Include="Avalonia.Desktop" Version="12.1.6" />
+        <PackageReference Include="Avalonia.Markup.Xaml.Loader" Version="12.1.6" />
+        <PackageReference Include="Avalonia.Skia" Version="12.1.6" />
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.6" />
         <PackageReference Include="AvaloniaEdit.TextMate" Version="12.0.0" />
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="5.9.0" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.13" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="5.12.0" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="11.0.0" />
         <PackageReference Include="ReactiveUI.Avalonia" Version="12.1.6" />
-        <PackageReference Include="SDL3-CS" Version="3.4.18" />
-        <PackageReference Include="SDL3-CS.Linux" Version="3.4.18" />
-        <PackageReference Include="SDL3-CS.Linux.Mixer" Version="3.2.4.13" />
-        <PackageReference Include="SDL3-CS.MacOS" Version="3.4.18" />
-        <PackageReference Include="SDL3-CS.MacOS.Mixer" Version="3.2.4.13" />
-        <PackageReference Include="SDL3-CS.Windows" Version="3.4.18" />
-        <PackageReference Include="SDL3-CS.Windows.Mixer" Version="3.2.4.13" />
-        <PackageReference Include="SkiaSharp" Version="4.153.1" />
-        <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="4.153.1" />
-        <PackageReference Include="TreeDataGrid" Version="12.0.0.7" />
-        <PackageReference Include="Xaml.Behaviors" Version="12.0.7" />
+        <PackageReference Include="SDL3-CS" Version="3.4.20" />
+        <PackageReference Include="SDL3-CS.Linux" Version="3.4.20" />
+        <PackageReference Include="SDL3-CS.Linux.Mixer" Version="3.2.4.15" />
+        <PackageReference Include="SDL3-CS.MacOS" Version="3.4.20" />
+        <PackageReference Include="SDL3-CS.MacOS.Mixer" Version="3.2.4.15" />
+        <PackageReference Include="SDL3-CS.Windows" Version="3.4.20" />
+        <PackageReference Include="SDL3-CS.Windows.Mixer" Version="3.2.4.15" />
+        <PackageReference Include="SkiaSharp" Version="4.156.1" />
+        <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="4.156.1" />
+        <PackageReference Include="TreeDataGrid" Version="12.1.5" />
+        <PackageReference Include="Xaml.Behaviors" Version="12.1.5" />
     </ItemGroup>
 
     <ItemGroup>
