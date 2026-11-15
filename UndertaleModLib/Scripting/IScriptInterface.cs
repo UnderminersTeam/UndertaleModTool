@@ -445,6 +445,17 @@ public interface IScriptInterface
     void ChangeSelection(object newSelection, bool inNewTab = false);
 
     /// <summary>
+    /// Renders a room the way the GUI's room editor shows it and saves it as a PNG image.
+    /// </summary>
+    /// <param name="room">The room to render.</param>
+    /// <param name="filePath">Where to save the PNG image.</param>
+    /// <remarks>Only GUIs with a room renderer support this; the default implementation throws.</remarks>
+    void ExportRoomAsPNG(UndertaleRoom room, string filePath)
+    {
+        throw new NotSupportedException("Exporting rooms as images is not supported here.");
+    }
+
+    /// <summary>
     /// Used to prompt the user for a directory.
     /// </summary>
     /// <returns>The directory selected by the user.</returns>

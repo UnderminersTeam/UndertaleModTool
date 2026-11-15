@@ -128,9 +128,7 @@ public class Scripting
                 // Used by bundled scripts: System.Timers (AutoBackup) and System.Text.Json (the JSON importers and exporters).
                 "System.ComponentModel.TypeConverter",
                 "System.Text.Json",
-                "System.Text.Encodings.Web",
-                // The app itself, for scripts that need more than the scripting API (e.g. ExportAllRoomsToPNG uses its room renderer).
-                "UndertaleModToolAvalonia")
+                "System.Text.Encodings.Web")
             .WithFilePath(filePath)
             .WithFileEncoding(Encoding.Default)
             .WithEmitDebugInformation(true),
@@ -479,6 +477,17 @@ public class ScriptGlobals : IScriptInterface, IDisposable
     public void ScriptMessage(string message)
     {
         mainVM.View!.MessageDialog(message, title: "Script message").WaitOnDispatcherFrame();
+    }
+
+    public void ExportRoomAsPNG(UndertaleRoom room, string filePath)
+    {
+        // The room renderer shares the app's image cache with the open editors, and that cache isn't thread-safe.
+        WaitOnUIThread(async () =>
+        {
+            using FileStream file = File.Create(filePath);
+            await ImportExport.ExportRoomAsPNG(room, file);
+            return true;
+        });
     }
 
     public void ScriptOpenURL(string url)

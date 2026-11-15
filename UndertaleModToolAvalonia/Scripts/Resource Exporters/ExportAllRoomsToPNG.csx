@@ -1,10 +1,9 @@
 // Exports every room as a PNG image.
-// Version for the cross-platform UndertaleModTool: it renders rooms with the app's own room renderer
-// (the same one as "Save as image" in the room editor), instead of driving the WPF room editor.
+// Version for the cross-platform UndertaleModTool: it renders rooms with ExportRoomAsPNG
+// (the same renderer as "Save as image" in the room editor), instead of driving the WPF room editor.
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using UndertaleModToolAvalonia;
 
 EnsureDataLoaded();
 
@@ -17,35 +16,35 @@ StartProgressBarUpdater();
 
 int skippedCount = 0;
 
-// Rooms are rendered on the UI thread, because the room renderer shares the app's image cache with the open editors,
-// and that cache is not thread-safe. A short pause after each room lets the progress window redraw.
-foreach (UndertaleRoom room in Data.Rooms)
+// The loop runs off the UI thread so the progress window stays responsive.
+await Task.Run(() =>
 {
-    if (IsAppClosed)
-        break;
-
-    bool hasNoImage = room is null || room.Width == 0 || room.Height == 0;
-    if (hasNoImage)
+    foreach (UndertaleRoom room in Data.Rooms)
     {
-        skippedCount++;
+        if (IsAppClosed)
+            break;
+
+        bool hasNoImage = room is null || room.Width == 0 || room.Height == 0;
+        if (hasNoImage)
+        {
+            skippedCount++;
+            IncrementProgressParallel();
+            continue;
+        }
+
+        string roomName = room.Name?.Content ?? $"room_{Data.Rooms.IndexOf(room)}";
+        try
+        {
+            ExportRoomAsPNG(room, Path.Join(exportFolder, roomName + ".png"));
+        }
+        catch (Exception e)
+        {
+            throw new ScriptException($"An error occurred while exporting room \"{roomName}\".\n{e}");
+        }
+
         IncrementProgressParallel();
-        continue;
     }
-
-    string roomName = room.Name?.Content ?? $"room_{Data.Rooms.IndexOf(room)}";
-    try
-    {
-        using FileStream file = File.Create(Path.Join(exportFolder, roomName + ".png"));
-        await ImportExport.ExportRoomAsPNG(room, file);
-    }
-    catch (Exception e)
-    {
-        throw new ScriptException($"An error occurred while exporting room \"{roomName}\".\n{e}");
-    }
-
-    IncrementProgressParallel();
-    await Task.Delay(1);
-}
+});
 
 await StopProgressBarUpdater();
 HideProgressBar();
