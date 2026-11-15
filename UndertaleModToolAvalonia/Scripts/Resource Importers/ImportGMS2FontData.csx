@@ -30,6 +30,9 @@ if (importFile == null)
 JsonDocumentOptions yyJsonOptions = new() { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip };
 JsonObject fontData = JsonNode.Parse(File.ReadAllText(importFile), documentOptions: yyJsonOptions).AsObject();
 
+// Newtonsoft's JToken casts accepted numbers written as floats (12.0); System.Text.Json's integer casts throw on them.
+double ReadNumber(JsonNode node) => (double)node;
+
 string fontPath = Path.GetDirectoryName(importFile);
 string yyFilename = Path.GetFileNameWithoutExtension(importFile);
 string fontName = (string)fontData["name"] ?? yyFilename;
@@ -126,30 +129,30 @@ font.Texture = texturePageItem;
 font.Bold = (bool)fontData["bold"];
 font.Italic = (bool)fontData["italic"];
 // FIXME: Potentially causes float precision to be lost
-font.EmSize = (uint)(double)fontData["size"];
+font.EmSize = (uint)ReadNumber(fontData["size"]);
 // Save font size as a float in GMS2.3+ (shouldn't UML always save EmSize as a float for GMS2.3+ games??)
 font.EmSizeIsFloat = Data.IsVersionAtLeast(2, 3);
-font.Charset = (byte)fontData["charset"];
-font.AntiAliasing = (byte)fontData["AntiAlias"];
+font.Charset = (byte)ReadNumber(fontData["charset"]);
+font.AntiAliasing = (byte)ReadNumber(fontData["AntiAlias"]);
 // FIXME: ??? All YY files I've saw don't contain this
 font.ScaleX = 1;
 font.ScaleY = 1;
 // Ascender is GM2022.2+
 if (fontData.ContainsKey("ascender"))
-    font.Ascender = (uint)fontData["ascender"];
+    font.Ascender = (uint)ReadNumber(fontData["ascender"]);
 if (fontData.ContainsKey("ascenderOffset"))
-    font.AscenderOffset = (int)fontData["ascenderOffset"];
+    font.AscenderOffset = (int)ReadNumber(fontData["ascenderOffset"]);
 if (fontData.ContainsKey("usesSDF") && (bool)fontData["usesSDF"] && fontData.ContainsKey("sdfSpread"))
-    font.SDFSpread = (uint)fontData["sdfSpread"];
+    font.SDFSpread = (uint)ReadNumber(fontData["sdfSpread"]);
 if (fontData.ContainsKey("lineHeight"))
-    font.LineHeight = (uint)fontData["lineHeight"];
+    font.LineHeight = (uint)ReadNumber(fontData["lineHeight"]);
 
 // FIXME: Too complicated?
 List<int> charRangesUppersAndLowers = new();
 foreach (JsonNode range in fontData["ranges"].AsArray())
 {
-    charRangesUppersAndLowers.Add((int)range["upper"]);
-    charRangesUppersAndLowers.Add((int)range["lower"]);
+    charRangesUppersAndLowers.Add((int)ReadNumber(range["upper"]));
+    charRangesUppersAndLowers.Add((int)ReadNumber(range["lower"]));
 }
 charRangesUppersAndLowers.Sort();
 // FIXME: Check the range by ourselves if ranges don't have it probably
@@ -164,13 +167,13 @@ foreach (KeyValuePair<string, JsonNode> glyphKVEntry in fontData["glyphs"].AsObj
     var glyphData = glyphKVEntry.Value;
     glyphs.Add(new UndertaleFont.Glyph()
     {
-        Character = (ushort)glyphData["character"],
-        SourceX = (ushort)glyphData["x"],
-        SourceY = (ushort)glyphData["y"],
-        SourceWidth = (ushort)glyphData["w"],
-        SourceHeight = (ushort)glyphData["h"],
-        Shift = (short)glyphData["shift"],
-        Offset = (short)glyphData["offset"],
+        Character = (ushort)ReadNumber(glyphData["character"]),
+        SourceX = (ushort)ReadNumber(glyphData["x"]),
+        SourceY = (ushort)ReadNumber(glyphData["y"]),
+        SourceWidth = (ushort)ReadNumber(glyphData["w"]),
+        SourceHeight = (ushort)ReadNumber(glyphData["h"]),
+        Shift = (short)ReadNumber(glyphData["shift"]),
+        Offset = (short)ReadNumber(glyphData["offset"]),
     });
 }
 // Sort glyphs like UndertaleFontEditor to be safe
@@ -184,12 +187,12 @@ glyphs = font.Glyphs.ToList();
 foreach (JsonNode kerningPair in fontData["kerningPairs"]?.AsArray() ?? new JsonArray())
 {
     // Why do I need to do this. Thanks YoYo
-    var first = (ushort)kerningPair["first"];
+    var first = (ushort)ReadNumber(kerningPair["first"]);
     var glyph = glyphs.Find(x => x.Character == first);
     glyph.Kerning.Add(new UndertaleFont.Glyph.GlyphKerning()
     {
-        Character = (short)kerningPair["second"],
-        ShiftModifier = (short)kerningPair["amount"],
+        Character = (short)ReadNumber(kerningPair["second"]),
+        ShiftModifier = (short)ReadNumber(kerningPair["amount"]),
     });
 }
 

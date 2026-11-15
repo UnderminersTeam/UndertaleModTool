@@ -481,13 +481,17 @@ public class ScriptGlobals : IScriptInterface, IDisposable
 
     public void ExportRoomAsPNG(UndertaleRoom room, string filePath)
     {
+        ArgumentNullException.ThrowIfNull(room);
+
         // The room renderer shares the app's image cache with the open editors, and that cache isn't thread-safe.
+        // It renders into memory first so a failed render doesn't leave a broken PNG behind, or replace a good one.
+        MemoryStream png = new();
         WaitOnUIThread(async () =>
         {
-            using FileStream file = File.Create(filePath);
-            await ImportExport.ExportRoomAsPNG(room, file);
+            await ImportExport.ExportRoomAsPNG(room, png);
             return true;
         });
+        File.WriteAllBytes(filePath, png.ToArray());
     }
 
     public void ScriptOpenURL(string url)
