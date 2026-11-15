@@ -78,6 +78,19 @@ public class SKImageViewer : Control
     SKImageDrawOperation? skImageDrawOperation;
     double scaling = 1;
 
+    /// <summary>
+    /// The zoom factor, also changed by the user with Ctrl+scroll.
+    /// </summary>
+    public double Scaling
+    {
+        get => scaling;
+        set
+        {
+            scaling = value;
+            Invalidate();
+        }
+    }
+
     public SKImageViewer()
     {
         ClipToBounds = true;

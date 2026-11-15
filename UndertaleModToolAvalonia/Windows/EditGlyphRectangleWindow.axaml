@@ -1,0 +1,34 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:l="clr-namespace:UndertaleModToolAvalonia"
+        mc:Ignorable="d"
+        x:Class="UndertaleModToolAvalonia.EditGlyphRectangleWindow"
+        x:DataType="l:EditGlyphRectangleWindow"
+        DataContext="{Binding $self}"
+        Title="Edit a font glyph rectangle"
+        Width="800" Height="575"
+        WindowStartupLocation="CenterOwner">
+    <Grid RowDefinitions="Auto,1*,Auto" Margin="4">
+        <TextBlock Grid.Row="0" Name="HelpTextBlock" TextWrapping="Wrap" Margin="0,0,0,4" />
+
+        <ScrollViewer Grid.Row="1" Name="TextureScroll" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+            <Panel Name="TexturePanel" Background="Transparent" Focusable="True"
+                   HorizontalAlignment="Left" VerticalAlignment="Top"
+                   PointerPressed="Texture_PointerPressed" PointerMoved="Texture_PointerMoved" PointerReleased="Texture_PointerReleased"
+                   KeyDown="Texture_KeyDown" KeyUp="Texture_KeyUp">
+                <l:SKImageViewer Name="TextureImage" Image="{Binding Font.Texture}" />
+                <!-- Exactly the image's size, so the overlay's zoom matches the image's and the click mapping. -->
+                <l:FontGlyphsOverlay Name="Overlay" Font="{Binding Font}" OtherGlyphs="{Binding Glyphs}"
+                                     HorizontalAlignment="Left" VerticalAlignment="Top"
+                                     Width="{Binding #TextureImage.Bounds.Width}" Height="{Binding #TextureImage.Bounds.Height}" />
+            </Panel>
+        </ScrollViewer>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,4,0,0">
+            <Button Click="SaveButton_Click" IsDefault="True">Save changes</Button>
+            <Button Click="CancelButton_Click" IsCancel="True">Cancel</Button>
+        </StackPanel>
+    </Grid>
+</Window>

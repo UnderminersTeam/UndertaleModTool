@@ -94,6 +94,20 @@ public partial class EditableDataGrid : UserControl
         }
     }
 
+    public void SelectAndScrollTo(object item)
+    {
+        DataGridControl.SelectedItem = item;
+        // The grid may have just become visible (e.g. in a newly expanded Expander), so wait until it's laid out.
+        // The first scroll uses estimated heights for rows it hasn't created yet and can land short of a far item;
+        // once those rows exist, a second scroll lands exactly.
+        void ScrollToItem() => DataGridControl.ScrollIntoView(item, null);
+        Dispatcher.UIThread.Post(() =>
+        {
+            ScrollToItem();
+            Dispatcher.UIThread.Post(ScrollToItem, DispatcherPriority.Background);
+        }, DispatcherPriority.Background);
+    }
+
     public void Add()
     {
         object item;
