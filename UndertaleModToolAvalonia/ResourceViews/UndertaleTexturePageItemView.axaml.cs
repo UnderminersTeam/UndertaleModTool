@@ -2,6 +2,7 @@ using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
+using Avalonia.VisualTree;
 using UndertaleModLib.Models;
 
 namespace UndertaleModToolAvalonia;
@@ -23,18 +24,42 @@ public partial class UndertaleTexturePageItemView : UserControl
     {
         base.OnDataContextChanged(e);
 
-        itemChangedSubscription?.Dispose();
-        itemChangedSubscription = null;
-
+        StopListening();
         texturePageItem = (DataContext as UndertaleTexturePageItemViewModel)?.TexturePageItem;
-        if (texturePageItem is not null)
-        {
-            itemChangedSubscription = texturePageItem
-                .WhenAnyValue(x => x.TexturePage, x => x.SourceX, x => x.SourceY, x => x.SourceWidth, x => x.SourceHeight)
-                .Subscribe(_ => UpdateItemHighlight());
-        }
+        if (this.IsAttachedToVisualTree())
+            StartListening();
 
         UpdateItemHighlight();
+    }
+
+    // The item outlives this view, so only listen to it while the view is shown; otherwise it would keep the view alive.
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        StartListening();
+    }
+
+    protected override void OnDetachedFromVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnDetachedFromVisualTree(e);
+        StopListening();
+    }
+
+    void StartListening()
+    {
+        if (texturePageItem is null || itemChangedSubscription is not null)
+            return;
+
+        // Also runs once right away, so the highlight catches up with changes made while the view was hidden.
+        itemChangedSubscription = texturePageItem
+            .WhenAnyValue(x => x.TexturePage, x => x.SourceX, x => x.SourceY, x => x.SourceWidth, x => x.SourceHeight)
+            .Subscribe(_ => UpdateItemHighlight());
+    }
+
+    void StopListening()
+    {
+        itemChangedSubscription?.Dispose();
+        itemChangedSubscription = null;
     }
 
     void UpdateItemHighlight()
