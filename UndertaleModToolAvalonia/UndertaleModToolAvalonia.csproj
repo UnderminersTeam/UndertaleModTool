@@ -32,7 +32,6 @@
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="5.9.0" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.13" />
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
         <PackageReference Include="ReactiveUI.Avalonia" Version="12.1.6" />
         <PackageReference Include="SDL3-CS" Version="3.4.18" />
         <PackageReference Include="SDL3-CS.Linux" Version="3.4.18" />
@@ -51,16 +50,10 @@
         <ProjectReference Include="..\UndertaleModLib\UndertaleModLib.csproj" />
     </ItemGroup>
 
-    <!-- The bundled scripts live in the WPF project; ship the same ones for the Scripts menu and scripts that use ExePath.
-         Scripts in this project's Scripts folder are port versions of WPF-only ones: they replace the WPF file at the same path. -->
+    <!-- Bundled scripts, shipped next to the app for the Scripts menu and for scripts that use ExePath. -->
     <ItemGroup>
-        <PortScripts Include="Scripts\**" />
         <None Remove="Scripts\**" />
-        <Content Include="..\UndertaleModTool\Scripts\**" Exclude="@(PortScripts->'..\UndertaleModTool\%(Identity)')" LinkBase="Scripts">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-        </Content>
-        <Content Include="@(PortScripts)">
+        <Content Include="Scripts\**">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </Content>

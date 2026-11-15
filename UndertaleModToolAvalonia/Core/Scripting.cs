@@ -124,13 +124,13 @@ public class Scripting
                 "UndertaleModLib.Scripting")
             .AddReferences(
                 "System.Core",
-                "UndertaleModLib")
-            // Also available to scripts in the WPF version, and used by some bundled scripts.
-            .AddReferences(
-                typeof(Newtonsoft.Json.JsonConvert).Assembly,
-                typeof(System.Timers.Timer).Assembly)
-            // Lets port-only scripts use the app itself (e.g. ImportExport), like WPF scripts can use the WPF app.
-            .AddReferences(typeof(Scripting).Assembly)
+                "UndertaleModLib",
+                // Used by bundled scripts: System.Timers (AutoBackup) and System.Text.Json (the JSON importers and exporters).
+                "System.ComponentModel.TypeConverter",
+                "System.Text.Json",
+                "System.Text.Encodings.Web",
+                // The app itself, for scripts that need more than the scripting API (e.g. ExportAllRoomsToPNG uses its room renderer).
+                "UndertaleModToolAvalonia")
             .WithFilePath(filePath)
             .WithFileEncoding(Encoding.Default)
             .WithEmitDebugInformation(true),
