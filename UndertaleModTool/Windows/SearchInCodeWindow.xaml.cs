@@ -41,7 +41,6 @@ namespace UndertaleModTool.Windows
 
         private Regex keywordRegex, nameRegex;
         private GlobalDecompileContext decompileContext;
-        private LoaderDialog loaderDialog;
         private UndertaleCodeEditor.CodeEditorTab editorTab;
 
         public readonly record struct Result(string Code, int LineNumber, string LineText);
@@ -173,10 +172,7 @@ namespace UndertaleModTool.Windows
 
             isSearchInProgress = true;
 
-            loaderDialog = new("Searching...", null);
-            loaderDialog.Owner = this;
-            loaderDialog.PreventClose = true;
-            loaderDialog.Show();
+            mainWindow.InitializeProgressDialog("Searching...", null);
 
             Results.Clear();
 
@@ -192,22 +188,20 @@ namespace UndertaleModTool.Windows
                 decompileContext = new GlobalDecompileContext(mainWindow.Data);
             }
 
-            loaderDialog.SavedStatusText = "Code entries";
-            loaderDialog.Update(null, "Code entries", 0, codeEntriesToSearch.Count);
+            mainWindow.SetProgressBar(null, "Code entries", 0, codeEntriesToSearch.Count);
+            mainWindow.StartProgressBarUpdater();
 
             await Task.Run(() => Parallel.ForEach(codeEntriesToSearch, SearchInUndertaleCode));
             await Task.Run(SortResults);
 
-            loaderDialog.Maximum = null;
-            loaderDialog.Update("Generating result list...");
+            await mainWindow.StopProgressBarUpdater();
+            mainWindow.UpdateProgressStatus("Generating result list...");
 
             editorTab = isInAssembly ? UndertaleCodeEditor.CodeEditorTab.Disassembly : UndertaleCodeEditor.CodeEditorTab.Decompiled;
 
             ShowResults();
 
-            loaderDialog.PreventClose = false;
-            loaderDialog.Close();
-            loaderDialog = null;
+            mainWindow.CloseProgressBar();
 
             mainWindow.IsEnabled = true;
             this.IsEnabled = true;
@@ -246,7 +240,7 @@ namespace UndertaleModTool.Windows
             }
 
             Interlocked.Increment(ref progressCount);
-            Dispatcher.Invoke(() => loaderDialog.ReportProgress(progressCount));
+            mainWindow.IncrementProgressParallel();
         }
 
         private void SearchInCodeText(string codeName, string codeText)
@@ -468,7 +462,7 @@ namespace UndertaleModTool.Windows
 
         private void Window_Closing(object sender, CancelEventArgs e)
         {
-            e.Cancel = (loaderDialog is not null);
+            e.Cancel = isSearchInProgress;
         }
     }
 }
