@@ -17,36 +17,35 @@ StartProgressBarUpdater();
 
 int skippedCount = 0;
 
-// Rendering happens off the UI thread, so the progress window stays responsive.
-await Task.Run(async () =>
+// Rooms are rendered on the UI thread, because the room renderer shares the app's image cache with the open editors,
+// and that cache is not thread-safe. A short pause after each room lets the progress window redraw.
+foreach (UndertaleRoom room in Data.Rooms)
 {
-    foreach (UndertaleRoom room in Data.Rooms)
+    if (IsAppClosed)
+        break;
+
+    bool hasNoImage = room is null || room.Width == 0 || room.Height == 0;
+    if (hasNoImage)
     {
-        if (IsAppClosed)
-            break;
-
-        bool hasNoImage = room is null || room.Width == 0 || room.Height == 0;
-        if (hasNoImage)
-        {
-            skippedCount++;
-            IncrementProgressParallel();
-            continue;
-        }
-
-        string roomName = room.Name?.Content ?? $"room_{Data.Rooms.IndexOf(room)}";
-        try
-        {
-            using FileStream file = File.Create(Path.Join(exportFolder, roomName + ".png"));
-            await ImportExport.ExportRoomAsPNG(room, file);
-        }
-        catch (Exception e)
-        {
-            throw new ScriptException($"An error occurred while exporting room \"{roomName}\".\n{e}");
-        }
-
+        skippedCount++;
         IncrementProgressParallel();
+        continue;
     }
-});
+
+    string roomName = room.Name?.Content ?? $"room_{Data.Rooms.IndexOf(room)}";
+    try
+    {
+        using FileStream file = File.Create(Path.Join(exportFolder, roomName + ".png"));
+        await ImportExport.ExportRoomAsPNG(room, file);
+    }
+    catch (Exception e)
+    {
+        throw new ScriptException($"An error occurred while exporting room \"{roomName}\".\n{e}");
+    }
+
+    IncrementProgressParallel();
+    await Task.Delay(1);
+}
 
 await StopProgressBarUpdater();
 HideProgressBar();

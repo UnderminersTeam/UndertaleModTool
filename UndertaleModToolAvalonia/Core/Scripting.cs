@@ -261,7 +261,7 @@ public class ScriptGlobals : IScriptInterface, IDisposable
     public void ChangeSelection(object newSelection, bool inNewTab = false)
     {
         // Wait so the script continues only after the tab is open (which may ask to save the current tab), like the WPF version.
-        mainVM.Tabs.TabOpen(newSelection, inNewTab).WaitOnDispatcherFrame();
+        WaitOnUIThread(() => mainVM.Tabs.TabOpen(newSelection, inNewTab));
     }
 
     public Task ClickableSearchOutput(string title, string query, int resultsCount, IOrderedEnumerable<KeyValuePair<string, List<(int lineNum, string codeLine)>>> resultsDict, bool showInDecompiledView, IOrderedEnumerable<string>? failedList = null)
@@ -277,15 +277,19 @@ public class ScriptGlobals : IScriptInterface, IDisposable
     }
 
     // Shows the results in a "Search in code" window, where they can be opened like the window's own results.
+    // Search scripts may gather results inside Task.Run and call this from there, but windows must be created on the UI thread.
     void ShowSearchResults(string title, string query, IEnumerable<KeyValuePair<string, List<(int lineNum, string codeLine)>>> results, bool showInDecompiledView, IEnumerable<string>? failedList)
     {
         if (mainVM.View is not MainView mainView)
             return;
 
-        SearchInCodeViewModel searchVM = new(mainVM.ServiceProvider);
-        searchVM.ShowResults(query, results, inAssembly: !showInDecompiledView, failedCount: failedList?.Count() ?? 0);
-
-        mainView.OpenSearchInCode(searchVM, title);
+        WaitOnUIThread(() =>
+        {
+            SearchInCodeViewModel searchVM = new(mainVM.ServiceProvider);
+            searchVM.ShowResults(query, results, inAssembly: !showInDecompiledView, failedCount: failedList?.Count() ?? 0);
+            mainView.OpenSearchInCode(searchVM, title);
+            return Task.FromResult(true);
+        });
     }
 
     public void EnableUI()
