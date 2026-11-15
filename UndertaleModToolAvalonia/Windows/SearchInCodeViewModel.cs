@@ -263,6 +263,43 @@ public partial class SearchInCodeViewModel : ObservableObject
         Interlocked.Increment(ref currentCodeEntriesCount);
     }
 
+    /// <summary>
+    /// Shows results found elsewhere (e.g. by a script) instead of searching.
+    /// </summary>
+    /// <param name="results">Code entry names, each with its matching lines as (1-based line number, line text).</param>
+    public void ShowResults(string query, IEnumerable<KeyValuePair<string, List<(int lineNumber, string lineText)>>> results, bool inAssembly, int failedCount)
+    {
+        SearchText = query;
+        IsInAssembly = inAssembly;
+        resultsAreInAssembly = inAssembly;
+
+        List<SearchResult> resultsList = [];
+        int codeEntriesCount = 0;
+
+        foreach (var (codeName, lines) in results)
+        {
+            // Results for code entries that don't exist couldn't be opened, so they're left out.
+            UndertaleCode? code = MainVM.Data?.Code.ByName(codeName);
+            if (code is null)
+                continue;
+
+            codeEntriesCount++;
+            foreach (var (lineNumber, lineText) in lines)
+            {
+                resultsList.Add(new(code, lineNumber, 1, lineText));
+            }
+        }
+
+        Results = [.. resultsList];
+
+        string str = $"{resultsList.Count} result{(resultsList.Count != 1 ? "s" : "")} found in {codeEntriesCount} code entr{(codeEntriesCount != 1 ? "ies" : "y")}.";
+        if (failedCount > 0)
+        {
+            str += $" {failedCount} code entr{(failedCount != 1 ? "ies" : "y")} with an error.";
+        }
+        StatusBarText = str;
+    }
+
     public async void OpenSearchResult(SearchResult searchResult, bool inNewTab = false)
     {
         var tab = await MainVM.TabOpen(searchResult.Code, inNewTab);

@@ -42,10 +42,20 @@ public interface IView
         return await new MessageWindow(message, title, buttons).ShowDialog<MessageWindow.Result>(window);
     }
 
-    public async Task<string?> TextBoxDialog(string message, string text = "", string? title = null, bool isMultiline = false, bool isReadOnly = false)
+    public async Task<string?> TextBoxDialog(string message, string text = "", string? title = null, bool isMultiline = false, bool isReadOnly = false,
+        string? okText = null, string? cancelText = null, bool preventClose = false)
     {
         Window window = View.FindLogicalAncestorOfType<Window>() ?? throw new InvalidOperationException("Window not found");
-        return await new TextBoxWindow(message, text, title, isMultiline, isReadOnly).ShowDialog<string?>(window);
+        return await new TextBoxWindow(message, text, title, isMultiline, isReadOnly, okText, cancelText, preventClose).ShowDialog<string?>(window);
+    }
+
+    /// <summary>
+    /// Shows a text box window without waiting for it to close.
+    /// </summary>
+    public void TextBoxShow(string message, string text = "", string? title = null, bool isMultiline = false)
+    {
+        Window window = View.FindLogicalAncestorOfType<Window>() ?? throw new InvalidOperationException("Window not found");
+        new TextBoxWindow(message, text, title, isMultiline).Show(window);
     }
 
     public ILoaderWindow LoaderOpen()

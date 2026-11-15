@@ -49,8 +49,8 @@ public static class ImportExport
     public static async Task ExportRoomAsPNG(UndertaleRoom room, Stream stream)
     {
         // NOTE: This is a CPU bitmap, unlike the GPU surface used when rendering in the UI.
-        SKBitmap bitmap = new((int)room.Width, (int)room.Height, SKColorType.Bgra8888, SKAlphaType.Unpremul);
-        SKCanvas canvas = new(bitmap);
+        using SKBitmap bitmap = new((int)room.Width, (int)room.Height, SKColorType.Bgra8888, SKAlphaType.Unpremul);
+        using SKCanvas canvas = new(bitmap);
 
         RoomRenderer renderer = new();
         renderer.RenderCommands(new RoomRenderer.RenderCommandsBuilder(room).RenderCommands, canvas);

@@ -78,6 +78,10 @@ public partial class DataExplorerView : UserControl
         };
 
         treeDataGridSource.RowSelection!.SingleSelect = false;
+        treeDataGridSource.RowSelection.SelectionChanged += (_, _) =>
+        {
+            vm.HighlightedValue = treeDataGridSource.RowSelection.SelectedItem?.Value;
+        };
 
         MainTreeDataGrid.Source = treeDataGridSource;
 

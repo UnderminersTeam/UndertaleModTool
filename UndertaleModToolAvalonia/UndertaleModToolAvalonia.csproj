@@ -49,4 +49,13 @@
     <ItemGroup>
         <ProjectReference Include="..\UndertaleModLib\UndertaleModLib.csproj" />
     </ItemGroup>
+
+    <!-- Bundled scripts, shipped next to the app for the Scripts menu and for scripts that use ExePath. -->
+    <ItemGroup>
+        <None Remove="Scripts\**" />
+        <Content Include="Scripts\**">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        </Content>
+    </ItemGroup>
 </Project>

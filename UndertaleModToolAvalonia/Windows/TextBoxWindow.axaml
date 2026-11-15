@@ -16,8 +16,8 @@
         <TextBlock Grid.Row="0" Name="MessageTextBlock" Text="{Binding Message}" TextWrapping="Wrap" />
         <TextBox Grid.Row="1" Name="TextTextBox" />
         <StackPanel Grid.Row="2" Name="ButtonsStackPanel" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Command="{Binding OkClick}" IsDefault="True">OK</Button>
-            <Button Command="{Binding CancelClick}">Cancel</Button>
+            <Button Name="OkButton" Command="{Binding OkClick}" IsDefault="True">OK</Button>
+            <Button Name="CancelButton" Command="{Binding CancelClick}">Cancel</Button>
         </StackPanel>
     </Grid>
 </Window>

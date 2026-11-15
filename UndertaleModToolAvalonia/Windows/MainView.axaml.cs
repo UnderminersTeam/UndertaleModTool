@@ -46,11 +46,19 @@ public partial class MainView : UserControl, IView
 
     public void OpenSearchInCode(IServiceProvider serviceProvider)
     {
+        OpenSearchInCode(new SearchInCodeViewModel(serviceProvider));
+    }
+
+    public void OpenSearchInCode(SearchInCodeViewModel searchInCodeVM, string? title = null)
+    {
         Window window = this.FindLogicalAncestorOfType<Window>() ?? throw new InvalidOperationException("Window not found");
-        new SearchInCodeWindow()
+        SearchInCodeWindow searchInCodeWindow = new()
         {
-            DataContext = new SearchInCodeViewModel(serviceProvider),
-        }.Show(window);
+            DataContext = searchInCodeVM,
+        };
+        if (title is not null)
+            searchInCodeWindow.Title = title;
+        searchInCodeWindow.Show(window);
     }
 
     public void OpenFindReferences(IServiceProvider serviceProvider, UndertaleResource? resource = null)
@@ -93,8 +101,7 @@ public partial class MainView : UserControl, IView
             if (e.Key == Key.Enter && !e.KeyModifiers.HasFlag(KeyModifiers.Shift))
             {
                 e.Handled = true;
-                object? result = await vm.Scripting.RunScript(vm.CommandTextBoxText);
-                vm.CommandTextBoxText = result?.ToString() ?? "";
+                await vm.Scripting.RunScript(vm.CommandTextBoxText);
             }
     }
 }

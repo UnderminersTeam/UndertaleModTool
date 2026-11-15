@@ -15,6 +15,9 @@ public partial class DataExplorerViewModel : ObservableObject
     [ObservableProperty]
     public partial ObservableCollection<Item> TreeDataGridData { get; set; } = [];
 
+    // The value of the item selected in the tree, for scripts.
+    public object? HighlightedValue { get; set; }
+
     public delegate void OnExpandItemOnTreeDelegate(DataExplorerViewModel.Item item);
     public OnExpandItemOnTreeDelegate? OnExpandItemOnTree;
 
