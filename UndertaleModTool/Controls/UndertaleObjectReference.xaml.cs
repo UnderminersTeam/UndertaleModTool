@@ -234,7 +234,7 @@ namespace UndertaleModTool
                         }
                         else
                         {
-                            ObjectReference = UndertaleCode.CreateEmptyEntry(mainWindow.Data, name);
+                            ObjectReference = UndertaleCode.CreateEmptyRoomEntry(mainWindow.Data, name);
                         }
                     }
                     else
@@ -251,7 +251,7 @@ namespace UndertaleModTool
                             name = beginning + "_" + (i++).ToString() + suffix;
                         }
 
-                        ObjectReference = UndertaleCode.CreateEmptyEntry(mainWindow.Data, name);
+                        ObjectReference = UndertaleCode.CreateEmptyRoomEntry(mainWindow.Data, name);
                     }
                 }
                 else

@@ -87,7 +87,35 @@ internal sealed class SerializableCode : ISerializableProjectAsset
             {
                 Name = projectContext.MakeString(DataName)
             };
-            projectContext.Data.Code.Add(_dataAsset);
+
+            // Check whether this is a room creation code entry that needs an extra index-matching script
+            const string roomPrefix = "gml_Room";
+            if (DataName.StartsWith(roomPrefix) && projectContext.Data.IsVersionAtLeast(2023, 11))
+            {
+                // Check if script exists with this prefix already. If so, try to reuse its index.
+                int insertIndex = projectContext.Data.Scripts.IndexOfName(DataName);
+                if (insertIndex == -1)
+                {
+                    // No script found, so find script/code list divergence index, and use that
+                    insertIndex = UndertaleCode.FindCodeScriptIndexDivergence(projectContext.Data);
+
+                    // Create a script, in case the project doesn't actually contain one
+                    UndertaleScript roomScript = new()
+                    {
+                        Name = _dataAsset.Name,
+                        Code = _dataAsset,
+                        IsConstructor = false
+                    };
+                    projectContext.Data.Scripts.Insert(insertIndex, roomScript);
+                }
+
+                // Insert at desired index
+                projectContext.Data.Code.Insert(insertIndex, _dataAsset);
+            }
+            else
+            {
+                projectContext.Data.Code.Add(_dataAsset);
+            }
 
             // Also create code locals, if applicable
             if (projectContext.Data.CodeLocals is not null)

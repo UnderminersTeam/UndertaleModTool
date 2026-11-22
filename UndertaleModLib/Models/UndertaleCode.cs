@@ -1530,6 +1530,9 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
     /// <summary>
     /// Creates an empty root code entry with the given name, along with an empty code locals entry (when necessary).
     /// </summary>
+    /// <remarks>
+    /// The code entry (and possibly code locals entry) will be immediately added to the data.
+    /// </remarks>
     /// <param name="data">Data to add the new code to.</param>
     /// <param name="name">Name of the new code entry to create.</param>
     /// <returns>The new code entry.</returns>
@@ -1542,6 +1545,98 @@ public class UndertaleCode : UndertaleNamedResource, UndertaleObjectWithBlobs, I
             LocalsCount = 1
         };
         data.Code.Add(newEntry);
+
+        // Also attach code locals if necessary
+        if (data.CodeLocals is not null)
+        {
+            UndertaleCodeLocals.CreateEmptyEntry(data, name);
+        }
+        else
+        {
+            newEntry.WeirdLocalFlag = true;
+        }
+
+        return newEntry;
+    }
+
+    /// <summary>
+    /// Finds the first index at which code and script indices diverge in the given <see cref="UndertaleData"/>.
+    /// </summary>
+    /// <remarks>
+    /// This is useful for finding a good index to insert script assets (as referenced by ID),
+    /// and room creation code in 2023.11+ (which requires scripts at identical indices to code).
+    /// </remarks>
+    /// <returns>Index of first divergence.</returns>
+    public static int FindCodeScriptIndexDivergence(UndertaleData data)
+    {
+        int i = 0;
+        while (i < data.Code.Count && i < data.Scripts.Count)
+        {
+            // If the script at this index doesn't refer to the corresponding
+            // code entry, then the lists diverge here
+            if (data.Scripts[i].Code != data.Code[i])
+            {
+                break;
+            }
+            i++;
+        }
+
+        // Either found a differing name, or hit the end of a list
+        return i;
+    }
+
+    /// <summary>
+    /// Creates an empty root code entry with the given name, along with an empty code locals entry,
+    /// as well as a script entry (as necessary, depending on GameMaker version).
+    /// </summary>
+    /// <remarks>
+    /// The code entry (and possibly code locals and/or script entry) will be immediately added to the data.
+    /// </remarks>
+    /// <param name="data">Data to add the new code to.</param>
+    /// <param name="name">Name of the new code entry to create.</param>
+    /// <returns>The new code entry.</returns>
+    public static UndertaleCode CreateEmptyRoomEntry(UndertaleData data, string name)
+    {
+        return CreateEmptyRoomEntry(data, data.Strings.MakeString(name));
+    }
+
+    /// <summary>
+    /// Creates an empty root code entry with the given name, along with an empty code locals entry,
+    /// as well as a script entry (as necessary, depending on GameMaker version).
+    /// </summary>
+    /// <remarks>
+    /// The code entry (and possibly code locals and/or script entry) will be immediately added to the data.
+    /// </remarks>
+    /// <param name="data">Data to add the new code to.</param>
+    /// <param name="name">Name of the new code entry to create.</param>
+    /// <returns>The new code entry.</returns>
+    public static UndertaleCode CreateEmptyRoomEntry(UndertaleData data, UndertaleString name)
+    {
+        // Before 2023.11, no special logic is required
+        if (!data.IsVersionAtLeast(2023, 11))
+        {
+            return CreateEmptyEntry(data, name);
+        }
+        
+        // Find a good index to insert into
+        int insertIndex = FindCodeScriptIndexDivergence(data);
+
+        // Create entry
+        UndertaleCode newEntry = new()
+        {
+            Name = name,
+            LocalsCount = 1
+        };
+        data.Code.Insert(insertIndex, newEntry);
+
+        // Create script
+        UndertaleScript newScript = new()
+        {
+            Name = name,
+            Code = newEntry,
+            IsConstructor = false
+        };
+        data.Scripts.Insert(insertIndex, newScript);
 
         // Also attach code locals if necessary
         if (data.CodeLocals is not null)

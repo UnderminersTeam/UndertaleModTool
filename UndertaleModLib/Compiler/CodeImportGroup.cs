@@ -154,11 +154,12 @@ public sealed class CodeImportGroup
         }
     }
 
-    // Separators used for event name parsing.
-    private const string EventScriptPrefix = "gml_Script_";
-    private const string EventGlobalScriptPrefix = "gml_GlobalScript_";
-    private const string EventObjectPrefix = "gml_Object_";
-    private const string EventCollisionSeparator = "_Collision_";
+    // Separators used for code name parsing.
+    private const string CodeScriptPrefix = "gml_Script_";
+    private const string CodeGlobalScriptPrefix = "gml_GlobalScript_";
+    private const string CodeRoomPrefix = "gml_Room";
+    private const string CodeObjectPrefix = "gml_Object_";
+    private const string CodeEventCollisionSeparator = "_Collision_";
 
     /// <summary>
     /// Attempts to parse the collision event subtype for the given code entry name.
@@ -176,18 +177,18 @@ public sealed class CodeImportGroup
         }
 
         // Make sure only one separator exists.
-        if (codeEntryName.IndexOf(EventCollisionSeparator, collisionSeparatorIndex + EventCollisionSeparator.Length - 1, StringComparison.Ordinal) >= 0)
+        if (codeEntryName.IndexOf(CodeEventCollisionSeparator, collisionSeparatorIndex + CodeEventCollisionSeparator.Length - 1, StringComparison.Ordinal) >= 0)
         {
             return false;
         }
 
         // Figure out object names, and make sure the one on the right-hand side already exists.
-        objectName = codeEntryName.AsSpan(new Range(EventObjectPrefix.Length, collisionSeparatorIndex));
+        objectName = codeEntryName.AsSpan(new Range(CodeObjectPrefix.Length, collisionSeparatorIndex));
         if (objectName.Length <= 0)
         {
             return false;
         }
-        ReadOnlySpan<char> otherObjectName = codeEntryName.AsSpan(collisionSeparatorIndex + EventCollisionSeparator.Length);
+        ReadOnlySpan<char> otherObjectName = codeEntryName.AsSpan(collisionSeparatorIndex + CodeEventCollisionSeparator.Length);
         int otherObjectIndex = Data.GameObjects.IndexOfName(otherObjectName);
         if (otherObjectIndex < 0)
         {
@@ -214,13 +215,18 @@ public sealed class CodeImportGroup
             return existing;
         }
 
+        // Check if this is a room creation code entry
+        bool isRoomEntry = codeEntryName.StartsWith(CodeRoomPrefix, StringComparison.Ordinal);
+
         // Need to create a new entry!
         UndertaleString newEntryName = null;
         UndertaleCode newEntry = null;
         MainThreadAction(() =>
         {
             newEntryName = Data.Strings.MakeString(codeEntryName);
-            newEntry = UndertaleCode.CreateEmptyEntry(Data, newEntryName);
+            newEntry = isRoomEntry ?
+                UndertaleCode.CreateEmptyRoomEntry(Data, newEntryName) :
+                UndertaleCode.CreateEmptyEntry(Data, newEntryName);
         });
         if (newEntryName is null || newEntry is null)
         {
@@ -234,11 +240,11 @@ public sealed class CodeImportGroup
         }
 
         // Also create assets based on code entry name
-        if (codeEntryName.StartsWith(EventScriptPrefix, StringComparison.Ordinal))
+        if (codeEntryName.StartsWith(CodeScriptPrefix, StringComparison.Ordinal))
         {
             MainThreadAction(() =>
             {
-                ReadOnlySpan<char> scriptName = codeEntryName.AsSpan(EventScriptPrefix.Length);
+                ReadOnlySpan<char> scriptName = codeEntryName.AsSpan(CodeScriptPrefix.Length);
                 if (Data.Scripts.ByName(scriptName) is not UndertaleScript existingScript)
                 {
                     // Create script, as one doesn't already exist
@@ -255,7 +261,7 @@ public sealed class CodeImportGroup
                 }
             });
         }
-        else if (codeEntryName.StartsWith(EventGlobalScriptPrefix, StringComparison.Ordinal))
+        else if (codeEntryName.StartsWith(CodeGlobalScriptPrefix, StringComparison.Ordinal))
         {
             // Scan to see if there's a global init script with a matching (and presumably, invalid) code reference
             UndertaleGlobalInit existingGlobalInit = null;
@@ -284,11 +290,11 @@ public sealed class CodeImportGroup
                 existingGlobalInit.Code = newEntry;
             }
         }
-        else if (codeEntryName.StartsWith(EventObjectPrefix, StringComparison.Ordinal))
+        else if (codeEntryName.StartsWith(CodeObjectPrefix, StringComparison.Ordinal))
         {
             // Parse object event.
             // First, handle collision events, if applicable. (Only supported in GM 2.3+, when "_Collision_" is not in either object name.)
-            int collisionSeparatorIndex = codeEntryName.IndexOf(EventCollisionSeparator, StringComparison.Ordinal);
+            int collisionSeparatorIndex = codeEntryName.IndexOf(CodeEventCollisionSeparator, StringComparison.Ordinal);
             bool containsCollisionSeparator = collisionSeparatorIndex >= 0;
             if (containsCollisionSeparator && TryParseCollisionEvent(codeEntryName, collisionSeparatorIndex, out ReadOnlySpan<char> collisionObjectName, out uint collisionSubtype))
             {
@@ -354,7 +360,7 @@ public sealed class CodeImportGroup
             }
 
             // Create new object if necessary.
-            ReadOnlySpan<char> objectName = codeEntryName.AsSpan(new Range(EventObjectPrefix.Length, secondLastUnderscore));
+            ReadOnlySpan<char> objectName = codeEntryName.AsSpan(new Range(CodeObjectPrefix.Length, secondLastUnderscore));
             UndertaleGameObject obj = Data.GameObjects.ByName(objectName);
             if (obj is null)
             {
