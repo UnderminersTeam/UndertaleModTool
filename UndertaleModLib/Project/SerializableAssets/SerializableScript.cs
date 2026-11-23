@@ -78,6 +78,17 @@ internal sealed class SerializableScript : ISerializableProjectAsset
                     // No code found, so find script/code list divergence index, and use that
                     insertIndex = UndertaleCode.FindCodeScriptIndexDivergence(projectContext.Data);
                 }
+                else if (insertIndex > projectContext.Data.Scripts.Count)
+                {
+                    throw new ProjectException($"Failed to import room script {DataName} at correct index; " +
+                                               $"code entry already exists at invalid index {insertIndex}");
+                }
+                else
+                {
+                    // Assign code entry we found to this new script, so divergence calculations are correct
+                    _dataAsset.Code = projectContext.Data.Code[insertIndex];
+                    _dataAsset.IsConstructor = false;
+                }
 
                 // Insert at desired index
                 projectContext.Data.Scripts.Insert(insertIndex, _dataAsset);

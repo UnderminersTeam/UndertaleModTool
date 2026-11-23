@@ -108,6 +108,11 @@ internal sealed class SerializableCode : ISerializableProjectAsset
                     };
                     projectContext.Data.Scripts.Insert(insertIndex, roomScript);
                 }
+                else if (insertIndex > projectContext.Data.Code.Count)
+                {
+                    throw new ProjectException($"Failed to import room code entry {DataName} at correct index; " +
+                                               $"script already exists at invalid index {insertIndex}");
+                }
 
                 // Insert at desired index
                 projectContext.Data.Code.Insert(insertIndex, _dataAsset);
