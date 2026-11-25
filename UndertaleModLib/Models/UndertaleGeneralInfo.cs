@@ -453,17 +453,17 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
 
         // Some GMS2+ version detection. The rest is spread around, mostly in UndertaleChunks.cs
         if (reader.AllChunkNames.Contains("UILR"))      // 2024.13, not present on LTS
-            detectedVer = new(2024, 13, 0, 0, BranchType.Post2022_0);
+            detectedVer = new(2024, 13, 1, 242, BranchType.Post2022_0);
         else if (reader.AllChunkNames.Contains("PSEM")) // 2023.2, not present on LTS
-            detectedVer = new(2023, 2, 0, 0, BranchType.Post2022_0);
+            detectedVer = new(2023, 2, 0, 87, BranchType.Post2022_0);
         else if (reader.AllChunkNames.Contains("FEAT")) // 2022.8
-            detectedVer = new(2022, 8, 0, 0, BranchType.Pre2022_0);
+            detectedVer = new(2022, 8, 0, 50, BranchType.Pre2022_0);
         else if (reader.AllChunkNames.Contains("FEDS")) // 2.3.6
-            detectedVer = new(2, 3, 6, 0, BranchType.Pre2022_0);
+            detectedVer = new(2, 3, 6, 0, BranchType.Pre2022_0); // TODO: exact 2.3.6 runtime build
         else if (reader.AllChunkNames.Contains("SEQN")) // 2.3
-            detectedVer = new(2, 3, 0, 0, BranchType.Pre2022_0);
+            detectedVer = new(2, 3, 0, 0, BranchType.Pre2022_0); // TODO: exact 2.3.0 runtime build
         else if (reader.AllChunkNames.Contains("TGIN")) // 2.2.1
-            detectedVer = new(2, 2, 1, 0, BranchType.Pre2022_0);
+            detectedVer = new(2, 2, 1, 0, BranchType.Pre2022_0); // TODO: exact GMS2.2.1 runtime build
 
         return detectedVer;
     }
@@ -689,29 +689,24 @@ public class UndertaleGeneralInfo : UndertaleObject, IDisposable
         else
         {
             StringBuilder sb = new(DisplayName?.ToString() ?? "");
-            if (Major < 2022 || (Major == 2022 && Minor < 3))
-                sb.Append(" (GMS ");
-            else
-                sb.Append(" (GM ");
+            bool isModernNaming = Branch == BranchType.LTS2022_0 || Major > 2022 || (Major == 2022 && Minor >= 3);
+            sb.Append(isModernNaming ? " (GM " : " (GMS ");
             if (Branch == BranchType.LTS2022_0) // TODO: Is there some way to dynamically get this from the enum?
             {
-                sb.Append("2022.0");
+                sb.Append("2022.0.");
+                sb.Append(Release);
+                sb.Append('.');
+                sb.Append(Build);
             }
             else
             {
                 sb.Append(Major);
                 sb.Append('.');
                 sb.Append(Minor);
-            }
-            if (Release != 0)
-            {
                 sb.Append('.');
                 sb.Append(Release);
-                if (Build != 0)
-                {
-                    sb.Append('.');
-                    sb.Append(Build);
-                }
+                sb.Append('.');
+                sb.Append(Build);
             }
             if (Major < 2022)
             {
