@@ -36,7 +36,7 @@ if (isXbox)
             script_execute(SCR_GAMESTART, 0, 0, 0, 0, 0)
         """);
 
-    var obj_time = Data.GameObjects.ByName("obj_time");
+    var obj_time = Data.GameObjects.RequireByName("obj_time");
     var otherEvents = obj_time.Events[(int)EventType.Other];
     var gameStartEvent = otherEvents.FirstOrDefault(x => x.EventSubtype == (int)EventSubtypeOther.GameStart);
     if (gameStartEvent is not null)

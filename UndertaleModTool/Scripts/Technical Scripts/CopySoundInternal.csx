@@ -23,7 +23,7 @@ List<string> splitStringsList = GetSplitStringsList("sound");
 List<UndertaleSound> soundsList = GetSoundsList(splitStringsList);
 foreach (UndertaleSound snd in soundsList)
 {
-    UndertaleSound donorSND = Data.Sounds.ByName(snd.Name.Content);
+    UndertaleSound donorSND = Data.Sounds.RequireByName(snd.Name.Content);
     UndertaleSound nativeSND = new UndertaleSound();
     string newName = "";
     if (donorSND.Name != null)

@@ -15,7 +15,7 @@ UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
     MainThreadAction = MainThreadAction
 };
 
-var code = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f1, Data);
+var code = Data.GameObjects.RequireByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f1, Data);
 importGroup.QueueReplace(code,
     """
     if (global.debug) 

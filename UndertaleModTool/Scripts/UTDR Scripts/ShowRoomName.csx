@@ -2,17 +2,17 @@
 EnsureDataLoaded();
 ScriptMessage("Show room name and ID in debug mode\nby krzys_h, Kneesnap\n");
 Data.Functions.EnsureDefined("room_get_name", Data.Strings); // required for Deltarune
-string displayName = Data?.GeneralInfo?.DisplayName?.Content.ToLower();
+string displayName = Data?.GeneralInfo?.DisplayName?.Content.ToLowerInvariant();
 bool isDeltarune = displayName.StartsWith("deltarune chapter");
 
 UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
 {
     MainThreadAction = MainThreadAction
 };
-var gml_Object_obj_time_Draw_64 = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Draw, EventSubtypeDraw.DrawGUI, Data);
+var drawCode = Data.GameObjects.RequireByName("obj_time").EventHandlerFor(EventType.Draw, EventSubtypeDraw.DrawGUI, Data);
 if (isDeltarune)
 {
-    importGroup.QueueAppend(gml_Object_obj_time_Draw_64, @"
+    importGroup.QueueAppend(drawCode, @"
     if (scr_debug())
     {
         draw_set_color(c_yellow);
@@ -22,7 +22,7 @@ if (isDeltarune)
 }
 else
 {
-    importGroup.QueueAppend(gml_Object_obj_time_Draw_64, @"
+    importGroup.QueueAppend(drawCode, @"
     if (global.debug)
     {
         draw_set_color(c_yellow);
@@ -32,5 +32,5 @@ else
 }
 importGroup.Import();
 
-ChangeSelection(gml_Object_obj_time_Draw_64);
+ChangeSelection(drawCode);
 ScriptMessage("Patched!");

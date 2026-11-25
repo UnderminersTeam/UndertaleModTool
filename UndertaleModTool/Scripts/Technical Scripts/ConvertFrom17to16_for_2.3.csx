@@ -89,7 +89,7 @@ applying any changes to the game.";
             //code.Name = MakeString(code.Name.Content);
             code.Name = MakeString(code.Name.Content, false);
         }
-        Data.CodeLocals.ByName(code.Name.Content).Name = code.Name;
+        Data.CodeLocals.RequireByName(code.Name.Content).Name = code.Name;
     }
     for (int i = 0; i < Data.Scripts.Count; i++)
     {

@@ -17,7 +17,7 @@ if (!Data.IsGameMaker2())
     return;
 }
 
-var gml_Object_obj_time_Step_1 = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Step, EventSubtypeStep.BeginStep, Data);
+var gml_Object_obj_time_Step_1 = Data.GameObjects.RequireByName("obj_time").EventHandlerFor(EventType.Step, EventSubtypeStep.BeginStep, Data);
 
 UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
 {

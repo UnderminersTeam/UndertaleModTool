@@ -36,7 +36,7 @@ for (var j = 0; j < splitStringsList.Count; j++)
         if (splitStringsList[j].ToLower() == obj.Name.Content.ToLower())
         {
             UndertaleGameObject nativeOBJ = Data.GameObjects.ByName(obj.Name.Content);
-            UndertaleGameObject donorOBJ = DonorData.GameObjects.ByName(obj.Name.Content);
+            UndertaleGameObject donorOBJ = DonorData.GameObjects.RequireByName(obj.Name.Content);
             if (nativeOBJ == null)
             {
                 nativeOBJ = new UndertaleGameObject();
@@ -44,7 +44,7 @@ for (var j = 0; j < splitStringsList.Count; j++)
                 Data.GameObjects.Add(nativeOBJ);
             }
             if (donorOBJ.Sprite != null)
-                nativeOBJ.Sprite = Data.Sprites.ByName(donorOBJ.Sprite.Name.Content);
+                nativeOBJ.Sprite = Data.Sprites.RequireByName(donorOBJ.Sprite.Name.Content);
             if (donorOBJ.Visible != null)
                 nativeOBJ.Visible = donorOBJ.Visible;
             if (donorOBJ.Solid != null)
@@ -54,9 +54,9 @@ for (var j = 0; j < splitStringsList.Count; j++)
             if (donorOBJ.Persistent != null)
                 nativeOBJ.Persistent = donorOBJ.Persistent;
             if (donorOBJ.ParentId != null)
-                nativeOBJ.ParentId = Data.GameObjects.ByName(donorOBJ.ParentId.Name.Content);
+                nativeOBJ.ParentId = Data.GameObjects.RequireByName(donorOBJ.ParentId.Name.Content);
             if (donorOBJ.TextureMaskId != null)
-                nativeOBJ.TextureMaskId = Data.Sprites.ByName(donorOBJ.TextureMaskId.Name.Content);
+                nativeOBJ.TextureMaskId = Data.Sprites.RequireByName(donorOBJ.TextureMaskId.Name.Content);
             if (donorOBJ.UsesPhysics != null)
                 nativeOBJ.UsesPhysics = donorOBJ.UsesPhysics;
             if (donorOBJ.IsSensor != null)
@@ -147,7 +147,7 @@ for (var j = 0; j < splitStringsList.Count; j++)
                                 {
                                     ScriptError("Uh oh, " + donorACT.CodeId?.Name?.Content + " has an error: " + ec.Message);
                                 }
-                                nativeACT.CodeId = Data.Code.ByName(donorACT.CodeId?.Name?.Content);
+                                nativeACT.CodeId = Data.Code.RequireByName(donorACT.CodeId?.Name?.Content);
                                 nativeACT.CodeId.LocalsCount = donorACT.CodeId.LocalsCount;
                                 nativeACT.CodeId.ArgumentsCount = donorACT.CodeId.ArgumentsCount;
                                 nativeACT.CodeId.Offset = donorACT.CodeId.Offset;
@@ -155,8 +155,8 @@ for (var j = 0; j < splitStringsList.Count; j++)
                                 if (Data.CodeLocals is not null)
                                 {
                                     UndertaleCodeLocals nativelocals = Data.CodeLocals.ByName(donorACT.CodeId?.Name?.Content);
-                                    UndertaleCodeLocals donorlocals = DonorData.CodeLocals.ByName(donorACT.CodeId?.Name?.Content);
-                                    if (Data.CodeLocals.ByName(donorACT.CodeId?.Name?.Content) == null)
+                                    UndertaleCodeLocals donorlocals = DonorData.CodeLocals.RequireByName(donorACT.CodeId?.Name?.Content);
+                                    if (Data.CodeLocals.RequireByName(donorACT.CodeId?.Name?.Content) == null)
                                     {
                                         nativelocals = new UndertaleCodeLocals();
                                         nativelocals.Name = Data.Strings.MakeString(donorACT.CodeId?.Name?.Content);

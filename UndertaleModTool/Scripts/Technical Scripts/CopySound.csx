@@ -36,7 +36,7 @@ List<UndertaleSound> soundsList = GetSoundsList(splitStringsList, DonorData);
 foreach (UndertaleSound snd in soundsList)
 {
     UndertaleSound nativeSND = Data.Sounds.ByName(snd.Name.Content);
-    UndertaleSound donorSND = DonorData.Sounds.ByName(snd.Name.Content);
+    UndertaleSound donorSND = DonorData.Sounds.RequireByName(snd.Name.Content);
     if (nativeSND == null)
     {
         nativeSND = new UndertaleSound();

@@ -1,7 +1,7 @@
 ﻿EnsureDataLoaded();
 ScriptMessage("DebugMsg - Displays dialogue messages\nwhile debug mode is enabled.\n\nAuthor: krzys-h, Kneesnap");
 
-var code = Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.Draw, EventSubtypeDraw.DrawGUI, Data);
+var code = Data.GameObjects.RequireByName("obj_time").EventHandlerFor(EventType.Draw, EventSubtypeDraw.DrawGUI, Data);
 
 UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data)
 {

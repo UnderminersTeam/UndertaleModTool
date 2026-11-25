@@ -47,7 +47,7 @@ namespace UndertaleModLib
                 // Prevent recursion
                 if (resourceTypeName == "Item")
                     return;
-                
+
                 var property = GetType().GetProperty(resourceTypeName);
                 if (property is null)
                     throw new MissingMemberException($"\"UndertaleData\" doesn't contain a property named \"{resourceTypeName}\".");
@@ -349,7 +349,7 @@ namespace UndertaleModLib
         public BuiltinList BuiltinList;
 
         /// <summary>
-        /// Cache for GMLv2 functions defined in global scripts. 
+        /// Cache for GMLv2 functions defined in global scripts.
         /// Can be updated by <see cref="Decompiler.GlobalDecompileContext"/>, if no <see cref="IGlobalFunctions"/> is provided to it.
         /// </summary>
         public GlobalFunctions GlobalFunctions;
@@ -376,32 +376,56 @@ namespace UndertaleModLib
         }
 
         /// <summary>
-        /// Get a resource from the data file by name.
+        /// Returns the element (or <see langword="null"/>) of any resource type that has a specified <paramref name="name"/>.
         /// </summary>
         /// <remarks>
         /// This does a linear search, and will thus be slow if used many times. It's recommended to build lookup maps if many searches are required.
         /// </remarks>
-        /// <param name="name">The name of the desired resource.</param>
-        /// <param name="ignoreCase">Whether to ignore casing while searching.</param>
-        /// <returns>The <see cref="UndertaleNamedResource"/>.</returns>
+        /// <param name="name">The name of the desired resource</param>
+        /// <param name="ignoreCase">Whether to ignore casing while searching</param>
+        /// <returns>The <see cref="UndertaleNamedResource"/> or <see langword="null"/> if no element was found</returns>
         public UndertaleNamedResource ByName(string name, bool ignoreCase = false)
         {
-            return 
-                Sounds.ByName(name, ignoreCase) ??
-                Sprites.ByName(name, ignoreCase) ??
-                Backgrounds.ByName(name, ignoreCase) ??
-                Paths.ByName(name, ignoreCase) ??
-                Scripts.ByName(name, ignoreCase) ??
-                Fonts.ByName(name, ignoreCase) ??
-                GameObjects.ByName(name, ignoreCase) ??
-                Rooms.ByName(name, ignoreCase) ??
-                Extensions.ByName(name, ignoreCase) ??
-                Shaders.ByName(name, ignoreCase) ??
-                Timelines.ByName(name, ignoreCase) ??
+            return
+                Sounds?.ByName(name, ignoreCase) ??
+                Sprites?.ByName(name, ignoreCase) ??
+                Backgrounds?.ByName(name, ignoreCase) ??
+                Paths?.ByName(name, ignoreCase) ??
+                Scripts?.ByName(name, ignoreCase) ??
+                Fonts?.ByName(name, ignoreCase) ??
+                GameObjects?.ByName(name, ignoreCase) ??
+                Rooms?.ByName(name, ignoreCase) ??
+                Extensions?.ByName(name, ignoreCase) ??
+                Shaders?.ByName(name, ignoreCase) ??
+                Timelines?.ByName(name, ignoreCase) ??
                 AnimationCurves?.ByName(name, ignoreCase) ??
                 Sequences?.ByName(name, ignoreCase) ??
                 AudioGroups?.ByName(name, ignoreCase) ??
                 (UndertaleNamedResource)null;
+        }
+
+        /// <summary>
+        /// Returns the element of any resource type that has a specified <paramref name="name"/>.
+        /// </summary>
+        /// <remarks>
+        /// This does a linear search, and will thus be slow if used many times. It's recommended to build lookup maps if many searches are required.
+        /// </remarks>
+        /// <param name="name">The name of the desired resource</param>
+        /// <param name="ignoreCase">Whether to ignore casing while searching</param>
+        /// <returns>The <see cref="UndertaleNamedResource"/></returns>
+        /// <exception cref="KeyNotFoundException">if no element was found</exception>
+        public UndertaleNamedResource RequireByName(string name, bool ignoreCase = false)
+        {
+            if (ByName(name, ignoreCase) is { } result)
+            {
+                return result;
+            }
+            string ex = $"Could not find resource with name `{name}`";
+            if (ignoreCase)
+            {
+                ex += " (case-insensitive)";
+            }
+            throw new KeyNotFoundException(ex);
         }
 
         /// <summary>
@@ -437,55 +461,60 @@ namespace UndertaleModLib
         /// <remarks>
         /// This does a linear search, and will thus be slow if used many times. It's recommended to build lookup maps if many searches are required.
         /// </remarks>
-        /// <param name="name">The name of the desired resource.</param>
-        /// <param name="ignoreCase">Whether to ignore casing while searching.</param>
-        /// <returns>The zero-based index position of the <see cref="UndertaleNamedResource"/> if it is found, or -1 if it is not found.</returns>
-        public int IndexOfByName(string name, bool ignoreCase = false)
+        /// <param name="name">The name of the desired resource</param>
+        /// <param name="ignoreCase">Whether to ignore casing while searching</param>
+        /// <returns>The zero-based index position of the <see cref="UndertaleNamedResource"/> if it is found, or -1 if it is not found</returns>
+        public int IndexOfName(string name, bool ignoreCase = false)
         {
-            int res = Sounds.IndexOfName(name, ignoreCase);
-            if (res >= 0) return res;
-            res = Sprites.IndexOfName(name, ignoreCase);
-            if (res >= 0) return res;
-            res = Backgrounds.IndexOfName(name, ignoreCase);
-            if (res >= 0) return res;
-            res = Paths.IndexOfName(name, ignoreCase);
-            if (res >= 0) return res;
-            res = Scripts.IndexOfName(name, ignoreCase);
-            if (res >= 0) return res;
-            res = Fonts.IndexOfName(name, ignoreCase);
-            if (res >= 0) return res;
-            res = GameObjects.IndexOfName(name, ignoreCase);
-            if (res >= 0) return res;
-            res = Rooms.IndexOfName(name, ignoreCase);
-            if (res >= 0) return res;
-            res = Extensions.IndexOfName(name, ignoreCase);
-            if (res >= 0) return res;
-            res = Shaders.IndexOfName(name, ignoreCase);
-            if (res >= 0) return res;
-            res = Timelines.IndexOfName(name, ignoreCase);
-            if (res >= 0) return res;
-
-            if (AnimationCurves is not null)
-            {
-                res = AnimationCurves.IndexOfName(name, ignoreCase);
-                if (res >= 0) return res;
-            }
-            if (Sequences is not null)
-            {
-                res = Sequences.IndexOfName(name, ignoreCase);
-                if (res >= 0) return res;
-            }
-            if (AudioGroups is not null)
-            {
-                res = AudioGroups.IndexOfName(name, ignoreCase);
-                if (res >= 0) return res;
-            }
-
+            int res;
+            res = Sounds?.IndexOfName(name, ignoreCase) ?? -1; if (res != -1) return res;
+            res = Sprites?.IndexOfName(name, ignoreCase) ?? -1; if (res != -1) return res;
+            res = Backgrounds?.IndexOfName(name, ignoreCase) ?? -1; if (res != -1) return res;
+            res = Paths?.IndexOfName(name, ignoreCase) ?? -1; if (res != -1) return res;
+            res = Scripts?.IndexOfName(name, ignoreCase) ?? -1; if (res != -1) return res;
+            res = Fonts?.IndexOfName(name, ignoreCase) ?? -1; if (res != -1) return res;
+            res = GameObjects?.IndexOfName(name, ignoreCase) ?? -1; if (res != -1) return res;
+            res = Rooms?.IndexOfName(name, ignoreCase) ?? -1; if (res != -1) return res;
+            res = Extensions?.IndexOfName(name, ignoreCase) ?? -1; if (res != -1) return res;
+            res = Shaders?.IndexOfName(name, ignoreCase) ?? -1; if (res != -1) return res;
+            res = Timelines?.IndexOfName(name, ignoreCase) ?? -1; if (res != -1) return res;
+            res = AnimationCurves?.IndexOfName(name, ignoreCase) ?? -1; if (res != -1) return res;
+            res = Sequences?.IndexOfName(name, ignoreCase) ?? -1; if (res != -1) return res;
+            res = AudioGroups?.IndexOfName(name, ignoreCase) ?? -1; if (res != -1) return res;
             return -1;
         }
 
+        /// <summary> Renamed to <see cref="IndexOfName"/></summary>
+        [Obsolete]
+        public int IndexOfByName(string name, bool ignoreCase = false) => IndexOfName(name, ignoreCase);
+
         /// <summary>
-        /// Reports whether the data file was built by GameMaker Studio 2.
+        /// Returns the zero-based index of the first occurrence of the specified <see cref="UndertaleNamedResource"/>.
+        /// </summary>
+        /// <remarks>
+        /// This does a linear search, and will thus be slow if used many times. It's recommended to build lookup maps if many searches are required.
+        /// </remarks>
+        /// <param name="name">The name of the desired resource</param>
+        /// <param name="ignoreCase">Whether to ignore casing while searching</param>
+        /// <returns>The zero-based index position of the <see cref="UndertaleNamedResource"/></returns>
+        /// <exception cref="KeyNotFoundException">if no element was found</exception>
+        public int RequireIndexOfName(string name, bool ignoreCase = false)
+        {
+            int idx = IndexOfName(name, ignoreCase);
+            if (idx != -1)
+            {
+                return idx;
+            }
+            string ex = $"Could not find index of resource with name `{name}`";
+            if (ignoreCase)
+            {
+                ex += " (case-insensitive)";
+            }
+            throw new KeyNotFoundException(ex);
+        }
+
+        /// <summary>
+        /// Reports whether the data file was built in GameMaker Studio 2 or later.
         /// </summary>
         /// <returns><see langword="true"/> if yes, <see langword="false"/> if not.</returns>
         public bool IsGameMaker2()
@@ -499,7 +528,8 @@ namespace UndertaleModLib
         // Early Access: https://web.archive.org/web/20181002232646/http://store.yoyogames.com:80/downloads/gm-studio-ea/release-notes-studio.html
         private bool TestGMS1Version(uint stableBuild, uint betaBuild, bool allowGMS2 = false)
         {
-            return (allowGMS2 || !IsGameMaker2()) && (IsVersionAtLeast(1, 0, 0, stableBuild) || (IsVersionAtLeast(1, 0, 0, betaBuild) && !IsVersionAtLeast(1, 0, 0, 1000)));
+            if (allowGMS2 && !IsGameMaker2()) return false;
+            return IsVersionAtLeast(1, 0, 0, stableBuild) || (IsVersionAtLeast(1, 0, 0, betaBuild) && !IsVersionAtLeast(1, 0, 0, 1000));
         }
 
         // Helper for verifying valid major GMS2 versions
@@ -514,7 +544,7 @@ namespace UndertaleModLib
         /// <summary>
         /// Sets the GMS2+ version flag in GeneralInfo.
         /// </summary>
-        public void SetGMS2Version(UndertaleGeneralInfo.RuntimeVersion ver) 
+        public void SetGMS2Version(UndertaleGeneralInfo.RuntimeVersion ver)
         {
             VerifyMajorGMS2Version(ver.Major);
             GeneralInfo.Version = ver;
@@ -545,7 +575,7 @@ namespace UndertaleModLib
         }
 
         /// <summary>
-        /// Sets the branch type in GeneralInfo to the appropriate LTS or non-LTS version based on 
+        /// Sets the branch type in GeneralInfo to the appropriate LTS or non-LTS version based on
         /// </summary>
         /// <param name="isLTS">If included, alter the data branch between LTS and non-LTS.</param>
         public void SetLTS(bool isLTS)
@@ -779,7 +809,7 @@ namespace UndertaleModLib
         public IDecompileSettings DecompilerSettings = new DecompileSettings();
 
         /// <summary>
-        /// Function that returns the prefix to be used when 
+        /// Function that returns the prefix to be used when
         /// resolving instance ID references in the compiler and decompiler.
         /// </summary>
         public Func<string> InstanceIdPrefix = () => "inst_";

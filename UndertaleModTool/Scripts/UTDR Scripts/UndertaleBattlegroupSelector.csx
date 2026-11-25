@@ -20,8 +20,7 @@ if (!name.StartsWith("undertale") && name != "nxtale") {
 }
 
 var selector = Data.GameObjects.ByName("obj_battlegroup_input");
-
-if(selector == null) {
+if (selector is null) {
     selector = new UndertaleGameObject() { Name = Data.Strings.MakeString("obj_battlegroup_input") };
     Data.GameObjects.Add(selector);
 }
@@ -101,9 +100,9 @@ draw_text(x + 4, y - string_height(str) - 4, str)
 global.battlegroup = battlegroup
 ".Replace("XVIEW", XVIEW).Replace("YVIEW", YVIEW).Replace("WVIEW", WVIEW).Replace("HVIEW", HVIEW));
 
-var mainchara = Data.GameObjects.ByName("obj_mainchara");
+var mainchara = Data.GameObjects.RequireByName("obj_mainchara");
 
-for(var i = 0; i < 5; i++) {
+for (int i = 0; i < 5; i++) {
     importGroup.QueueReplace(
         mainchara.EventHandlerFor(EventType.KeyPress, (uint)(48 + i), Data),
         "if global.debug == 1 && !instance_exists(obj_battlegroup_input) global.filechoice = " + i

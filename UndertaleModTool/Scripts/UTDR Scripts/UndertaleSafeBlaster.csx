@@ -227,7 +227,7 @@ type = 0
 num = 0
 ");
 
-var obj_gasterbl_gen = Data.GameObjects.ByName("obj_gasterbl_gen");
+var obj_gasterbl_gen = Data.GameObjects.RequireByName("obj_gasterbl_gen");
 UndertaleCode codeToDecompile = obj_gasterbl_gen.EventHandlerFor(EventType.Alarm, (uint)0, Data);
 string decomp = GetDecompiledText(codeToDecompile, null, new Underanalyzer.Decompiler.DecompileSettings());
 importGroup.QueueReplace(obj_safebl_gen.EventHandlerFor(EventType.Alarm, (uint)0, Data), 

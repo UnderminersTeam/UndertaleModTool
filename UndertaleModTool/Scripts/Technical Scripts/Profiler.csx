@@ -68,7 +68,7 @@ UndertaleFunction DefineFunc(string name)
 
 // Define script functions so that we can use them in bytecode
 // Actual implementations come later
-UndertaleFunction func = Data.Functions.ByName("__scr_eventrun__"), endFunc, getInteractFunc, setInteractFunc;
+UndertaleFunction func = Data.Functions.RequireByName("__scr_eventrun__"), endFunc, getInteractFunc, setInteractFunc;
 UndertaleString eventStr, getInteractStr, setInteractStr;
 if (func == null)
 {
@@ -239,7 +239,7 @@ void SetUpCustomGML()
     ";
     importGroup.QueueReplace("gml_Object___obj_executionorder___Draw_64" /* draw gui */, str);
 
-    var objt = Data.GameObjects.ByName("__obj_executionorder__");
+    var objt = Data.GameObjects.RequireByName("__obj_executionorder__");
     objt.Persistent = true;
     Data.GeneralInfo.RoomOrder.First().Resource.GameObjects.Insert(0, new UndertaleRoom.GameObject()
     {
@@ -626,7 +626,7 @@ void PersistentObjectSetup(string objectName)
         {
             MainThreadAction = MainThreadAction
         };
-        importGroup.QueueReplace(Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, (uint)114, Data), "");
+        importGroup.QueueReplace(Data.GameObjects.RequireByName("obj_time").EventHandlerFor(EventType.KeyPress, (uint)114, Data), "");
         importGroup.Import();
     }
     bool gms2 = Data.IsVersionAtLeast(2, 0, 0, 0);

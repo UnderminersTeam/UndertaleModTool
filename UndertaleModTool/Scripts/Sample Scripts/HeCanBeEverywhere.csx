@@ -24,7 +24,7 @@ UndertaleModLib.Compiler.CodeImportGroup importGroup = new(Data, globalDecompile
 };
 
 // spr_joker_main has an offset, so we need to make our own one
-var spr_joker_main = Data.Sprites.ByName("spr_joker_main");
+var spr_joker_main = Data.Sprites.RequireByName("spr_joker_main");
 var spr_joker_enemy = new UndertaleSprite()
 {
     Name = Data.Strings.MakeString("spr_joker_enemy"),
@@ -44,9 +44,9 @@ foreach (var col in spr_joker_main.CollisionMasks)
     spr_joker_enemy.CollisionMasks.Add(col);
 Data.Sprites.Add(spr_joker_enemy);
 
-var obj_joker = Data.GameObjects.ByName("obj_joker");
+var obj_joker = Data.GameObjects.RequireByName("obj_joker");
 
-var obj_chaseenemy = Data.GameObjects.ByName("obj_chaseenemy");
+var obj_chaseenemy = Data.GameObjects.RequireByName("obj_chaseenemy");
 importGroup.QueueAppend(obj_chaseenemy.EventHandlerFor(EventType.Create, Data), @"
 myencounter = 25; // Jevil.
 touchsprite = spr_joker_enemy;
@@ -54,7 +54,7 @@ sprite_index = spr_joker_enemy;
 chasetype = 0;
 pacetype = 1;");
 
-var obj_testoverworldenemy = Data.GameObjects.ByName("obj_testoverworldenemy");
+var obj_testoverworldenemy = Data.GameObjects.RequireByName("obj_testoverworldenemy");
 var obj_testoverworldenemy_User0 = obj_testoverworldenemy.EventHandlerFor(EventType.Other, EventSubtypeOther.User0, Data);
 importGroup.QueueAppend(obj_testoverworldenemy_User0, "snd_play(snd_joker_laugh0);");
 importGroup.Import();
@@ -69,14 +69,14 @@ for (int i = 0; i < obj_joker_User10.Instructions.Count; i++)
     }
     if (obj_joker_User10.Instructions[i].Kind == UndertaleInstruction.Opcode.Call && obj_joker_User10.Instructions[i].ValueFunction.Name.Content == "snd_free_all")
     {
-        obj_joker_User10.Instructions[i].ValueFunction = Data.Functions.ByName("scr_84_debug"); // just redirect it to something useless
+        obj_joker_User10.Instructions[i].ValueFunction = Data.Functions.RequireByName("scr_84_debug"); // just redirect it to something useless
     }
 }
 importGroup.QueueAppend(obj_joker_User10, @"
 if (room != room_cc_joker)
     instance_destroy(obj_joker_body);");
 
-var scr_encountersetup = Data.Scripts.ByName("scr_encountersetup");
+var scr_encountersetup = Data.Scripts.RequireByName("scr_encountersetup");
 importGroup.QueueAppend(scr_encountersetup.Code, @"
 if (argument0 == 25) {
     if (global.flag[241] < 1)
@@ -117,7 +117,7 @@ if (argument0 == 25) {
     }
 }");
 
-var scr_text = Data.Scripts.ByName("scr_text");
+var scr_text = Data.Scripts.RequireByName("scr_text");
 importGroup.QueueAppend(scr_text.Code, @"
 if ((argument0 == 405) || (argument0 == 410)) {
     if (global.flag[241] < 5)
@@ -139,12 +139,12 @@ if ((argument0 == 405) || (argument0 == 410)) {
         con = 10;
 }");
 
-var spr_jokerdoor = Data.Sprites.ByName("spr_jokerdoor");
+var spr_jokerdoor = Data.Sprites.RequireByName("spr_jokerdoor");
 spr_jokerdoor.Textures[0].Texture = spr_jokerdoor.Textures[2].Texture;
 spr_jokerdoor.Textures[1].Texture = spr_jokerdoor.Textures[2].Texture;
 
 
-var obj_doorX_musfade = Data.GameObjects.ByName("obj_doorX_musfade");
+var obj_doorX_musfade = Data.GameObjects.RequireByName("obj_doorX_musfade");
 importGroup.QueueReplace(obj_doorX_musfade.EventHandlerFor(EventType.Other, EventSubtypeOther.User9, Data), @"
 if (room == room_cc_prison_prejoker && global.flag[241] < 6) {
     global.typer = 666;
@@ -165,7 +165,7 @@ if (touched == 0) {
     touched = 1;
 }");
 
-var obj_jokerbattleevent = Data.GameObjects.ByName("obj_jokerbattleevent");
+var obj_jokerbattleevent = Data.GameObjects.RequireByName("obj_jokerbattleevent");
 importGroup.QueueAppend(obj_jokerbattleevent.EventHandlerFor(EventType.Step, EventSubtypeStep.Step, Data), @"
 if (instance_exists(obj_battlecontroller) && global.jevilizer < 0.15) {
     __view_set(4, 0, ((__view_get(4, 0) + (sin((global.time / 15)) / 2)) + 1));
@@ -230,13 +230,13 @@ if (!snd_is_playing(global.currentsong[1])) {
     global.currentsong[1] = mus_loop_ext(global.currentsong[0], 1, 0.85);
 }");
 
-var scr_roomname = Data.Scripts.ByName("scr_roomname");
+var scr_roomname = Data.Scripts.RequireByName("scr_roomname");
 importGroup.QueueFindReplace(scr_roomname.Code, "return roomname;", @"
 if (argument0 == room_cc_joker)
     roomname = ""CHAOS, CHAOS!"";
 return roomname;");
 
-var obj_shop1 = Data.GameObjects.ByName("obj_shop1");
+var obj_shop1 = Data.GameObjects.RequireByName("obj_shop1");
 var obj_shop1_Draw = obj_shop1.EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data);
 var obj_shop1_Patches = new Dictionary<string, string>()
 {
@@ -268,15 +268,15 @@ for (int i = 0; i < obj_shop1_Draw.Instructions.Count; i++)
 obj_shop1_Draw.UpdateLength();
 obj_shop1_Draw.Replace(Assembler.Assemble(obj_shop1_Draw.Disassemble(Data.Variables, Data.CodeLocals?.For(obj_shop1_Draw)), Data)); // TODO: no idea why this is needed
 
-importGroup.QueueReplace(Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f6, Data), @"
+importGroup.QueueReplace(Data.GameObjects.RequireByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f6, Data), @"
 if (global.debug == 1)
     global.flag[241] = 1;");
 
-importGroup.QueueReplace(Data.GameObjects.ByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f7, Data), @"
+importGroup.QueueReplace(Data.GameObjects.RequireByName("obj_time").EventHandlerFor(EventType.KeyPress, EventSubtypeKey.vk_f7, Data), @"
 if (global.debug == 1)
     global.flag[241] = 7;");
 
-importGroup.QueueReplace(Data.GameObjects.ByName("obj_jokerbg_triangle_real").EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data), @"
+importGroup.QueueReplace(Data.GameObjects.RequireByName("obj_jokerbg_triangle_real").EventHandlerFor(EventType.Draw, EventSubtypeDraw.Draw, Data), @"
 if (room == room_cc_joker) {
     on = (instance_number(obj_joker) != 0);
     rotspeed = (instance_number(obj_joker) * instance_number(obj_joker));
