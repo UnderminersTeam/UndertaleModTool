@@ -16,6 +16,7 @@ public interface IUndertaleUINodeData : UndertaleObject
 /// <remarks>
 /// This abstraction is required to work with UI node polymorphism correctly.
 /// </remarks>
+[PropertyChanged.AddINotifyPropertyChangedInterface]
 public class UndertaleUINode : UndertaleObject
 {
     /// <summary>
@@ -139,6 +140,7 @@ public class UndertaleUINode : UndertaleObject
 /// <summary>
 /// Root structure containing a root-level UI node.
 /// </summary>
+
 public class UndertaleUIRootNode : UndertaleUINode, UndertaleNamedResource
 {
     /// <inheritdoc/>
@@ -460,6 +462,7 @@ public interface IUndertaleFlexInstanceProperties
 /// <summary>
 /// Base class of all UI container nodes.
 /// </summary>
+[PropertyChanged.AddINotifyPropertyChangedInterface]
 public abstract class UndertaleUIContainer : IUndertaleUINodeData, IUndertaleFlexProperties
 {
     /// <summary>
@@ -513,6 +516,7 @@ public abstract class UndertaleUIContainer : IUndertaleUINodeData, IUndertaleFle
 /// <summary>
 /// Represents a UI layer node.
 /// </summary>
+[PropertyChanged.AddINotifyPropertyChangedInterface]
 public class UndertaleUILayer : UndertaleUIContainer, UndertaleNamedResource
 {
     /// <summary>
@@ -568,6 +572,7 @@ public class UndertaleUILayer : UndertaleUIContainer, UndertaleNamedResource
 /// <summary>
 /// Represents a UI flex panel node.
 /// </summary>
+[PropertyChanged.AddINotifyPropertyChangedInterface]
 public class UndertaleUIFlexPanel : UndertaleUIContainer
 {
     /// <summary>
@@ -743,6 +748,7 @@ public class UndertaleUIFlexPanel : UndertaleUIContainer
 /// <summary>
 /// Represents a UI game object node.
 /// </summary>
+[PropertyChanged.AddINotifyPropertyChangedInterface]
 public class UndertaleUIGameObject : UndertaleRoom.GameObject, IUndertaleUINodeData, IUndertaleFlexInstanceProperties
 {
     /// <inheritdoc/>
@@ -791,6 +797,7 @@ public class UndertaleUIGameObject : UndertaleRoom.GameObject, IUndertaleUINodeD
 /// <summary>
 /// Represents a UI sequence instance node.
 /// </summary>
+[PropertyChanged.AddINotifyPropertyChangedInterface]
 public class UndertaleUISequenceInstance : UndertaleRoom.SequenceInstance, IUndertaleUINodeData, IUndertaleFlexInstanceProperties
 {
     /// <inheritdoc/>
@@ -839,6 +846,7 @@ public class UndertaleUISequenceInstance : UndertaleRoom.SequenceInstance, IUnde
 /// <summary>
 /// Represents a UI sprite instance node.
 /// </summary>
+[PropertyChanged.AddINotifyPropertyChangedInterface]
 public class UndertaleUISpriteInstance : UndertaleRoom.SpriteInstance, IUndertaleUINodeData, IUndertaleFlexInstanceProperties
 {
     /// <inheritdoc/>
@@ -887,6 +895,7 @@ public class UndertaleUISpriteInstance : UndertaleRoom.SpriteInstance, IUndertal
 /// <summary>
 /// Represents a UI text item instance node.
 /// </summary>
+[PropertyChanged.AddINotifyPropertyChangedInterface]
 public class UndertaleUITextItemInstance : UndertaleRoom.TextItemInstance, IUndertaleUINodeData, IUndertaleFlexInstanceProperties
 {
     /// <inheritdoc/>
@@ -935,6 +944,7 @@ public class UndertaleUITextItemInstance : UndertaleRoom.TextItemInstance, IUnde
 /// <summary>
 /// Represents a UI effect layer node.
 /// </summary>
+[PropertyChanged.AddINotifyPropertyChangedInterface]
 public class UndertaleUIEffectLayer : IUndertaleUINodeData
 {
     /// <summary>

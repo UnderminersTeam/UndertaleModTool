@@ -1,0 +1,13 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="UndertaleModToolAvalonia.App"
+             Name="UndertaleModToolAvalonia"
+             RequestedThemeVariant="Default">
+    <Application.Styles>
+        <StyleInclude Source="/Styles.axaml" />
+    </Application.Styles>
+
+    <NativeMenu.Menu>
+        <NativeMenu></NativeMenu>
+    </NativeMenu.Menu>
+</Application>

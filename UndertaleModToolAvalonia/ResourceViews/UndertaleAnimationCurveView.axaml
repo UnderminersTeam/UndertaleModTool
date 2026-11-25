@@ -1,0 +1,109 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:l="clr-namespace:UndertaleModToolAvalonia"
+             xmlns:undertalem="clr-namespace:UndertaleModLib.Models;assembly=UndertaleModLib"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="UndertaleModToolAvalonia.UndertaleAnimationCurveView"
+             x:DataType="l:UndertaleAnimationCurveViewModel">
+    <UserControl.Resources>
+        <l:EnumTypeToValuesConverter x:Key="EnumTypeToValuesConverter" />
+    </UserControl.Resources>
+    
+    <ScrollViewer>
+        <StackPanel Classes="PaddedProperties">
+            <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                <Label>Name</Label>
+                <l:UndertaleStringReferenceView Reference="{Binding AnimationCurve.Name}" />
+
+                <Label>Graph type</Label>
+                <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleAnimationCurve+GraphTypeEnum}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                          SelectedItem="{Binding AnimationCurve.GraphType}" />
+
+                <Label>Channels</Label>
+                <l:EditableDataGrid Name="ChannelsDataGrid" ItemsSource="{Binding AnimationCurve.Channels}" ItemFactory="{Binding CreateChannel}" HeadersVisibility="None"
+                                    SelectionChanged="{Binding ChannelSelectedChanged}">
+                    <l:EditableDataGrid.Columns>
+                        <DataGridTemplateColumn Header="Name" Width="1*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate DataType="undertalem:UndertaleAnimationCurve+Channel">
+                                    <TextBlock Text="{Binding Name.Content}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </l:EditableDataGrid.Columns>
+                </l:EditableDataGrid>
+            </Grid>
+
+            <StackPanel IsVisible="{Binding ChannelSelected, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <Separator />
+                
+                <Label>
+                    <TextBlock FontWeight="Bold">Selected channel properties (<TextBlock Text="{Binding ChannelSelected.Name.Content}"/>)</TextBlock>
+                </Label>
+
+                <Grid l:AutoGridBehavior.Enable="True" ColumnDefinitions="1*,3*">
+                    <Label>Name</Label>
+                    <l:UndertaleStringReferenceView Reference="{Binding ChannelSelected.Name}"/>
+                        
+                    <Label>Curve type</Label>
+                    <ComboBox ItemsSource="{Binding Source={x:Type undertalem:UndertaleAnimationCurve+Channel+CurveType}, Converter={StaticResource EnumTypeToValuesConverter}}"
+                                SelectedItem="{Binding ChannelSelected.Curve}" />
+                        
+                    <Label>Iterations</Label>
+                    <TextBox Text="{Binding ChannelSelected.Iterations}" />
+
+                    <Label>Points</Label>
+                    <l:EditableDataGrid ItemsSource="{Binding ChannelSelected.Points}" ItemFactory="{Binding CreatePoint}">
+                        <l:EditableDataGrid.Columns>
+                            <DataGridTemplateColumn Header="H" Width="1*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate DataType="undertalem:UndertaleAnimationCurve+Channel+Point">
+                                        <TextBox Text="{Binding X}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="V" Width="1*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate DataType="undertalem:UndertaleAnimationCurve+Channel+Point">
+                                        <TextBox Text="{Binding Value}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Bezier X0" Width="1*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate DataType="undertalem:UndertaleAnimationCurve+Channel+Point">
+                                        <TextBox Text="{Binding BezierX0}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Bezier Y0" Width="1*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate DataType="undertalem:UndertaleAnimationCurve+Channel+Point">
+                                        <TextBox Text="{Binding BezierY0}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Bezier X1" Width="1*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate DataType="undertalem:UndertaleAnimationCurve+Channel+Point">
+                                        <TextBox Text="{Binding BezierX1}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Bezier Y1" Width="1*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate DataType="undertalem:UndertaleAnimationCurve+Channel+Point">
+                                        <TextBox Text="{Binding BezierY1}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </l:EditableDataGrid.Columns>
+                    </l:EditableDataGrid>
+                </Grid>
+                <!-- TODO: Visual curve editor -->
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

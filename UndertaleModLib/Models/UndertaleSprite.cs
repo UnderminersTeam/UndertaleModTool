@@ -171,7 +171,7 @@ public class UndertaleSprite : UndertaleNamedResource, IProjectAsset, PrePaddedO
 
     public UndertaleSequence V2Sequence;
 
-    public NineSlice V3NineSlice;
+    public NineSlice V3NineSlice { get; set; }
 
     /// <inheritdoc />
     public event PropertyChangedEventHandler PropertyChanged;
