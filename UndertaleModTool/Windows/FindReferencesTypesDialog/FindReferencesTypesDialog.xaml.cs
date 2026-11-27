@@ -86,18 +86,12 @@ namespace UndertaleModTool.Windows
                 return;
             }
 
-            GameVersion ver;
-            if (data.GeneralInfo.Branch == UndertaleGeneralInfo.BranchType.LTS2022_0)
-                ver = (2022, 0, 0);
-            else
-                ver = (data.GeneralInfo.Major, data.GeneralInfo.Minor, data.GeneralInfo.Release);
-            var sourceTypes = UndertaleResourceReferenceMap.GetReferenceableTypes(ver);
+            GameVersion version = new(data.GeneralInfo);
+            bool isYYC = data.Code is null; // There is `UndertaleData.IsYYC()`, but it also checks for general info
+            var sourceTypes = UndertaleResourceReferenceMap.GetReferenceableTypes(version, isYYC);
 
             foreach (var typePair in sourceTypes)
             {
-                if (data.Code is null && UndertaleResourceReferenceMap.CodeTypes.Contains(typePair.Key))
-                    continue;
-
                 TypesList.Items.Add(new CheckBox()
                 {
                     DataContext = typePair.Key,

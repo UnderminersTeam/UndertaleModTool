@@ -14,27 +14,37 @@ namespace UndertaleModTool.Windows
 {
     public class HashSetTypesOverride : HashSet<Type>
     {
-        private readonly bool containsEverything, isYYC;
-        public HashSetTypesOverride(bool containsEverything = false, bool isYYC = false)
+        private static bool containsEverything;
+        private static HashSet<Type> supportedTypes;
+
+        public static void MakeContainEverything(GameVersion version, bool isYYC)
         {
-            this.containsEverything = containsEverything;
-            this.isYYC = isYYC;
+            containsEverything = true;
+            supportedTypes = UndertaleResourceReferenceMap.GetSupportedReferenceTypes(version, isYYC);
         }
+
         public new bool Contains(Type item)
         {
-            if (!containsEverything)
-                return base.Contains(item);
+            if (containsEverything)
+                return supportedTypes.Contains(item);
 
-            return !isYYC || !UndertaleResourceReferenceMap.CodeTypes.Contains(item);
-        } 
+            return base.Contains(item);
+        }
+
+        public static void Restore()
+        {
+            containsEverything = false;
+            supportedTypes = null;
+        }
     }
 
     public class PredicateForVersion
     {
-        public (uint Major, uint Minor, uint Release) Version { get; set; }
-        public (uint Major, uint Minor, uint Release) BeforeVersion { get; set; } = (uint.MaxValue, uint.MaxValue, uint.MaxValue);
-        public bool DisableForLTS2022 { get; set; } = false;
-        public Func<object, HashSetTypesOverride, bool, Dictionary<string, object[]>> Predicate { get; set; }
+        public delegate Dictionary<string, object[]> PredicateDelegate(object objSrc, HashSetTypesOverride types, bool checkOne);
+
+        public GameVersion Version { get; set; }
+        public GameVersion BeforeVersion { get; set; } = new((uint.MaxValue, uint.MaxValue, uint.MaxValue), byte.MaxValue);
+        public PredicateDelegate Predicate { get; set; }
     }
 
     public static class UndertaleResourceReferenceMethodsMap
@@ -178,8 +188,7 @@ namespace UndertaleModTool.Windows
                     },
                     new PredicateForVersion()
                     {
-                        Version = (2023, 2, 0),
-                        DisableForLTS2022 = true,
+                        Version = (2023, 2, 0), // Not present if it's LTS 2022
                         Predicate = (objSrc, types, checkOne) =>
                         {
                             if (!types.Contains(typeof(UndertaleParticleSystemEmitter)))
@@ -640,7 +649,7 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         // Bytecode version 15
-                        Version = (15, uint.MaxValue, uint.MaxValue),
+                        Version = new(15),
                         BeforeVersion = (2024, 8, 0),
                         Predicate = (objSrc, types, checkOne) =>
                         {
@@ -660,7 +669,7 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         // Bytecode version 16
-                        Version = (16, uint.MaxValue, uint.MaxValue),
+                        Version = new(16),
                         Predicate = (objSrc, types, checkOne) =>
                         {
                             if (!types.Contains(typeof(UndertaleLanguage)))
@@ -820,17 +829,24 @@ namespace UndertaleModTool.Windows
                                     outDict["Sequences"] = checkOne ? sequences.ToEmptyArray() : sequences.ToArray();
                             }
 
-                            // TODO: make these "IEnumerable<object[]>"
+                            // TODO: make these "IEnumerable<object[]>"?
                             List<object[]> sequenceTracks = new();
                             List<object[]> seqStringKeyframes = new();
                             void ProcessTrack(UndertaleSequence seq, Track track, List<object> trackChain)
                             {
+                                if (checkOne && (sequenceTracks.Count > 0 || seqStringKeyframes.Count > 0))
+                                    return; // Stop recursion, we already found one reference
+
                                 trackChain = new(trackChain);
                                 trackChain.Insert(0, track);
                                 if (types.Contains(typeof(Track)))
                                 {
                                     if (track.Name == obj || track.ModelName == obj)
+                                    {
                                         sequenceTracks.Add(trackChain.Append(seq).ToArray());
+                                        if (checkOne)
+                                            return; // No need for getting all of the references
+                                    }
                                 }
 
                                 if (types.Contains(typeof(StringKeyframes)))
@@ -842,14 +858,22 @@ namespace UndertaleModTool.Windows
                                             foreach (var strPair in keyframe.Channels)
                                             {
                                                 if (strPair.Value.Value == obj)
+                                                {
                                                     seqStringKeyframes.Add(new object[] { strPair.Channel }.Concat(trackChain).Append(seq).ToArray());
+                                                    if (checkOne)
+                                                        return; // No need for getting all of the references
+                                                }
                                             }
                                         }
                                     }
                                 }
 
                                 foreach (var subTrack in track.Tracks)
+                                {
                                     ProcessTrack(seq, subTrack, trackChain);
+                                    if (checkOne && (sequenceTracks.Count > 0 || seqStringKeyframes.Count > 0))
+                                        return;
+                                }
                             };
                             foreach (var seq in data.Sequences.SkipNullItems())
                             {
@@ -857,6 +881,8 @@ namespace UndertaleModTool.Windows
                                 {
                                     List<object> trackChain = new();
                                     ProcessTrack(seq, track, trackChain);
+                                    if (checkOne && (sequenceTracks.Count > 0 || seqStringKeyframes.Count > 0))
+                                        break;
                                 }
                             }
                             if (sequenceTracks.Count > 0)
@@ -968,10 +994,13 @@ namespace UndertaleModTool.Windows
                             if (objSrc is not UndertaleString obj)
                                 return null;
 
-                            // TODO: make this "IEnumerable<object[]>"
+                            // TODO: make this "IEnumerable<object[]>"?
                             List<object[]> textKeyframesList = new();
                             void ProcessTrack(UndertaleSequence seq, Track track, List<object> trackChain)
                             {
+                                if (checkOne && textKeyframesList.Count > 0)
+                                    return; // Stop recursion, we already found one reference
+
                                 trackChain = new(trackChain);
                                 trackChain.Insert(0, track);
 
@@ -980,13 +1009,23 @@ namespace UndertaleModTool.Windows
                                     foreach (var keyframe in textKeyframes.List)
                                     {
                                         foreach (var textPair in keyframe.Channels)
+                                        {
                                             if (textPair.Value.Text == obj)
+                                            {
                                                 textKeyframesList.Add(new object[] { textPair.Channel }.Concat(trackChain).Append(seq).ToArray());
+                                                if (checkOne)
+                                                    return; // No need for getting all of the references
+                                            }
+                                        }
                                     }
                                 }
 
                                 foreach (var subTrack in track.Tracks)
+                                {
                                     ProcessTrack(seq, subTrack, trackChain);
+                                    if (checkOne && textKeyframesList.Count > 0)
+                                        return;
+                                }
                             };
 
                             foreach (var seq in data.Sequences.SkipNullItems())
@@ -995,6 +1034,8 @@ namespace UndertaleModTool.Windows
                                 {
                                     List<object> trackChain = new();
                                     ProcessTrack(seq, track, trackChain);
+                                    if (checkOne && textKeyframesList.Count > 0)
+                                        break;
                                 }
                             }
                             if (textKeyframesList.Count > 0)
@@ -1005,8 +1046,7 @@ namespace UndertaleModTool.Windows
                     },
                     new PredicateForVersion()
                     {
-                        Version = (2023, 2, 0),
-                        DisableForLTS2022 = true,
+                        Version = (2023, 2, 0), // Not present if it's LTS 2022
                         Predicate = (objSrc, types, checkOne) =>
                         {
                             if (objSrc is not UndertaleString obj)
@@ -1130,10 +1170,13 @@ namespace UndertaleModTool.Windows
                             if (objSrc is not UndertaleGameObject obj)
                                 return null;
 
-                            // TODO: make this "IEnumerable<object[]>"
+                            // TODO: make this "IEnumerable<object[]>"?
                             List<object[]> instKeyframesList = new();
                             void ProcessTrack(UndertaleSequence seq, Track track, List<object> trackChain)
                             {
+                                if (checkOne && instKeyframesList.Count > 0)
+                                    return; // Stop recursion, we already found one reference
+
                                 trackChain = new(trackChain);
                                 trackChain.Insert(0, track);
 
@@ -1143,12 +1186,20 @@ namespace UndertaleModTool.Windows
                                     {
                                         foreach (var instPair in keyframe.Channels)
                                             if (instPair.Value.Resource.Resource == obj)
+                                            {
                                                 instKeyframesList.Add(new object[] { instPair.Channel }.Concat(trackChain).Append(seq).ToArray());
+                                                if (checkOne)
+                                                    return; // No need for getting all of the references
+                                            }
                                     }
                                 }
 
                                 foreach (var subTrack in track.Tracks)
+                                {
                                     ProcessTrack(seq, subTrack, trackChain);
+                                    if (checkOne && instKeyframesList.Count > 0)
+                                        return;
+                                }
                             };
 
                             foreach (var seq in data.Sequences.SkipNullItems())
@@ -1157,6 +1208,8 @@ namespace UndertaleModTool.Windows
                                 {
                                     List<object> trackChain = new();
                                     ProcessTrack(seq, track, trackChain);
+                                    if (checkOne && instKeyframesList.Count > 0)
+                                        break;
                                 }
                             }
                             if (instKeyframesList.Count > 0)
@@ -1258,7 +1311,7 @@ namespace UndertaleModTool.Windows
                     new PredicateForVersion()
                     {
                         // Bytecode version 16
-                        Version = (16, uint.MaxValue, uint.MaxValue),
+                        Version = new(16),
                         Predicate = (objSrc, types, checkOne) =>
                         {
                             if (!types.Contains(typeof(UndertaleRoom.GameObject)))
@@ -1334,7 +1387,7 @@ namespace UndertaleModTool.Windows
                 {
                     new PredicateForVersion()
                     {
-                        Version = (1, 0, 0),
+                        Version = new(14), // Bytecode version 14
                         Predicate = (objSrc, types, checkOne) =>
                         {
                             if (!types.Contains(typeof(UndertaleSound)))
@@ -1469,8 +1522,7 @@ namespace UndertaleModTool.Windows
                 {
                     new PredicateForVersion()
                     {
-                        Version = (2023, 2, 0),
-                        DisableForLTS2022 = true,
+                        Version = (2023, 2, 0), // Not present if it's LTS 2022
                         Predicate = (objSrc, types, checkOne) =>
                         {
                             if (!types.Contains(typeof(UndertaleRoom.ParticleSystemInstance)))
@@ -1510,8 +1562,7 @@ namespace UndertaleModTool.Windows
                 {
                     new PredicateForVersion()
                     {
-                        Version = (2023, 2, 0),
-                        DisableForLTS2022 = true,
+                        Version = (2023, 2, 0), // Not present if it's LTS 2022
                         Predicate = (objSrc, types, checkOne) =>
                         {
                             if (objSrc is not UndertaleParticleSystemEmitter obj)
@@ -1542,9 +1593,25 @@ namespace UndertaleModTool.Windows
             }
         };
 
+        public static void SetCurrentGameData(UndertaleData data)
+        {
+            UndertaleResourceReferenceMethodsMap.data = data;
+        }
+        public static void ClearCurrentGameData()
+        {
+            UndertaleResourceReferenceMethodsMap.data = null;
+        }
 
-
+        // For singular use, sets and clears the current game data.
         public static Dictionary<string, List<object>> GetReferencesOfObject(object obj, UndertaleData data, HashSetTypesOverride types, bool checkOne = false)
+        {
+            SetCurrentGameData(data);
+            var result = GetReferencesOfObject(obj, types, checkOne);
+            ClearCurrentGameData();
+
+            return result;
+        }
+        public static Dictionary<string, List<object>> GetReferencesOfObject(object obj, HashSetTypesOverride types, bool checkOne = false)
         {
             if (obj is null)
                 return null;
@@ -1552,46 +1619,31 @@ namespace UndertaleModTool.Windows
             if (!typeMap.TryGetValue(obj.GetType(), out PredicateForVersion[] predicatesForVer))
                 return null;
 
-            UndertaleResourceReferenceMethodsMap.data = data;
-
             bool onlyEmptyResult = true;
 
-            var ver = (data.GeneralInfo.Major, data.GeneralInfo.Minor, data.GeneralInfo.Release);
+            GameVersion ver = new(data.GeneralInfo);
             Dictionary<string, List<object>> outDict = new();
             foreach (var predicateForVer in predicatesForVer)
             {
-                bool isAtLeast = false;
-                if (predicateForVer.Version.Minor == uint.MaxValue)
-                    isAtLeast = predicateForVer.Version.Major <= data.GeneralInfo.BytecodeVersion;
-                else
-                    isAtLeast = predicateForVer.Version.CompareTo(ver) <= 0;
+                bool isAtLeast = ver.CompareTo(predicateForVer.Version) >= 0;
+                bool isAboveMost = ver.CompareTo(predicateForVer.BeforeVersion) >= 0;
 
-                bool isAboveMost = false;
-                if (predicateForVer.BeforeVersion.Minor == uint.MaxValue)
-                    isAboveMost = predicateForVer.BeforeVersion.Major <= data.GeneralInfo.BytecodeVersion;
-                else
-                    isAboveMost = predicateForVer.BeforeVersion.CompareTo(ver) <= 0;
+                if (!isAtLeast || isAboveMost)
+                    continue;
 
-                bool disableDueToLTS = false;
-                if (data.GeneralInfo.Branch == UndertaleGeneralInfo.BranchType.LTS2022_0)
-                    disableDueToLTS = predicateForVer.DisableForLTS2022;
-
-                if (isAtLeast && !isAboveMost && !disableDueToLTS)
+                var result = predicateForVer.Predicate(obj, types, checkOne);
+                if (result is null)
                 {
-                    var result = predicateForVer.Predicate(obj, types, checkOne);
-                    if (result is null)
-                    {
-                        onlyEmptyResult = false;
-                        continue;
-                    }
-                    if (onlyEmptyResult && result == emptyResultArr)
-                        continue;
-
                     onlyEmptyResult = false;
+                    continue;
+                }
+                if (onlyEmptyResult && result == emptyResultArr)
+                    continue;
 
-                    foreach (var entry in result)
-                        outDict.Add(entry.Key, new(entry.Value));
-                }  
+                onlyEmptyResult = false;
+
+                foreach (var entry in result)
+                    outDict.Add(entry.Key, new(entry.Value));
             }
 
             if (onlyEmptyResult)
@@ -1599,15 +1651,20 @@ namespace UndertaleModTool.Windows
             if (outDict.Count == 0)
                 return null;
 
+            // Sort the output dictionary by the asset type name, for consistent order
+            outDict = outDict.OrderBy(x => x.Key)
+                             .ToDictionary(x => x.Key, x => x.Value);
+
             return outDict;
         }
 
         public static async Task<Dictionary<string, List<object>>> GetUnreferencedObjects(UndertaleData data, Dictionary<Type, string> typesDict)
         {
-            UndertaleResourceReferenceMethodsMap.data = data;
+            SetCurrentGameData(data);
 
             Dictionary<string, List<object>> outDict = new();
 
+            Dictionary<object, int> assetIndexes = new();
             List<(IList, string)> assetLists = new();
             foreach (var typePair in typesDict)
             {
@@ -1616,37 +1673,47 @@ namespace UndertaleModTool.Windows
 
                 assetLists.Add((resList, typePair.Value));
             }
-            List<(UndertaleResource, string)> assets = new(assetLists.Select(x => x.Item1.Count).Sum());
+            List<(UndertaleResource, string)> assets = new(assetLists.Sum(x => x.Item1.Count));
             foreach (var list in assetLists)
-                assets.AddRange(list.Item1.Cast<UndertaleResource>()
-                                          .Select(x => (x, list.Item2)));
-
-            stringReferences = new();
-            funcReferences = new();
-            variReferences = new();
-            foreach (var code in data.Code)
             {
-                var strings = new HashSet<UndertaleString>();
-                var functions = new HashSet<UndertaleFunction>();
-                var variables = new HashSet<UndertaleVariable>();
-                foreach (var inst in code.Instructions)
+                for (int i = 0; i < list.Item1.Count; i++)
                 {
-                    if (inst.ValueString?.Resource is UndertaleString str)
-                        strings.Add(str);
-
-                    if (inst.ValueVariable is UndertaleVariable variable)
-                        variables.Add(variable);
-
-                    if (inst.ValueFunction is UndertaleFunction function)
-                        functions.Add(function);
+                    var asset = list.Item1[i];
+                    assetIndexes[asset] = i;
+                    assets.Add(((UndertaleResource)asset, list.Item2));
                 }
+            }
 
-                if (strings.Count != 0)
-                    stringReferences[code] = strings;
-                if (functions.Count != 0)
-                    funcReferences[code] = functions;
-                if (variables.Count != 0)
-                    variReferences[code] = variables;
+            // If it's not a YYC game
+            if (data.Code is not null)
+            {
+                stringReferences = new();
+                funcReferences = new();
+                variReferences = new();
+                foreach (var code in data.Code)
+                {
+                    var strings = new HashSet<UndertaleString>();
+                    var functions = new HashSet<UndertaleFunction>();
+                    var variables = new HashSet<UndertaleVariable>();
+                    foreach (var inst in code.Instructions)
+                    {
+                        if (inst.ValueString?.Resource is UndertaleString str)
+                            strings.Add(str);
+
+                        if (inst.ValueVariable is UndertaleVariable variable)
+                            variables.Add(variable);
+
+                        if (inst.ValueFunction is UndertaleFunction function)
+                            functions.Add(function);
+                    }
+
+                    if (strings.Count != 0)
+                        stringReferences[code] = strings;
+                    if (functions.Count != 0)
+                        funcReferences[code] = functions;
+                    if (variables.Count != 0)
+                        variReferences[code] = variables;
+                }
             }
 
             mainWindow.IsEnabled = false;
@@ -1656,11 +1723,15 @@ namespace UndertaleModTool.Windows
                 mainWindow.SetProgressBar(null, "Assets", 0, assets.Count);
                 mainWindow.StartProgressBarUpdater();
 
-                List<Dictionary<string, List<object>>> dicts = new();
+                ConcurrentBag<Dictionary<string, List<object>>> dicts = new();
 
                 if (assets.Count > 0) // A Partitioner can't be created on an empty list.
                 {
                     ignoreArgumentsVar = true;
+
+                    GameVersion version = new(data.GeneralInfo);
+                    bool isYYC = data.Code is null;
+                    HashSetTypesOverride.MakeContainEverything(version, isYYC);
 
                     var assetsPart = Partitioner.Create(0, assets.Count);
 
@@ -1673,8 +1744,7 @@ namespace UndertaleModTool.Windows
                             for (int i = range.Item1; i < range.Item2; i++)
                             {
                                 var asset = assets[i];
-                                var assetReferences = GetReferencesOfObject(asset.Item1, data,
-                                                                            new HashSetTypesOverride(true, data.Code is null), true);
+                                var assetReferences = GetReferencesOfObject(asset.Item1, new HashSetTypesOverride(), true);
                                 if (assetReferences is null)
                                 {
                                     if (resultDict.TryGetValue(asset.Item2, out var list))
@@ -1728,6 +1798,18 @@ namespace UndertaleModTool.Windows
                         }
                     }
                 }
+
+                // Sort each asset list by the asset ID (the index in the source asset list)
+                foreach (var assetList in outDict.Values)
+                {
+                    assetList.Sort((left, right) => {
+                        return assetIndexes[left].CompareTo(assetIndexes[right]);
+                    });
+                }
+
+                // Also sort the output dictionary by the asset type name (so the asset group order is also consistent)
+                outDict = outDict.OrderBy(x => x.Key)
+                                 .ToDictionary(x => x.Key, x => x.Value);
             }
             finally
             {
@@ -1738,6 +1820,9 @@ namespace UndertaleModTool.Windows
                 stringReferences = null;
                 funcReferences = null;
                 variReferences = null;
+                
+                ClearCurrentGameData();
+                HashSetTypesOverride.Restore();
             }
 
             if (outDict.Count == 0)
