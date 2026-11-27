@@ -10,6 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Underanalyzer.Decompiler;
@@ -264,35 +265,59 @@ public partial class Program : IScriptInterface
         });
 
         // Setup project command
-        Argument<FileInfo> projectBuildFileArgument = new("file")
+        Argument<FileInfo> projectFileArgument = new("file")
         {
             Description = "Path to the UndertaleModTool project.json file"
         };
-        Option<FileInfo> projectBuildSourceOption = new("-s", "--source") { Description = "Source data file", Required = true };
-        Option<FileInfo> projectBuildDestinationOption = new("-d", "--destination") { Description = "Destination data file", Required = true };
+        Option<FileInfo> projectSourceOption = new("-s", "--source") { Description = "Source data file", Required = true };
+        Option<FileInfo> projectDestinationOption = new("-d", "--destination") { Description = "Destination data file", Required = true };
 
         Command projectBuildCommand = new("build", "Build a project")
         {
-            projectBuildFileArgument,
+            projectFileArgument,
             verboseOption,
-            projectBuildSourceOption,
-            projectBuildDestinationOption
+            projectSourceOption,
+            projectDestinationOption
         };
 
         projectBuildCommand.SetAction(parseResult =>
         {
             return BuildProject(new ProjectBuildOptions()
             {
-                ProjectFile = parseResult.GetValue(projectBuildFileArgument),
+                ProjectFile = parseResult.GetValue(projectFileArgument),
                 Verbose = parseResult.GetValue(verboseOption),
-                Source = parseResult.GetValue(projectBuildSourceOption),
-                Destination = parseResult.GetValue(projectBuildDestinationOption)
+                Source = parseResult.GetValue(projectSourceOption),
+                Destination = parseResult.GetValue(projectDestinationOption)
+            });
+        });
+
+        Option<string[]> projectExportAssetsOption = new("-a", "--assets") { Description = "Assets to export (use * as a wildcard)", Required = true };
+
+        Command projectExportCommand = new("export", "Export assets to project")
+        {
+            projectFileArgument,
+            verboseOption,
+            projectSourceOption,
+            projectDestinationOption,
+            projectExportAssetsOption
+        };
+
+        projectExportCommand.SetAction(parseResult =>
+        {
+            return ExportToProject(new ProjectExportOptions()
+            {
+                ProjectFile = parseResult.GetValue(projectFileArgument),
+                Verbose = parseResult.GetValue(verboseOption),
+                Source = parseResult.GetValue(projectSourceOption),
+                Destination = parseResult.GetValue(projectDestinationOption),
+                Assets = parseResult.GetValue(projectExportAssetsOption),
             });
         });
 
         Command projectCommand = new("project", "Subcommands that deal with projects")
         {
-            projectBuildCommand
+            projectBuildCommand,
+            projectExportCommand,
         };
 
         // Merge everything together
@@ -702,6 +727,107 @@ public partial class Program : IScriptInterface
             Console.WriteLine($"Saving to destination data file");
 
         program.SaveDataFile(options.Destination.FullName);
+
+        return EXIT_SUCCESS;
+    }
+
+    private static int ExportToProject(ProjectExportOptions options)
+    {
+        try
+        {
+            ArgumentNullException.ThrowIfNull(options.ProjectFile);
+            ArgumentNullException.ThrowIfNull(options.Source);
+            ArgumentNullException.ThrowIfNull(options.Destination);
+        }
+        catch (Exception e)
+        {
+            Console.Error.WriteLine(e.Message);
+            return EXIT_FAILURE;
+        }
+
+        // Load source
+        Program program;
+        try
+        {
+            program = new Program(options.Source, options.Verbose);
+        }
+        catch (FileNotFoundException e)
+        {
+            Console.Error.WriteLine(e.Message);
+            return EXIT_FAILURE;
+        }
+
+        program.FilePath = options.Destination.FullName;
+
+        // Load project
+        ProjectContext newProjectContext;
+        try
+        {
+            if (program.Verbose)
+                Console.WriteLine($"Loading project file '{options.ProjectFile.FullName}'");
+
+            newProjectContext = ProjectContext.CreateWithDataFilePaths(options.Source.FullName, options.Destination.FullName, options.ProjectFile.FullName);
+
+            if (program.Verbose)
+                Console.WriteLine($"Importing project into source data file");
+
+            // TODO: This should be unnecessary, could look directly at data file and the project without needing to import it.
+            newProjectContext.Import(program.Data);
+
+            string regexPattern = string.Join("|", options.Assets.Select(x => "^" + Regex.Escape(x).Replace(@"\*", ".*") + "$"));
+
+            if (program.Verbose)
+                Console.WriteLine($"Searching for exportable assets matching {regexPattern}");
+
+            IEnumerable<IEnumerable<IProjectAsset>> lists = [ 
+                program.Data.GameObjects,
+                program.Data.Paths,
+                program.Data.Code,
+                program.Data.Scripts,
+                program.Data.Sounds,
+                program.Data.Rooms,
+                program.Data.Backgrounds,
+                program.Data.Sprites,
+                program.Data.Sequences,
+                program.Data.AnimationCurves,
+                program.Data.Fonts,
+                program.Data.Shaders,
+            ];
+
+            foreach (IEnumerable<IProjectAsset> list in lists)
+                foreach (IProjectAsset asset in list)
+                {
+                    if (asset.ProjectExportable && Regex.IsMatch(asset.ProjectName, regexPattern))
+                    {
+                        if (program.Verbose)
+                            Console.WriteLine($"Marking asset for export: {asset.ProjectName}");
+
+                        newProjectContext.MarkAssetForExport(asset);
+                    }
+                }
+
+            if (!newProjectContext.EnumerateUnexportedAssets().Any())
+            {
+                Console.Error.WriteLine($"No exported assets matching asset names");
+                return EXIT_FAILURE;
+            }
+
+            if (program.Verbose)
+                Console.WriteLine($"Exporting assets");
+
+            // TODO: Make it so an error in one asset doesn't stop everything
+            newProjectContext.Export(false);
+        }
+        catch (ProjectException e)
+        {
+            Console.Error.WriteLine($"Failed to export to project: {e.Message}");
+            return EXIT_FAILURE;
+        }
+        catch (Exception e)
+        {
+            Console.Error.WriteLine($"Error occurred when loading project:\n{e}");
+            return EXIT_FAILURE;
+        }
 
         return EXIT_SUCCESS;
     }
